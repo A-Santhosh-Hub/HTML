@@ -1,0 +1,66 @@
+*{
+    margin: 0;
+    padding: 0;
+
+}
+
+nav{
+    
+    background-color: rgb(218, 69, 69);
+    color: rgb(41, 31, 18);
+    padding: 15px;
+    margin-right: 20px;
+    
+}
+li,h1,ul{
+    display: inline;
+}
+ul{
+    margin-left: 75%;
+    
+}
+li:hover{
+    color: aqua;
+    cursor: pointer;
+}
+nav:hover{
+    color: rgb(42, 38, 255);
+    cursor: pointer;
+}
+input{
+    padding: 15px;
+    width: 60%;
+}
+.scrch{
+    padding: 40px;
+    text-align: center;
+
+}
+.game1{
+    margin-bottom: 30px;
+    margin-right: 100px;
+    border-color: black;
+    border-width: 4px;
+    border-style: solid;
+    display: inline-block;
+    width: 300px;
+}
+.game{
+    text-align: center;
+}
+.game1:hover{
+    color: rgb(236, 142, 19);
+    cursor: pointer;
+}
+.des{
+    font-style: italic;
+    font-size: 80px;
+    text-align: center;
+
+}
+.contack{
+    background-color: aqua;
+    font-size: 40px;
+    padding: 30px;
+    text-align: center;
+}
