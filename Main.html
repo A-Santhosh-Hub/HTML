@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="Main1.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full Background</title>
+</head>
+<script>
+    function openModal(imgElement) {
+      var modal = document.getElementById("imgModal");
+      var modalImg = document.getElementById("modalImg");
+    
+      modal.style.display = "block";
+      modalImg.src = imgElement.src;
+    }
+    
+    function closeModal() {
+      document.getElementById("imgModal").style.display = "none";
+    }
+
+    function openModal(imgElement) {
+  var modal = document.getElementById("imgModal");
+  var modalImg = document.getElementById("modalImg");
+
+  modal.style.display = "block";
+  modalImg.src = imgElement.src;
+}
+
+function closeModal() {
+  document.getElementById("imgModal").style.display = "none";
+}
+
+function handleUpload() {
+  const input = document.getElementById("uploadInput");
+  const imageCard = document.querySelector(".image-card");
+
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const newImg = document.createElement("img");
+      newImg.src = e.target.result;
+      newImg.className = "framed-img";
+      newImg.alt = "Uploaded Image";
+      newImg.setAttribute("onclick", "openModal(this)");
+
+      imageCard.appendChild(newImg);
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+
+
+
+    </script>
+    
+<body>
+    <!-- Top Navigation Bar -->
+<nav class="nav-top">
+    <ul>
+      <li><a href="#">Home</a></li>
+      <li><a href="#">Gallery</a></li>
+      <li><a href="#">About</a></li>
+    </ul>
+  </nav>
+  
+  <!-- Your content goes here -->
+  <div class="content">
+    <!-- Image grid, text, etc. -->
+  </div>
+  
+  <!-- Bottom Navigation Bar -->
+  <nav class="nav-bottom">
+    <ul>
+      <li><a href="#">Contact</a></li>
+      <li><a href="#">Privacy</a></li>
+      <li><a href="#">Help</a></li>
+    </ul>
+  </nav>
+  <div class="image-card">
+    <img src="images/2.PNG" class="framed-img" onclick="openModal(this)" alt="Image 2">
+    <img src="images/3.PNG" class="framed-img" onclick="openModal(this)" alt="Image 3">
+    <img src="images/4.PNG" class="framed-img" onclick="openModal(this)" alt="Image 3">
+    <img src="images/5.PNG" class="framed-img" onclick="openModal(this)" alt="Image 3">
+    <img src="images/6.PNG" class="framed-img" onclick="openModal(this)" alt="Image 3">
+    <img src="images/7.PNG" class="framed-img" onclick="openModal(this)" alt="Image 3">
+    <img src="images/8.PNG" class="framed-img" onclick="openModal(this)" alt="Image 3">
+    <img src="images/9.PNG" class="framed-img" onclick="openModal(this)" alt="Image 3">
+    <img src="images/10.PNG" class="framed-img" onclick="openModal(this)" alt="Image 3">
+    <img src="images/11.PNG" class="framed-img" onclick="openModal(this)" alt="Image 3">
+    <img src="images/14.PNG" class="framed-img" onclick="openModal(this)" alt="Image 3">
+    <img src="images/1.PNG" class="framed-img" onclick="openModal(this)" alt="Image 3">
+    <img src="images/15.PNG" class="framed-img" onclick="openModal(this)" alt="Image 3">
+    <img src="images/1.PNG" class="framed-img" onclick="openModal(this)" alt="Image 3">
+
+    <img src="images/12.PNG" class="framed-img" onclick="openModal(this)" alt="Image 3">
+    <img src="images/13.PNG" class="framed-img" onclick="openModal(this)" alt="Image 3">
+ 
+    <!-- ...more images... -->
+  </div>
+  
+  <!-- Modal (hidden by default) -->
+  <div id="imgModal" class="modal">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <img class="modal-content" id="modalImg">
+    <div class="upload-section">
+        <label for="uploadInput" class="upload-label">Choose File</label>
+        <input type="file" id="uploadInput" accept="image/*">
+        <button class="neon" onclick="handleUpload()">Upload Image</button>
+      </div>
+      
+    
+    <h1>Hello, World!</h1>
+   
+</body>
+</html>
