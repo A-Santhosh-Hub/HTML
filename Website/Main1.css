@@ -1,0 +1,231 @@
+
+body {
+  position: relative;
+  margin: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('image.png') center center / cover no-repeat;
+  filter: blur(8px) brightness(0.8);
+  z-index: -1;
+}
+
+/* Top nav */
+.nav-top {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    z-index: 1000;
+  }
+  
+  .nav-top ul {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    padding: 1rem;
+    margin: 0;
+    list-style: none;
+  }
+  
+  .nav-top a {
+    color: white;
+    text-decoration: none;
+  }
+  
+  /* Bottom nav */
+  .nav-bottom {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    z-index: 1000;
+  }
+  
+  .nav-bottom ul {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    padding: 1rem;
+    margin: 0;
+    list-style: none;
+  }
+  
+  .nav-bottom a {
+    color: white;
+    text-decoration: none;
+  }
+  
+
+  @keyframes blink {
+    0%   { opacity: 1; }
+    50%  { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* Make only hovered image blink */
+.framed-img:hover {
+    animation: blink 1s infinite;
+}
+
+  /* Content */
+  .content {
+    padding: 100px 20px 100px 20px; /* Padding to avoid overlap with navs */
+  }
+
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    padding-top: 60px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.9);
+  }
+  
+  .modal-content {
+    display: block;
+    margin: auto;
+    max-width: 90%;
+    max-height: 90%;
+    animation: zoom 0.5s;
+    border-radius: 10px;
+  }
+  
+  @keyframes zoom {
+    from { transform: scale(0.7); }
+    to { transform: scale(1); }
+  }
+  
+  .close {
+    position: absolute;
+    top: 30px;
+    right: 50px;
+    color: white;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+
+
+body {
+    background-image: url('image.png'); /* no slash, no folder */
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-attachment: fixed; /* This keeps it static during scroll */
+}
+/* Border around the inserted image */
+.image-card {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    justify-items: center;
+    padding: 100px 20px 150px; /* extra bottom space for nav/upload */
+}
+
+.image-card {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  justify-items: center;
+  padding: 100px 20px 150px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.framed-img {
+  width: 100%;
+  max-width: 250px;
+  height: 350px;
+  object-fit: cover;
+  border: 5px solid white;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.framed-img:hover {
+  transform: scale(1.05);
+}
+
+.upload-section {
+    margin: 120px 20px 40px;
+    text-align: center;
+}
+
+.upload-section input[type="file"] {
+    padding: 10px;
+    font-size: 16px;
+}
+
+.upload-section button {
+    padding: 10px 20px;
+    margin-left: 10px;
+    font-size: 16px;
+    background-color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.upload-section {
+    position: fixed;
+    bottom: 70px; /* Just above the bottom nav */
+    right: 40px;
+    z-index: 1000;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+/* Neon effect shared base */
+.neon {
+    font-size: 16px;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    color: #a80000;
+    background: #9c0000;
+    box-shadow: 0 0 8px rgb(1, 128, 145), 0 0 15px rgb(5, 140, 150);
+    transition: all 0.3s ease;
+}
+.neon:hover {
+    box-shadow: 0 0 12px rgb(4, 141, 146), 0 0 25px rgb(17, 159, 184);
+    background: #222;
+    cursor: pointer;
+}
+
+/* Apply neon style to file input using label trick */
+.upload-section input[type="file"] {
+    display: none;
+}
+.upload-label {
+    background: #111;
+    box-shadow: 0 0 8px #f0f, 0 0 15px #f0f;
+    color: #ffffff;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+
+.upload-section button:hover {
+    background-color: #ddd;
+}
