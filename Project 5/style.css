@@ -1,0 +1,219 @@
+/* Basic reset */
+* {
+    margin: 0px;
+    padding: 10;
+    box-sizing: border-box;
+  }
+  
+  /* Body Styles */
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #97d1f3;
+    color: #333;
+    line-height: 1.6;
+  }
+  
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+
+
+/* Static Navbar Styling */
+.navbar {
+    position: fixed;  /* Fixed position at the top */
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #333;
+    padding: 15px 30px;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-menu {
+    display: flex;
+    list-style-type: none;
+}
+
+.nav-menu li {
+    margin-right: 20px;
+}
+
+.nav-menu li a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 18px;
+    padding: 10px;
+    transition: all 0.3s ease;
+}
+
+.nav-menu li a:hover {
+    background-color: #ff00ff;
+    border-radius: 5px;
+    color: #fff;
+}
+
+
+
+  
+/* Back to Home block */
+.back-home-block {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #f4f4f4;
+    z-index: 10; /* Ensure it is above other elements */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 20px;
+    border: 2px solid #333;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    transition: all 0.3s ease;
+    color: #333;
+  }
+  
+  /* Hover effect */
+  .back-home-block:hover {
+    background-color: #ddd;
+    color: #fff;
+    border-color: #ff00ff;
+    box-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff;
+  }
+  
+  
+  /* Container for the App Cards */
+  .container {
+    max-width: 720px;
+    margin: 20px auto;
+    padding: 0 20px;
+    text-align: center;
+  }
+  
+  /* Heading */
+  h1 {
+    font-size: 32px;
+    margin-bottom: 20px;
+    color: #000000;
+    text-shadow: 0 0 10px #ffae00;
+  }
+  
+  /* App Card Styles */
+  .app-card {
+    display: flex;
+    flex-direction: row;
+    background-color: #fff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  
+  .app-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px #ffbb00, 0 0 25px #ffd000;
+  }
+  
+  .app-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    object-fit: cover;
+    margin-right: 20px;
+  }
+  
+  .app-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .app-content h2 {
+    font-size: 20px;
+    margin-bottom: 5px;
+    color: #333;
+    text-shadow: 0 0 10px #ff9900;
+  }
+  
+  .app-content p {
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .download-button {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 5px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+  }
+  
+  .download-button i {
+    margin-right: 10px;
+  }
+  
+  .download-button:hover {
+    background-color: #0056b3;
+    box-shadow: 0 0 15px #007bff, 0 0 30px #007bff;
+  }
+  
+  .faster-button {
+    background-color: #28a745;
+  }
+  
+  .faster-button:hover {
+    background-color: #218838;
+    box-shadow: 0 0 15px #28a745, 0 0 25px #28a745;
+  }
+  
+  /* Footer Styles */
+  .footer {
+    margin-top: 50px;
+    text-align: center;
+    padding: 20px 0;
+    background-color: #333;
+    color: #fff;
+    font-size: 14px;
+  }
+  
+  .footer a {
+    color: #fff;
+  }
+  
+  .footer a:hover {
+    color: #ddd;
+    text-shadow: 0 0 10px #ff00ff;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .app-card {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .app-icon {
+      margin-bottom: 15px;
+    }
+  
+    .app-content h2 {
+      font-size: 18px;
+    }
+  }
+  
