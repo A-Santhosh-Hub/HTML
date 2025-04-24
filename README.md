@@ -9,7 +9,7 @@
 
 # Project 04   https://santhosh2025.neocities.org/Skill/Skills
 
-# Project 05 
 
-# Project 06   https://santhosh2025.neocities.org/POST/News
+
+# Project 05    https://santhosh2025.neocities.org/POST/News
 <<------------------ More Soon ----------------->>
