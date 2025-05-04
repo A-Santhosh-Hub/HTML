@@ -1,0 +1,253 @@
+In This I give all Code For My 3D Web Site like HTML + CSS + Js ( You can Copay and Past)
+
+
+HTML: 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My 3D Models</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Load model-viewer -->
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+</head>
+<body>
+  <header>
+    <button id="backHomeBtn" onclick="location.href='https://santhosh2025.neocities.org/profile/'">← Back Home</button>
+    <h1>My Blender 3D Models</h1>
+    <input type="text" id="search" placeholder="Search models..." />
+  </header>
+
+  <nav>
+    <button data-filter="all">All</button>
+    <button data-filter="Mobil">Mobile</button>
+    <button data-filter="city">City</button>
+    <button data-filter="Funny">Funny</button>
+  </nav>
+
+  <main class="gallery">
+    <!-- Replace model paths with your own .glb files in the models folder -->
+
+    <div class="card" data-category="city">
+      <model-viewer src="models/car1.glb" alt="1975 Porsche"
+        auto-rotate camera-controls background-color="#111"
+        style="width: 100%; height: 300px;">
+      </model-viewer>
+      <h3>City</h3>
+    </div>
+
+    <div class="card" data-category="Mobil">
+      <model-viewer src="models/MOBIL.glb" alt="Cyberpunk Hover Car"
+        auto-rotate camera-controls background-color="#111"
+        style="width: 100%; height: 300px;">
+      </model-viewer>
+      <h3>Mobile</h3>
+    </div>
+    <!---Add Models -->
+<div class="card" data-category="city">
+  <model-viewer src="models/Sword.glb" alt="City Scene"
+    auto-rotate camera-controls background-color="#111"
+    style="width: 100%; height: 300px;">
+  </model-viewer>
+  <h3>City Block</h3>
+</div>
+
+
+    <div class="card" data-category="city">
+      <model-viewer src="models/house.glb" alt="City Scene"
+        auto-rotate camera-controls background-color="#111"
+        style="width: 100%; height: 300px;">
+      </model-viewer>
+      <h3>House Block</h3>
+    </div>
+<!---Add Models -->
+<div class="card" data-category="city">
+  <model-viewer src="models/THE CLASS.glb" alt="City Scene"
+    auto-rotate camera-controls background-color="#111"
+    style="width: 100%; height: 300px;">
+  </model-viewer>
+  <h3>City Block</h3>
+</div>
+
+
+<!---Add Models -->
+<div class="card" data-category="Funny">
+  <model-viewer src="models/dark.glb" alt="City Scene"
+    auto-rotate camera-controls background-color="#111"
+    style="width: 100%; height: 300px;">
+  </model-viewer>
+  <h3>Text</h3>
+</div>
+<!---Add Models -->
+<div class="card" data-category="Funny">
+  <model-viewer src="models/KATHTHI.glb" alt="City Scene"
+    auto-rotate camera-controls background-color="#111"
+    style="width: 100%; height: 300px;">
+  </model-viewer>
+  <h3>A knife</h3>
+</div>
+<!---Add Models -->
+<div class="card" data-category="Funny">
+  <model-viewer src="models/THLIGHT.glb" alt="City Scene"
+    auto-rotate camera-controls background-color="#111"
+    style="width: 100%; height: 300px;">
+  </model-viewer>
+  <h3>A Torch Light</h3>
+</div>
+<!---Add Models -->
+<div class="card" data-category="city">
+  <model-viewer src="models/untitled.glb" alt="City Scene"
+    auto-rotate camera-controls background-color="#111"
+    style="width: 100%; height: 300px;">
+  </model-viewer>
+  <h3>City Block</h3>
+</div>
+
+<!---Add Models -->
+<div class="card" data-category="Funny">
+  <model-viewer src="models/CLASS.glb" alt="City Scene"
+    auto-rotate camera-controls background-color="#111"
+    style="width: 100%; height: 300px;">
+  </model-viewer>
+  <h3>Class Block</h3>
+</div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
+===========================================
+
+CSS:
+
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #111;
+    color: #fff;
+  }
+  
+  header {
+    background: #1a1a1a;
+    padding: 20px;
+    text-align: center;
+  }
+  
+
+
+  /* Button */
+
+  #backHomeBtn {
+    margin: 15px;
+    padding: 8px 14px;
+    background-color: #111;
+    color: #00f7ff;
+    border: 1px solid #00f7ff;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  /* Button */
+  header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+  }
+  
+  #search {
+    margin-top: 10px;
+    padding: 10px;
+    width: 60%;
+    font-size: 1rem;
+    border-radius: 5px;
+    border: none;
+  }
+  
+  nav {
+    text-align: center;
+    margin: 20px 0;
+  }
+  
+  nav button {
+    background: #333;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    margin: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.3s ease;
+  }
+  
+  nav button:hover {
+    background: #555;
+  }
+  
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  .card {
+    background: #1f1f1f;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+    text-align: center;
+  }
+  
+  .card:hover {
+    transform: scale(1.02);
+  }
+  
+  .card h3 {
+    margin-top: 10px;
+    font-size: 1.2rem;
+  }
+  
+  model-viewer {
+    width: 100%;
+    height: 300px;
+    border-radius: 10px;
+    background-color: #111;
+  }
+  =============================================
+JS:
+
+const search = document.getElementById("search");
+const buttons = document.querySelectorAll("nav button");
+const cards = document.querySelectorAll(".card");
+
+// Search Filter
+search.addEventListener("keyup", () => {
+  const term = search.value.toLowerCase();
+  cards.forEach(card => {
+    const title = card.querySelector("h3").textContent.toLowerCase();
+    card.style.display = title.includes(term) ? "" : "none";
+  });
+});
+
+// Category Filter
+buttons.forEach(button => {
+  button.addEventListener("click", () => {
+    const filter = button.getAttribute("data-filter");
+    cards.forEach(card => {
+      const category = card.getAttribute("data-category");
+      card.style.display = (filter === "all" || category === filter) ? "" : "none";
+    });
+  });
+});
+
+
+--------------------------------------------------------
+
+CSS:
+
