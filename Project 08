@@ -1,0 +1,286 @@
+HTML:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Official FitGirl Repacks archive - Download top repacks.">
+    <meta name="keywords" content="FitGirl, repacks, PC games, compressed games, downloads">
+    <link rel="icon" type="image/png" href="assets/n.jpg" />
+    <title>Gamers Repacks</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Static Navbar -->
+    <div class="navbar">
+        <a href="https://santhosh2025.neocities.org/Best%20PC%20&%20Android%20Games%20Updates/Best%20Games">POPULAR REPACKS</a>
+        <a href="https://santhosh2025.neocities.org/Project%2001/Game%20WebSite">ALL MY REPACKS, A-Z</a>
+        <a href="https://santhosh2025.neocities.org/Best%20PC%20&%20Android%20Games%20Updates/Best%20Games">UPDATES LIST</a>
+        <a href="https://santhosh2025.neocities.org/profile/">CONTACTS</a>
+        <a href="https://santhosh2025.neocities.org/Best%20PC%20&%20Android%20Games%20Updates/Best%20Games">REPACKS TROUBLESHOOTING</a>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">   
+            <h1>Gamers Repacks</h1>
+            <p>The ONLY Fun made site for Gamers Repacks. Every single FG repack installer has a link inside, which leads here. Do not fall for fake and scam sites, which are using my name.</p>
+            <a href="#">POPULAR REPACKS</a>
+            <a href="https://santhosh2025.neocities.org/Best%20PC%20&%20Android%20Games%20Updates/Best%20Games">ALL MY REPACKS, A-Z</a>
+            <a href="https://santhosh2025.neocities.org/profile/">CONTACTS</a>
+            <a href="#">REPACKS TROUBLESHOOTING</a>
+            <a href="#" class="donate-btn">DONATE to GAMER'S</a>
+        </div>
+
+        <div class="main-content">
+            <h1>TOP REPACKS OF THE YEAR</h1>
+            <!-- <h2>Top Repacks of the Year</h2> -->
+            <div class="game-grid">
+                <div class="game-card" onclick="viewGame('Grand Theft Auto V')">
+                    <img src="assets/3.png" alt="Grand Theft Auto V" onerror="this.src='placeholder.png';">
+                    <p>Grand Theft Auto V</p>
+                </div>
+                <div class="game-card" onclick="viewGame('Spider-Man 2')">
+                    <img src="assets/sp.png" alt="Spider-Man 2" onerror="this.src='placeholder.png';">
+                    <p>Spider-Man 2</p>
+                </div>
+                <div class="game-card" onclick="viewGame('The Last of Us Part I')">
+                    <img src="assets/1.png" alt="The Last of Us Part I" onerror="this.src='placeholder.png';">
+                    <p>The Last of Us Part I</p>
+                </div>
+                <div class="game-card" onclick="viewGame('The Last of Us: Part II')">
+                    <img src="assets/2.png" alt="Cyberpunk 2077" onerror="this.src='placeholder.png';">
+                    <p>The Last of Us: Part II</p>
+                </div>
+                <div class="game-card" onclick="viewGame('Red Dead Redemption II')">
+                    <img src="assets/4.png" alt="Red Dead Redemption II" onerror="this.src='placeholder.png';">
+                    <p>Red Dead Redemption II</p>
+                </div>
+                <div class="game-card" onclick="viewGame('God of War Ragnarok')">
+                    <img src="assets/god.png" alt="God of War Ragnarok" onerror="this.src='placeholder.png';">
+                    <p>God of War Ragnarok</p>
+                </div>
+                <div class="game-card" onclick="viewGame('Forza Horizon 5')">
+                    <img src="assets/5.png" alt="Forza Horizon 5" onerror="this.src='placeholder.png';">
+                    <p>Forza Horizon 5</p>
+                </div>
+                <div class="game-card" onclick="viewGame('Assassin\'s Creed Mirage')">
+                    <img src="assets/6.png" alt="Assassin's Creed Mirage" onerror="this.src='placeholder.png';">
+                    <p>Assassin's Creed Mirage</p>
+                </div>
+                <div class="game-card" onclick="viewGame('Cyberpunk 2077')">
+                    <img src="assets/7.png" alt="Cyberpunk 2077" onerror="this.src='placeholder.png';">
+                    <p>Cyberpunk 2077</p>
+                </div>
+<!-- Add The New Games On This -->
+            <!--Next-->     
+            <div class="game-card" onclick="viewGame('Ghost of Tsushima')">
+                 <img src="assets/gho.png" alt="Ghost of Tsushima" onerror="this.src='placeholder.png';">
+                 <p>Ghost of Tsushima </p>
+            </div>
+            <!--Next-->
+            <div class="game-card" onclick="viewGame('https://fitgirl-repacks.site/call-of-duty-modern-warfare-3/')">
+                <img src="assets/call.png" alt="Call of Duty" onerror="this.src='https://fitgirl-repacks.site/call-of-duty-modern-warfare-3/';">
+                <p>Call of Duty: Modern Warfare 3  </p>
+           </div>
+           <!--Next-->  
+   <!--Next-->     
+        <div class="game-card" onclick="viewGame('Ghost of Tsushima')">
+            <img src="assets/Elde.png" alt="Ghost of Tsushima" onerror="this.src='placeholder.png';">
+            <p>ELDEN RING: Shadow of the Erdtree Deluxe Edition </p>
+        </div>
+<!--Next-->
+            <!--Next-->
+            <div class="game-card" onclick="viewGame('Nothing')">
+                <img src="assets/in.png" alt="Call of Duty" onerror="this.src='Nothing';">
+                <p>Indiana Jones and the Great Circle </p>
+           </div>
+
+           <!--Next-->
+           <div class="game-card" onclick="viewGame('Nothing')">
+            <img src="assets/RDR.png" alt="Call of Duty" onerror="this.src='Nothing';">
+            <p>Red Dead Redemption </p>
+       </div>
+
+        <!--Next-->
+        <div class="game-card" onclick="viewGame('Nothing')">
+            <img src="assets/ric.png" alt="Call of Duty" onerror="this.src='Nothing';">
+            <p>Rise of the Ronin  </p>
+       </div>
+
+       <!--Next-->
+       <div class="game-card" onclick="viewGame('Nothing')">
+        <img src="assets/un.png" alt="Call of Duty" onerror="this.src='Nothing';">
+        <p>UNCHARTED: Legacy of Thieves Collection </p>
+   </div>
+
+                <!--Next-->
+            <div class="game-card" onclick="viewGame('Nothing')">
+                <img src="assets/GO.png" alt="Call of Duty" onerror="this.src='Nothing';">
+                <p>God of War</p>
+           </div>
+
+
+                    <!--Next-->
+            <div class="game-card" onclick="viewGame('Nothing')">
+                <img src="assets/ST.png" alt="Call of Duty" onerror="this.src='Nothing';">
+                <p>S.T.A.L.K.E.R. 2: Heart of Chornobyl </p>
+           </div>
+
+
+
+           <!--Next-->
+           <div class="game-card" onclick="viewGame('Nothing')">
+            <img src="assets/HT.png" alt="Call of Duty" onerror="this.src='Nothing';">
+            <p>HITMAN: World of Assassination </p>
+       </div>
+
+
+
+       <!--Next-->
+       <div class="game-card" onclick="viewGame('Nothing')">
+        <img src="assets/TW.png" alt="Call of Duty" onerror="this.src='Nothing';">
+        <p>The Witcher 3: Wild Hunt</p>
+   </div>
+
+
+
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+=============================================================================
+
+CSS:
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #ffa600;
+    color: #4b3d07;
+}
+.container {
+    display: flex;
+    flex-wrap: wrap;
+}
+.sidebar {
+    width: 250px;
+    background-color: #1a1a1a;
+    padding: 30px 20px; /* Increased padding for more space inside */
+    height: 100vh;
+    margin-top: 70px; /* Space between the navbar and sidebar */
+}
+.sidebar h1 {
+    color: #ff00ff;
+    font-size: 24px;
+    margin: 0 0 20px;
+}
+.sidebar p {
+    font-size: 12px;
+    color: #ec0000;
+    margin-bottom: 20px;
+}
+.sidebar a {
+    color: #fefefe;
+    text-decoration: none;
+    display: block;
+    margin: 10px 0;
+    font-weight: bold;
+}
+.sidebar .donate-btn {
+    background-color: #ffbf00;
+    color: #000;
+    text-align: center;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+/* Static Navbar */
+.navbar {
+    background-color: #000;
+    padding: 20px 20px; /* Adjusted padding */
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    border-bottom: 1px solid #333;
+    margin-top: 10px; /* Added margin for spacing above navbar */
+}
+.navbar a {
+    color: #fff;
+    margin: 0 10px;
+    text-decoration: none;
+}
+.navbar a:hover {
+    color: #ff9100;
+}
+.main-content {
+    flex: 1;
+    padding: 40px 20px; /* Increased padding for more space inside */
+    background-color: #ffffff;
+    color: #000000;
+    margin-top: 60px; /* Adjusted top margin for space between navbar */
+}
+.main-content h1 {
+    font-size: 36px;
+    margin: 0 0 10px;
+}
+.main-content h2 {
+    font-size: 24px;
+    color: #000000;
+    margin-bottom: 20px;
+}
+.game-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 20px;
+}
+.game-card {
+    background-color: #afa8a8;
+    border: 1px solid #000000;
+    border-radius: 5px;
+    overflow: hidden;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+.game-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+.game-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+.game-card p {
+    margin: 10px;
+    font-size: 14px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        height: auto;
+    }
+    .navbar {
+        padding: 15px;
+        text-align: center;
+    }
+    .game-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+}
+==================================================================
+Java Script:
+function viewGame(gameTitle) {
+    alert("Viewing: " + gameTitle);
+}
