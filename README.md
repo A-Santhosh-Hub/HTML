@@ -16,6 +16,8 @@
 
 # Project 08   https://santhosh2025.neocities.org/Project%2002/GAME%20TO%20CODE
 
+# Project 09   https://santhosh2025.neocities.org/idle/Calculator
+
 
 
 <<------------------ More Soon ----------------->>
