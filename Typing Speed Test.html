@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Typing Speed Test</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #1c1c1c;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body.light {
+      background: #f4f4f4;
+      color: #000;
+    }
+
+    .container {
+      text-align: center;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    #sentence {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+    }
+
+    #input {
+      width: 100%;
+      height: 100px;
+      font-size: 1rem;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      resize: none;
+    }
+
+    body.light #input {
+      background: #fff;
+      color: #000;
+    }
+
+    .stats {
+      margin-top: 20px;
+    }
+
+    .stats span {
+      transition: transform 0.3s ease, opacity 0.3s;
+    }
+
+    .stats span.animate {
+      transform: scale(1.3);
+      opacity: 1;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #00b894;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    body.light button {
+      background: #0984e3;
+    }
+
+    select {
+      padding: 5px;
+      border-radius: 5px;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Typing Speed Test</h1>
+
+    <label for="difficulty">Difficulty:</label>
+    <select id="difficulty">
+      <option value="easy">Easy</option>
+      <option value="medium" selected>Medium</option>
+      <option value="hard">Hard</option>
+    </select>
+
+    <p id="sentence">Loading sentence...</p>
+    <textarea id="input" placeholder="Start typing here..."></textarea>
+
+    <div class="stats">
+      <p>⏱ Time: <span id="time">0</span> s</p>
+      <p>💨 WPM: <span id="wpm">0</span></p>
+      <p>🎯 Accuracy: <span id="accuracy">0</span>%</p>
+      <p>🏆 Best WPM: <span id="bestWpm">0</span></p>
+    </div>
+
+    <button id="restart">Restart</button>
+    <button id="themeToggle">🌙 Toggle Theme</button>
+  </div>
+
+  <script>
+    const sentencePool = {
+      easy: [
+        "Hello world.",
+        "I love coding.",
+        "Typing is fun.",
+        "The sun is bright.",
+        "Cats sleep all day.",
+        "Typing is fun.",
+        "I love to code.",
+        "She likes apples.",
+        "Rain falls softly.",
+        "Time goes fast.",
+        "Dogs bark loudly.",
+        "Birds can fly.",
+        "We are friends."
+      ],
+      medium: [
+        "Typing fast requires practice and patience.",
+        "JavaScript makes websites interactive.",
+        "Web development is creative and logical.",
+        "Practice makes perfect in everything you do.",
+        "The quick brown fox jumps over the lazy dog.",
+        "Typing quickly takes time and effort to master.",
+        "Javascript is used to create interactive websites.",
+        "Reading books can improve your vocabulary.",
+        "A web developer designs and builds websites.",
+        "Programming improves your logical thinking skills.",
+        "Consistent practice helps you type faster.",
+        "Errors decrease your accuracy score.",
+        "Coding is both an art and a science."
+      ],
+      hard: [
+        "Syntactically correct code enhances program readability.",
+        "Java is a high-level, object-oriented programming language used to build web apps, mobile applications, and enterprise software systems. It is known for its Write Once, Run Anywhere capability, which means code written in Java can run on any device that supports the Java Virtual Machine (JVM).",
+        "Concurrency and asynchronous patterns are complex concepts.",
+        "Synchronization and concurrency are vital concepts in multithreaded programming.",
+        "A well-optimized algorithm reduces computational time significantly.",
+        "Optimization of algorithms can greatly reduce computational complexity.",
+        "Debugging complex systems requires patience, strategy, and deep focus.",
+        "Accurate measurement of typing speed involves precision and time tracking.",
+        "Typing long, structured sentences builds endurance and accuracy.",
+        "Modern web applications often utilize asynchronous data fetching mechanisms.",
+        "User interfaces should be both functional and aesthetically pleasing.",
+        "Cross-browser compatibility is a core concern in front-end development.",
+        "JavaScript closures and scope chains are challenging but powerful concepts.",
+        "Software development is iterative, evolving through testing and feedback.",
+      ]
+    };
+
+    let sentence = "";
+    let startTime;
+    let timerInterval;
+
+    const sentenceEl = document.getElementById("sentence");
+    const inputEl = document.getElementById("input");
+    const timeEl = document.getElementById("time");
+    const wpmEl = document.getElementById("wpm");
+    const accuracyEl = document.getElementById("accuracy");
+    const restartBtn = document.getElementById("restart");
+    const bestWpmEl = document.getElementById("bestWpm");
+    const difficultySelect = document.getElementById("difficulty");
+    const themeToggle = document.getElementById("themeToggle");
+
+    let bestWpm = localStorage.getItem("bestWpm") || 0;
+    bestWpmEl.textContent = bestWpm;
+
+    function loadSentence() {
+      const difficulty = difficultySelect.value;
+      const pool = sentencePool[difficulty];
+      sentence = pool[Math.floor(Math.random() * pool.length)];
+      sentenceEl.textContent = sentence;
+      inputEl.value = "";
+      timeEl.textContent = "0";
+      wpmEl.textContent = "0";
+      accuracyEl.textContent = "0";
+      clearInterval(timerInterval);
+      startTime = null;
+    }
+
+    function calculateResults() {
+      const timeTaken = (Date.now() - startTime) / 1000;
+      const wordsTyped = inputEl.value.trim().split(/\s+/).length;
+      const wpm = Math.round((wordsTyped / timeTaken) * 60);
+      const correctChars = inputEl.value.split('').filter((char, i) => char === sentence[i]).length;
+      const accuracy = Math.round((correctChars / sentence.length) * 100);
+
+      timeEl.textContent = timeTaken.toFixed(1);
+      wpmEl.textContent = isNaN(wpm) ? 0 : wpm;
+      accuracyEl.textContent = accuracy;
+
+      if (wpm > bestWpm) {
+        bestWpm = wpm;
+        localStorage.setItem("bestWpm", bestWpm);
+        bestWpmEl.textContent = bestWpm;
+      }
+
+      ["time", "wpm", "accuracy"].forEach(id => {
+        const el = document.getElementById(id);
+        el.classList.add("animate");
+        setTimeout(() => el.classList.remove("animate"), 300);
+      });
+    }
+
+    inputEl.addEventListener("input", () => {
+      if (!startTime) {
+        startTime = Date.now();
+        timerInterval = setInterval(() => {
+          const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+          timeEl.textContent = elapsed;
+        }, 100);
+      }
+
+      if (inputEl.value === sentence) {
+        clearInterval(timerInterval);
+        calculateResults();
+      }
+    });
+
+    restartBtn.addEventListener("click", loadSentence);
+    difficultySelect.addEventListener("change", loadSentence);
+
+    themeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("light");
+      const isLight = document.body.classList.contains("light");
+      localStorage.setItem("theme", isLight ? "light" : "dark");
+    });
+
+    if (localStorage.getItem("theme") === "light") {
+      document.body.classList.add("light");
+    }
+
+    loadSentence();
+  </script>
+</body>
+</html>
