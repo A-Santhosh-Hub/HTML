@@ -18,6 +18,8 @@
 
 # Project 09   https://santhosh2025.neocities.org/idle/Calculator
 
+# Project 10   https://santhosh2025.neocities.org/Typing%20Speed%20Test/TypingSpeedTest
+
 
 
 
