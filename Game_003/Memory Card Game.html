@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Memory Card Game</title>
+  <link rel="stylesheet" href="style_01.css" />
+</head>
+<body>
+  <div class="game-container">
+    <h1>🧠 Memory Match Game</h1>
+    <div class="stats">
+      <span>Moves: <span id="moves">0</span></span>
+      <span>Time: <span id="timer">0s</span></span>
+      <span>Best: <span id="best-time">--</span></span>
+    </div>
+    <div class="grid" id="grid"></div>
+    <button id="restart">🔁 Restart</button>
+  </div>
+
+  <div id="win-popup" class="hidden">
+    <h2>🎉 You Win!</h2>
+    <p>Moves: <span id="final-moves"></span></p>
+    <p>Time: <span id="final-time"></span></p>
+    <button onclick="startGame()">Play Again</button>
+  </div>
+
+  <script src="script_01.js"></script>
+</body>
+</html>
