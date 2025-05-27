@@ -2,7 +2,7 @@
 
 # Project 01   https://santhosh2025.neocities.org/New%20Project/Main
 
-# Project 02   https://santhosh2025.neocities.org/Skill/Skills
+# Project 02   https://santhosh2025.neocities.org/Skill/Skills  --- SKILLS
 
 # Project 03    https://santhosh2025.neocities.org/POST/News
 
