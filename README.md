@@ -16,7 +16,7 @@
 
 # Project 08   https://santhosh2025.neocities.org/Project%2002/GAME%20TO%20CODE
 
-# Project 09   https://santhosh2025.neocities.org/idle/Calculator
+# Project 09   https://santhosh2025.neocities.org/idle/Calculator ---> Calculator website
 
 # Project 10   https://santhosh2025.neocities.org/Typing%20Speed%20Test/TypingSpeedTest
 
