@@ -18,7 +18,7 @@
 
 # Project 09   https://santhosh2025.neocities.org/idle/Calculator ---> Calculator website
 
-# Project 10   https://santhosh2025.neocities.org/Typing%20Speed%20Test/TypingSpeedTest
+# Project 10   https://santhosh2025.neocities.org/Typing%20Speed%20Test/TypingSpeedTest  --- Typing Speed Test
 
 # Project 11   https://santhosh2025.neocities.org/GAMES/GAME_PROJECT_001/Memory%20Match%20Game -- GAME_PROJECT gaming website
 
