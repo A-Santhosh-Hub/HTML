@@ -1,0 +1,21 @@
+{
+  "name": "Live Weather UI",
+  "short_name": "WeatherUI",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f8b500",
+  "theme_color": "#f8b500",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
