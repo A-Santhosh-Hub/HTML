@@ -1,0 +1,122 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  transition: background 0.5s ease;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Base weather card styling */
+.weather-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px);
+  padding: 30px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 0 25px rgba(0,0,0,0.2);
+  color: #fff;
+  width: 300px;
+}
+
+select {
+  margin-top: 10px;
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
+  font-size: 16px;
+  outline: none;
+}
+
+.weather-info {
+  margin-top: 20px;
+}
+
+#weatherIcon {
+  font-size: 48px;
+}
+
+#temp {
+  font-size: 24px;
+  margin-top: 10px;
+}
+
+/* Weather themes */
+body.sunny {
+  background: linear-gradient(to top, #fceabb, #f8b500);
+}
+
+body.cloudy {
+  background: linear-gradient(to top, #bdc3c7, #2c3e50);
+}
+
+body.rainy {
+  background: linear-gradient(to top, #485563, #29323c);
+}
+
+body.thunderstorm {
+  background: linear-gradient(to top, #2c3e50, #000000);
+}
+
+/* Weather Effects Layer */
+#weatherEffects {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ☀️ Sunny rays */
+.sun-rays {
+  background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* ☁️ Clouds */
+.cloud {
+  width: 120px;
+  height: 60px;
+  background: #fff;
+  border-radius: 60px;
+  position: absolute;
+  top: 20%;
+  left: -150px;
+  animation: floatClouds 30s linear infinite;
+  opacity: 0.5;
+}
+@keyframes floatClouds {
+  0% { left: -150px; }
+  100% { left: 110%; }
+}
+
+/* 🌧️ Rain drops */
+.raindrop {
+  width: 2px;
+  height: 15px;
+  background: #a0d2eb;
+  position: absolute;
+  top: -20px;
+  animation: rainFall 0.7s linear infinite;
+}
+@keyframes rainFall {
+  to { transform: translateY(100vh); }
+}
+
+/* ⛈️ Thunder flash */
+@keyframes flash {
+  0%, 100% { background: none; }
+  50% { background: rgba(255, 255, 255, 0.2); }
+}
+.flash {
+  animation: flash 1s infinite;
+}
