@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Live Weather UI</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Manifest & PWA setup -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#f8b500">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+
+</head>
+<body class="sunny">
+  <div class="weather-card">
+    <h1>Live Weather UI</h1>
+    <select id="citySelect">
+      <option value="chennai">Erode</option>
+      
+      <option value="mumbai">Mumbai</option>
+      <option value="chennai">Chennai</option>
+      <option value="delhi">Delhi</option>
+      <option value="bangalore">Bangalore</option>
+    </select>
+    <div class="weather-info">
+      <div id="weatherIcon">☀️</div>
+      <div id="cityName">Erode</div>
+      <div id="temp">32°C</div>
+      <div id="condition">Sunny</div>
+    </div>
+  </div>
+
+  <div id="weatherEffects"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
