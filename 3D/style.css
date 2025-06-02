@@ -1,0 +1,177 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body, html {
+  font-family: 'Segoe UI', sans-serif;
+  background: #111;
+  color: #fff;
+  scroll-behavior: smooth;
+  perspective: 1000px;
+  overflow-x: hidden;
+}
+#progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 5px;
+  background: #00ffe1;
+  width: 0%;
+  z-index: 1000;
+  transition: width 0.2s ease-out;
+}
+
+/* 🎯 Navbar */
+.navbar {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1001;
+  display: flex;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 10px 20px;
+  border-radius: 20px;
+}
+.navbar button {
+  background: #00ffe1;
+  border: none;
+  padding: 8px 16px;
+  color: #000;
+  font-weight: bold;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.navbar button:hover {
+  background: #0ff;
+}
+
+section {
+  text-align: center;
+  padding: 80px 20px;
+}
+.hero {
+  height: 100vh;
+  background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.hero h1 {
+  font-size: 3rem;
+  margin-bottom: 20px;
+  text-shadow: 0 0 10px #00ffe1;
+}
+.hero p {
+  font-size: 1.2rem;
+  opacity: 0.8;
+}
+
+/* 🔄 Parallax */
+.parallax {
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform-style: preserve-3d;
+}
+.layer-1 {
+  background-image: url('file/5.png');
+}
+.layer-2 {
+  background-image: url('file/X\ suit.jpg');
+}
+.layer-3 {
+  background-image: url('file/1.jpg');
+}
+.layer-4 {
+  background-image: url('file/SANTHOSH_004.png');
+}
+.layer-5 {
+  background-image: url('file/2.jpg');
+}
+
+.layer-6 {
+  background-image: url('file/7.jpg');
+}
+
+.layer-7 {
+  background-image: url('file/3.jpg');
+}
+.layer-8 {
+  background-image: url('file/4.jpg');
+}
+.layer-9 {
+  background-image: url('file/SANTHOSH_004.png');
+}
+.layer-10 {
+  background-image: url('file/SANTHOSH_003.png');
+}
+
+.layer-11 {
+  background-image: url('file/SANTHOSH_001.png');
+}
+
+
+.layer-12 {
+  background-image: url('file/guhan.png');
+}
+
+
+.layer-13 {
+  background-image: url('file/MCLON.png');
+}
+.layer-14 {
+  background-image: url('file/6.png');
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+.layer-content h2 {
+  font-size: 3rem;
+  text-shadow: 0 0 10px #00ffe1;
+  transform: translateZ(40px);
+}
+.text-section {
+  background: #1e1e1e;
+  padding: 100px 30px;
+}
+.text-section p {
+  font-size: 1.2rem;
+  max-width: 800px;
+  margin: auto;
+  transform: translateZ(10px);
+}
+footer {
+  padding: 30px;
+  background: #111;
+  text-align: center;
+  color: #aaa;
+}
+
+/* ✨ Animations */
+.fade-in, .slide-in {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1s ease-out, transform 1s ease-out;
+}
+.show {
+  opacity: 1;
+  transform: translateY(0);
+}
