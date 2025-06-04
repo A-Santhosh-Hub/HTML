@@ -12,9 +12,9 @@
 
 # Project 06   https://santhosh2025.neocities.org/Gamer's%20Repacks/Index   ---- ( Gamer Repacks )
 
-# Project 07   https://santhosh2025.neocities.org/Project%2001/Game%20WebSite 
+# Project 07   https://santhosh2025.neocities.org/Project%2001/Game%20WebSite  --- ( Game WebSite )
 
-# Project 08   https://santhosh2025.neocities.org/Project%2002/GAME%20TO%20CODE
+# Project 08   https://santhosh2025.neocities.org/Project%2002/GAME%20TO%20CODE   ---  ( GAME CODE  )
 
 # Project 09   https://santhosh2025.neocities.org/idle/Calculator ---> Calculator website
 
