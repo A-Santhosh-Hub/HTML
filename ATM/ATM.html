@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ATM Interface</title>
+  <link rel="icon" type="image/png" href="ico.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Login Page -->
+  <div class="container" id="login-page">
+    <h2>ATM Login</h2>
+    <h5 >Enter Name and Password</h5>
+    <h6>Don't forget your Name and Password</h6>
+    <input type="text" id="username-input" placeholder="Enter Username" />
+    <input type="password" id="pin-input" placeholder="Enter 4-digit PIN" maxlength="4" />
+    <button onclick="login()">Login</button>
+    <p id="login-error"></p>
+  </div>
+
+  <!-- ATM Page -->
+  <div class="container" id="atm-page" style="display: none;">
+    <h2>Welcome, <span id="user-display"></span></h2>
+    <p><strong>Balance:</strong> ₹<span id="balance">0.00</span></p>
+    <input type="number" id="amount" placeholder="Enter amount" />
+    <div class="buttons">
+      <button onclick="checkBalance()">Check Balance</button>
+      <button onclick="deposit()">Deposit</button>
+      <button onclick="withdraw()">Withdraw</button>
+      <button onclick="logout()">Logout</button>
+    </div>
+    <p id="atm-message"></p>
+    <h3>Transaction History</h3>
+    <ul id="history-list"></ul>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
