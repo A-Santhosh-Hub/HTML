@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enhanced To-Do List</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter&display=swap" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #4caf50;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 1rem;
+    }
+
+    .input-group input, .input-group button {
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .input-group button {
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .input-group button:hover {
+      background-color: #43a047;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      padding: 10px;
+      background: #fafafa;
+      margin-bottom: 8px;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    li.completed span.task-text {
+      text-decoration: line-through;
+      color: gray;
+    }
+
+    .task-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .export-buttons button, #clearBtn {
+      margin-top: 10px;
+      width: 100%;
+      background-color: #e91e63;
+      border: none;
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>To-Do List</h1>
+    <div class="input-group">
+      <input type="text" id="taskInput" placeholder="Task description" />
+      <input type="date" id="dueDate" />
+      <button onclick="addTask()">Add Task</button>
+    </div>
+    <ul id="taskList"></ul>
+    <button id="clearBtn" onclick="clearAll()">Clear All</button>
+    <div class="export-buttons">
+      <button onclick="exportTXT()">Export as TXT</button>
+      <button onclick="exportCSV()">Export as CSV</button>
+    </div>
+  </div>
+
+  <script>
+    let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+    function saveTasks() {
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+    }
+
+    function renderTasks() {
+      const list = document.getElementById("taskList");
+      list.innerHTML = "";
+      tasks.forEach((task, i) => {
+        const li = document.createElement("li");
+        li.className = task.completed ? "completed" : "";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = task.completed;
+        checkbox.onchange = () => {
+          tasks[i].completed = checkbox.checked;
+          saveTasks();
+          renderTasks();
+        };
+
+        const span = document.createElement("span");
+        span.className = "task-text";
+        span.textContent = `${task.text} (Due: ${task.dueDate})`;
+
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "Delete";
+        delBtn.onclick = () => {
+          tasks.splice(i, 1);
+          saveTasks();
+          renderTasks();
+        };
+
+        const controls = document.createElement("div");
+        controls.className = "task-controls";
+        controls.appendChild(checkbox);
+        controls.appendChild(delBtn);
+
+        li.appendChild(span);
+        li.appendChild(controls);
+        list.appendChild(li);
+      });
+    }
+
+    function addTask() {
+      const input = document.getElementById("taskInput");
+      const date = document.getElementById("dueDate");
+      if (!input.value.trim()) return;
+      tasks.push({ text: input.value.trim(), dueDate: date.value, completed: false });
+      input.value = "";
+      date.value = "";
+      saveTasks();
+      renderTasks();
+    }
+
+    function clearAll() {
+      if (confirm("Are you sure you want to clear all tasks?")) {
+        tasks = [];
+        saveTasks();
+        renderTasks();
+      }
+    }
+
+    function exportTXT() {
+      let content = tasks.map(t => `${t.completed ? '[x]' : '[ ]'} ${t.text} (Due: ${t.dueDate})`).join("\n");
+      downloadFile("todo.txt", content);
+    }
+
+    function exportCSV() {
+      let content = "Task,Due Date,Completed\n" +
+        tasks.map(t => `"${t.text}","${t.dueDate}","${t.completed}"`).join("\n");
+      downloadFile("todo.csv", content);
+    }
+
+    function downloadFile(filename, content) {
+      const blob = new Blob([content], { type: "text/plain" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+    }
+
+    renderTasks();
+  </script>
+</body>
+</html>
