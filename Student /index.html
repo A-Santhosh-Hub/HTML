@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Management</title>
+  <link rel="icon" type="image/png" href="ico.png" />   
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>🎓 Student Management</h1>
+    <form id="studentForm">
+      <input type="text" id="id" placeholder="Student ID" required />
+      <input type="text" id="name" placeholder="Name" required />
+      <input type="text" id="course" placeholder="Course" required />
+      <input type="number" id="age" placeholder="Age" required />
+      <button type="submit">➕ Add / Update Student</button>
+    </form>
+
+    <h2>📋 Student List</h2>
+    <table id="studentTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Course</th>
+          <th>Age</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
