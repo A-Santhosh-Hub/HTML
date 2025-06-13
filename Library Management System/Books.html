@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="ico.png" />
+  <title>Library Management System</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    .form-group, #authSection {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    input {
+      padding: 10px;
+      flex: 1;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      min-width: 200px;
+    }
+    button {
+      padding: 10px 15px;
+      background: #0077cc;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #005fa3;
+    }
+    .book-card {
+      background: #f9f9f9;
+      margin: 10px 0;
+      padding: 15px;
+      border-left: 5px solid #0077cc;
+      border-radius: 8px;
+    }
+    .book-card.unavailable {
+      border-left-color: #cc0000;
+      opacity: 0.7;
+    }
+    .book-actions button {
+      margin-top: 10px;
+    }
+    #searchBox {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📚 Library Management System</h1>
+
+    <div id="authSection">
+      <h2>User Login</h2>
+      <input type="text" id="username" placeholder="Username">
+      <input type="password" id="password" placeholder="Password">
+      <button onclick="login()">Login</button>
+      <button onclick="register()">Register</button>
+    </div>
+
+    <p id="loggedUser" style="text-align:center;"></p>
+
+    <div class="form-group">
+      <input type="text" id="title" placeholder="Book Title" />
+      <input type="text" id="author" placeholder="Author Name" />
+      <button onclick="addBook()">Add Book</button>
+    </div>
+
+    <input type="text" id="searchBox" placeholder="Search by title..." oninput="searchBooks()" />
+
+    <button onclick="exportToCSV()">Export Book List (CSV)</button>
+
+    <h2>All Books</h2>
+    <div id="bookList"></div>
+  </div>
+
+  <script>
+    let books = JSON.parse(localStorage.getItem("books")) || [];
+    let idCounter = localStorage.getItem("bookIdCounter") || 1000;
+    let users = JSON.parse(localStorage.getItem("users")) || [];
+    let currentUser = localStorage.getItem("currentUser") || null;
+
+    function saveData() {
+      localStorage.setItem("books", JSON.stringify(books));
+      localStorage.setItem("bookIdCounter", idCounter);
+    }
+
+    function updateLoginStatus() {
+      document.getElementById("loggedUser").innerText = currentUser ? `🔐 Logged in as: ${currentUser}` : '';
+    }
+
+    function register() {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+      if (!username || !password) return alert("Fill in all fields");
+      if (users.find(u => u.username === username)) return alert("User already exists");
+      users.push({ username, password });
+      localStorage.setItem("users", JSON.stringify(users));
+      alert("Registered successfully!");
+    }
+
+    function login() {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+      const user = users.find(u => u.username === username && u.password === password);
+      if (!user) return alert("Invalid credentials");
+      currentUser = username;
+      localStorage.setItem("currentUser", currentUser);
+      updateLoginStatus();
+    }
+
+    function addBook() {
+      const title = document.getElementById("title").value.trim();
+      const author = document.getElementById("author").value.trim();
+      if (!title || !author) return alert("Fill all fields");
+      const book = {
+        id: Number(idCounter++),
+        title,
+        author,
+        isAvailable: true
+      };
+      books.push(book);
+      saveData();
+      renderBooks();
+      document.getElementById("title").value = "";
+      document.getElementById("author").value = "";
+    }
+
+    function borrowBook(id) {
+      if (!currentUser) return alert("Please login to borrow books");
+      const book = books.find(b => b.id === id);
+      if (book && book.isAvailable) {
+        book.isAvailable = false;
+        book.borrowedBy = currentUser;
+        book.borrowedDate = new Date().toISOString().split("T")[0];
+        book.dueDate = new Date(Date.now() + 14 * 86400000).toISOString().split("T")[0];
+        saveData();
+        renderBooks();
+      }
+    }
+
+    function returnBook(id) {
+      if (!currentUser) return alert("Please login to return books");
+      const book = books.find(b => b.id === id);
+      if (book && !book.isAvailable && book.borrowedBy === currentUser) {
+        book.isAvailable = true;
+        delete book.borrowedBy;
+        delete book.borrowedDate;
+        delete book.dueDate;
+        saveData();
+        renderBooks();
+      }
+    }
+
+    function renderBooks(list = books) {
+      const bookList = document.getElementById("bookList");
+      bookList.innerHTML = list.length === 0 ? "<p>No books found.</p>" : "";
+      list.forEach(book => {
+        const div = document.createElement("div");
+        div.className = "book-card" + (book.isAvailable ? "" : " unavailable");
+        div.innerHTML = `
+          <strong>ID:</strong> ${book.id}<br/>
+          <strong>Title:</strong> ${book.title}<br/>
+          <strong>Author:</strong> ${book.author}<br/>
+          <strong>Status:</strong> ${book.isAvailable ? "Available" : "Borrowed"}<br/>
+        `;
+        if (!book.isAvailable) {
+          div.innerHTML += `
+            <strong>Borrowed By:</strong> ${book.borrowedBy}<br/>
+            <strong>Borrowed Date:</strong> ${book.borrowedDate}<br/>
+            <strong>Due Date:</strong> ${book.dueDate}<br/>
+          `;
+        }
+        div.innerHTML += `
+          <div class="book-actions">
+            ${book.isAvailable ? `<button onclick="borrowBook(${book.id})">Borrow</button>` : `<button onclick="returnBook(${book.id})">Return</button>`}
+          </div>
+        `;
+        bookList.appendChild(div);
+      });
+    }
+
+    function searchBooks() {
+      const query = document.getElementById("searchBox").value.toLowerCase();
+      const filtered = books.filter(book => book.title.toLowerCase().includes(query));
+      renderBooks(filtered);
+    }
+
+    function exportToCSV() {
+      let csv = "ID,Title,Author,Status,Borrowed By,Due Date\n";
+      books.forEach(book => {
+        csv += `${book.id},"${book.title}","${book.author}",${book.isAvailable ? "Available" : "Borrowed"},${book.borrowedBy || ""},${book.dueDate || ""}\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "library_books.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    updateLoginStatus();
+    renderBooks();
+  </script>
+</body>
+</html>
