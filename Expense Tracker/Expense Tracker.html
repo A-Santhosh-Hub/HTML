@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Expense Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/png" href="ico.png" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>💰 Expense Tracker</h1>
+
+    <div class="top-controls">
+      <div class="filter-export">
+        <label for="month-filter">Filter by Month:</label>
+        <input type="month" id="month-filter">
+        <button onclick="exportCSV()">⬇ Export CSV</button>
+      </div>
+      <label class="dark-toggle">
+        <input type="checkbox" id="darkModeToggle" />
+        🌙 Dark Mode
+      </label>
+    </div>
+
+    <form id="transaction-form">
+      <select id="type" required>
+        <option value="Income">Income</option>
+        <option value="Expense">Expense</option>
+      </select>
+      <input type="text" id="category" placeholder="Category" required />
+      <input type="number" id="amount" placeholder="Amount" required />
+      <input type="text" id="description" placeholder="Description (optional)" />
+      <button type="submit">Add Transaction</button>
+    </form>
+
+    <div class="summary">
+      <p>💵 Income: ₹<span id="income">0</span></p>
+      <p>💸 Expenses: ₹<span id="expense">0</span></p>
+      <p>🧾 Balance: ₹<span id="balance">0</span></p>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Category</th>
+          <th>Amount</th>
+          <th>Description</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="transaction-table"></tbody>
+    </table>
+
+    <h3>📊 Charts</h3>
+    <canvas id="barChart" height="200"></canvas>
+    <canvas id="pieChart" height="200"></canvas>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
