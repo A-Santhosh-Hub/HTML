@@ -38,7 +38,7 @@
 
 #  Project 19 https://santhosh2025.neocities.org/Online%20Examination%20Portal/ --  ( Online Exam Portal )
 
-#  Project 20 https://santhosh2025.neocities.org/Inventory%20Management%20System/Index  --( Inventory Management System )
+
 
 
 
