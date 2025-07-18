@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Loan EMI Calculator</title>
+  <link rel="icon" type="image/png" href="ico.png" />
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div style="text-align:right">
+      <label>
+        🌗 <input type="checkbox" id="darkModeToggle" /> Dark Mode
+      </label>
+    </div>
+
+    <h1>Loan EMI Calculator</h1>
+
+    <div class="input-group">
+      <label>Loan Amount (₹):</label>
+      <input type="number" id="loanAmount" placeholder="e.g. 500000" />
+
+      <label>Interest Rate (% p.a):</label>
+      <input type="number" id="interestRate" placeholder="e.g. 7.5" />
+
+      <label>Duration (Years):</label>
+      <input type="number" id="duration" placeholder="e.g. 5" />
+
+      <button onclick="calculateEMI()">Calculate EMI</button>
+    </div>
+
+    <div id="result">
+      <h2>Monthly EMI: ₹<span id="emi">0.00</span></h2>
+      <p>Total Payment: ₹<span id="totalPayment">0.00</span></p>
+      <p>Total Interest: ₹<span id="totalInterest">0.00</span></p>
+    </div>
+
+    <canvas id="pieChart" width="400" height="200"></canvas>
+
+    <button id="exportBtn">Export to PDF</button>
+
+    <h2>Amortization Table</h2>
+    <table id="amortizationTable">
+      <thead>
+        <tr>
+          <th>Month</th>
+          <th>Principal</th>
+          <th>Interest</th>
+          <th>Balance</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
