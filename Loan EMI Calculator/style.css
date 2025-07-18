@@ -1,0 +1,101 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f9f9f9;
+  margin: 0;
+  padding: 20px;
+}
+
+.container {
+  max-width: 800px;
+  margin: auto;
+  background: #fff;
+  padding: 30px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  border-radius: 8px;
+}
+
+h1, h2 {
+  text-align: center;
+}
+
+.input-group {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.input-group label {
+  margin-top: 10px;
+}
+
+.input-group input {
+  padding: 8px;
+  font-size: 16px;
+}
+
+.input-group button,
+#exportBtn {
+  padding: 10px;
+  font-size: 18px;
+  background-color: #0078D7;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.input-group button:hover,
+#exportBtn:hover {
+  background-color: #005fa3;
+}
+
+#result {
+  margin-top: 20px;
+  text-align: center;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+thead {
+  background-color: #0078D7;
+  color: white;
+}
+
+table, th, td {
+  border: 1px solid #ccc;
+}
+
+th, td {
+  padding: 10px;
+  text-align: center;
+}
+
+/* 🌙 Dark Mode */
+body.dark {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+body.dark .container {
+  background: #1e1e1e;
+  box-shadow: none;
+}
+
+body.dark input,
+body.dark button {
+  background-color: #333;
+  color: #fff;
+  border: 1px solid #666;
+}
+
+body.dark table {
+  border-color: #444;
+}
+
+body.dark thead {
+  background-color: #333;
+}
