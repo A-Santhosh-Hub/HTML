@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diwali Firecrackers</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* Dark background */
+        }
+        .product-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.2), 0 4px 6px -2px rgba(249, 115, 22, 0.1);
+        }
+        .btn-primary {
+            background-color: #f97316; /* Orange */
+            color: white;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #ea580c;
+        }
+        .btn-whatsapp {
+            background-color: #25D366;
+            color: white;
+            transition: background-color 0.3s;
+        }
+        .btn-whatsapp:hover {
+            background-color: #128C7E;
+        }
+        .cart-item {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="text-white">
+
+    <!-- Header -->
+    <header class="bg-gray-900 shadow-lg">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-3xl font-bold text-orange-500">Sparkle & Boom</h1>
+            <div id="cart-icon" class="relative cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <span id="cart-count" class="absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-8">
+        <h2 class="text-4xl font-extrabold text-center mb-12 text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-600">Our Firecracker Collection</h2>
+
+        <!-- Product Grid -->
+        <div id="product-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            <!-- Product items will be injected here by JavaScript -->
+        </div>
+    </main>
+
+    <!-- Shopping Cart Sidebar -->
+    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-full md:w-1/3 lg:w-1/4 bg-gray-800 shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-50">
+        <div class="flex flex-col h-full">
+            <div class="flex justify-between items-center p-6 border-b border-gray-700">
+                <h3 class="text-2xl font-bold text-orange-500">Your Cart</h3>
+                <button id="close-cart" class="text-gray-400 hover:text-white">&times;</button>
+            </div>
+            <div id="cart-items" class="flex-grow p-6 overflow-y-auto">
+                <!-- Cart items will be injected here -->
+                <p class="text-gray-400">Your cart is empty.</p>
+            </div>
+            <div class="p-6 border-t border-gray-700">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-xl font-bold">Total:</span>
+                    <span id="total-price" class="text-2xl font-bold text-orange-500">₹0.00</span>
+                </div>
+                <button id="whatsapp-btn" class="w-full btn-whatsapp font-bold py-3 rounded-lg flex items-center justify-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 4.315 1.731 6.086l.479 1.063-1.04 3.833 3.829-1.042.992.476z"/></svg>
+                    <span>Send Order on WhatsApp</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div id="cart-overlay" class="fixed top-0 left-0 w-full h-full bg-black opacity-50 hidden z-40"></div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DATA ---
+            const products = [
+                { id: 1, name: '1000 Wala Garland', price: 350.00, image: 'https://placehold.co/300x300/f97316/white?text=Garland' },
+                { id: 2, name: 'Standard Flower Pots', price: 250.50, image: 'https://placehold.co/300x300/ea580c/white?text=Flower+Pot' },
+                { id: 3, name: 'Ground Spinner (Chakkar)', price: 150.00, image: 'https://placehold.co/300x300/d97706/white?text=Chakkar' },
+                { id: 4, name: 'Electric Sparklers', price: 80.75, image: 'https://placehold.co/300x300/c2410c/white?text=Sparklers' },
+                { id: 5, name: '12 Shot Sky Shots', price: 550.00, image: 'https://placehold.co/300x300/f97316/white?text=Sky+Shot' },
+                { id: 6, name: 'Bijili Crackers (100 Pcs)', price: 60.00, image: 'https://placehold.co/300x300/ea580c/white?text=Bijili' },
+                { id: 7, name: 'Rocket Bomb', price: 200.00, image: 'https://placehold.co/300x300/d97706/white?text=Rocket' },
+                { id: 8, name: 'Twinkling Stars', price: 120.25, image: 'https://placehold.co/300x300/c2410c/white?text=Twinkling' }
+            ];
+
+            let cart = [];
+
+            // --- DOM ELEMENTS ---
+            const productList = document.getElementById('product-list');
+            const cartIcon = document.getElementById('cart-icon');
+            const cartSidebar = document.getElementById('cart-sidebar');
+            const closeCartBtn = document.getElementById('close-cart');
+            const cartItemsContainer = document.getElementById('cart-items');
+            const totalPriceEl = document.getElementById('total-price');
+            const cartCountEl = document.getElementById('cart-count');
+            const whatsappBtn = document.getElementById('whatsapp-btn');
+            const cartOverlay = document.getElementById('cart-overlay');
+
+            // --- RENDER PRODUCTS ---
+            function renderProducts() {
+                productList.innerHTML = '';
+                products.forEach(product => {
+                    const productCard = `
+                        <div class="product-card bg-gray-800 rounded-lg overflow-hidden shadow-lg border border-gray-700">
+                            <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover">
+                            <div class="p-4">
+                                <h3 class="text-lg font-semibold mb-2">${product.name}</h3>
+                                <p class="text-xl font-bold text-orange-500 mb-4">₹${product.price.toFixed(2)}</p>
+                                <div class="flex items-center space-x-4">
+                                    <input type="number" id="qty-${product.id}" class="bg-gray-700 text-white border border-gray-600 rounded-md w-20 p-2 text-center" value="1" min="1">
+                                    <button onclick="addToCart(${product.id})" class="flex-1 btn-primary font-bold py-2 px-4 rounded-md">Add to Cart</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    productList.innerHTML += productCard;
+                });
+            }
+
+            // --- CART LOGIC ---
+            window.addToCart = (productId) => {
+                const quantity = parseInt(document.getElementById(`qty-${productId}`).value);
+                if (quantity <= 0) return;
+
+                const product = products.find(p => p.id === productId);
+                const cartItem = cart.find(item => item.id === productId);
+
+                if (cartItem) {
+                    cartItem.quantity += quantity;
+                } else {
+                    cart.push({ ...product, quantity });
+                }
+                
+                showToast(`${product.name} added to cart!`);
+                updateCart();
+            };
+
+            function updateCart() {
+                renderCartItems();
+                updateCartTotal();
+                updateCartCount();
+            }
+            
+            function renderCartItems() {
+                if (cart.length === 0) {
+                    cartItemsContainer.innerHTML = '<p class="text-gray-400">Your cart is empty.</p>';
+                    return;
+                }
+
+                cartItemsContainer.innerHTML = '';
+                cart.forEach((item, index) => {
+                    const cartItemEl = `
+                        <div class="cart-item flex justify-between items-center mb-4 p-2 bg-gray-700 rounded-md">
+                            <div>
+                                <p class="font-semibold">${item.name}</p>
+                                <p class="text-sm text-gray-400">₹${item.price.toFixed(2)} x ${item.quantity}</p>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <p class="font-bold text-orange-400">₹${(item.price * item.quantity).toFixed(2)}</p>
+                                <button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-400 font-bold">X</button>
+                            </div>
+                        </div>
+                    `;
+                    cartItemsContainer.innerHTML += cartItemEl;
+                });
+            }
+
+            window.removeFromCart = (index) => {
+                cart.splice(index, 1);
+                updateCart();
+            };
+
+            function updateCartTotal() {
+                const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                totalPriceEl.textContent = `₹${total.toFixed(2)}`;
+            }
+            
+            function updateCartCount() {
+                const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+                cartCountEl.textContent = count;
+            }
+
+            // --- UI INTERACTIONS ---
+            function toggleCart() {
+                cartSidebar.classList.toggle('translate-x-full');
+                cartOverlay.classList.toggle('hidden');
+            }
+
+            cartIcon.addEventListener('click', toggleCart);
+            closeCartBtn.addEventListener('click', toggleCart);
+            cartOverlay.addEventListener('click', toggleCart);
+
+            // --- WHATSAPP INTEGRATION ---
+            whatsappBtn.addEventListener('click', () => {
+                if (cart.length === 0) {
+                    alert("Your cart is empty. Please add items before sending an order.");
+                    return;
+                }
+
+                const phoneNumber = "911234567890"; // IMPORTANT: Replace with your WhatsApp number
+                let message = "🎉 New Firecracker Order! 🎉\n\n";
+                message += "Hello! I would like to place the following order:\n\n";
+
+                cart.forEach(item => {
+                    message += `*${item.name}*\n`;
+                    message += `  - Quantity: ${item.quantity}\n`;
+                    message += `  - Price: ₹${(item.price * item.quantity).toFixed(2)}\n\n`;
+                });
+
+                const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                message += `*Total Amount: ₹${total.toFixed(2)}*\n\n`;
+                message += "Please confirm the order and provide payment details.\nThank you!";
+
+                const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+                window.open(whatsappUrl, '_blank');
+            });
+            
+            // --- TOAST NOTIFICATION ---
+            function showToast(message) {
+                const toast = document.createElement('div');
+                toast.className = 'fixed bottom-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg animate-bounce';
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    toast.remove();
+                }, 3000);
+            }
+
+            // --- INITIALIZE ---
+            renderProducts();
+        });
+    </script>
+</body>
+</html>
