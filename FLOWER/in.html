@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       <link rel="icon" type="image/png" href="as/1.png" />
+    <title>Bloom & Petal - Online Flower Shop</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter for text -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .font-display {
+            font-family: 'Playfair Display', serif;
+        }
+        /* Style for number input arrows */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+          -webkit-appearance: none; 
+          margin: 0; 
+        }
+        input[type=number] {
+          -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-3xl font-display text-pink-600">Bloom & Petal</h1>
+            <div class="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                <span id="cart-count" class="ml-2 text-lg font-bold text-gray-700">0</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12">
+        
+        <!-- Hero Section -->
+        <section class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-display text-gray-800 mb-4">Fresh Flowers, Delivered with Love</h2>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">Select your favorite blooms, choose the quantity, and send your order directly to us via WhatsApp.</p>
+        </section>
+
+        <!-- Flower Selection -->
+        <section id="flower-selection" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Flower products will be injected here by JavaScript -->
+        </section>
+
+        <!-- Order Summary & Checkout -->
+        <section id="order-summary" class="mt-16 bg-white p-8 rounded-2xl shadow-lg">
+            <h3 class="text-3xl font-display text-gray-800 mb-6 border-b pb-4">Your Order</h3>
+            
+            <!-- Cart Items -->
+            <div id="cart-items" class="mb-6">
+                <p class="text-gray-500">Your cart is empty. Add some flowers to get started!</p>
+            </div>
+
+            <!-- Total -->
+            <div class="border-t pt-6">
+                <div class="flex justify-between items-center text-2xl font-bold">
+                    <span class="text-gray-800">Total:</span>
+                    <span id="total-cost" class="text-pink-600">₹0.00</span>
+                </div>
+            </div>
+
+            <!-- WhatsApp Button -->
+            <div class="mt-8 text-center">
+                <button id="whatsapp-btn" class="bg-green-500 text-white font-bold py-4 px-8 rounded-lg w-full md:w-auto hover:bg-green-600 transition-all duration-300 transform hover:scale-105 flex items-center justify-center disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.886-.001 2.225.651 4.315 1.731 6.086l.06.098-1.165 4.251 4.356-1.14z"/></svg>
+                    Send Order via WhatsApp
+                </button>
+                <p class="text-sm text-gray-500 mt-4">You will be redirected to WhatsApp to send your order.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white mt-16 border-t">
+        <div class="container mx-auto px-6 py-8 text-center text-gray-600">
+            <p>&copy; 2024 Bloom & Petal. All Rights Reserved.</p>
+            <p class="text-sm">Designed with ❤️</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- CONFIGURATION ---
+            const WHATSAPP_NUMBER = "919003356047"; // IMPORTANT: Replace with your WhatsApp number including country code (e.g., 91 for India)
+            const CURRENCY = "₹";
+
+            // --- DATA ---
+            const flowers = [
+                { id: 1, name: 'Crimson Roses', price: 150, image: 'as/1.png' },
+                { id: 2, name: 'Sunny Sunflowers', price: 120, image: 'as/2.png' },
+                { id: 3, name: 'Elegant Lilies', price: 200, image: 'as/3.png' },
+                { id: 4, name: 'Delicate Tulips', price: 180, image: 'as/4.png' },
+                { id: 5, name: 'Orchid Paradise', price: 250, image: 'as/5.png' },
+                { id: 6, name: 'Mixed Bouquet', price: 300, image: 'as/6.png' }
+            ];
+
+            // --- STATE ---
+            let cart = {}; // Example: { 1: 2, 3: 1 } means 2 of flowerId 1, 1 of flowerId 3
+
+            // --- DOM ELEMENTS ---
+            const flowerSelection = document.getElementById('flower-selection');
+            const cartItemsContainer = document.getElementById('cart-items');
+            const totalCostEl = document.getElementById('total-cost');
+            const cartCountEl = document.getElementById('cart-count');
+            const whatsappBtn = document.getElementById('whatsapp-btn');
+
+            // --- FUNCTIONS ---
+
+            /**
+             * Renders all flower products to the page.
+             */
+            function renderProducts() {
+                let html = '';
+                flowers.forEach(flower => {
+                    html += `
+                        <div class="bg-white rounded-2xl shadow-md overflow-hidden transform hover:-translate-y-2 transition-transform duration-300">
+                            <img src="${flower.image}" alt="${flower.name}" class="w-full h-56 object-cover">
+                            <div class="p-6">
+                                <h3 class="text-2xl font-bold font-display text-gray-800">${flower.name}</h3>
+                                <p class="text-xl text-pink-500 font-semibold mt-2">${CURRENCY}${flower.price.toFixed(2)}</p>
+                                <div class="mt-4 flex items-center">
+                                    <label for="qty-${flower.id}" class="mr-3 text-gray-600">Quantity:</label>
+                                    <input type="number" id="qty-${flower.id}" data-id="${flower.id}"
+                                           class="quantity-input w-20 p-2 border border-gray-300 rounded-lg text-center font-bold" 
+                                           min="0" value="0">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                flowerSelection.innerHTML = html;
+            }
+
+            /**
+             * Updates the cart object when a quantity changes.
+             */
+            function handleQuantityChange(event) {
+                const input = event.target;
+                const flowerId = parseInt(input.dataset.id);
+                const quantity = parseInt(input.value);
+
+                if (quantity > 0) {
+                    cart[flowerId] = quantity;
+                } else {
+                    delete cart[flowerId];
+                }
+                
+                // Ensure non-negative values
+                if (quantity < 0) {
+                    input.value = 0;
+                    delete cart[flowerId];
+                }
+
+                updateCart();
+            }
+
+            /**
+             * Updates the cart display, total cost, and button state.
+             */
+            function updateCart() {
+                cartItemsContainer.innerHTML = '';
+                let totalCost = 0;
+                let totalItems = 0;
+                const cartIsEmpty = Object.keys(cart).length === 0;
+
+                if (cartIsEmpty) {
+                    cartItemsContainer.innerHTML = '<p class="text-gray-500">Your cart is empty. Add some flowers to get started!</p>';
+                } else {
+                    let cartHtml = '<div class="space-y-4">';
+                    for (const flowerId in cart) {
+                        const quantity = cart[flowerId];
+                        const flower = flowers.find(f => f.id == flowerId);
+                        const subtotal = flower.price * quantity;
+                        totalCost += subtotal;
+                        totalItems += quantity;
+
+                        cartHtml += `
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-bold text-lg">${flower.name}</p>
+                                    <p class="text-gray-600">Quantity: ${quantity}</p>
+                                </div>
+                                <p class="font-semibold text-lg">${CURRENCY}${subtotal.toFixed(2)}</p>
+                            </div>
+                        `;
+                    }
+                    cartHtml += '</div>';
+                    cartItemsContainer.innerHTML = cartHtml;
+                }
+
+                totalCostEl.textContent = `${CURRENCY}${totalCost.toFixed(2)}`;
+                cartCountEl.textContent = totalItems;
+                whatsappBtn.disabled = cartIsEmpty;
+            }
+
+            /**
+             * Generates and opens the WhatsApp message link.
+             */
+            function sendWhatsAppMessage() {
+                let message = "Hello Bloom & Petal! I'd like to place an order:\n\n";
+                let totalCost = 0;
+
+                for (const flowerId in cart) {
+                    const quantity = cart[flowerId];
+                    const flower = flowers.find(f => f.id == flowerId);
+                    const subtotal = flower.price * quantity;
+                    totalCost += subtotal;
+                    message += `*${flower.name}*:\n`;
+                    message += `  - Quantity: ${quantity}\n`;
+                    message += `  - Price: ${CURRENCY}${flower.price.toFixed(2)} each\n`;
+                    message += `  - Subtotal: ${CURRENCY}${subtotal.toFixed(2)}\n\n`;
+                }
+
+                message += `*TOTAL COST: ${CURRENCY}${totalCost.toFixed(2)}*\n\n`;
+                message += "Please confirm my order. Thank you!";
+
+                const encodedMessage = encodeURIComponent(message);
+                const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
+                
+                window.open(whatsappUrl, '_blank');
+            }
+
+
+            // --- INITIALIZATION & EVENT LISTENERS ---
+
+            renderProducts();
+            updateCart(); // Initial cart render
+
+            // Listen for changes on quantity inputs
+            flowerSelection.addEventListener('input', (event) => {
+                if (event.target.classList.contains('quantity-input')) {
+                    handleQuantityChange(event);
+                }
+            });
+
+            // Listen for click on WhatsApp button
+            whatsappBtn.addEventListener('click', sendWhatsAppMessage);
+        });
+    </script>
+</body>
+</html>
