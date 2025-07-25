@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAMER's - Laptop & Computer Sales and Service</title>
+     <link rel="icon" type="image/png" href="ico.png" />
+    <!-- Chosen Palette: Gamer Night -->
+    <!-- Application Structure Plan: The application uses a single-page, top-down narrative structure. The flow is designed to guide the user logically from discovery to action: 1. Hero (Brand Intro), 2. Products (For Sale), 3. Services (Offered), 4. Cart (Review & Confirm), 5. Order (Final Action). This task-oriented flow is more intuitive for an e-commerce experience than a simple report-style layout. It simplifies the user journey, making it easy to find items, understand the selection, and place an order, which is the primary goal of the site. -->
+    <!-- Visualization & Content Choices: Report Info: Product/Service listings -> Goal: Inform/Compare -> Viz/Presentation Method: Interactive Cards (HTML/Tailwind) -> Interaction: 'Add to Cart' button triggers JS function to update a central cart state. Justification: Cards are a standard, highly effective UI pattern for e-commerce, allowing for a clean presentation of image, title, price, and action. Report Info: User's selection -> Goal: Organize/Inform -> Viz/Presentation Method: Dynamic List (HTML/JS) -> Interaction: Users can change quantity or remove items, with instant updates to the list and total. Justification: Provides clear, real-time feedback on the user's order before submission. Report Info: Final Order -> Goal: Action -> Viz/Presentation Method: Button -> Interaction: Click triggers JS to compile cart data and open a pre-filled WhatsApp message. Justification: Meets the core business requirement for a simple, no-backend ordering system. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .font-logo {
+            font-family: 'Press Start 2P', cursive;
+        }
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200">
+
+    <!-- Header & Navigation -->
+    <header class="bg-gray-900/80 backdrop-blur-lg sticky top-0 z-50 border-b border-gray-700">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="font-logo text-2xl text-amber-400">GAMER's</a>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#products" class="hover:text-amber-400 transition-colors">Products</a>
+                <a href="#services" class="hover:text-amber-400 transition-colors">Services</a>
+                <a href="#cart" class="hover:text-amber-400 transition-colors">Cart</a>
+            </div>
+            <a href="#order" class="hidden md:block bg-amber-400 text-gray-900 font-bold py-2 px-4 rounded-lg hover:bg-amber-300 transition-colors">
+                Place Order
+            </a>
+            <button id="mobile-menu-button" class="md:hidden text-2xl">
+                ☰
+            </button>
+        </nav>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4 space-y-2">
+            <a href="#products" class="block hover:text-amber-400 transition-colors">Products</a>
+            <a href="#services" class="block hover:text-amber-400 transition-colors">Services</a>
+            <a href="#cart" class="block hover:text-amber-400 transition-colors">Cart</a>
+            <a href="#order" class="block mt-2 bg-amber-400 text-gray-900 font-bold py-2 px-4 rounded-lg hover:bg-amber-300 transition-colors text-center">
+                Place Order
+            </a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6">
+
+        <!-- Hero Section -->
+        <section class="text-center py-20 md:py-32">
+            <h1 class="text-4xl md:text-6xl font-bold mb-4">Power Up Your Experience</h1>
+            <p class="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto mb-8">Your one-stop shop for high-performance gaming hardware, custom builds, and expert repair services.</p>
+            <a href="#products" class="bg-amber-400 text-gray-900 font-bold py-3 px-8 rounded-lg text-lg hover:bg-amber-300 transition-colors">Explore Hardware</a>
+        </section>
+
+        <!-- Products Section -->
+        <section id="products" class="py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold">Hardware & PCs</h2>
+                <p class="text-gray-400 mt-2">Browse our selection of new and refurbished gaming laptops and desktops.</p>
+            </div>
+            <div id="product-list" class="card-container">
+                <!-- Product cards will be dynamically inserted here by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section id="services" class="py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold">Expert Services</h2>
+                <p class="text-gray-400 mt-2">From repairs to custom builds, our technicians have you covered.</p>
+            </div>
+            <div id="service-list" class="card-container">
+                <!-- Service cards will be dynamically inserted here by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Shopping Cart Section -->
+        <section id="cart" class="py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold">Your Selection</h2>
+                <p class="text-gray-400 mt-2">Review your items before placing an order.</p>
+            </div>
+            <div class="max-w-4xl mx-auto bg-gray-800 rounded-lg p-6 md:p-8">
+                <div id="cart-items-container" class="space-y-4">
+                    <!-- Cart items will be dynamically inserted here -->
+                    <p id="cart-empty-message" class="text-center text-gray-400">Your cart is currently empty.</p>
+                </div>
+                <div class="border-t border-gray-700 mt-6 pt-6 text-right">
+                    <p class="text-2xl font-bold">Total: <span class="text-amber-400">$<span id="cart-total">0.00</span></span></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Order Form Section -->
+        <section id="order" class="py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold">Finalize Your Order</h2>
+                <p class="text-gray-400 mt-2">Enter your details and send your order directly to us via WhatsApp.</p>
+            </div>
+            <div class="max-w-lg mx-auto bg-gray-800 rounded-lg p-6 md:p-8">
+                <form id="order-form" class="space-y-6">
+                    <div>
+                        <label for="customer-name" class="block mb-2 font-semibold">Your Name</label>
+                        <input type="text" id="customer-name" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-amber-400" required>
+                    </div>
+                    <div>
+                        <label for="customer-contact" class="block mb-2 font-semibold">Contact Number (Optional)</label>
+                        <input type="tel" id="customer-contact" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-amber-400">
+                    </div>
+                    <button type="submit" class="w-full bg-green-500 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-green-600 transition-colors flex items-center justify-center space-x-2">
+                        <span>Order via WhatsApp</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.886-.001 2.269.655 4.505 1.905 6.344l-1.196 4.359 4.557-1.196z"/></svg>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 mt-16">
+        <div class="container mx-auto px-6 py-8 text-center text-gray-400">
+            <p>&copy; 2025 GAMER's. All Rights Reserved.</p>
+            <p class="mt-2">Contact: arussanthosh@gmail.com | +91 90033 56047</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const inventory = [
+                { id: 1, type: 'product', name: 'Viper G16 Gaming Laptop', description: 'Intel i7, RTX 4060, 16GB RAM, 1TB SSD. The perfect balance of power and portability.', price: 1499.99, image: 'https://placehold.co/600x400/2D3748/FBBF24?text=Viper+G16' },
+                { id: 2, type: 'product', name: 'Aegis Pro Desktop', description: 'AMD Ryzen 9, RTX 4080, 32GB RAM, 2TB NVMe SSD. Unleash ultimate performance.', price: 2799.00, image: 'https://placehold.co/600x400/2D3748/FBBF24?text=Aegis+Pro' },
+                { id: 3, type: 'product', name: 'Refurbished Blade 15', description: 'Intel i7 (10th Gen), RTX 2070, 16GB RAM. A great value high-performance machine.', price: 950.00, image: 'https://placehold.co/600x400/2D3748/FBBF24?text=Blade+15' },
+                { id: 4, type: 'service', name: 'Full System Diagnostic', description: 'Comprehensive hardware and software checkup to identify performance issues or failures.', price: 50.00, image: 'https://placehold.co/600x400/2D3748/38B2AC?text=Diagnostic' },
+                { id: 5, type: 'service', name: 'Custom PC Build Consultation', description: 'We help you pick the parts and assemble your dream gaming rig for peak performance.', price: 150.00, image: 'https://placehold.co/600x400/2D3748/38B2AC?text=PC+Build' },
+                { id: 6, type: 'service', name: 'Laptop Deep Cleaning', description: 'Internal dust removal, thermal paste re-application, and exterior cleaning for cooler temps.', price: 75.00, image: 'https://placehold.co/600x400/2D3748/38B2AC?text=Cleaning' },
+            ];
+
+            let cart = [];
+
+            const productListEl = document.getElementById('product-list');
+            const serviceListEl = document.getElementById('service-list');
+            const cartItemsContainerEl = document.getElementById('cart-items-container');
+            const cartEmptyMessageEl = document.getElementById('cart-empty-message');
+            const cartTotalEl = document.getElementById('cart-total');
+            const orderFormEl = document.getElementById('order-form');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            function createItemCard(item) {
+                const accentColor = item.type === 'product' ? 'amber' : 'teal';
+                return `
+                    <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 flex flex-col">
+                        <img src="${item.image}" alt="${item.name}" class="w-full h-56 object-cover">
+                        <div class="p-6 flex flex-col flex-grow">
+                            <h3 class="text-xl font-bold mb-2">${item.name}</h3>
+                            <p class="text-gray-400 mb-4 flex-grow">${item.description}</p>
+                            <div class="mt-auto flex justify-between items-center">
+                                <p class="text-2xl font-bold text-${accentColor}-400">$${item.price.toFixed(2)}</p>
+                                <button data-id="${item.id}" class="add-to-cart-btn bg-${accentColor}-400 text-gray-900 font-bold py-2 px-4 rounded-lg hover:bg-${accentColor}-300 transition-colors">Add to Cart</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function renderInventory() {
+                productListEl.innerHTML = inventory.filter(item => item.type === 'product').map(createItemCard).join('');
+                serviceListEl.innerHTML = inventory.filter(item => item.type === 'service').map(createItemCard).join('');
+            }
+
+            function renderCart() {
+                if (cart.length === 0) {
+                    cartItemsContainerEl.innerHTML = '';
+                    cartEmptyMessageEl.classList.remove('hidden');
+                } else {
+                    cartEmptyMessageEl.classList.add('hidden');
+                    cartItemsContainerEl.innerHTML = cart.map(cartItem => {
+                        const inventoryItem = inventory.find(item => item.id === cartItem.id);
+                        return `
+                            <div class="flex items-center justify-between bg-gray-700 p-4 rounded-lg">
+                                <div>
+                                    <p class="font-bold">${inventoryItem.name}</p>
+                                    <p class="text-sm text-gray-400">$${inventoryItem.price.toFixed(2)}</p>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <div class="flex items-center space-x-2">
+                                        <button data-id="${inventoryItem.id}" class="quantity-change-btn" data-change="-1">-</button>
+                                        <input type="number" value="${cartItem.quantity}" min="1" data-id="${inventoryItem.id}" class="cart-item-quantity w-12 text-center bg-gray-800 rounded">
+                                        <button data-id="${inventoryItem.id}" class="quantity-change-btn" data-change="1">+</button>
+                                    </div>
+                                    <button data-id="${inventoryItem.id}" class="remove-from-cart-btn text-red-500 hover:text-red-400 text-2xl">&times;</button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+                updateCartTotal();
+            }
+
+            function updateCartTotal() {
+                const total = cart.reduce((sum, cartItem) => {
+                    const inventoryItem = inventory.find(item => item.id === cartItem.id);
+                    return sum + (inventoryItem.price * cartItem.quantity);
+                }, 0);
+                cartTotalEl.textContent = total.toFixed(2);
+            }
+
+            function addToCart(productId) {
+                const existingItem = cart.find(item => item.id === productId);
+                if (existingItem) {
+                    existingItem.quantity++;
+                } else {
+                    cart.push({ id: productId, quantity: 1 });
+                }
+                renderCart();
+            }
+            
+            function updateQuantity(productId, newQuantity) {
+                const cartItem = cart.find(item => item.id === productId);
+                if (cartItem) {
+                    if (newQuantity > 0) {
+                        cartItem.quantity = newQuantity;
+                    } else {
+                        removeFromCart(productId);
+                    }
+                }
+                renderCart();
+            }
+
+            function removeFromCart(productId) {
+                cart = cart.filter(item => item.id !== productId);
+                renderCart();
+            }
+
+            document.body.addEventListener('click', e => {
+                if (e.target.classList.contains('add-to-cart-btn')) {
+                    addToCart(parseInt(e.target.dataset.id));
+                }
+                if (e.target.classList.contains('remove-from-cart-btn')) {
+                    removeFromCart(parseInt(e.target.dataset.id));
+                }
+                if (e.target.classList.contains('quantity-change-btn')) {
+                    const productId = parseInt(e.target.dataset.id);
+                    const change = parseInt(e.target.dataset.change);
+                    const cartItem = cart.find(item => item.id === productId);
+                    if (cartItem) {
+                        updateQuantity(productId, cartItem.quantity + change);
+                    }
+                }
+            });
+            
+            cartItemsContainerEl.addEventListener('change', e => {
+                if(e.target.classList.contains('cart-item-quantity')) {
+                    const productId = parseInt(e.target.dataset.id);
+                    const newQuantity = parseInt(e.target.value);
+                    updateQuantity(productId, newQuantity);
+                }
+            });
+
+            orderFormEl.addEventListener('submit', e => {
+                e.preventDefault();
+                if (cart.length === 0) {
+                    alert("Your cart is empty. Please add items before ordering.");
+                    return;
+                }
+
+                const customerName = document.getElementById('customer-name').value;
+                const customerContact = document.getElementById('customer-contact').value;
+
+                let message = `*New Order from GAMER's Website*\n\n`;
+                message += `*Customer:* ${customerName}\n`;
+                if(customerContact) {
+                    message += `*Contact:* ${customerContact}\n`;
+                }
+                message += `\n--- ORDER DETAILS ---\n`;
+
+                cart.forEach(cartItem => {
+                    const item = inventory.find(i => i.id === cartItem.id);
+                    message += `\n*${item.name}*\n`;
+                    message += `  - Quantity: ${cartItem.quantity}\n`;
+                    message += `  - Total: $${(item.price * cartItem.quantity).toFixed(2)}\n`;
+                });
+
+                message += `\n-------------------\n`;
+                message += `*GRAND TOTAL: $${cartTotalEl.textContent}*`;
+
+                const whatsappNumber = '919003356047'; // IMPORTANT: Replace with your actual WhatsApp number including country code, without '+' or '00'
+                const encodedMessage = encodeURIComponent(message);
+                const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+
+                window.open(whatsappURL, '_blank');
+            });
+
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Close mobile menu when a link is clicked
+            mobileMenu.addEventListener('click', (e) => {
+                if (e.target.tagName === 'A') {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+
+
+            renderInventory();
+            renderCart();
+        });
+    </script>
+</body>
+</html>
