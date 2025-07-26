@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Logic Blocks</title>
+    <style>
+        body { display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #1a1a2e; font-family: 'Poppins', sans-serif; }
+        .container { display: flex; flex-direction: column; align-items: center; gap: 20px;}
+        h1 { color: #e0e0e0; }
+        .grid { display: grid; grid-template-columns: repeat(4, 100px); gap: 10px; perspective: 1000px; }
+        .card { width: 100px; height: 100px; position: relative; transform-style: preserve-3d; transition: transform 0.6s; cursor: pointer; }
+        .card.flipped { transform: rotateY(180deg); }
+        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 40px; }
+        .card-front { background: #16213e; border: 2px solid #0f3460; }
+        .card-back { background: #e94560; transform: rotateY(180deg); color: #fff;}
+        #status { color: #e0e0e0; font-size: 1.2rem; height: 2rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Logic Blocks Memory</h1>
+        <div id="status">Select two cards to find a match!</div>
+        <div id="game-grid" class="grid"></div>
+    </div>
+    <script>
+        const grid = document.getElementById('game-grid');
+        const statusEl = document.getElementById('status');
+        const symbols = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'];
+        const cards = [...symbols, ...symbols];
+        let flippedCards = [];
+        let matchedPairs = 0;
+
+        function shuffle(array) {
+            array.sort(() => Math.random() - 0.5);
+        }
+
+        function createBoard() {
+            shuffle(cards);
+            grid.innerHTML = '';
+            cards.forEach(symbol => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.dataset.symbol = symbol;
+                card.innerHTML = `
+                    <div class="card-face card-front"></div>
+                    <div class="card-face card-back">${symbol}</div>
+                `;
+                card.addEventListener('click', handleCardClick);
+                grid.appendChild(card);
+            });
+        }
+
+        function handleCardClick(e) {
+            const clickedCard = e.currentTarget;
+            if (flippedCards.length < 2 && !clickedCard.classList.contains('flipped')) {
+                clickedCard.classList.add('flipped');
+                flippedCards.push(clickedCard);
+
+                if (flippedCards.length === 2) {
+                    checkForMatch();
+                }
+            }
+        }
+
+        function checkForMatch() {
+            const [card1, card2] = flippedCards;
+            if (card1.dataset.symbol === card2.dataset.symbol) {
+                statusEl.textContent = 'Match found!';
+                matchedPairs++;
+                flippedCards = [];
+                if (matchedPairs === symbols.length) {
+                    setTimeout(() => statusEl.textContent = 'You won! Congratulations!', 500);
+                }
+            } else {
+                statusEl.textContent = 'Not a match.';
+                setTimeout(() => {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                    flippedCards = [];
+                    statusEl.textContent = 'Select two cards to find a match!';
+                }, 1000);
+            }
+        }
+        createBoard();
+    </script>
+</body>
+</html>
