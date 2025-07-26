@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Haunted Maze</title>
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #0d0d0d; color: #9a0000; text-align: center; }
+        #maze { display: grid; grid-template-columns: repeat(15, 30px); border: 2px solid #444; margin: 20px auto; }
+        .cell { width: 30px; height: 30px; }
+        .wall { background-color: #333; box-shadow: inset 0 0 5px #000; }
+        .path { background-color: #1a1a1a; }
+        .player { background-color: #00f2ea; border-radius: 50%; }
+        .end { background-color: #9a0000; }
+    </style>
+</head>
+<body>
+    <h1>Haunted Maze</h1>
+    <p>Use Arrow Keys to reach the red square!</p>
+    <div id="maze"></div>
+    <script>
+        const mazeContainer = document.getElementById('maze');
+        const layout = [
+            [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,0,0,1,0,0,0,1,0,0,0,1],
+            [1,1,1,1,1,0,1,0,1,0,1,0,1,0,1],
+            [1,0,0,0,1,0,0,0,1,0,1,0,1,0,1],
+            [1,0,1,0,1,1,1,1,1,0,1,1,1,0,1],
+            [1,0,1,0,0,0,0,0,1,0,0,0,0,0,1],
+            [1,0,1,1,1,1,1,0,1,1,1,0,1,1,1],
+            [1,0,1,0,0,0,1,0,0,0,1,0,0,2,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ]; // 1: wall, 0: path, 2: end
+        let playerPos = { x: 1, y: 0 };
+
+        function drawMaze() {
+            mazeContainer.innerHTML = '';
+            for (let y = 0; y < layout.length; y++) {
+                for (let x = 0; x < layout[y].length; x++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    if (layout[y][x] === 1) cell.classList.add('wall');
+                    else if (layout[y][x] === 0) cell.classList.add('path');
+                    else if (layout[y][x] === 2) cell.classList.add('end');
+                    
+                    if (x === playerPos.x && y === playerPos.y) {
+                        cell.classList.add('player');
+                    }
+                    mazeContainer.appendChild(cell);
+                }
+            }
+        }
+
+        document.addEventListener('keydown', e => {
+            let newX = playerPos.x;
+            let newY = playerPos.y;
+            if (e.key === 'ArrowUp') newY--;
+            if (e.key === 'ArrowDown') newY++;
+            if (e.key === 'ArrowLeft') newX--;
+            if (e.key === 'ArrowRight') newX++;
+
+            if (newX >= 0 && newX < layout[0].length && newY >= 0 && newY < layout.length && layout[newY][newX] !== 1) {
+                playerPos = { x: newX, y: newY };
+                drawMaze();
+                if (layout[newY][newX] === 2) {
+                    setTimeout(() => alert('You escaped!'), 100);
+                }
+            }
+        });
+        drawMaze();
+    </script>
+</body>
+</html>
