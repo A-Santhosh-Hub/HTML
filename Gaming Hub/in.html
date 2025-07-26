@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAMER'S</title>
+     <link rel="icon" type="image/png" href="ico.png" />
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header>
+        <nav class="navbar">
+            <a href="#" class="logo">GAMER'S<span>.</span></a>
+            <ul class="nav-links">
+                <li><a href="#" class="nav-item active" data-category="all">All</a></li>
+                <li><a href="#" class="nav-item" data-category="action">Action</a></li>
+                <li><a href="#" class="nav-item" data-category="puzzle">Puzzle</a></li>
+                <li><a href="#" class="nav-item" data-category="strategy">Strategy</a></li>
+                <li><a href="#" class="nav-item" data-category="horror">Horror</a></li>
+            </ul>
+            <button id="theme-switcher" class="theme-btn">☀️</button>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h1>Your Ultimate Gaming Hub</h1>
+            <p>Discover and play the best browser games in one place.</p>
+        </section>
+
+        <section id="games-section" class="games-container">
+            <div id="game-grid" class="game-grid">
+                </div>
+        </section>
+
+        <div id="game-view" class="game-view hidden">
+            <button id="close-game-btn" class="close-btn">&times;</button>
+            <iframe id="game-frame" src="" frameborder="0"></iframe>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 GAMER'S. All Rights Reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
