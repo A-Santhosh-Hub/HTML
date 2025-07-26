@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sudoku Pro</title>
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #2c3e50; color: #ecf0f1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #sudoku-board { display: grid; grid-template-columns: repeat(9, 50px); grid-template-rows: repeat(9, 50px); border: 3px solid #ecf0f1; margin-top: 20px;}
+        .cell { width: 50px; height: 50px; border: 1px solid #7f8c8d; text-align: center; font-size: 24px; }
+        .cell input { width: 100%; height: 100%; border: none; background-color: #34495e; color: #00f2ea; text-align: center; font-size: 24px; }
+        .cell input:focus { outline: 2px solid #00f2ea; }
+        .cell.given { background-color: #2c3e50; display: flex; justify-content: center; align-items: center; }
+        .cell:nth-child(3n) { border-right: 2px solid #ecf0f1; }
+        .cell:nth-child(9n) { border-right: none; }
+        #sudoku-board .row:nth-child(3n) .cell { border-bottom: 2px solid #ecf0f1; }
+    </style>
+</head>
+<body>
+    <h1>Sudoku Pro</h1>
+    <div id="sudoku-board"></div>
+    <script>
+        const boardContainer = document.getElementById('sudoku-board');
+        const puzzle = [
+            [5,3,0,0,7,0,0,0,0],
+            [6,0,0,1,9,5,0,0,0],
+            [0,9,8,0,0,0,0,6,0],
+            [8,0,0,0,6,0,0,0,3],
+            [4,0,0,8,0,3,0,0,1],
+            [7,0,0,0,2,0,0,0,6],
+            [0,6,0,0,0,0,2,8,0],
+            [0,0,0,4,1,9,0,0,5],
+            [0,0,0,0,8,0,0,7,9]
+        ];
+
+        for (let i = 0; i < 9; i++) {
+            const rowDiv = document.createElement('div');
+            rowDiv.classList.add('row');
+            for (let j = 0; j < 9; j++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                if (puzzle[i][j] !== 0) {
+                    cell.textContent = puzzle[i][j];
+                    cell.classList.add('given');
+                } else {
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.min = '1';
+                    input.max = '9';
+                    cell.appendChild(input);
+                }
+                boardContainer.appendChild(cell);
+            }
+        }
+    </script>
+</body>
+</html>

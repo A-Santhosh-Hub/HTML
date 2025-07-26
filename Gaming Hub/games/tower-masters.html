@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tower Masters</title>
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #111; color: #eee; text-align: center; }
+        .container { display: flex; justify-content: center; margin-top: 50px; }
+        .tower { width: 200px; height: 300px; border-bottom: 5px solid #00f2ea; margin: 0 20px; display: flex; flex-direction: column-reverse; align-items: center; }
+        .tower.selected { border-bottom: 5px solid #e94560; }
+        .disk { height: 30px; border-radius: 15px; margin-bottom: 2px; cursor: pointer; transition: background-color 0.3s; }
+        .disk:hover { background-color: #f0f0f0 !important; }
+        #d1 { width: 180px; background-color: #ff3333; }
+        #d2 { width: 160px; background-color: #ff9933; }
+        #d3 { width: 140px; background-color: #ffff33; }
+        #d4 { width: 120px; background-color: #33ff33; }
+        #message { margin-top: 20px; font-size: 1.5em; height: 30px; color: #00f2ea;}
+    </style>
+</head>
+<body>
+    <h1>Tower Masters (of Hanoi)</h1>
+    <div id="message">Click a tower to pick up a disk. Click another to place it.</div>
+    <div class="container">
+        <div id="tower-1" class="tower"></div>
+        <div id="tower-2" class="tower"></div>
+        <div id="tower-3" class="tower"></div>
+    </div>
+    <script>
+        const towers = [document.getElementById('tower-1'), document.getElementById('tower-2'), document.getElementById('tower-3')];
+        const messageEl = document.getElementById('message');
+        let selectedTower = null;
+        const numDisks = 4;
+
+        function createDisks() {
+            for (let i = numDisks; i > 0; i--) {
+                const disk = document.createElement('div');
+                disk.classList.add('disk');
+                disk.id = `d${i}`;
+                disk.dataset.size = i;
+                towers[0].appendChild(disk);
+            }
+        }
+
+        towers.forEach(tower => {
+            tower.addEventListener('click', () => {
+                if (selectedTower) { // Placing a disk
+                    const diskToMove = selectedTower.lastElementChild;
+                    const topDiskOnTarget = tower.lastElementChild;
+                    
+                    if (!topDiskOnTarget || parseInt(diskToMove.dataset.size) < parseInt(topDiskOnTarget.dataset.size)) {
+                        tower.appendChild(diskToMove);
+                        checkWin();
+                    }
+                    selectedTower.classList.remove('selected');
+                    selectedTower = null;
+                } else if (tower.children.length > 0) { // Picking up a disk
+                    selectedTower = tower;
+                    selectedTower.classList.add('selected');
+                }
+            });
+        });
+
+        function checkWin() {
+            if (towers[2].children.length === numDisks) {
+                messageEl.textContent = "You Win!";
+            }
+        }
+
+        createDisks();
+    </script>
+</body>
+</html>

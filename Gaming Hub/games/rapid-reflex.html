@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rapid Reflex</title>
+    <style>
+        body { background-color: #222; color: #fff; font-family: 'Poppins', sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; }
+        #game-area { width: 80vw; height: 70vh; background-color: #333; border: 2px solid #555; position: relative; }
+        #target { width: 60px; height: 60px; background-color: #e94560; border-radius: 50%; position: absolute; cursor: pointer; display: none; }
+        #start-btn { padding: 10px 20px; font-size: 1.2rem; cursor: pointer; background-color: #00f2ea; color: #111; border: none; border-radius: 5px; margin-bottom: 20px;}
+    </style>
+</head>
+<body>
+    <h1>Rapid Reflex Test</h1>
+    <button id="start-btn">Click here to start</button>
+    <div id="game-area">
+        <div id="target"></div>
+    </div>
+    <script>
+        const startBtn = document.getElementById('start-btn');
+        const gameArea = document.getElementById('game-area');
+        const target = document.getElementById('target');
+        let startTime;
+
+        startBtn.addEventListener('click', () => {
+            startBtn.style.display = 'none';
+            const delay = Math.random() * 3000 + 1000; // 1-4 seconds
+            setTimeout(() => {
+                const maxX = gameArea.clientWidth - target.offsetWidth;
+                const maxY = gameArea.clientHeight - target.offsetHeight;
+                target.style.top = `${Math.random() * maxY}px`;
+                target.style.left = `${Math.random() * maxX}px`;
+                target.style.display = 'block';
+                startTime = Date.now();
+            }, delay);
+        });
+
+        target.addEventListener('click', () => {
+            const endTime = Date.now();
+            const reactionTime = (endTime - startTime) / 1000;
+            alert(`Your reaction time is ${reactionTime.toFixed(3)} seconds!`);
+            target.style.display = 'none';
+            startBtn.style.display = 'block';
+        });
+    </script>
+</body>
+</html>
