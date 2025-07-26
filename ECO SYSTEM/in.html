@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Ecosystem Simulation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+        canvas {
+            background-color: #f0fdf4; /* A very light green, like a meadow */
+            border-radius: 0.5rem;
+            border: 1px solid #d1fae5;
+        }
+        .control-panel {
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col md:flex-row h-screen antialiased text-gray-800">
+
+    <!-- Simulation Canvas -->
+    <div class="flex-grow flex items-center justify-center p-4">
+        <canvas id="ecosystemCanvas"></canvas>
+    </div>
+
+    <!-- Control Panel -->
+    <div class="w-full md:w-80 lg:w-96 p-4 space-y-4 overflow-y-auto">
+        <div class="control-panel p-6 shadow-lg">
+            <h1 class="text-2xl font-bold text-gray-900 mb-4">Ecosystem Controls</h1>
+
+            <!-- Simulation Controls -->
+            <div class="space-y-2 mb-6">
+                <button id="startStopBtn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">Start</button>
+                <button id="resetBtn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">Reset</button>
+            </div>
+
+            <!-- Add Species -->
+            <div class="border-t border-gray-200 pt-4">
+                <h2 class="text-xl font-semibold text-gray-900 mb-3">Add New Species</h2>
+                <div class="space-y-3">
+                    <div>
+                        <label for="speciesType" class="block text-sm font-medium text-gray-700">Type</label>
+                        <select id="speciesType" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                            <option value="herbivore">Herbivore</option>
+                            <option value="carnivore">Carnivore</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="speciesCount" class="block text-sm font-medium text-gray-700">Population</label>
+                        <input type="number" id="speciesCount" value="10" min="1" max="100" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+                    <button id="addSpeciesBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">Add Species</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ecosystem Statistics -->
+        <div class="control-panel p-6 shadow-lg">
+            <h2 class="text-xl font-semibold text-gray-900 mb-3">Statistics</h2>
+            <div id="stats" class="space-y-2 text-sm">
+                <p>Time: <span id="timeStat">0</span></p>
+                <p>Food Available: <span id="foodStat">0</span></p>
+                <div id="speciesStats"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('ecosystemCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // --- Simulation State ---
+        let simulationRunning = false;
+        let animationFrameId;
+        let world;
+        let time = 0;
+
+        // --- DOM Elements ---
+        const startStopBtn = document.getElementById('startStopBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const addSpeciesBtn = document.getElementById('addSpeciesBtn');
+        const timeStat = document.getElementById('timeStat');
+        const foodStat = document.getElementById('foodStat');
+        const speciesStatsContainer = document.getElementById('speciesStats');
+
+        // --- Utility Functions ---
+        const random = (min, max) => Math.random() * (max - min) + min;
+        const randomColor = () => `hsl(${random(0, 360)}, 70%, 50%)`;
+
+        // --- Core Classes ---
+
+        /**
+         * Represents a single creature in the ecosystem.
+         */
+        class Creature {
+            constructor(x, y, type, color) {
+                this.id = crypto.randomUUID();
+                this.x = x;
+                this.y = y;
+                this.type = type; // 'herbivore' or 'carnivore'
+                this.color = color || randomColor();
+                this.energy = 100;
+                this.speed = random(0.5, 1.5);
+                this.size = this.type === 'herbivore' ? 5 : 7;
+                this.vision = 100;
+                this.age = 0;
+                this.maxAge = random(500, 1500);
+                this.reproductionCooldown = 0;
+            }
+
+            move(world) {
+                // Basic random movement for now
+                this.x += random(-this.speed, this.speed);
+                this.y += random(-this.speed, this.speed);
+
+                // Boundary checks
+                this.x = Math.max(0, Math.min(world.width, this.x));
+                this.y = Math.max(0, Math.min(world.height, this.y));
+
+                this.energy -= 0.1; // Energy cost for moving
+                this.age++;
+                if (this.reproductionCooldown > 0) {
+                    this.reproductionCooldown--;
+                }
+            }
+
+            eat(target, world) {
+                if (this.type === 'herbivore' && target.isFood) {
+                    this.energy += target.energy;
+                    world.removeFood(target);
+                } else if (this.type === 'carnivore' && target.type === 'herbivore') {
+                    this.energy += target.energy / 2; // Less energy from eating others
+                    world.removeCreature(target);
+                }
+            }
+
+            reproduce(world) {
+                if (this.energy > 150 && this.reproductionCooldown === 0) {
+                    this.energy /= 2;
+                    const offspring = new Creature(this.x, this.y, this.type, this.color);
+                    // Small mutation in speed
+                    offspring.speed = Math.max(0.1, this.speed + random(-0.2, 0.2));
+                    world.addCreature(offspring);
+                    this.reproductionCooldown = 200; // Cooldown before reproducing again
+                }
+            }
+
+            update(world) {
+                this.move(world);
+
+                // Find food or prey
+                if (this.energy < 120) {
+                    let closestTarget = null;
+                    let minDistance = this.vision;
+
+                    if (this.type === 'herbivore') {
+                        world.food.forEach(f => {
+                            const d = Math.hypot(this.x - f.x, this.y - f.y);
+                            if (d < minDistance) {
+                                minDistance = d;
+                                closestTarget = f;
+                            }
+                        });
+                    } else { // Carnivore
+                        world.creatures.forEach(c => {
+                            if (c.type === 'herbivore') {
+                                const d = Math.hypot(this.x - c.x, this.y - c.y);
+                                if (d < minDistance) {
+                                    minDistance = d;
+                                    closestTarget = c;
+                                }
+                            }
+                        });
+                    }
+
+                    if (closestTarget) {
+                        // Move towards target
+                        const angle = Math.atan2(closestTarget.y - this.y, closestTarget.x - this.x);
+                        this.x += Math.cos(angle) * this.speed;
+                        this.y += Math.sin(angle) * this.speed;
+
+                        // Eat if close enough
+                        if (minDistance < this.size) {
+                            this.eat(closestTarget, world);
+                        }
+                    }
+                }
+
+                this.reproduce(world);
+
+                if (this.energy <= 0 || this.age > this.maxAge) {
+                    world.removeCreature(this);
+                }
+            }
+
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+                ctx.stroke();
+            }
+        }
+
+        /**
+         * Represents a piece of food (for herbivores).
+         */
+        class Food {
+            constructor(x, y) {
+                this.id = crypto.randomUUID();
+                this.x = x;
+                this.y = y;
+                this.size = 3;
+                this.energy = 25;
+                this.isFood = true;
+            }
+
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = '#22c55e'; // Green
+                ctx.fill();
+            }
+        }
+
+
+        /**
+         * Manages the entire simulation environment.
+         */
+        class World {
+            constructor(width, height) {
+                this.width = width;
+                this.height = height;
+                this.creatures = [];
+                this.food = [];
+                this.speciesMap = new Map(); // To track species by color/type
+                this.foodSpawnRate = 0.1;
+            }
+
+            addCreature(creature) {
+                this.creatures.push(creature);
+                if (!this.speciesMap.has(creature.color)) {
+                    this.speciesMap.set(creature.color, { type: creature.type, count: 0 });
+                }
+                this.speciesMap.get(creature.color).count++;
+            }
+
+            removeCreature(creature) {
+                this.creatures = this.creatures.filter(c => c.id !== creature.id);
+                const species = this.speciesMap.get(creature.color);
+                if (species) {
+                    species.count--;
+                    if (species.count <= 0) {
+                        this.speciesMap.delete(creature.color);
+                    }
+                }
+            }
+
+            addFood(food) {
+                this.food.push(food);
+            }
+
+            removeFood(food) {
+                this.food = this.food.filter(f => f.id !== food.id);
+            }
+
+            update() {
+                // Update all creatures
+                [...this.creatures].forEach(c => c.update(this));
+
+                // Spawn new food
+                if (Math.random() < this.foodSpawnRate) {
+                    this.addFood(new Food(random(0, this.width), random(0, this.height)));
+                }
+            }
+
+            draw(ctx) {
+                ctx.clearRect(0, 0, this.width, this.height);
+                this.food.forEach(f => f.draw(ctx));
+                this.creatures.forEach(c => c.draw(ctx));
+            }
+        }
+
+
+        // --- Simulation Loop ---
+
+        function gameLoop() {
+            if (!simulationRunning) return;
+
+            time++;
+            world.update();
+            world.draw(ctx);
+            updateStats();
+
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        // --- Event Handlers & Setup ---
+
+        function setup() {
+            // Resize canvas to fit container
+            const container = canvas.parentElement;
+            const size = Math.min(container.clientWidth, container.clientHeight) * 0.95;
+            canvas.width = size;
+            canvas.height = size;
+
+            world = new World(canvas.width, canvas.height);
+            time = 0;
+            
+            // Initial population
+            addSpecies('herbivore', 20);
+            addSpecies('carnivore', 5);
+            for (let i = 0; i < 50; i++) {
+                world.addFood(new Food(random(0, world.width), random(0, world.height)));
+            }
+            
+            world.draw(ctx);
+            updateStats();
+        }
+        
+        function addSpecies(type, count, color = null) {
+            const speciesColor = color || randomColor();
+            for (let i = 0; i < count; i++) {
+                const x = random(0, world.width);
+                const y = random(0, world.height);
+                world.addCreature(new Creature(x, y, type, speciesColor));
+            }
+            updateStats();
+        }
+
+        function toggleSimulation() {
+            simulationRunning = !simulationRunning;
+            if (simulationRunning) {
+                startStopBtn.textContent = 'Stop';
+                startStopBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
+                startStopBtn.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
+                gameLoop();
+            } else {
+                startStopBtn.textContent = 'Start';
+                startStopBtn.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
+                startStopBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+                cancelAnimationFrame(animationFrameId);
+            }
+        }
+        
+        function resetSimulation() {
+            simulationRunning = false;
+            cancelAnimationFrame(animationFrameId);
+            startStopBtn.textContent = 'Start';
+            startStopBtn.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
+            startStopBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+            setup();
+        }
+
+        function updateStats() {
+            timeStat.textContent = time;
+            foodStat.textContent = world.food.length;
+            
+            speciesStatsContainer.innerHTML = '';
+            if (world.speciesMap.size === 0) {
+                 speciesStatsContainer.innerHTML = '<p>All species are extinct.</p>';
+                 return;
+            }
+
+            world.speciesMap.forEach((data, color) => {
+                const statEl = document.createElement('div');
+                statEl.className = 'flex items-center justify-between text-sm';
+                statEl.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="w-3 h-3 rounded-full mr-2" style="background-color: ${color};"></span>
+                        <span>${data.type.charAt(0).toUpperCase() + data.type.slice(1)}</span>
+                    </div>
+                    <span>${data.count}</span>
+                `;
+                speciesStatsContainer.appendChild(statEl);
+            });
+        }
+
+        // --- Event Listeners ---
+        startStopBtn.addEventListener('click', toggleSimulation);
+        resetBtn.addEventListener('click', resetSimulation);
+        addSpeciesBtn.addEventListener('click', () => {
+            const type = document.getElementById('speciesType').value;
+            const count = parseInt(document.getElementById('speciesCount').value, 10);
+            if (count > 0) {
+                addSpecies(type, count);
+                if (!simulationRunning) world.draw(ctx);
+            }
+        });
+        window.addEventListener('resize', resetSimulation);
+
+
+        // --- Initial Load ---
+        setup();
+
+    </script>
+</body>
+</html>
