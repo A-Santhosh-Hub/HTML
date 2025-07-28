@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Stone Cost Calculator</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles to enhance the look and feel */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* A slightly lighter gray for better contrast */
+        }
+        /* Custom focus ring color */
+        .form-input:focus {
+            --tw-ring-color: #4f46e5; /* Indigo-600 */
+        }
+        /* Transition for smooth updates */
+        #totalCostDisplay, #finalCostDisplay {
+            transition: all 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-3xl bg-white rounded-2xl shadow-xl p-6 md:p-8 space-y-8">
+        
+        <!-- Header Section -->
+        <div class="text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Advanced Stone Calculator</h1>
+            <p class="text-gray-500 mt-2">Calculate costs for multiple stone sizes and quantities.</p>
+        </div>
+
+        <!-- Calculator Form -->
+        <div id="calculator" class="space-y-8">
+            
+            <!-- Step 1: Stone Type Selection -->
+            <div>
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">1. Select Base Stone Type</h2>
+                <select id="stoneType" class="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                    <option value="granite">Granite</option>
+                    <option value="marble">Marble</option>
+                    <option value="quartz">Quartz</option>
+                    <option value="slate">Slate</option>
+                </select>
+            </div>
+
+            <!-- Step 2: Quantity and Price Configuration per Size -->
+            <div>
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">2. Enter Quantities & Prices Per Size</h2>
+                <div class="space-y-4">
+                    <!-- 6 Feet Stone Configuration -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <div class="md:col-span-1 flex items-center">
+                            <label for="quantity6ft" class="text-lg font-medium text-gray-800">6 Feet Stones</label>
+                        </div>
+                        <div class="md:col-span-1">
+                            <label for="quantity6ft" class="text-sm font-medium text-gray-600">Quantity</label>
+                            <input type="number" id="quantity6ft" value="0" min="0" class="form-input w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-indigo-500">
+                        </div>
+                        <div class="md:col-span-1">
+                            <label for="price6ft" class="text-sm font-medium text-gray-600">Price per Stone ($)</label>
+                            <input type="number" id="price6ft" value="100" min="0" class="form-input w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-indigo-500">
+                        </div>
+                    </div>
+                    <!-- 7 Feet Stone Configuration -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                         <div class="md:col-span-1 flex items-center">
+                            <label for="quantity7ft" class="text-lg font-medium text-gray-800">7 Feet Stones</label>
+                        </div>
+                        <div class="md:col-span-1">
+                            <label for="quantity7ft" class="text-sm font-medium text-gray-600">Quantity</label>
+                            <input type="number" id="quantity7ft" value="0" min="0" class="form-input w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-indigo-500">
+                        </div>
+                        <div class="md:col-span-1">
+                            <label for="price7ft" class="text-sm font-medium text-gray-600">Price per Stone ($)</label>
+                            <input type="number" id="price7ft" value="110" min="0" class="form-input w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-indigo-500">
+                        </div>
+                    </div>
+                    <!-- 8 Feet Stone Configuration -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                         <div class="md:col-span-1 flex items-center">
+                            <label for="quantity8ft" class="text-lg font-medium text-gray-800">8 Feet Stones</label>
+                        </div>
+                        <div class="md:col-span-1">
+                            <label for="quantity8ft" class="text-sm font-medium text-gray-600">Quantity</label>
+                            <input type="number" id="quantity8ft" value="0" min="0" class="form-input w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-indigo-500">
+                        </div>
+                        <div class="md:col-span-1">
+                            <label for="price8ft" class="text-sm font-medium text-gray-600">Price per Stone ($)</label>
+                            <input type="number" id="price8ft" value="120" min="0" class="form-input w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-indigo-500">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Number of People -->
+            <div>
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">3. Divide Total Cost</h2>
+                <label for="peopleCount" class="text-sm font-medium text-gray-600">Number of People</label>
+                <input type="number" id="peopleCount" value="1" min="1" class="form-input w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+            </div>
+
+            <!-- Message/Error Display -->
+            <div id="messageBox" class="text-center text-red-600 font-medium min-h-[24px]"></div>
+
+            <!-- Result Section -->
+            <div class="bg-indigo-50 rounded-lg p-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
+                <div>
+                    <p class="text-lg text-indigo-800 font-medium">Total Project Cost</p>
+                    <p id="totalCostDisplay" class="text-4xl font-bold text-indigo-600 mt-2">$0.00</p>
+                </div>
+                <div>
+                    <p class="text-lg text-indigo-800 font-medium">Cost Per Person</p>
+                    <p id="finalCostDisplay" class="text-4xl font-bold text-indigo-600 mt-2">$0.00</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM Element References ---
+            const calculatorForm = document.getElementById('calculator');
+            const messageBox = document.getElementById('messageBox');
+            const totalCostDisplay = document.getElementById('totalCostDisplay');
+            const finalCostDisplay = document.getElementById('finalCostDisplay');
+            
+            // --- Calculation Logic ---
+            const calculateCost = () => {
+                // Clear previous messages
+                messageBox.textContent = '';
+                
+                let totalCost = 0;
+                let isValid = true;
+
+                // Helper function to calculate subtotal for a given size
+                const calculateSubtotal = (size) => {
+                    const quantityInput = document.getElementById(`quantity${size}ft`);
+                    const priceInput = document.getElementById(`price${size}ft`);
+                    
+                    const quantity = parseInt(quantityInput.value, 10);
+                    const price = parseFloat(priceInput.value);
+
+                    if (isNaN(quantity) || quantity < 0) {
+                        messageBox.textContent = `Invalid quantity for ${size}ft stone.`;
+                        isValid = false;
+                        return 0;
+                    }
+                    if (isNaN(price) || price < 0) {
+                        messageBox.textContent = `Invalid price for ${size}ft stone.`;
+                        isValid = false;
+                        return 0;
+                    }
+                    
+                    return quantity * price;
+                };
+
+                // Calculate total cost from all sizes
+                const cost6ft = calculateSubtotal(6);
+                const cost7ft = calculateSubtotal(7);
+                const cost8ft = calculateSubtotal(8);
+
+                if (!isValid) {
+                    totalCostDisplay.textContent = '$0.00';
+                    finalCostDisplay.textContent = '$0.00';
+                    return;
+                }
+
+                totalCost = cost6ft + cost7ft + cost8ft;
+                totalCostDisplay.textContent = `$${totalCost.toFixed(2)}`;
+
+                // Get the number of people
+                const peopleCountInput = document.getElementById('peopleCount');
+                const peopleCount = parseInt(peopleCountInput.value, 10);
+
+                if (isNaN(peopleCount) || peopleCount <= 0) {
+                    messageBox.textContent = 'Please enter a valid number of people (1 or more).';
+                    finalCostDisplay.textContent = '$0.00';
+                    return;
+                }
+
+                // Perform the final division
+                const costPerPerson = totalCost / peopleCount;
+                finalCostDisplay.textContent = `$${costPerPerson.toFixed(2)}`;
+            };
+
+            // --- Event Listeners ---
+            // Listen for any change or input within the form to trigger recalculation
+            calculatorForm.addEventListener('input', calculateCost);
+            
+            // Initial calculation on page load
+            calculateCost();
+        });
+    </script>
+
+</body>
+</html>
