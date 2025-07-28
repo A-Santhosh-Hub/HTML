@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stone Calculator | Professional UI</title>
+    <link rel="icon" type="image/png" href="ico.png" />
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for background and UI enhancements */
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Applying a high-quality background image */
+            background-image: url('https://images.unsplash.com/photo-1617094553202-7a36b8015f0a?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed; /* Creates a parallax effect on desktop */
+        }
+        /* Style for the main calculator card to create a "glassmorphism" effect */
+        .calculator-card {
+            background-color: rgba(255, 255, 255, 0.92); /* Slightly more opaque for better readability */
+            backdrop-filter: blur(14px); /* Blurs the background behind the card */
+            -webkit-backdrop-filter: blur(14px); /* Safari support */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        /* Custom focus ring color for better accessibility */
+        .form-input:focus, .form-checkbox:focus, .form-select:focus {
+            --tw-ring-color: #4f46e5; /* Indigo-600 */
+            --tw-ring-offset-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-2 sm:p-4">
+
+    <!-- The main calculator card with mobile-first padding and spacing -->
+    <div class="calculator-card w-full max-w-3xl rounded-2xl shadow-2xl p-4 sm:p-6 md:p-8 space-y-6 md:space-y-8">
+        
+        <!-- Header Section with responsive text size -->
+        <div class="text-center">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">Advanced Stone Calculator</h1>
+            <p class="text-gray-600 mt-2 text-sm sm:text-base">Calculate costs with a fully responsive interface.</p>
+        </div>
+
+        <!-- Calculator Form -->
+        <div id="calculator" class="space-y-6 md:space-y-8">
+            
+            <!-- Step 1: Stone Type Selection -->
+            <div>
+                <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-3">1. Select Base Stone Type</h2>
+                <select id="stoneType" class="form-select w-full p-3 bg-gray-50/50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                    <option>Granite</option>
+                    <option>Marble</option>
+                    <option>Quartz</option>
+                    <option>Slate</option>
+                </select>
+            </div>
+
+            <!-- Step 2: Quantity and Price Configuration per Size -->
+            <div>
+                <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-3">2. Enter Quantities & Prices</h2>
+                <div class="space-y-3">
+                    <!-- 6 Feet Stone Configuration -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-2 p-3 bg-gray-50/50 rounded-lg border border-gray-200">
+                        <div class="md:col-span-1 flex items-center">
+                            <label class="text-base sm:text-lg font-medium text-gray-800">6 Feet Stones</label>
+                        </div>
+                        <div>
+                            <label for="quantity6ft" class="text-xs sm:text-sm font-medium text-gray-600">Quantity</label>
+                            <input type="number" id="quantity6ft" value="0" min="0" class="form-input w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-1">
+                        </div>
+                        <div>
+                            <label for="price6ft" class="text-xs sm:text-sm font-medium text-gray-600">Price per Stone (₹)</label>
+                            <input type="number" id="price6ft" value="100" min="0" class="form-input w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-1">
+                        </div>
+                    </div>
+                    <!-- 7 Feet Stone Configuration -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-2 p-3 bg-gray-50/50 rounded-lg border border-gray-200">
+                         <div class="md:col-span-1 flex items-center">
+                            <label class="text-base sm:text-lg font-medium text-gray-800">7 Feet Stones</label>
+                        </div>
+                        <div>
+                            <label for="quantity7ft" class="text-xs sm:text-sm font-medium text-gray-600">Quantity</label>
+                            <input type="number" id="quantity7ft" value="0" min="0" class="form-input w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-1">
+                        </div>
+                        <div>
+                            <label for="price7ft" class="text-xs sm:text-sm font-medium text-gray-600">Price per Stone (₹)</label>
+                            <input type="number" id="price7ft" value="110" min="0" class="form-input w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-1">
+                        </div>
+                    </div>
+                    <!-- 8 Feet Stone Configuration -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-2 p-3 bg-gray-50/50 rounded-lg border border-gray-200">
+                         <div class="md:col-span-1 flex items-center">
+                            <label class="text-base sm:text-lg font-medium text-gray-800">8 Feet Stones</label>
+                        </div>
+                        <div>
+                            <label for="quantity8ft" class="text-xs sm:text-sm font-medium text-gray-600">Quantity</label>
+                            <input type="number" id="quantity8ft" value="0" min="0" class="form-input w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-1">
+                        </div>
+                        <div>
+                            <label for="price8ft" class="text-xs sm:text-sm font-medium text-gray-600">Price per Stone (₹)</label>
+                            <input type="number" id="price8ft" value="120" min="0" class="form-input w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 3: Owner's Contribution -->
+            <div>
+                <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-3">3. Owner's Contribution</h2>
+                <div class="p-3 bg-gray-50/50 rounded-lg border border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <label for="includeOwner" class="text-base sm:text-lg font-medium text-gray-800 cursor-pointer">Add Owner's Share</label>
+                        <input type="checkbox" id="includeOwner" class="form-checkbox h-5 w-5 sm:h-6 sm:w-6 text-indigo-600 rounded focus:ring-2 cursor-pointer">
+                    </div>
+                    <div id="ownerContributionSection" class="mt-3 opacity-50 transition">
+                        <label for="ownerAmount" class="text-xs sm:text-sm font-medium text-gray-600">Contribution Amount (₹)</label>
+                        <input type="number" id="ownerAmount" value="0" min="0" class="form-input w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-1" disabled>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Divide Remaining Cost -->
+            <div>
+                <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-3">4. Divide Remaining Cost</h2>
+                <label for="peopleCount" class="text-xs sm:text-sm font-medium text-gray-600">Number of People (excluding owner)</label>
+                <input type="number" id="peopleCount" value="1" min="1" class="form-input w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 transition">
+            </div>
+
+            <!-- Message/Error Display -->
+            <div id="messageBox" class="text-center text-red-600 font-semibold min-h-[24px] text-sm"></div>
+
+            <!-- Result Section with responsive text size -->
+            <div class="bg-indigo-600/10 rounded-lg p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
+                <div>
+                    <p class="text-base sm:text-lg text-indigo-800 font-semibold">Total Project Cost</p>
+                    <p id="totalCostDisplay" class="text-3xl sm:text-4xl font-bold text-indigo-600 mt-1">₹0.00</p>
+                </div>
+                <div class="border-t pt-4 md:border-t-0 md:pt-0 md:border-l md:pl-6 border-indigo-200">
+                    <p class="text-base sm:text-lg text-indigo-800 font-semibold">Cost Per Person</p>
+                    <p id="finalCostDisplay" class="text-3xl sm:text-4xl font-bold text-indigo-600 mt-1">₹0.00</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const calculatorForm = document.getElementById('calculator');
+            const messageBox = document.getElementById('messageBox');
+            const totalCostDisplay = document.getElementById('totalCostDisplay');
+            const finalCostDisplay = document.getElementById('finalCostDisplay');
+            const includeOwnerCheckbox = document.getElementById('includeOwner');
+            const ownerContributionSection = document.getElementById('ownerContributionSection');
+            const ownerAmountInput = document.getElementById('ownerAmount');
+            
+            const toggleOwnerSection = () => {
+                if (includeOwnerCheckbox.checked) {
+                    ownerContributionSection.classList.remove('opacity-50');
+                    ownerAmountInput.disabled = false;
+                } else {
+                    ownerContributionSection.classList.add('opacity-50');
+                    ownerAmountInput.disabled = true;
+                    ownerAmountInput.value = '0';
+                }
+                calculateCost();
+            };
+
+            const calculateCost = () => {
+                messageBox.textContent = '';
+                let totalCost = 0;
+                let isValid = true;
+
+                const calculateSubtotal = (size) => {
+                    const quantity = parseInt(document.getElementById(`quantity${size}ft`).value, 10);
+                    const price = parseFloat(document.getElementById(`price${size}ft`).value);
+                    if (isNaN(quantity) || quantity < 0) {
+                        if (isValid) messageBox.textContent = `Invalid quantity for ${size}ft stone.`;
+                        isValid = false; return 0;
+                    }
+                    if (isNaN(price) || price < 0) {
+                        if (isValid) messageBox.textContent = `Invalid price for ${size}ft stone.`;
+                        isValid = false; return 0;
+                    }
+                    return quantity * price;
+                };
+
+                totalCost = calculateSubtotal(6) + calculateSubtotal(7) + calculateSubtotal(8);
+                if (!isValid) {
+                    totalCostDisplay.textContent = '₹0.00';
+                    finalCostDisplay.textContent = '₹0.00';
+                    return;
+                }
+                totalCostDisplay.textContent = `₹${totalCost.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
+                let ownerContribution = 0;
+                if (includeOwnerCheckbox.checked) {
+                    ownerContribution = parseFloat(ownerAmountInput.value);
+                    if (isNaN(ownerContribution) || ownerContribution < 0) {
+                        messageBox.textContent = 'Invalid owner contribution amount.';
+                        isValid = false; ownerContribution = 0;
+                    }
+                }
+                
+                if (ownerContribution > totalCost) {
+                    messageBox.textContent = "Owner's contribution cannot exceed total cost.";
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    finalCostDisplay.textContent = '₹0.00';
+                    return;
+                }
+
+                const remainingCost = totalCost - ownerContribution;
+                const peopleCount = parseInt(document.getElementById('peopleCount').value, 10);
+
+                if (isNaN(peopleCount) || peopleCount <= 0) {
+                    messageBox.textContent = 'Please enter a valid number of people (1 or more).';
+                    finalCostDisplay.textContent = '₹0.00';
+                    return;
+                }
+
+                const costPerPerson = remainingCost > 0 ? remainingCost / peopleCount : 0;
+                finalCostDisplay.textContent = `₹${costPerPerson.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            };
+
+            calculatorForm.addEventListener('input', calculateCost);
+            includeOwnerCheckbox.addEventListener('change', toggleOwnerSection);
+            toggleOwnerSection();
+        });
+    </script>
+
+</body>
+</html>
