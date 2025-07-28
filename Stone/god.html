@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stone Calculator | Dynamic Contributions</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for background and UI enhancements */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1582494764392-f12d4653b6a2?q=80&w=1974&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        /* Glassmorphism effect for the main card */
+        .calculator-card {
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        /* Custom focus ring for better accessibility */
+        .form-input:focus, .form-select:focus {
+            --tw-ring-color: #4f46e5;
+        }
+        /* Animation for new rows */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .dynamic-row {
+            animation: fadeIn 0.3s ease-out;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-2 sm:p-4">
+
+    <div class="calculator-card w-full max-w-3xl rounded-2xl shadow-2xl p-4 sm:p-6 md:p-8 space-y-6 md:space-y-8">
+        
+        <!-- Header Section -->
+        <div class="text-center">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">Advanced Stone Calculator</h1>
+            <p class="text-gray-600 mt-2 text-sm sm:text-base">With dynamic owner & god contributions.</p>
+        </div>
+
+        <!-- Calculator Form -->
+        <div id="calculator" class="space-y-6 md:space-y-8">
+            
+            <!-- Step 1: Stone Type Selection -->
+            <div>
+                <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-3">1. Select Base Stone Type</h2>
+                <select id="stoneType" class="form-select w-full p-3 bg-gray-50/50 border border-gray-300 rounded-lg focus:ring-2 transition">
+                    <option>Granite</option>
+                    <option>Marble</option>
+                    <option>Quartz</option>
+                    <option>Slate</option>
+                </select>
+            </div>
+
+            <!-- Step 2: Quantity and Price Configuration -->
+            <div>
+                <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-3">2. Enter Quantities & Prices</h2>
+                <div class="space-y-3">
+                    <!-- Stone Size Inputs -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-2 p-3 bg-gray-50/50 rounded-lg border">
+                        <label class="md:col-span-1 flex items-center text-base sm:text-lg font-medium text-gray-800">6 Feet Stones</label>
+                        <div><label class="text-xs sm:text-sm font-medium text-gray-600">Quantity</label><input type="number" id="quantity6ft" value="0" min="0" class="form-input w-full mt-1 p-2 border-gray-300 rounded-md focus:ring-1"></div>
+                        <div><label class="text-xs sm:text-sm font-medium text-gray-600">Price (₹)</label><input type="number" id="price6ft" value="8000" min="0" class="form-input w-full mt-1 p-2 border-gray-300 rounded-md focus:ring-1"></div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-2 p-3 bg-gray-50/50 rounded-lg border">
+                        <label class="md:col-span-1 flex items-center text-base sm:text-lg font-medium text-gray-800">7 Feet Stones</label>
+                        <div><label class="text-xs sm:text-sm font-medium text-gray-600">Quantity</label><input type="number" id="quantity7ft" value="0" min="0" class="form-input w-full mt-1 p-2 border-gray-300 rounded-md focus:ring-1"></div>
+                        <div><label class="text-xs sm:text-sm font-medium text-gray-600">Price (₹)</label><input type="number" id="price7ft" value="9500" min="0" class="form-input w-full mt-1 p-2 border-gray-300 rounded-md focus:ring-1"></div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-2 p-3 bg-gray-50/50 rounded-lg border">
+                        <label class="md:col-span-1 flex items-center text-base sm:text-lg font-medium text-gray-800">8 Feet Stones</label>
+                        <div><label class="text-xs sm:text-sm font-medium text-gray-600">Quantity</label><input type="number" id="quantity8ft" value="0" min="0" class="form-input w-full mt-1 p-2 border-gray-300 rounded-md focus:ring-1"></div>
+                        <div><label class="text-xs sm:text-sm font-medium text-gray-600">Price (₹)</label><input type="number" id="price8ft" value="11000" min="0" class="form-input w-full mt-1 p-2 border-gray-300 rounded-md focus:ring-1"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 3: God's Contribution (Increases Total Cost) -->
+            <div>
+                <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-3">3. God Contributions (Adds to Total)</h2>
+                <div id="godsList" class="space-y-3">
+                    <!-- Dynamic god rows will be inserted here -->
+                </div>
+                <button id="addGodBtn" type="button" class="mt-3 w-full flex items-center justify-center gap-2 p-2 text-sm font-semibold text-green-600 bg-green-100 hover:bg-green-200 rounded-lg transition-colors">
+                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" /></svg>
+                    Add God
+                </button>
+            </div>
+
+            <!-- Step 4: Owner's Contribution (Reduces Remaining Cost) -->
+            <div>
+                <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-3">4. Owner Contributions (Reduces Share)</h2>
+                <div id="ownersList" class="space-y-3">
+                    <!-- Dynamic owner rows will be inserted here -->
+                </div>
+                <button id="addOwnerBtn" type="button" class="mt-3 w-full flex items-center justify-center gap-2 p-2 text-sm font-semibold text-indigo-600 bg-indigo-100 hover:bg-indigo-200 rounded-lg transition-colors">
+                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" /></svg>
+                    Add Owner
+                </button>
+            </div>
+
+            <!-- Step 5: Divide Remaining Cost -->
+            <div>
+                <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-3">5. Divide Remaining Cost</h2>
+                <label for="peopleCount" class="text-xs sm:text-sm font-medium text-gray-600">Number of People (to split the rest)</label>
+                <input type="number" id="peopleCount" value="1" min="1" class="form-input w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 transition">
+            </div>
+
+            <!-- Message/Error Display -->
+            <div id="messageBox" class="text-center text-red-600 font-semibold min-h-[24px] text-sm"></div>
+
+            <!-- Result Section -->
+            <div class="bg-indigo-600/10 rounded-lg p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
+                <div>
+                    <p class="text-base sm:text-lg text-indigo-800 font-semibold">Total Project Cost</p>
+                    <p id="totalCostDisplay" class="text-3xl sm:text-4xl font-bold text-indigo-600 mt-1">₹0.00</p>
+                </div>
+                <div class="border-t pt-4 md:border-t-0 md:pt-0 md:border-l md:pl-6 border-indigo-200">
+                    <p class="text-base sm:text-lg text-indigo-800 font-semibold">Cost Per Person</p>
+                    <p id="finalCostDisplay" class="text-3xl sm:text-4xl font-bold text-indigo-600 mt-1">₹0.00</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const calculatorForm = document.getElementById('calculator');
+            const messageBox = document.getElementById('messageBox');
+            const totalCostDisplay = document.getElementById('totalCostDisplay');
+            const finalCostDisplay = document.getElementById('finalCostDisplay');
+            
+            const addOwnerBtn = document.getElementById('addOwnerBtn');
+            const ownersList = document.getElementById('ownersList');
+            
+            const addGodBtn = document.getElementById('addGodBtn');
+            const godsList = document.getElementById('godsList');
+
+            // --- Function to Add a New Owner Row ---
+            const addOwnerRow = () => {
+                const ownerRow = document.createElement('div');
+                ownerRow.className = 'dynamic-row grid grid-cols-1 sm:grid-cols-12 gap-2 items-center p-2 bg-gray-50/50 rounded-lg border';
+                ownerRow.innerHTML = `
+                    <div class="sm:col-span-5">
+                        <label class="text-xs font-medium text-gray-500">Owner Name</label>
+                        <input type="text" placeholder="e.g. Suresh" class="form-input w-full p-2 text-sm border-gray-300 rounded-md focus:ring-1">
+                    </div>
+                    <div class="sm:col-span-5">
+                        <label class="text-xs font-medium text-gray-500">Contribution (₹)</label>
+                        <input type="number" value="0" min="0" class="owner-contribution form-input w-full p-2 text-sm border-gray-300 rounded-md focus:ring-1">
+                    </div>
+                    <div class="sm:col-span-2 text-right">
+                         <label class="text-xs font-medium text-gray-500 hidden sm:block">&nbsp;</label>
+                        <button type="button" class="remove-btn p-2 text-red-500 bg-red-100 hover:bg-red-200 rounded-md transition-colors">
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.58.22-2.365.468a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193v-.443A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z" clip-rule="evenodd" /></svg>
+                        </button>
+                    </div>
+                `;
+                ownersList.appendChild(ownerRow);
+            };
+            
+            // --- Function to Add a New God Row ---
+            const addGodRow = () => {
+                const godRow = document.createElement('div');
+                godRow.className = 'dynamic-row grid grid-cols-1 sm:grid-cols-12 gap-2 items-center p-2 bg-gray-50/50 rounded-lg border';
+                godRow.innerHTML = `
+                    <div class="sm:col-span-5">
+                        <label class="text-xs font-medium text-gray-500">God/Temple Name</label>
+                        <input type="text" placeholder="e.g. Temple Fund" class="form-input w-full p-2 text-sm border-gray-300 rounded-md focus:ring-1">
+                    </div>
+                    <div class="sm:col-span-5">
+                        <label class="text-xs font-medium text-gray-500">Amount to Add (₹)</label>
+                        <input type="number" value="0" min="0" class="god-contribution form-input w-full p-2 text-sm border-gray-300 rounded-md focus:ring-1">
+                    </div>
+                    <div class="sm:col-span-2 text-right">
+                         <label class="text-xs font-medium text-gray-500 hidden sm:block">&nbsp;</label>
+                        <button type="button" class="remove-btn p-2 text-red-500 bg-red-100 hover:bg-red-200 rounded-md transition-colors">
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.58.22-2.365.468a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193v-.443A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z" clip-rule="evenodd" /></svg>
+                        </button>
+                    </div>
+                `;
+                godsList.appendChild(godRow);
+            };
+
+            // --- Main Calculation Logic ---
+            const calculateCost = () => {
+                messageBox.textContent = '';
+                let isValid = true;
+
+                // 1. Calculate base cost from stones
+                const calculateSubtotal = (size) => {
+                    const quantity = parseInt(document.getElementById(`quantity${size}ft`).value, 10);
+                    const price = parseFloat(document.getElementById(`price${size}ft`).value);
+                    if (isNaN(quantity) || quantity < 0) {
+                        if (isValid) messageBox.textContent = `Invalid quantity for ${size}ft stone.`;
+                        isValid = false; return 0;
+                    }
+                    if (isNaN(price) || price < 0) {
+                        if (isValid) messageBox.textContent = `Invalid price for ${size}ft stone.`;
+                        isValid = false; return 0;
+                    }
+                    return quantity * price;
+                };
+                const baseProjectCost = calculateSubtotal(6) + calculateSubtotal(7) + calculateSubtotal(8);
+
+                // 2. Calculate God contributions to ADD to the cost
+                let totalGodContribution = 0;
+                document.querySelectorAll('.god-contribution').forEach(input => {
+                    const contribution = parseFloat(input.value);
+                    if (!isNaN(contribution) && contribution > 0) {
+                        totalGodContribution += contribution;
+                    }
+                });
+
+                // 3. Calculate the final total cost
+                const totalCost = baseProjectCost + totalGodContribution;
+
+                if (!isValid) {
+                    totalCostDisplay.textContent = '₹0.00';
+                    finalCostDisplay.textContent = '₹0.00';
+                    return;
+                }
+                totalCostDisplay.textContent = `₹${totalCost.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
+                // 4. Calculate Owner contributions to SUBTRACT from the cost
+                let totalOwnerContribution = 0;
+                document.querySelectorAll('.owner-contribution').forEach(input => {
+                    const contribution = parseFloat(input.value);
+                    if (!isNaN(contribution) && contribution > 0) {
+                        totalOwnerContribution += contribution;
+                    }
+                });
+                
+                if (totalOwnerContribution > totalCost) {
+                    messageBox.textContent = "Owners' total contribution cannot exceed total cost.";
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    finalCostDisplay.textContent = '₹0.00';
+                    return;
+                }
+
+                // 5. Calculate remaining cost and split
+                const remainingCost = totalCost - totalOwnerContribution;
+                const peopleCount = parseInt(document.getElementById('peopleCount').value, 10);
+
+                if (isNaN(peopleCount) || peopleCount <= 0) {
+                    messageBox.textContent = 'Please enter a valid number of people (1 or more).';
+                    finalCostDisplay.textContent = '₹0.00';
+                    return;
+                }
+
+                const costPerPerson = remainingCost > 0 ? remainingCost / peopleCount : 0;
+                finalCostDisplay.textContent = `₹${costPerPerson.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            };
+
+            // --- Event Listeners ---
+            calculatorForm.addEventListener('input', calculateCost);
+            addOwnerBtn.addEventListener('click', addOwnerRow);
+            addGodBtn.addEventListener('click', addGodRow);
+            
+            // Event delegation for removing rows from either list
+            calculatorForm.addEventListener('click', (e) => {
+                if (e.target.closest('.remove-btn')) {
+                    e.target.closest('.dynamic-row').remove();
+                    calculateCost(); // Recalculate after removing
+                }
+            });
+            
+            // Initial calculation on load
+            calculateCost();
+        });
+    </script>
+
+</body>
+</html>
