@@ -44,7 +44,7 @@
 
 # Project 22  https://santhosh2025.neocities.org/Gaming%20Hub/in  --- ( Gaming Hub )
 
-# Project 23  https://santhosh2024.neocities.org/Project's/Stone/   ---  ( Advanced Stone Calculator )
+# Project 23  https://santhosh2024.neocities.org/Project's/Stone/   ---   https://santhosh2024.neocities.org/Project's/Stone/   ( Advanced Stone Calculator )
 
 
 
