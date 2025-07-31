@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Typer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" href="ico.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for the futuristic look and feel */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a1a;
+            color: #e0e0e0;
+            overflow: hidden;
+        }
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+        .glowing-text {
+            text-shadow: 0 0 5px rgba(173, 216, 230, 0.7), 0 0 10px rgba(173, 216, 230, 0.5);
+        }
+        .neon-box {
+            border: 1px solid rgba(137, 207, 240, 0.3);
+            box-shadow: 0 0 15px rgba(137, 207, 240, 0.1), inset 0 0 10px rgba(137, 207, 240, 0.1);
+            transition: all 0.3s ease-in-out;
+        }
+        .neon-box:hover {
+            box-shadow: 0 0 20px rgba(137, 207, 240, 0.3), inset 0 0 15px rgba(137, 207, 240, 0.2);
+        }
+        .option-btn {
+            transition: all 0.3s ease;
+            color: #9ca3af;
+        }
+        .option-btn.active {
+            color: #87CEFA; /* Light Sky Blue */
+            text-shadow: 0 0 8px #87CEFA;
+        }
+        .option-btn:not(.active):hover {
+            color: #e5e7eb;
+        }
+        
+        /* Text display styling */
+        #text-display {
+            font-size: 1.75rem;
+            line-height: 2.5rem;
+            letter-spacing: 0.05em;
+        }
+        #text-display span {
+            transition: color 0.2s ease;
+        }
+        #text-display span.correct {
+            color: #4ade80; /* Green 400 */
+        }
+        #text-display span.incorrect {
+            color: #f87171; /* Red 400 */
+            text-decoration: underline;
+            text-decoration-color: #f87171;
+        }
+        
+        /* Custom animated caret */
+        #text-display span.caret::before {
+            content: '';
+            position: absolute;
+            width: 3px;
+            height: 2.2rem;
+            background-color: #87CEFA;
+            border-radius: 2px;
+            animation: blink 1s infinite;
+            transition: left 0.1s linear;
+            box-shadow: 0 0 8px #87CEFA;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Background animation */
+        #background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+        }
+        
+        /* Results modal animation */
+        .modal-enter {
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+        }
+        .modal-enter-active {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div id="background-animation"></div>
+    <div id="app-container" class="w-full max-w-5xl mx-auto flex flex-col items-center gap-8">
+
+        <header class="text-center">
+            <h1 class="font-orbitron text-5xl md:text-6xl font-bold glowing-text tracking-widest">
+                COSMIC TYPER
+            </h1>
+            <p class="text-lg text-gray-400 mt-2">How fast can you navigate the word-verse?</p>
+        </header>
+
+        <!-- Options Bar -->
+        <div id="options-bar" class="neon-box bg-black bg-opacity-25 p-4 rounded-lg w-full max-w-2xl flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-8">
+            <div class="flex items-center gap-4">
+                <span class="font-bold text-gray-300">Time:</span>
+                <button data-time="15" class="option-btn text-lg">15s</button>
+                <button data-time="30" class="option-btn text-lg active">30s</button>
+                <button data-time="60" class="option-btn text-lg">60s</button>
+                <button data-time="120" class="option-btn text-lg">120s</button>
+            </div>
+            <div class="w-px h-6 bg-gray-600 hidden sm:block"></div>
+            <div class="flex items-center gap-4">
+                 <span class="font-bold text-gray-300">Mode:</span>
+                <button data-mode="words" class="option-btn text-lg active">Words</button>
+                <button data-mode="sentences" class="option-btn text-lg">Sentences</button>
+            </div>
+        </div>
+
+        <!-- Stats Dashboard -->
+        <div id="stats-dashboard" class="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full max-w-3xl text-center">
+            <div class="neon-box bg-black bg-opacity-20 p-4 rounded-lg">
+                <p class="font-orbitron text-3xl" id="timer">30</p>
+                <p class="text-sm text-gray-400">SECONDS</p>
+            </div>
+            <div class="neon-box bg-black bg-opacity-20 p-4 rounded-lg">
+                <p class="font-orbitron text-3xl" id="wpm">0</p>
+                <p class="text-sm text-gray-400">WPM</p>
+            </div>
+            <div class="neon-box bg-black bg-opacity-20 p-4 rounded-lg">
+                <p class="font-orbitron text-3xl" id="cpm">0</p>
+                <p class="text-sm text-gray-400">CPM</p>
+            </div>
+            <div class="neon-box bg-black bg-opacity-20 p-4 rounded-lg">
+                <p class="font-orbitron text-3xl" id="accuracy">100</p>
+                <p class="text-sm text-gray-400">% ACCURACY</p>
+            </div>
+        </div>
+
+        <!-- Typing Area -->
+        <div id="typing-area" class="relative w-full max-w-4xl h-48 p-6 neon-box bg-black bg-opacity-25 rounded-lg overflow-hidden select-none cursor-text">
+            <div id="text-display" class="text-gray-500 filter blur-sm">
+                <!-- Text will be generated here by JavaScript -->
+            </div>
+            <input type="text" id="text-input" class="absolute top-0 left-0 w-full h-full opacity-0 cursor-text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        </div>
+        
+        <!-- Restart Button -->
+        <button id="restart-btn" class="font-orbitron text-lg px-8 py-3 rounded-lg bg-sky-400 text-gray-900 font-bold hover:bg-sky-300 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-sky-500 focus:ring-opacity-50">
+            Restart Test
+        </button>
+
+    </div>
+
+    <!-- Results Modal -->
+    <div id="results-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 backdrop-blur-sm flex items-center justify-center p-4">
+        <div id="results-content" class="modal-enter neon-box bg-slate-900 p-8 rounded-xl w-full max-w-md text-center flex flex-col items-center gap-4">
+            <h2 class="font-orbitron text-4xl font-bold glowing-text">Test Complete!</h2>
+            <div class="grid grid-cols-2 gap-4 w-full mt-4">
+                <div class="text-left bg-black bg-opacity-20 p-4 rounded-lg">
+                    <p class="text-sm text-gray-400">WPM</p>
+                    <p class="font-orbitron text-4xl" id="results-wpm">0</p>
+                </div>
+                <div class="text-left bg-black bg-opacity-20 p-4 rounded-lg">
+                    <p class="text-sm text-gray-400">Accuracy</p>
+                    <p class="font-orbitron text-4xl" id="results-accuracy">0%</p>
+                </div>
+                 <div class="text-left bg-black bg-opacity-20 p-4 rounded-lg">
+                    <p class="text-sm text-gray-400">CPM</p>
+                    <p class="font-orbitron text-4xl" id="results-cpm">0</p>
+                </div>
+                 <div class="text-left bg-black bg-opacity-20 p-4 rounded-lg">
+                    <p class="text-sm text-gray-400">Mistakes</p>
+                    <p class="font-orbitron text-4xl" id="results-mistakes">0</p>
+                </div>
+            </div>
+            <button id="modal-restart-btn" class="mt-6 font-orbitron text-lg px-8 py-3 rounded-lg bg-sky-400 text-gray-900 font-bold hover:bg-sky-300 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-sky-500 focus:ring-opacity-50">
+                Try Again
+            </button>
+        </div>
+    </div>
+
+
+    <script>
+        // DOM Elements
+        const textDisplay = document.getElementById('text-display');
+        const textInput = document.getElementById('text-input');
+        const timerEl = document.getElementById('timer');
+        const wpmEl = document.getElementById('wpm');
+        const cpmEl = document.getElementById('cpm');
+        const accuracyEl = document.getElementById('accuracy');
+        const restartBtn = document.getElementById('restart-btn');
+        const modalRestartBtn = document.getElementById('modal-restart-btn');
+        const optionsBar = document.getElementById('options-bar');
+        const resultsModal = document.getElementById('results-modal');
+        const resultsContent = document.getElementById('results-content');
+        const typingArea = document.getElementById('typing-area');
+
+        // State variables
+        let testDuration = 30;
+        let testMode = 'words'; // 'words' or 'sentences'
+        let timerInterval = null;
+        let timeRemaining = testDuration;
+        let testInProgress = false;
+        let currentIndex = 0;
+        let totalTypedChars = 0;
+        let correctChars = 0;
+        let incorrectChars = 0;
+        let textToType = '';
+
+        // Word and Sentence Banks
+        const wordBank = [
+            'the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have', 'I', 'it', 'for', 'not', 'on', 'with', 'he', 'as', 'you', 'do', 'at', 'this', 'but', 'his', 'by', 'from', 'they', 'we', 'say', 'her', 'she', 'or', 'an', 'will', 'my', 'one', 'all', 'would', 'there', 'their', 'what', 'so', 'up', 'out', 'if', 'about', 'who', 'get', 'which', 'go', 'me', 'when', 'make', 'can', 'like', 'time', 'no', 'just', 'him', 'know', 'take', 'person', 'into', 'year', 'your', 'good', 'some', 'could', 'them', 'see', 'other', 'than', 'then', 'now', 'look', 'only', 'come', 'its', 'over', 'think', 'also', 'back', 'after', 'use', 'two', 'how', 'our', 'work', 'first', 'well', 'way', 'even', 'new', 'want', 'because', 'any', 'these', 'give', 'day', 'most', 'us', 'code', 'develop', 'system', 'galaxy', 'orbit', 'planet', 'star', 'nebula', 'cosmos', 'future', 'laser', 'robot', 'android', 'cyborg', 'network', 'interface', 'algorithm', 'data', 'matrix'
+        ];
+        const sentenceBank = [
+            "The quick brown fox jumps over the lazy dog.",
+            "Cosmic dust drifted through the silent void of space.",
+            "A journey of a thousand miles begins with a single step.",
+            "The future is not set, there is no fate but what we make for ourselves.",
+            "Technology is a useful servant but a dangerous master.",
+            "To be or not to be, that is the question.",
+            "The only way to do great work is to love what you do.",
+            "Artificial intelligence will reshape our world in the coming decades.",
+            "Sunlight streamed through the viewport of the orbiting space station.",
+            "He who controls the spice controls the universe."
+        ];
+
+        // --- Event Listeners ---
+        document.addEventListener('keydown', () => textInput.focus());
+        textInput.addEventListener('keydown', handleKeyPress);
+        typingArea.addEventListener('click', () => textInput.focus());
+        restartBtn.addEventListener('click', resetTest);
+        modalRestartBtn.addEventListener('click', () => {
+             resultsModal.classList.add('hidden');
+             resetTest();
+        });
+
+        optionsBar.addEventListener('click', (e) => {
+            if (testInProgress) return;
+            const target = e.target;
+            
+            if (target.dataset.time) {
+                testDuration = parseInt(target.dataset.time);
+                document.querySelectorAll('[data-time]').forEach(btn => btn.classList.remove('active'));
+                target.classList.add('active');
+                resetTest();
+            }
+            if (target.dataset.mode) {
+                testMode = target.dataset.mode;
+                document.querySelectorAll('[data-mode]').forEach(btn => btn.classList.remove('active'));
+                target.classList.add('active');
+                resetTest();
+            }
+        });
+
+
+        // --- Core Functions ---
+
+        /**
+         * Generates and displays the text for the typing test.
+         */
+        function generateText() {
+            let words;
+            if (testMode === 'words') {
+                words = Array(100).fill(0).map(() => wordBank[Math.floor(Math.random() * wordBank.length)]);
+            } else {
+                words = Array(10).fill(0).map(() => sentenceBank[Math.floor(Math.random() * sentenceBank.length)]);
+            }
+            textToType = words.join(' ');
+            
+            textDisplay.innerHTML = textToType
+                .split('')
+                .map(char => `<span>${char}</span>`)
+                .join('');
+            
+            // Add initial caret
+            const firstChar = textDisplay.querySelector('span');
+            if(firstChar) {
+                firstChar.classList.add('caret');
+            }
+        }
+
+        /**
+         * Handles key presses from the user.
+         */
+        function handleKeyPress(e) {
+            // Start the test on the first valid keypress
+            if (!testInProgress && e.key !== 'Shift' && e.key !== 'CapsLock' && e.key !== 'Control' && e.key !== 'Alt' && e.key !== 'Meta') {
+                startTest();
+            }
+
+            if (!testInProgress) return;
+
+            const typedChar = e.key;
+            const targetChar = textToType[currentIndex];
+            const spans = textDisplay.querySelectorAll('span');
+
+            // Handle backspace
+            if (typedChar === 'Backspace') {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    // Only decrement totalTypedChars if the character was actually typed (not just an empty backspace)
+                    if(spans[currentIndex].dataset.status) totalTypedChars--;
+                    
+                    const spanToClear = spans[currentIndex];
+                    // Recalculate correct/incorrect chars based on the status before clearing
+                    if (spanToClear.dataset.status === 'correct') correctChars--;
+                    if (spanToClear.dataset.status === 'incorrect') incorrectChars--;
+                    
+                    spanToClear.classList.remove('correct', 'incorrect');
+                    delete spanToClear.dataset.status;
+                }
+            } 
+            // Handle regular character input
+            else if (typedChar.length === 1) {
+                if (currentIndex < textToType.length) {
+                    totalTypedChars++;
+                    if (typedChar === targetChar) {
+                        spans[currentIndex].classList.add('correct');
+                        spans[currentIndex].dataset.status = 'correct';
+                        correctChars++;
+                    } else {
+                        spans[currentIndex].classList.add('incorrect');
+                        spans[currentIndex].dataset.status = 'incorrect';
+                        incorrectChars++;
+                    }
+                    currentIndex++;
+                }
+            }
+
+            // Update caret position
+            spans.forEach(span => span.classList.remove('caret'));
+            if (currentIndex < textToType.length) {
+                spans[currentIndex].classList.add('caret');
+            }
+            
+            updateStats();
+            scrollText();
+        }
+
+        /**
+         * Starts the typing test.
+         */
+        function startTest() {
+            testInProgress = true;
+            textDisplay.classList.remove('filter', 'blur-sm');
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                timerEl.textContent = timeRemaining;
+                updateStats();
+                if (timeRemaining <= 0) {
+                    endTest();
+                }
+            }, 1000);
+        }
+
+        /**
+         * Ends the typing test and shows results.
+         */
+        function endTest() {
+            clearInterval(timerInterval);
+            testInProgress = false;
+            textInput.blur();
+            
+            // Final calculation
+            const finalWpm = calculateWPM();
+            const finalAccuracy = calculateAccuracy();
+            
+            // Update modal with results
+            document.getElementById('results-wpm').textContent = finalWpm;
+            document.getElementById('results-accuracy').textContent = `${finalAccuracy}%`;
+            document.getElementById('results-cpm').textContent = calculateCPM();
+            document.getElementById('results-mistakes').textContent = incorrectChars;
+
+            // Show modal
+            resultsModal.classList.remove('hidden');
+            resultsContent.classList.remove('modal-enter');
+            void resultsContent.offsetWidth; // Trigger reflow for animation
+            resultsContent.classList.add('modal-enter-active');
+
+        }
+
+        /**
+         * Resets the entire test to its initial state.
+         */
+        function resetTest() {
+            clearInterval(timerInterval);
+            testInProgress = false;
+            timeRemaining = testDuration;
+            currentIndex = 0;
+            totalTypedChars = 0;
+            correctChars = 0;
+            incorrectChars = 0;
+            
+            timerEl.textContent = testDuration;
+            wpmEl.textContent = 0;
+            cpmEl.textContent = 0;
+            accuracyEl.textContent = 100;
+            
+            textInput.value = '';
+            
+            // Generate the text and apply the initial blurred state
+            generateText();
+            textDisplay.classList.add('filter', 'blur-sm');
+            textDisplay.style.transform = 'translateY(0px)';
+            
+            // The following line was the source of the bug and has been removed.
+            // textDisplay.innerHTML = 'Click here or start typing to begin...';
+            
+            resultsModal.classList.add('hidden');
+            resultsContent.classList.remove('modal-enter-active');
+            resultsContent.classList.add('modal-enter');
+        }
+
+        /**
+         * Updates the real-time stats on the dashboard.
+         */
+        function updateStats() {
+            if (!testInProgress && timeRemaining !== testDuration) return;
+            wpmEl.textContent = calculateWPM();
+            cpmEl.textContent = calculateCPM();
+            accuracyEl.textContent = calculateAccuracy();
+        }
+        
+        /**
+         * Scrolls the text display area as the user types.
+        */
+        function scrollText() {
+            const spans = textDisplay.querySelectorAll('span');
+            const currentSpan = spans[currentIndex];
+            if (currentSpan) {
+                const typingAreaRect = typingArea.getBoundingClientRect();
+                const spanRect = currentSpan.getBoundingClientRect();
+                const currentTransform = new DOMMatrix(getComputedStyle(textDisplay).transform);
+                const currentY = currentTransform.m42;
+
+                // Check if the caret has moved to a line that is not fully visible
+                if(spanRect.bottom > typingAreaRect.bottom - 10) {
+                    const lineHeight = spanRect.height;
+                    textDisplay.style.transform = `translateY(${currentY - lineHeight}px)`;
+                } else if (spanRect.top < typingAreaRect.top + 10 && currentY < 0) {
+                     const lineHeight = spanRect.height;
+                     textDisplay.style.transform = `translateY(${currentY + lineHeight}px)`;
+                }
+            }
+        }
+
+        // --- Calculation Helpers ---
+        const calculateWPM = () => {
+            const elapsedTime = testDuration - timeRemaining;
+            if (elapsedTime <= 0) return 0;
+            // WPM is based on the standard of 5 characters (including spaces) per word.
+            const grossWords = correctChars / 5;
+            const minutes = elapsedTime / 60;
+            return Math.round(grossWords / minutes) || 0;
+        };
+
+        const calculateCPM = () => {
+            const elapsedTime = testDuration - timeRemaining;
+            if (elapsedTime <= 0) return 0;
+            const minutes = elapsedTime / 60;
+            return Math.round(correctChars / minutes) || 0;
+        };
+
+        const calculateAccuracy = () => {
+            if (totalTypedChars === 0) return 100;
+            return Math.round((correctChars / totalTypedChars) * 100) || 0;
+        };
+
+        // Initialize the app on first load
+        resetTest();
+    </script>
+</body>
+</html>
