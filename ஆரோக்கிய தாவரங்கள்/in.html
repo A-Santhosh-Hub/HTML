@@ -1,0 +1,516 @@
+
+<!DOCTYPE html>
+<html lang="ta" class="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ஆரோக்கிய தாவரங்கள் – இயற்கையின் மருந்து</title>
+    <link rel="icon" type="image/png" href="ico.png" />
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter for English, Noto Sans Tamil for Tamil -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+Tamil:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- jsPDF for PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- Custom Font Data for PDF (Noto Sans Tamil) -->
+    <!-- This is a base64 encoded font file required for jsPDF to render Tamil characters. -->
+    <script src="https://gist.githubusercontent.com/muthu-selvan-m/23ab306a4141d669192b14e9f5ec7464/raw/26e338316dfc14e27df3711d9a5b395632a90b42/noto-sans-tamil.js"></script>
+
+    <style>
+        /* Custom Styles */
+        body {
+            font-family: 'Noto Sans Tamil', 'Inter', sans-serif;
+            @apply bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-500;
+        }
+
+        /* Custom scrollbar for a modern look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            @apply dark:bg-gray-800;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+            @apply dark:bg-gray-600;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+            @apply dark:bg-gray-500;
+        }
+
+        /* Animation for modal */
+        .modal-enter {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        .modal-leave {
+            animation: fadeOut 0.3s ease-in forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.95); }
+        }
+
+        /* Animation for cards appearing */
+        .card-enter {
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            opacity: 0;
+        }
+        @keyframes popIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Main Container -->
+    <div class="container mx-auto px-4 py-8">
+
+        <!-- Header Section -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-emerald-600 dark:text-emerald-400">ஆரோக்கிய தாவரங்கள்</h1>
+            <p class="text-lg md:text-xl mt-2 text-gray-600 dark:text-gray-400">இயற்கையின் சக்திவாய்ந்த மருந்தகம்</p>
+        </header>
+
+        <!-- Controls: Search, Filter, Theme Toggle -->
+        <div class="mb-10 flex flex-col md:flex-row gap-4 items-center justify-between p-4 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-md sticky top-4 z-20">
+            <!-- Search Bar -->
+            <div class="relative w-full md:w-1/3">
+                <input type="text" id="search-bar" placeholder="தாவரத்தைத் தேடுங்கள்..." class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full bg-gray-100 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+            
+            <!-- Filter Buttons -->
+            <div id="filter-container" class="flex flex-wrap gap-2 justify-center">
+                <!-- Filter buttons will be dynamically inserted here -->
+            </div>
+
+            <!-- Theme Toggle -->
+            <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                <svg id="theme-toggle-dark-icon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                <svg id="theme-toggle-light-icon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 5.05A1 1 0 003.636 6.464l.707.707a1 1 0 001.414-1.414l-.707-.707zM3 11a1 1 0 100-2H2a1 1 0 100 2h1zm7.536 2.464l-.707.707a1 1 0 001.414 1.414l.707-.707a1 1 0 00-1.414-1.414z"></path></svg>
+            </button>
+        </div>
+
+        <!-- Plant Gallery -->
+        <main id="plant-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            <!-- Plant cards will be dynamically inserted here -->
+        </main>
+    </div>
+
+    <!-- Modal for Plant Details -->
+    <div id="plant-modal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div id="modal-content" class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative transform transition-all duration-300">
+            <!-- Content will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DATA ---
+            const plantsData = [
+                {
+                    id: 'tulsi',
+                    name_ta: 'துளசி',
+                    name_en: 'Ocimum tenuiflorum (Holy Basil)',
+                    image: 'https://cdn.ibcstack.com/article/1f8f70ee-46a5-473b-9809-21df37c44632/25-686a64a654048.webp',
+                    category: 'நோய் எதிர்ப்பு',
+                    benefits_ta: [
+                        'நோய் எதிர்ப்பு சக்தியை அதிகரிக்கிறது',
+                        'சளி, இருமல் மற்றும் காய்ச்சலுக்கு நிவாரணம்',
+                        'மன அழுத்தத்தைக் குறைத்து மனதை அமைதிப்படுத்தும்',
+                        'சக்திவாய்ந்த ஆன்டிஆக்ஸிடன்ட் பண்புகளைக் கொண்டது'
+                    ],
+                    uses_ta: 'இலைகளை நேரடியாக மென்று சாப்பிடலாம், தேநீரில் கலந்து பருகலாம் அல்லது கஷாயம் செய்து குடிக்கலாம். இது சுவாசப் பிரச்சனைகளுக்கு ஒரு சிறந்த தீர்வாகும்.'
+                },
+                {
+                    id: 'aloe-vera',
+                    name_ta: 'கற்றாழை',
+                    name_en: 'Aloe barbadensis miller',
+                    image: 'https://media.istockphoto.com/id/2196774796/photo/closeup-aloe-vera-cactus.webp?a=1&b=1&s=612x612&w=0&k=20&c=GhUt2CJUb7xIn7bbzHGWVznpeQCImW9yGN1G5EVRd-Q=',
+                    category: 'சருமப் பராமரிப்பு',
+                    benefits_ta: [
+                        'சரும எரிச்சல், வெயில் பாதிப்பு மற்றும் தீக்காயங்களைக் குணப்படுத்தும்',
+                        'சருமத்திற்கு ஈரப்பதம் அளித்து மென்மையாக்கும்',
+                        'செரிமான அமைப்பை மேம்படுத்தும்',
+                        'முடி வளர்ச்சிக்கு உதவுகிறது'
+                    ],
+                    uses_ta: 'கற்றாழை ஜெல்லை நேரடியாக சருமத்தில் தடவலாம். சாறு எடுத்து அருந்தினால் செரிமானம் சீராகும். கூந்தல் தைலத்துடன் கலந்தும் பயன்படுத்தலாம்.'
+                },
+                {
+                    id: 'turmeric',
+                    name_ta: 'மஞ்சள்',
+                    name_en: 'Curcuma longa',
+                    image: 'https://media.istockphoto.com/id/1910940672/photo/bowl-with-aromatic-turmeric-powder-and-raw-roots-isolated-on-white-top-view.webp?a=1&b=1&s=612x612&w=0&k=20&c=l0noZGKfXAkQy3WwQM45NX_RQ12SMJDDotSEPxBO7-4=',
+                    category: 'அழற்சி எதிர்ப்பு',
+                    benefits_ta: [
+                        'சக்திவாய்ந்த அழற்சி எதிர்ப்பு மற்றும் ஆண்டிசெப்டிக் பண்புகளைக் கொண்டது',
+                        'காயங்கள் மற்றும் தோல் நோய்களைக் குணப்படுத்த உதவுகிறது',
+                        'நோய் எதிர்ப்பு சக்தியை அதிகரிக்கும்',
+                        'மூட்டு வலிகளுக்கு நிவாரணம் அளிக்கும்'
+                    ],
+                    uses_ta: 'மஞ்சளை பாலில் கலந்து குடிப்பது சளி மற்றும் இருமலுக்கு நல்லது. காயங்களின் மீது பற்று போல போடலாம். உணவில் தினமும் சேர்ப்பது ஆரோக்கியத்திற்கு உகந்தது.'
+                },
+                {
+                    id: 'neem',
+                    name_ta: 'வேப்பிலை',
+                    name_en: 'Azadirachta indica',
+                    image: 'https://media.istockphoto.com/id/2172303449/photo/close-up-a-fresh-green-wild-neem-leaves-isolated.webp?a=1&b=1&s=612x612&w=0&k=20&c=FR7PqSFtYjkrHkKUpHLxSOnsy1L52mQvvCO1y9sGDJ8=',
+                    category: 'சருமப் பராமரிப்பு',
+                    benefits_ta: [
+                        'சிறந்த கிருமி நாசினி மற்றும் பாக்டீரியா எதிர்ப்பு பண்புகளைக் கொண்டது',
+                        'பல்வலி, பல் சொத்தை மற்றும் ஈறு பிரச்சனைகளுக்கு தீர்வு தரும்',
+                        'சரும நோய்கள், சொறி, சிரங்கு போன்றவற்றிற்கு மருந்தாகும்',
+                        'இரத்தத்தை சுத்திகரிக்கும்'
+                    ],
+                    uses_ta: 'வேப்பிலையை அரைத்து சருமத்தில் பூசலாம். தண்ணீரில் கொதிக்க வைத்து குளிக்கலாம். வேப்பங்குச்சி கொண்டு பல் துலக்குவது பற்களுக்கு நல்லது.'
+                },
+                {
+                    id: 'thoothuvalai',
+                    name_ta: 'தூதுவளை',
+                    name_en: 'Solanum trilobatum',
+                    image: 'https://thumbs.dreamstime.com/b/solanum-trilobatum-thuthuvalai-plant-blooming-flowers-s-herbal-medicinal-used-sinus-lung-disease-tuberculosis-368051002.jpg?w=768',
+                    category: 'சுவாசப் பாதுகாப்பு',
+                    benefits_ta: [
+                        'சுவாசப் பிரச்சனைகளான இருமல், சளி மற்றும் ஆஸ்துமாவுக்கு சிறந்த மருந்து',
+                        'நோய் எதிர்ப்பு சக்தியை அதிகரிக்கும்',
+                        'நரம்பு மண்டலத்தை பலப்படுத்தும்',
+                        'உடலுக்கு ஆற்றலை அளிக்கும்'
+                    ],
+                    uses_ta: 'தூதுவளை இலைகளை ரசம், துவையல் அல்லது சூப் செய்து சாப்பிடலாம். இது சளியை வெளியேற்றவும், சுவாசப் பாதையை சீராக்கவும் உதவும்.'
+                },
+                {
+                    id: 'keezhanelli',
+                    name_ta: 'கீழாநெல்லி',
+                    name_en: 'Phyllanthus niruri',
+                    image: 'https://thumbs.dreamstime.com/b/keelanelli-have-good-medical-value-ayurvedic-medicine-keelanelli-phyllanthus-niruri-gale-wind-used-ayurvedic-228268584.jpg?w=768',
+                    category: 'கல்லீரல் பாதுகாப்பு',
+                    benefits_ta: [
+                        'கல்லீரல் பிரச்சனைகளுக்கு ஒரு சிறந்த மூலிகை',
+                        'மஞ்சள் காமாலை நோய்க்கு சிகிச்சையளிக்கப் பயன்படுகிறது',
+                        'சிறுநீரக கற்களைக் கரைக்க உதவும்',
+                        'இரத்த சர்க்கரை அளவைக் கட்டுப்படுத்தும்'
+                    ],
+                    uses_ta: 'கீழாநெல்லி செடியை முழுவதுமாக அரைத்து மோருடன் கலந்து காலையில் வெறும் வயிற்றில் அருந்துவது மஞ்சள் காமாலைக்கு சிறந்த மருந்தாகும்.'
+                },
+                {
+                    id: 'vallarai',
+                    name_ta: 'வல்லாரை',
+                    name_en: 'Centella asiatica',
+                    image: 'https://www.netmeds.com/images/cms/wysiwyg/blog/2020/07/1594367640_keerai_big_1.jpg',
+                    category: 'நினைவாற்றல்',
+                    benefits_ta: [
+                        'நினைவாற்றலை அதிகரித்து, மூளையின் செயல்பாட்டை மேம்படுத்தும்',
+                        'மன அழுத்தத்தைக் குறைத்து, நரம்பு மண்டலத்தை பலப்படுத்தும்',
+                        'இரத்த ஓட்டத்தை சீராக்கும்',
+                        'சரும ஆரோக்கியத்தை மேம்படுத்தும்'
+                    ],
+                    uses_ta: 'வல்லாரை இலைகளை துவையல், கூட்டு அல்லது பொடி செய்து சாப்பிடலாம். இது மாணவர்களுக்கும், மூளை வேலை செய்பவர்களுக்கும் மிகவும் பயனுள்ளது.'
+                },
+                {
+                    id: 'ashwagandha',
+                    name_ta: 'அமுக்கரா',
+                    name_en: 'Withania somnifera (Ashwagandha)',
+                    image: 'data:image/jpeg;base64,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',
+                    category: 'ஆற்றல்',
+                    benefits_ta: [
+                        'உடல் பலத்தையும், ஆற்றலையும் அதிகரிக்கும்',
+                        'மன அழுத்தத்தையும், பதட்டத்தையும் குறைக்கும்',
+                        'ஆழ்ந்த உறக்கத்திற்கு உதவும்',
+                        'நோய் எதிர்ப்பு மண்டலத்தை வலுப்படுத்தும்'
+                    ],
+                    uses_ta: 'அமுக்கரா கிழங்குப் பொடியை பாலில் கலந்து இரவு உறங்குவதற்கு முன் அருந்தலாம். இது உடல் சோர்வை நீக்கி புத்துணர்ச்சி அளிக்கும்.'
+                },
+                {
+                    id: 'pirandai',
+                    name_ta: 'பிரண்டை',
+                    name_en: 'Cissus quadrangularis',
+                    image: 'https://c7.alamy.com/comp/MW34WE/a-cissus-quadrangularis-plant-also-known-as-veld-grape-MW34WE.jpg',
+                    category: 'எலும்பு ஆரோக்கியம்',
+                    benefits_ta: [
+                        'எலும்புகளை பலப்படுத்தி, எலும்பு முறிவுகளை விரைவில் குணமாக்கும்',
+                        'செரிமானத்தை சீராக்கி, பசியைத் தூண்டும்',
+                        'மூல நோய்க்கு சிறந்த மருந்தாகும்',
+                        'உடல் எடையைக் குறைக்க உதவும்'
+                    ],
+                    uses_ta: 'பிரண்டையின் தண்டை நார் நீக்கி துவையல் அல்லது வற்றல் செய்து சாப்பிடலாம். இது எலும்பு சம்பந்தமான பிரச்சனைகளுக்கு மிகச் சிறந்த தீர்வாகும்.'
+                }
+            ];
+
+            // --- DOM ELEMENTS ---
+            const plantGrid = document.getElementById('plant-grid');
+            const searchBar = document.getElementById('search-bar');
+            const filterContainer = document.getElementById('filter-container');
+            const modal = document.getElementById('plant-modal');
+            const modalContent = document.getElementById('modal-content');
+            const themeToggle = document.getElementById('theme-toggle');
+            const darkIcon = document.getElementById('theme-toggle-dark-icon');
+            const lightIcon = document.getElementById('theme-toggle-light-icon');
+            
+            // --- STATE ---
+            let currentFilter = 'அனைத்தும்';
+            let favorites = JSON.parse(localStorage.getItem('plantFavorites')) || [];
+
+            // --- FUNCTIONS ---
+
+            // Function to render plant cards
+            const renderPlants = (plantsToRender) => {
+                plantGrid.innerHTML = '';
+                plantsToRender.forEach((plant, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'group cursor-pointer card-enter';
+                    card.style.animationDelay = `${index * 50}ms`;
+                    card.dataset.id = plant.id;
+                    card.innerHTML = `
+                        <div class="relative overflow-hidden rounded-xl shadow-lg group-hover:shadow-2xl transition-all duration-300">
+                            <img src="${plant.image}" alt="${plant.name_ta}" class="w-full h-48 object-cover transform group-hover:scale-110 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                            <h3 class="absolute bottom-4 left-4 text-white text-xl font-bold">${plant.name_ta}</h3>
+                        </div>
+                    `;
+                    card.addEventListener('click', () => openModal(plant.id));
+                    plantGrid.appendChild(card);
+                });
+            };
+
+            // Function to open the modal
+            const openModal = (plantId) => {
+                const plant = plantsData.find(p => p.id === plantId);
+                if (!plant) return;
+                
+                const isFavorite = favorites.includes(plantId);
+
+                modalContent.innerHTML = `
+                    <button id="close-modal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white transition-colors z-10">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                    <div class="p-6 md:p-8">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="md:col-span-1">
+                                <img src="${plant.image}" alt="${plant.name_ta}" class="w-full h-auto rounded-lg shadow-md">
+                            </div>
+                            <div class="md:col-span-2">
+                                <h2 class="text-3xl font-bold text-emerald-600 dark:text-emerald-400">${plant.name_ta}</h2>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">${plant.name_en}</p>
+                                
+                                <h3 class="text-xl font-semibold mt-6 mb-2">🌿 மருத்துவப் பயன்கள்</h3>
+                                <ul class="list-none space-y-2">
+                                    ${plant.benefits_ta.map(benefit => `
+                                        <li class="flex items-start">
+                                            <svg class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            <span>${benefit}</span>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="mt-6">
+                            <h3 class="text-xl font-semibold mb-2">💡 பயன்படுத்தும் முறை</h3>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">${plant.uses_ta}</p>
+                        </div>
+                        <div class="mt-8 flex flex-col sm:flex-row gap-4">
+                            <button id="toggle-favorite-btn" data-id="${plant.id}" class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-colors ${isFavorite ? 'bg-pink-500 text-white hover:bg-pink-600' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'}">
+                                <svg class="w-6 h-6" fill="${isFavorite ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.5l1.318-1.182a4.5 4.5 0 116.364 6.364L12 21l-7.682-7.318a4.5 4.5 0 010-6.364z"></path></svg>
+                                <span>${isFavorite ? 'பிடித்தவற்றிலிருந்து நீக்கு' : 'பிடித்தவற்றில் சேர்'}</span>
+                            </button>
+                            <button id="download-pdf-btn" data-id="${plant.id}" class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-emerald-500 text-white font-semibold hover:bg-emerald-600 transition-colors">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                <span>PDF பதிவிறக்கம்</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                modal.classList.remove('hidden');
+                modalContent.classList.remove('modal-leave');
+                modalContent.classList.add('modal-enter');
+
+                document.getElementById('close-modal').addEventListener('click', closeModal);
+                document.getElementById('toggle-favorite-btn').addEventListener('click', toggleFavorite);
+                document.getElementById('download-pdf-btn').addEventListener('click', downloadPdf);
+            };
+            
+            // Function to close the modal
+            const closeModal = () => {
+                modalContent.classList.remove('modal-enter');
+                modalContent.classList.add('modal-leave');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+            };
+
+            // Function to filter plants
+            const filterAndRender = () => {
+                const searchTerm = searchBar.value.toLowerCase();
+                let filteredPlants = plantsData;
+
+                // Filter by category
+                if (currentFilter !== 'அனைத்தும்' && currentFilter !== 'பிடித்தவை') {
+                    filteredPlants = filteredPlants.filter(plant => plant.category === currentFilter);
+                } else if (currentFilter === 'பிடித்தவை') {
+                    filteredPlants = filteredPlants.filter(plant => favorites.includes(plant.id));
+                }
+
+                // Filter by search term
+                if (searchTerm) {
+                    filteredPlants = filteredPlants.filter(plant => 
+                        plant.name_ta.toLowerCase().includes(searchTerm) || 
+                        plant.name_en.toLowerCase().includes(searchTerm)
+                    );
+                }
+                
+                renderPlants(filteredPlants);
+            };
+
+            // Function to create filter buttons
+            const createFilterButtons = () => {
+                const categories = ['அனைத்தும்', ...new Set(plantsData.map(p => p.category)), 'பிடித்தவை'];
+                filterContainer.innerHTML = '';
+                categories.forEach(category => {
+                    const button = document.createElement('button');
+                    button.textContent = category;
+                    button.dataset.filter = category;
+                    button.className = `px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 ${currentFilter === category ? 'bg-emerald-500 text-white shadow-md' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'}`;
+                    button.addEventListener('click', () => {
+                        currentFilter = category;
+                        createFilterButtons(); // Re-render buttons to update active state
+                        filterAndRender();
+                    });
+                    filterContainer.appendChild(button);
+                });
+            };
+
+            // Function to handle favorite toggling
+            const toggleFavorite = (e) => {
+                const plantId = e.currentTarget.dataset.id;
+                const plantIndex = favorites.indexOf(plantId);
+
+                if (plantIndex > -1) {
+                    favorites.splice(plantIndex, 1); // Remove from favorites
+                } else {
+                    favorites.push(plantId); // Add to favorites
+                }
+                
+                localStorage.setItem('plantFavorites', JSON.stringify(favorites));
+                
+                // Re-open modal to update button state
+                openModal(plantId);
+                
+                // If currently viewing favorites, re-render the grid
+                if (currentFilter === 'பிடித்தவை') {
+                    filterAndRender();
+                }
+            };
+            
+            // Function to download PDF
+            const downloadPdf = async (e) => {
+                const { jsPDF } = window.jspdf;
+                const plantId = e.currentTarget.dataset.id;
+                const plant = plantsData.find(p => p.id === plantId);
+                if (!plant) return;
+
+                const doc = new jsPDF();
+                
+                // IMPORTANT: Add the custom Tamil font to the PDF document
+                // The `noto_sans_tamil_font` variable is loaded from the external script.
+                doc.addFileToVFS('NotoSansTamil-Regular.ttf', noto_sans_tamil_font);
+                doc.addFont('NotoSansTamil-Regular.ttf', 'NotoSansTamil', 'normal');
+                doc.setFont('NotoSansTamil');
+
+                // Set text colors
+                const titleColor = '#10B981'; // Emerald 600
+                const headingColor = '#1F2937'; // Gray 800
+                const textColor = '#4B5563'; // Gray 600
+
+                // Add content to PDF
+                doc.setTextColor(titleColor);
+                doc.setFontSize(22);
+                doc.text(plant.name_ta, 14, 22);
+
+                doc.setTextColor(textColor);
+                doc.setFontSize(10);
+                doc.text(plant.name_en, 14, 30);
+
+                doc.setDrawColor(titleColor);
+                doc.line(14, 35, 196, 35);
+
+                doc.setTextColor(headingColor);
+                doc.setFontSize(16);
+                doc.text('மருத்துவப் பயன்கள்', 14, 45);
+                
+                doc.setTextColor(textColor);
+                doc.setFontSize(12);
+                let yPos = 55;
+                plant.benefits_ta.forEach(benefit => {
+                    const lines = doc.splitTextToSize(`• ${benefit}`, 180);
+                    doc.text(lines, 14, yPos);
+                    yPos += (lines.length * 7);
+                });
+
+                yPos += 5;
+                doc.setTextColor(headingColor);
+                doc.setFontSize(16);
+                doc.text('பயன்படுத்தும் முறை', 14, yPos);
+                
+                yPos += 10;
+                doc.setTextColor(textColor);
+                doc.setFontSize(12);
+                const usesLines = doc.splitTextToSize(plant.uses_ta, 180);
+                doc.text(usesLines, 14, yPos);
+                
+                doc.save(`${plant.id}-details.pdf`);
+            };
+
+            // --- THEME TOGGLE LOGIC ---
+            const applyTheme = (theme) => {
+                if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                    darkIcon.classList.remove('hidden');
+                    lightIcon.classList.add('hidden');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    darkIcon.classList.add('hidden');
+                    lightIcon.classList.remove('hidden');
+                }
+            };
+
+            themeToggle.addEventListener('click', () => {
+                const isDark = document.documentElement.classList.contains('dark');
+                const newTheme = isDark ? 'light' : 'dark';
+                localStorage.setItem('theme', newTheme);
+                applyTheme(newTheme);
+            });
+            
+            // --- EVENT LISTENERS ---
+            searchBar.addEventListener('input', filterAndRender);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                    closeModal();
+                }
+            });
+
+            // --- INITIALIZATION ---
+            const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            applyTheme(savedTheme);
+            createFilterButtons();
+            filterAndRender();
+        });
+    </script>
+</body>
+</html>
