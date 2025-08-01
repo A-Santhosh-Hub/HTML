@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fresh Veggies & Fruits</title>
+    <link rel="icon" type="image/png" href="ico.png" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .hero-section {
+            background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=2874&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+        }
+        .card-hover-effect {
+            transition: all 0.3s ease-in-out;
+        }
+        .card-hover-effect:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .slide-in-right {
+            animation: slideInRight 0.5s forwards;
+        }
+        @keyframes slideInRight {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        .slide-out-right {
+            animation: slideOutRight 0.5s forwards;
+        }
+        @keyframes slideOutRight {
+            from { transform: translateX(0); }
+            to { transform: translateX(100%); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Customer View -->
+    <div id="customer-view">
+        <!-- Navbar -->
+        <nav class="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-40">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-20">
+                    <div class="flex-shrink-0">
+                        <a href="#" class="text-2xl font-bold text-green-600 flex items-center">
+                            <i class="fas fa-leaf mr-2"></i>FreshMart
+                        </a>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button id="cart-button" class="relative text-gray-600 hover:text-green-600 transition-colors">
+                            <i class="fas fa-shopping-cart text-2xl"></i>
+                            <span id="cart-count" class="absolute -top-2 -right-3 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                        </button>
+                        <button id="admin-login-button" class="hidden md:inline-block bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all shadow">
+                            Admin
+                        </button>
+                         <button id="admin-login-button-mobile" class="md:hidden text-gray-600 hover:text-green-600 transition-colors">
+                            <i class="fas fa-user-shield text-2xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <header class="hero-section text-white py-24 sm:py-32">
+            <div class="container mx-auto text-center px-4">
+                <h1 class="text-4xl md:text-6xl font-extrabold mb-4 animate-pulse">Freshness Delivered to Your Door</h1>
+                <p class="text-lg md:text-xl max-w-3xl mx-auto">The best quality vegetables and fruits, sourced directly from local farms. Healthy living starts here.</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <!-- Filter Section -->
+            <div class="flex justify-center items-center space-x-2 sm:space-x-4 mb-10">
+                <button class="filter-btn bg-green-600 text-white px-6 py-2 rounded-full shadow-md" data-filter="all">All</button>
+                <button class="filter-btn bg-white text-gray-700 px-6 py-2 rounded-full shadow-md" data-filter="vegetable">Vegetables</button>
+                <button class="filter-btn bg-white text-gray-700 px-6 py-2 rounded-full shadow-md" data-filter="fruit">Fruits</button>
+            </div>
+
+            <!-- Product Grid -->
+            <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                <!-- Products will be dynamically inserted here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Shopping Cart -->
+    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-full sm:w-96 bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out">
+        <div class="flex flex-col h-full">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h2 class="text-2xl font-bold text-gray-800">Your Cart</h2>
+                <button id="close-cart-button" class="text-gray-500 hover:text-gray-800"><i class="fas fa-times text-2xl"></i></button>
+            </div>
+            <div id="cart-items" class="flex-grow p-4 overflow-y-auto">
+                <!-- Cart items will be dynamically inserted here -->
+                <p id="empty-cart-msg" class="text-gray-500 text-center mt-8">Your cart is empty.</p>
+            </div>
+            <div class="p-4 border-t bg-gray-50">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-lg font-semibold text-gray-700">Total:</span>
+                    <span id="cart-total" class="text-2xl font-bold text-green-600">₹0.00</span>
+                </div>
+                <button id="whatsapp-order-button" class="w-full bg-green-500 text-white py-3 rounded-lg text-lg font-semibold hover:bg-green-600 transition-all flex items-center justify-center shadow-lg">
+                    <i class="fab fa-whatsapp mr-3 text-xl"></i> Place Order on WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="admin-login-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-sm fade-in">
+            <h2 class="text-2xl font-bold mb-6 text-center">Admin Login</h2>
+            <input type="password" id="admin-password" class="w-full p-3 border rounded-lg mb-4 focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="Enter Password">
+            <button id="admin-submit-password" class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-all">Login</button>
+            <button id="close-admin-modal" class="w-full mt-2 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-all">Cancel</button>
+            <p id="admin-error" class="text-red-500 text-center mt-4"></p>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="admin-panel" class="hidden p-4 sm:p-8">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Admin Panel</h1>
+            <button id="logout-button" class="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-all shadow">Logout</button>
+        </div>
+
+        <!-- Add/Edit Product Form -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 id="form-title" class="text-2xl font-semibold mb-4">Add New Product</h2>
+            <form id="product-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <input type="hidden" id="product-id">
+                <input type="text" id="product-name" placeholder="Product Name" class="p-3 border rounded-lg focus:ring-2 focus:ring-green-500" required>
+                <input type="number" id="product-price" placeholder="Price per Kg" class="p-3 border rounded-lg focus:ring-2 focus:ring-green-500" required>
+                <input type="text" id="product-image" placeholder="Image URL" class="p-3 border rounded-lg focus:ring-2 focus:ring-green-500" required>
+                <select id="product-category" class="p-3 border rounded-lg bg-white focus:ring-2 focus:ring-green-500" required>
+                    <option value="vegetable">Vegetable</option>
+                    <option value="fruit">Fruit</option>
+                </select>
+                <div class="md:col-span-2 flex space-x-4">
+                    <button type="submit" id="form-submit-btn" class="flex-1 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-all">Add Product</button>
+                    <button type="button" id="form-cancel-btn" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-all hidden">Cancel Edit</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Admin Product List -->
+        <div id="admin-product-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            <!-- Admin product list will be dynamically inserted here -->
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM ELEMENTS ---
+            const productGrid = document.getElementById('product-grid');
+            const cartButton = document.getElementById('cart-button');
+            const closeCartButton = document.getElementById('close-cart-button');
+            const cartSidebar = document.getElementById('cart-sidebar');
+            const cartItemsContainer = document.getElementById('cart-items');
+            const cartCount = document.getElementById('cart-count');
+            const cartTotal = document.getElementById('cart-total');
+            const emptyCartMsg = document.getElementById('empty-cart-msg');
+            const whatsappOrderButton = document.getElementById('whatsapp-order-button');
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            
+            const adminLoginButton = document.getElementById('admin-login-button');
+            const adminLoginButtonMobile = document.getElementById('admin-login-button-mobile');
+            const adminLoginModal = document.getElementById('admin-login-modal');
+            const closeAdminModal = document.getElementById('close-admin-modal');
+            const adminPasswordInput = document.getElementById('admin-password');
+            const adminSubmitPassword = document.getElementById('admin-submit-password');
+            const adminError = document.getElementById('admin-error');
+
+            const customerView = document.getElementById('customer-view');
+            const adminPanel = document.getElementById('admin-panel');
+            const logoutButton = document.getElementById('logout-button');
+            
+            const productForm = document.getElementById('product-form');
+            const formTitle = document.getElementById('form-title');
+            const formSubmitBtn = document.getElementById('form-submit-btn');
+            const formCancelBtn = document.getElementById('form-cancel-btn');
+            const productIdInput = document.getElementById('product-id');
+            const productNameInput = document.getElementById('product-name');
+            const productPriceInput = document.getElementById('product-price');
+            const productImageInput = document.getElementById('product-image');
+            const productCategoryInput = document.getElementById('product-category');
+            const adminProductList = document.getElementById('admin-product-list');
+
+            // --- DATA ---
+            let products = [
+                { id: 1, name: 'Tomato', price: 40, image: 'https://images.unsplash.com/photo-1561155653-2956d1159193?q=80&w=2940&auto=format&fit=crop', category: 'vegetable' },
+                { id: 2, name: 'Carrot', price: 60, image: 'https://images.unsplash.com/photo-1590868309235-ea34bed7bd7f?q=80&w=2940&auto=format&fit=crop', category: 'vegetable' },
+                { id: 3, name: 'Apple', price: 120, image: 'https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?q=80&w=2940&auto=format&fit=crop', category: 'fruit' },
+                { id: 4, name: 'Broccoli', price: 80, image: 'https://images.unsplash.com/photo-1587353097388-235a29419a33?q=80&w=2942&auto=format&fit=crop', category: 'vegetable' },
+                { id: 5, name: 'Banana', price: 50, image: 'https://images.unsplash.com/photo-1528825871115-3581a5387919?q=80&w=2815&auto=format&fit=crop', category: 'fruit' },
+                { id: 6, name: 'Spinach', price: 30, image: 'https://images.unsplash.com/photo-1576045057995-568f588f2f84?q=80&w=2814&auto=format&fit=crop', category: 'vegetable' },
+                { id: 7, name: 'Orange', price: 70, image: 'https://images.unsplash.com/photo-1547514701-42782101795e?q=80&w=2787&auto=format&fit=crop', category: 'fruit' },
+                { id: 8, name: 'Potato', price: 35, image: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?q=80&w=2940&auto=format&fit=crop', category: 'vegetable' },
+            ];
+            let cart = [];
+
+            // --- FUNCTIONS ---
+
+            // Render Products on Customer Page
+            function renderProducts(filter = 'all') {
+                productGrid.innerHTML = '';
+                const filteredProducts = products.filter(p => filter === 'all' || p.category === filter);
+                
+                if (filteredProducts.length === 0) {
+                    productGrid.innerHTML = `<p class="text-gray-500 col-span-full text-center">No products found in this category.</p>`;
+                    return;
+                }
+
+                filteredProducts.forEach(product => {
+                    const productCard = document.createElement('div');
+                    productCard.className = 'bg-white rounded-xl shadow-lg overflow-hidden card-hover-effect fade-in';
+                    productCard.innerHTML = `
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/600x400/cccccc/ffffff?text=Image+Not+Found';">
+                        <div class="p-4">
+                            <h3 class="text-xl font-bold text-gray-800">${product.name}</h3>
+                            <p class="text-green-600 font-semibold text-lg my-2">₹${product.price.toFixed(2)} / kg</p>
+                            <div class="flex items-center my-4">
+                                <label class="mr-2 font-medium">Qty (kg):</label>
+                                <div class="flex items-center border rounded-lg">
+                                    <button class="quantity-btn p-2" data-action="decrease">-</button>
+                                    <input type="number" class="quantity-input w-16 text-center border-l border-r" value="1" min="1">
+                                    <button class="quantity-btn p-2" data-action="increase">+</button>
+                                </div>
+                            </div>
+                            <button class="add-to-cart-btn w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition-all">Add to Cart</button>
+                        </div>
+                    `;
+                    
+                    // Event listeners for quantity and add to cart
+                    productCard.querySelector('.quantity-btn[data-action="decrease"]').addEventListener('click', () => updateQuantity(productCard, 'decrease'));
+                    productCard.querySelector('.quantity-btn[data-action="increase"]').addEventListener('click', () => updateQuantity(productCard, 'increase'));
+                    productCard.querySelector('.add-to-cart-btn').addEventListener('click', () => addToCart(product, productCard));
+
+                    productGrid.appendChild(productCard);
+                });
+            }
+
+            // Update quantity input
+            function updateQuantity(card, action) {
+                const input = card.querySelector('.quantity-input');
+                let value = parseInt(input.value);
+                if (action === 'increase') {
+                    value++;
+                } else if (action === 'decrease' && value > 1) {
+                    value--;
+                }
+                input.value = value;
+            }
+
+            // Add item to cart
+            function addToCart(product, card) {
+                const quantity = parseInt(card.querySelector('.quantity-input').value);
+                const existingItem = cart.find(item => item.id === product.id);
+
+                if (existingItem) {
+                    existingItem.quantity += quantity;
+                } else {
+                    cart.push({ ...product, quantity });
+                }
+                updateCartUI();
+            }
+
+            // Update Cart UI
+            function updateCartUI() {
+                cartItemsContainer.innerHTML = '';
+                if (cart.length === 0) {
+                    emptyCartMsg.style.display = 'block';
+                } else {
+                    emptyCartMsg.style.display = 'none';
+                    cart.forEach(item => {
+                        const cartItem = document.createElement('div');
+                        cartItem.className = 'flex justify-between items-center p-2 border-b';
+                        cartItem.innerHTML = `
+                            <div class="flex items-center">
+                                <img src="${item.image}" class="w-16 h-16 object-cover rounded-md mr-4">
+                                <div>
+                                    <p class="font-semibold">${item.name}</p>
+                                    <p class="text-sm text-gray-500">${item.quantity} kg x ₹${item.price.toFixed(2)}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-green-600">₹${(item.quantity * item.price).toFixed(2)}</p>
+                                <button class="remove-from-cart-btn text-red-500 text-sm hover:underline" data-id="${item.id}">Remove</button>
+                            </div>
+                        `;
+                        cartItemsContainer.appendChild(cartItem);
+                    });
+                }
+                
+                // Add event listeners to remove buttons
+                document.querySelectorAll('.remove-from-cart-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const id = parseInt(e.target.dataset.id);
+                        cart = cart.filter(item => item.id !== id);
+                        updateCartUI();
+                    });
+                });
+
+                const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                cartTotal.textContent = `₹${total.toFixed(2)}`;
+                cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+            }
+
+            // WhatsApp Order
+            function placeWhatsAppOrder() {
+                if (cart.length === 0) {
+                    alert("Your cart is empty!");
+                    return;
+                }
+                let message = "Hello FreshMart! I would like to place an order:\n\n";
+                cart.forEach(item => {
+                    message += `${item.name} - ${item.quantity} kg\n`;
+                });
+                const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                message += `\n*Total: ₹${total.toFixed(2)}*`;
+
+                const whatsappURL = `https://wa.me/919003356047?text=${encodeURIComponent(message)}`;
+                window.open(whatsappURL, '_blank');
+            }
+            
+            // --- Admin Functions ---
+            
+            function showAdminPanel() {
+                customerView.style.display = 'none';
+                adminPanel.style.display = 'block';
+                adminLoginModal.classList.add('hidden');
+                renderAdminProducts();
+            }
+            
+            function logout() {
+                customerView.style.display = 'block';
+                adminPanel.style.display = 'none';
+                adminPasswordInput.value = '';
+                adminError.textContent = '';
+                renderProducts(); // Refresh customer view
+            }
+
+            function renderAdminProducts() {
+                adminProductList.innerHTML = '';
+                products.forEach(product => {
+                    const adminCard = document.createElement('div');
+                    adminCard.className = 'bg-white rounded-lg shadow-md p-4 flex flex-col justify-between';
+                    adminCard.innerHTML = `
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-40 object-cover rounded-md mb-4" onerror="this.onerror=null;this.src='https://placehold.co/600x400/cccccc/ffffff?text=Image+Not+Found';">
+                        <h3 class="text-lg font-bold">${product.name}</h3>
+                        <p class="text-green-600 font-semibold my-1">₹${product.price.toFixed(2)} / kg</p>
+                        <p class="text-sm text-gray-500 capitalize">${product.category}</p>
+                        <div class="flex space-x-2 mt-4">
+                            <button class="edit-product-btn flex-1 bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-600 text-sm" data-id="${product.id}">Edit</button>
+                            <button class="remove-product-btn flex-1 bg-red-500 text-white py-1 px-2 rounded hover:bg-red-600 text-sm" data-id="${product.id}">Remove</button>
+                        </div>
+                    `;
+                    adminProductList.appendChild(adminCard);
+                });
+                
+                // Add event listeners for edit/remove
+                document.querySelectorAll('.edit-product-btn').forEach(btn => btn.addEventListener('click', handleEditProduct));
+                document.querySelectorAll('.remove-product-btn').forEach(btn => btn.addEventListener('click', handleRemoveProduct));
+            }
+            
+            function handleProductFormSubmit(e) {
+                e.preventDefault();
+                const id = productIdInput.value;
+                const name = productNameInput.value;
+                const price = parseFloat(productPriceInput.value);
+                const image = productImageInput.value;
+                const category = productCategoryInput.value;
+
+                if (!name || !price || !image || !category) {
+                    alert('Please fill all fields');
+                    return;
+                }
+
+                if (id) { // Editing
+                    const productIndex = products.findIndex(p => p.id == id);
+                    products[productIndex] = { id: parseInt(id), name, price, image, category };
+                } else { // Adding
+                    const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+                    products.push({ id: newId, name, price, image, category });
+                }
+                
+                resetProductForm();
+                renderAdminProducts();
+            }
+            
+            function handleEditProduct(e) {
+                const id = parseInt(e.target.dataset.id);
+                const product = products.find(p => p.id === id);
+                
+                productIdInput.value = product.id;
+                productNameInput.value = product.name;
+                productPriceInput.value = product.price;
+                productImageInput.value = product.image;
+                productCategoryInput.value = product.category;
+                
+                formTitle.textContent = 'Edit Product';
+                formSubmitBtn.textContent = 'Update Product';
+                formCancelBtn.classList.remove('hidden');
+                
+                window.scrollTo(0, 0);
+            }
+            
+            function handleRemoveProduct(e) {
+                if (!confirm('Are you sure you want to remove this product?')) return;
+                
+                const id = parseInt(e.target.dataset.id);
+                products = products.filter(p => p.id !== id);
+                renderAdminProducts();
+            }
+            
+            function resetProductForm() {
+                productForm.reset();
+                productIdInput.value = '';
+                formTitle.textContent = 'Add New Product';
+                formSubmitBtn.textContent = 'Add Product';
+                formCancelBtn.classList.add('hidden');
+            }
+
+            // --- EVENT LISTENERS ---
+            
+            // Cart visibility
+            cartButton.addEventListener('click', () => {
+                cartSidebar.classList.remove('translate-x-full', 'slide-out-right');
+                cartSidebar.classList.add('slide-in-right');
+            });
+            closeCartButton.addEventListener('click', () => {
+                cartSidebar.classList.remove('slide-in-right');
+                cartSidebar.classList.add('slide-out-right');
+            });
+
+            // Filtering
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => b.classList.replace('bg-green-600', 'bg-white'));
+                    filterBtns.forEach(b => b.classList.replace('text-white', 'text-gray-700'));
+                    btn.classList.replace('bg-white', 'bg-green-600');
+                    btn.classList.replace('text-gray-700', 'text-white');
+                    renderProducts(btn.dataset.filter);
+                });
+            });
+
+            // WhatsApp Order
+            whatsappOrderButton.addEventListener('click', placeWhatsAppOrder);
+
+            // Admin Login
+            const openAdminModal = () => adminLoginModal.classList.remove('hidden');
+            adminLoginButton.addEventListener('click', openAdminModal);
+            adminLoginButtonMobile.addEventListener('click', openAdminModal);
+            
+            closeAdminModal.addEventListener('click', () => adminLoginModal.classList.add('hidden'));
+
+            adminSubmitPassword.addEventListener('click', () => {
+                if (adminPasswordInput.value === '007124') {
+                    showAdminPanel();
+                } else {
+                    adminError.textContent = 'Incorrect password. Please try again.';
+                    setTimeout(() => adminError.textContent = '', 3000);
+                }
+            });
+            adminPasswordInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') adminSubmitPassword.click();
+            });
+            
+            // Admin Panel
+            logoutButton.addEventListener('click', logout);
+            productForm.addEventListener('submit', handleProductFormSubmit);
+            formCancelBtn.addEventListener('click', resetProductForm);
+
+            // --- INITIAL RENDER ---
+            renderProducts();
+            updateCartUI();
+        });
+    </script>
+
+</body>
+</html>
