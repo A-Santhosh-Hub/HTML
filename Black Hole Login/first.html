@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Black Hole Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        /* Custom font */
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+
+        h1, h2, .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Base styles for a dark, cosmic theme */
+        body {
+            background-color: #0a0a1a;
+            background-image: radial-gradient(circle, #1a1a3a 1px, transparent 1px);
+            background-size: 20px 20px;
+            overflow: hidden;
+        }
+
+        /* Canvas for particle effects */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Main container to center content */
+        .main-container {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Glassmorphism effect for panels */
+        .glass-panel {
+            background: rgba(20, 20, 40, 0.5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        /* Input field styling and focus animation */
+        .password-input {
+            transition: all 0.4s ease;
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0);
+        }
+
+        .password-input:focus {
+            box-shadow: 0 0 25px rgba(128, 90, 213, 0.8), 0 0 10px rgba(128, 90, 213, 0.6);
+            border-color: rgba(128, 90, 213, 0.8);
+        }
+
+        /* Button styling with hover effect */
+        .login-btn {
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0);
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.7);
+        }
+
+        /* Black Hole element */
+        #black-hole {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 0px;
+            height: 0px;
+            background: black;
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            z-index: 999;
+            transition: transform 2s cubic-bezier(0.6, -0.28, 0.735, 0.045);
+        }
+
+        #black-hole.active {
+            transform: translate(-50%, -50%) scale(250);
+        }
+
+        /* Animation for elements being absorbed */
+        .absorbed {
+            animation: absorb 1.5s forwards cubic-bezier(0.55, 0.085, 0.68, 0.53);
+        }
+
+        @keyframes absorb {
+            0% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0) rotate(360deg) translate(0, 0);
+                opacity: 0;
+                transform-origin: center;
+            }
+        }
+
+        /* Glitch effect for the catchup number */
+        .glitch {
+            animation: glitch-animation 1.5s infinite;
+        }
+
+        @keyframes glitch-animation {
+            0% { text-shadow: .05em 0 0 rgba(255,0,0,.75), -.025em -.05em 0 rgba(0,255,0,.75), .025em .05em 0 rgba(0,0,255,.75); }
+            14% { text-shadow: .05em 0 0 rgba(255,0,0,.75), -.025em -.05em 0 rgba(0,255,0,.75), .025em .05em 0 rgba(0,0,255,.75); }
+            15% { text-shadow: -.05em -.025em 0 rgba(255,0,0,.75), .025em .025em 0 rgba(0,255,0,.75), -.05em -.05em 0 rgba(0,0,255,.75); }
+            49% { text-shadow: -.05em -.025em 0 rgba(255,0,0,.75), .025em .025em 0 rgba(0,255,0,.75), -.05em -.05em 0 rgba(0,0,255,.75); }
+            50% { text-shadow: .025em .05em 0 rgba(255,0,0,.75), .05em 0 0 rgba(0,255,0,.75), 0 -.05em 0 rgba(0,0,255,.75); }
+            99% { text-shadow: .025em .05em 0 rgba(255,0,0,.75), .05em 0 0 rgba(0,255,0,.75), 0 -.05em 0 rgba(0,0,255,.75); }
+            100% { text-shadow: -.025em 0 0 rgba(255,0,0,.75), -.025em -.025em 0 rgba(0,255,0,.75), -.025em -.05em 0 rgba(0,0,255,.75); }
+        }
+    </style>
+</head>
+<body class="text-white">
+
+    <canvas id="particle-canvas"></canvas>
+    <div id="black-hole"></div>
+
+    <div id="main-container" class="main-container min-h-screen flex items-center justify-center p-4 transition-opacity duration-1000">
+
+        <!-- Login Screen -->
+        <div id="login-screen" class="w-full max-w-md space-y-8 transition-all duration-700">
+            <div class="text-center space-y-2 page-element">
+                <h1 class="text-4xl md:text-5xl font-bold tracking-wider">VOID ACCESS</h1>
+                <p class="text-purple-300">Enter credentials to cross the event horizon.</p>
+            </div>
+            <div class="glass-panel rounded-xl p-8 space-y-6 page-element">
+                <div class="space-y-2">
+                    <label for="password" class="text-sm font-light text-gray-300">Password</label>
+                    <input type="password" id="password" name="password" placeholder="••••••••••••"
+                           class="password-input w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 text-white">
+                </div>
+                <button id="login-btn" class="login-btn w-full py-3 bg-green-500 hover:bg-green-400 rounded-lg font-bold text-gray-900 tracking-wider">
+                    ENGAGE WARP DRIVE
+                </button>
+            </div>
+        </div>
+
+        <!-- Welcome Screen (Initially Hidden) -->
+        <div id="welcome-screen" class="hidden text-center transition-all duration-700 opacity-0">
+            <h2 class="text-5xl md:text-7xl font-bold text-green-400 animate-pulse">Welcome Home</h2>
+            <p class="text-xl text-gray-300 mt-4">The cosmos awaits your command.</p>
+        </div>
+
+        <!-- Out of Space Screen (Initially Hidden) -->
+        <div id="outofspace-screen" class="hidden text-center transition-all duration-700 opacity-0">
+             <div class="page-element">
+                <h2 class="text-5xl md:text-6xl font-bold text-red-500">You're Out of Space!</h2>
+                <p class="text-lg text-gray-400 mt-4">A singularity has occurred. Reality is unstable.</p>
+            </div>
+            <div class="glass-panel rounded-xl p-8 mt-8 space-y-6 page-element">
+                <p class="text-purple-300">Enter the Catchup Number to restore spacetime.</p>
+                <p id="catchup-number-display" class="text-6xl font-bold glitch text-cyan-400"></p>
+                <div class="space-y-2">
+                     <label for="catchup-input" class="text-sm font-light text-gray-300">Catchup Number</label>
+                    <input type="text" id="catchup-input" name="catchup-input" placeholder="###"
+                           class="password-input w-full text-center text-2xl px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white">
+                </div>
+                <button id="restore-btn" class="w-full py-3 bg-cyan-500 hover:bg-cyan-400 rounded-lg font-bold text-gray-900 tracking-wider transition-all duration-300">
+                    REVERSE ENTROPY
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const loginScreen = document.getElementById('login-screen');
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const outofspaceScreen = document.getElementById('outofspace-screen');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('login-btn');
+        const blackHole = document.getElementById('black-hole');
+        const catchupNumberDisplay = document.getElementById('catchup-number-display');
+        const catchupInput = document.getElementById('catchup-input');
+        const restoreBtn = document.getElementById('restore-btn');
+        const mainContainer = document.getElementById('main-container');
+
+        // --- State ---
+        const CORRECT_PASSWORD = 'password'; // The secret password
+        let catchupNumber = 0;
+
+        // --- Event Listeners ---
+        loginBtn.addEventListener('click', handleLogin);
+        passwordInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
+        restoreBtn.addEventListener('click', handleRestore);
+        catchupInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') handleRestore();
+        });
+
+
+        // --- Functions ---
+
+        /**
+         * Handles the login attempt.
+         */
+        function handleLogin() {
+            if (passwordInput.value === CORRECT_PASSWORD) {
+                showSuccess();
+            } else {
+                triggerBlackHole();
+            }
+        }
+        
+        /**
+         * Handles the attempt to restore spacetime with the catchup number.
+         */
+        function handleRestore() {
+            if (parseInt(catchupInput.value) === catchupNumber) {
+                window.location.reload(); // Simple way to reset the scene
+            } else {
+                catchupInput.classList.add('animate-shake');
+                setTimeout(() => catchupInput.classList.remove('animate-shake'), 500);
+            }
+        }
+
+        /**
+         * Shows the "Welcome Home" screen with a smooth transition.
+         */
+        function showSuccess() {
+            loginScreen.style.opacity = '0';
+            loginScreen.style.transform = 'scale(0.8)';
+
+            setTimeout(() => {
+                loginScreen.classList.add('hidden');
+                welcomeScreen.classList.remove('hidden');
+                setTimeout(() => {
+                    welcomeScreen.style.opacity = '1';
+                    welcomeScreen.style.transform = 'scale(1)';
+                }, 50); // Small delay to ensure display property is set
+            }, 700);
+        }
+
+        /**
+         * Triggers the black hole absorption animation.
+         */
+        function triggerBlackHole() {
+            const elementsToAbsorb = document.querySelectorAll('#login-screen .page-element');
+            
+            // Apply absorption animation with a delay for each element
+            elementsToAbsorb.forEach((el, index) => {
+                el.style.animationDelay = `${index * 0.15}s`;
+                el.classList.add('absorbed');
+            });
+            
+            // Activate the black hole growth
+            setTimeout(() => {
+                blackHole.classList.add('active');
+            }, 500);
+
+            // After absorption, show the "Out of Space" screen
+            setTimeout(() => {
+                showOutOfSpaceScreen();
+            }, 2000); // Wait for animations to mostly finish
+        }
+
+        /**
+         * Shows the "You're Out of Space" screen.
+         */
+        function showOutOfSpaceScreen() {
+            mainContainer.style.opacity = '0';
+            
+            setTimeout(() => {
+                loginScreen.classList.add('hidden');
+                outofspaceScreen.classList.remove('hidden');
+                
+                generateCatchupNumber();
+
+                mainContainer.style.opacity = '1';
+                setTimeout(() => {
+                    outofspaceScreen.style.opacity = '1';
+                }, 50);
+            }, 1000);
+        }
+        
+        /**
+         * Generates and displays the random catchup number.
+         */
+        function generateCatchupNumber() {
+            catchupNumber = Math.floor(100 + Math.random() * 900);
+            
+            // Animate the number generation
+            let interval = setInterval(() => {
+                catchupNumberDisplay.textContent = Math.floor(100 + Math.random() * 900);
+            }, 50);
+
+            setTimeout(() => {
+                clearInterval(interval);
+                catchupNumberDisplay.textContent = catchupNumber;
+                catchupNumberDisplay.classList.remove('glitch');
+            }, 1500);
+        }
+
+        // Add a simple shake animation for wrong catchup input
+        const styleSheet = document.createElement("style");
+        styleSheet.type = "text/css";
+        styleSheet.innerText = `
+            @keyframes shake {
+                10%, 90% { transform: translate3d(-1px, 0, 0); }
+                20%, 80% { transform: translate3d(2px, 0, 0); }
+                30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+                40%, 60% { transform: translate3d(4px, 0, 0); }
+            }
+            .animate-shake {
+                animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+            }
+        `;
+        document.head.appendChild(styleSheet);
+
+
+        // --- Canvas Particle System ---
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particles = [];
+        const numParticles = 200;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * 1 - 0.5;
+                this.color = `rgba(200, 200, 255, ${Math.random() * 0.5 + 0.2})`;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                // Reset particle if it goes off-screen
+                if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            for (let i = 0; i < numParticles; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+            }
+            requestAnimationFrame(animateParticles);
+        }
+        
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            particles = [];
+            initParticles();
+        });
+
+        initParticles();
+        animateParticles();
+    </script>
+</body>
+</html>
