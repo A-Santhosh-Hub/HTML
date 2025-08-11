@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galactic Portal | Space Adventure Login</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Orbitron', 'Arial Narrow', sans-serif;
+        }
+
+        body {
+            background: #000;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            color: #fff;
+            perspective: 1000px;
+        }
+
+        #starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .login-screen {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(10, 15, 30, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(100, 150, 255, 0.3);
+            box-shadow: 0 0 50px rgba(0, 100, 255, 0.3);
+            transform: translateZ(50px);
+            max-width: 500px;
+            width: 90%;
+            transition: all 0.5s ease;
+        }
+
+        .logo {
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .logo h1 {
+            font-size: 3rem;
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 15px rgba(0, 242, 254, 0.5);
+            letter-spacing: 4px;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo h2 {
+            font-size: 1.2rem;
+            color: #a0d2ff;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .input-group {
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(0, 20, 40, 0.7);
+            border: 2px solid rgba(100, 150, 255, 0.3);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1.2rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            border-color: #00f2fe;
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.7);
+            background: rgba(0, 30, 60, 0.8);
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, #0072ff, #00c6ff);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+            margin-top: 1rem;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 114, 255, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(1px);
+        }
+
+        .submit-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 20px;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(30deg);
+            transition: all 0.6s;
+        }
+
+        .submit-btn:hover::after {
+            left: 120%;
+        }
+
+        .instructions {
+            margin-top: 1rem;
+            color: #a0d2ff;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .blackhole {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, #000 0%, #000 60%, #4a00e0 100%);
+            box-shadow: 0 0 100px #4a00e0;
+            z-index: 5;
+            display: none;
+        }
+
+        .debris {
+            position: absolute;
+            color: white;
+            font-size: 1.5rem;
+            z-index: 6;
+            opacity: 0;
+        }
+
+        .catchup-challenge {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 15;
+            display: none;
+            background: rgba(0, 10, 30, 0.9);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 0, 128, 0.5);
+            box-shadow: 0 0 30px rgba(255, 0, 128, 0.5);
+        }
+
+        .catchup-number {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #ff00cc;
+            text-shadow: 0 0 20px #ff00cc;
+            margin: 1.5rem 0;
+            letter-spacing: 5px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .countdown {
+            font-size: 1.5rem;
+            color: #00f2fe;
+            margin-bottom: 1.5rem;
+        }
+
+        .wormhole {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, #00f2fe 0%, #0072ff 100%);
+            z-index: 20;
+            display: none;
+        }
+
+        .dashboard {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxjaXJjbGUgY3g9IjIwIiBjeT0iMjAiIHI9IjEiIGZpbGw9IiMwMDcyZmYiIGZpbGwtb3BhY2l0eT0iMC4xIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI3BhdHRlcm4pIi8+PC9zdmc+');
+            background-color: #001220;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 30;
+        }
+
+        .welcome-message {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .space-title {
+            font-size: 2rem;
+            color: #ffcc00;
+            margin-bottom: 3rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .station-view {
+            width: 80%;
+            max-width: 700px;
+            height: 300px;
+            background: rgba(0, 20, 40, 0.7);
+            border-radius: 20px;
+            border: 1px solid rgba(100, 150, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 100, 255, 0.3);
+        }
+
+        .space-object {
+            position: absolute;
+            border-radius: 50%;
+        }
+
+        .planet {
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle at 30% 30%, #ff9966, #ff5e62);
+            top: 50px;
+            right: 50px;
+            box-shadow: 0 0 30px #ff5e62;
+        }
+
+        .asteroid {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(45deg, #888, #555);
+            top: 150px;
+            left: 100px;
+            animation: float 15s infinite linear;
+        }
+
+        .asteroid:nth-child(3) {
+            width: 20px;
+            height: 20px;
+            top: 200px;
+            left: 300px;
+            animation-duration: 20s;
+        }
+
+        .starship {
+            width: 50px;
+            height: 30px;
+            background: linear-gradient(45deg, #00c6ff, #0072ff);
+            clip-path: polygon(0% 50%, 50% 0%, 100% 50%, 50% 100%);
+            top: 120px;
+            left: 250px;
+            animation: pulse 3s infinite alternate;
+        }
+
+        .controls {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .control-btn {
+            padding: 10px 20px;
+            background: rgba(0, 50, 100, 0.7);
+            border: 1px solid rgba(100, 150, 255, 0.5);
+            color: #a0d2ff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: rgba(0, 100, 200, 0.7);
+            transform: translateY(-2px);
+        }
+
+        .galaxy-map {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: none;
+            z-index: 40;
+        }
+
+        .constellation {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #fff;
+            cursor: pointer;
+        }
+
+        .constellation:hover::after {
+            content: attr(data-name);
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            padding: 5px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+
+        .constellation-line {
+            position: absolute;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.3);
+            transform-origin: 0 0;
+        }
+
+        @keyframes float {
+            0% { transform: translateX(0) translateY(0); }
+            100% { transform: translateX(700px) translateY(-100px); }
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.7; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.1); }
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.2; }
+            50% { opacity: 1; }
+            100% { opacity: 0.2; }
+        }
+
+        .cosmic-dust {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        .error-message {
+            color: #ff3366;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="starfield"></canvas>
+    
+    <div class="container">
+        <div class="login-screen">
+            <div class="logo">
+                <div>
+                    <h1>GALACTIC PORTAL</h1>
+                    <h2>ACCESS THE COSMIC NETWORK</h2>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <input type="password" id="password" class="input-field" placeholder="ENTER ACCESS CODE" autocomplete="off">
+                <div class="error-message" id="errorMsg"></div>
+            </div>
+            
+            <button id="loginBtn" class="submit-btn">INITIATE DOCKING SEQUENCE</button>
+            
+            <p class="instructions">Password hint: 007124</p>
+        </div>
+    </div>
+    
+    <div class="blackhole" id="blackhole"></div>
+    
+    <div class="catchup-challenge" id="catchupChallenge">
+        <h2>SPACE RESCUE REQUIRED</h2>
+        <p>Enter the emergency catchup number:</p>
+        <div class="catchup-number" id="catchupNumber">000000</div>
+        <div class="countdown" id="countdown">5s</div>
+        <div class="input-group">
+            <input type="text" id="catchupInput" class="input-field" placeholder="ENTER CATCHUP CODE">
+            <div class="error-message" id="catchupError"></div>
+        </div>
+        <button id="catchupBtn" class="submit-btn">ACTIVATE WORMHOLE</button>
+    </div>
+    
+    <div class="wormhole" id="wormhole"></div>
+    
+    <div class="dashboard" id="dashboard">
+        <div class="welcome-message">WELCOME HOME, COMMANDER</div>
+        <div class="space-title" id="spaceTitle">STAR ENGINEER</div>
+        
+        <div class="station-view">
+            <div class="space-object planet"></div>
+            <div class="space-object asteroid"></div>
+            <div class="space-object asteroid"></div>
+            <div class="space-object starship"></div>
+        </div>
+        
+        <div class="controls">
+            <button class="control-btn">NAVIGATION</button>
+            <button class="control-btn">COMMUNICATIONS</button>
+            <button class="control-btn">ENGINEERING</button>
+            <button class="control-btn" id="galaxyMapBtn">GALAXY MAP</button>
+        </div>
+    </div>
+    
+    <div class="galaxy-map" id="galaxyMap">
+        <!-- Constellation map will be generated here -->
+    </div>
+    
+    <audio id="backgroundMusic" loop>
+        <source src="https://assets.mixkit.co/music/preview/mixkit-space-game-668.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="successSound">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-sci-fi-positive-notification-266.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="errorSound">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-sci-fi-alarm-990.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="blackholeSound">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-deep-space-ambience-2996.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // Initialize Three.js for starfield background
+        const starfieldCanvas = document.getElementById('starfield');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: starfieldCanvas, alpha: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        camera.position.z = 5;
+
+        // Create stars
+        const starsGeometry = new THREE.BufferGeometry();
+        const starsMaterial = new THREE.PointsMaterial({
+            color: 0xFFFFFF,
+            size: 0.1,
+            transparent: true
+        });
+
+        const starsVertices = [];
+        for (let i = 0; i < 5000; i++) {
+            const x = THREE.MathUtils.randFloatSpread(2000);
+            const y = THREE.MathUtils.randFloatSpread(2000);
+            const z = THREE.MathUtils.randFloatSpread(2000);
+            starsVertices.push(x, y, z);
+        }
+
+        starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
+        const starField = new THREE.Points(starsGeometry, starsMaterial);
+        scene.add(starField);
+
+        // Create distant planets
+        const planets = [];
+        for (let i = 0; i < 5; i++) {
+            const planetGeometry = new THREE.SphereGeometry(20, 32, 32);
+            const planetMaterial = new THREE.MeshBasicMaterial({
+                color: new THREE.Color(Math.random() * 0xFFFFFF),
+                transparent: true,
+                opacity: 0.3
+            });
+            const planet = new THREE.Mesh(planetGeometry, planetMaterial);
+            planet.position.x = (Math.random() - 0.5) * 1000;
+            planet.position.y = (Math.random() - 0.5) * 1000;
+            planet.position.z = -500 - Math.random() * 1000;
+            scene.add(planet);
+            planets.push(planet);
+        }
+
+        // Animate starfield
+        function animateStarfield() {
+            requestAnimationFrame(animateStarfield);
+            
+            // Rotate starfield for parallax effect
+            starField.rotation.y += 0.0001;
+            
+            // Move planets slowly
+            planets.forEach(planet => {
+                planet.rotation.y += 0.001;
+                planet.position.z += 0.1;
+                if (planet.position.z > 0) {
+                    planet.position.z = -1000;
+                }
+            });
+            
+            renderer.render(scene, camera);
+        }
+        
+        animateStarfield();
+
+        // DOM elements
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('loginBtn');
+        const blackhole = document.getElementById('blackhole');
+        const catchupChallenge = document.getElementById('catchupChallenge');
+        const catchupNumber = document.getElementById('catchupNumber');
+        const countdown = document.getElementById('countdown');
+        const catchupInput = document.getElementById('catchupInput');
+        const catchupBtn = document.getElementById('catchupBtn');
+        const wormhole = document.getElementById('wormhole');
+        const dashboard = document.getElementById('dashboard');
+        const spaceTitle = document.getElementById('spaceTitle');
+        const galaxyMap = document.getElementById('galaxyMap');
+        const galaxyMapBtn = document.getElementById('galaxyMapBtn');
+        const errorMsg = document.getElementById('errorMsg');
+        const catchupError = document.getElementById('catchupError');
+        
+        // Audio elements
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const successSound = document.getElementById('successSound');
+        const errorSound = document.getElementById('errorSound');
+        const blackholeSound = document.getElementById('blackholeSound');
+        
+        // Cosmic dust particles
+        function createCosmicDust() {
+            for (let i = 0; i < 100; i++) {
+                const dust = document.createElement('div');
+                dust.className = 'cosmic-dust';
+                dust.style.left = `${Math.random() * 100}%`;
+                dust.style.top = `${Math.random() * 100}%`;
+                dust.style.animation = `twinkle ${2 + Math.random() * 3}s infinite`;
+                dust.style.opacity = Math.random() * 0.7;
+                document.body.appendChild(dust);
+            }
+        }
+        
+        // Dust reacts to mouse movement
+        document.addEventListener('mousemove', (e) => {
+            const dustParticles = document.querySelectorAll('.cosmic-dust');
+            dustParticles.forEach(particle => {
+                const x = parseFloat(particle.style.left);
+                const y = parseFloat(particle.style.top);
+                const dx = e.clientX - x;
+                const dy = e.clientY - y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < 200) {
+                    const force = 200 / distance;
+                    particle.style.transform = `translate(${dx * force * 0.01}px, ${dy * force * 0.01}px)`;
+                }
+            });
+        });
+        
+        // Generate random catchup number
+        function generateCatchupNumber() {
+            const num = Math.floor(100000 + Math.random() * 900000);
+            catchupNumber.textContent = num;
+            return num;
+        }
+        
+        // Space titles for successful login
+        const spaceTitles = [
+            "Captain of Orion",
+            "Star Engineer",
+            "Comet Chaser",
+            "Nebula Navigator",
+            "Quantum Explorer",
+            "Galactic Guardian",
+            "Cosmic Commander",
+            "Void Voyager",
+            "Astral Archivist",
+            "Pulsar Pilot"
+        ];
+        
+        // Constellation data for galaxy map
+        const constellations = [
+            { name: "Orion", x: 30, y: 30 },
+            { name: "Ursa Major", x: 70, y: 20 },
+            { name: "Cassiopeia", x: 20, y: 70 },
+            { name: "Lyra", x: 80, y: 60 },
+            { name: "Cygnus", x: 50, y: 40 },
+            { name: "Scorpius", x: 40, y: 80 },
+            { name: "Pegasus", x: 60, y: 30 },
+            { name: "Andromeda", x: 30, y: 50 }
+        ];
+        
+        // Create galaxy map
+        function createGalaxyMap() {
+            galaxyMap.innerHTML = '';
+            
+            // Create stars
+            for (let i = 0; i < 200; i++) {
+                const star = document.createElement('div');
+                star.className = 'constellation';
+                star.style.left = `${Math.random() * 95}%`;
+                star.style.top = `${Math.random() * 95}%`;
+                star.style.width = `${Math.random() * 5 + 2}px`;
+                star.style.height = star.style.width;
+                galaxyMap.appendChild(star);
+            }
+            
+            // Create constellations
+            constellations.forEach(constellation => {
+                const star = document.createElement('div');
+                star.className = 'constellation';
+                star.dataset.name = constellation.name;
+                star.style.left = `${constellation.x}%`;
+                star.style.top = `${constellation.y}%`;
+                star.style.width = '10px';
+                star.style.height = '10px';
+                star.style.background = '#4facfe';
+                star.style.boxShadow = '0 0 15px #4facfe';
+                galaxyMap.appendChild(star);
+            });
+            
+            // Create lines between constellations
+            for (let i = 0; i < constellations.length - 1; i++) {
+                const start = constellations[i];
+                const end = constellations[i + 1];
+                
+                const line = document.createElement('div');
+                line.className = 'constellation-line';
+                
+                const dx = end.x - start.x;
+                const dy = end.y - start.y;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                
+                line.style.width = `${length}%`;
+                line.style.left = `${start.x}%`;
+                line.style.top = `${start.y}%`;
+                line.style.transform = `rotate(${angle}deg)`;
+                
+                galaxyMap.appendChild(line);
+            }
+        }
+        
+        // Start background music
+        backgroundMusic.volume = 0.3;
+        backgroundMusic.play().catch(e => console.log("Autoplay prevented: " + e));
+        
+        // Password check
+        loginBtn.addEventListener('click', () => {
+            const password = passwordInput.value;
+            
+            // Easter egg for galaxy map
+            if (password === "galaxy123") {
+                createGalaxyMap();
+                galaxyMap.style.display = 'block';
+                return;
+            }
+            
+            if (password === "007124") {
+                // Correct password - warp effect
+                successSound.play();
+                errorMsg.textContent = '';
+                
+                // Create warp effect
+                gsap.to('.login-screen', {
+                    duration: 1,
+                    scale: 0.1,
+                    opacity: 0,
+                    ease: "power2.in"
+                });
+                
+                // Warp tunnel effect
+                const tunnel = document.createElement('div');
+                tunnel.style.position = 'fixed';
+                tunnel.style.top = '0';
+                tunnel.style.left = '0';
+                tunnel.style.width = '100%';
+                tunnel.style.height = '100%';
+                tunnel.style.background = 'radial-gradient(circle, #00f2fe 0%, #0072ff 100%)';
+                tunnel.style.zIndex = '25';
+                tunnel.style.opacity = '0';
+                document.body.appendChild(tunnel);
+                
+                gsap.to(tunnel, {
+                    duration: 2,
+                    opacity: 1,
+                    scale: 0.1,
+                    onComplete: () => {
+                        document.body.removeChild(tunnel);
+                        dashboard.style.display = 'flex';
+                        
+                        // Assign random space title
+                        const randomTitle = spaceTitles[Math.floor(Math.random() * spaceTitles.length)];
+                        spaceTitle.textContent = randomTitle;
+                        
+                        gsap.from('.welcome-message', {
+                            duration: 1,
+                            y: 50,
+                            opacity: 0
+                        });
+                        
+                        gsap.from('.space-title', {
+                            duration: 1,
+                            y: 30,
+                            opacity: 0,
+                            delay: 0.5
+                        });
+                        
+                        gsap.from('.station-view', {
+                            duration: 1,
+                            scale: 0.8,
+                            opacity: 0,
+                            delay: 1
+                        });
+                        
+                        gsap.from('.control-btn', {
+                            duration: 0.5,
+                            y: 20,
+                            opacity: 0,
+                            stagger: 0.1,
+                            delay: 1.5
+                        });
+                    }
+                });
+            } else {
+                // Wrong password - black hole effect
+                errorSound.play();
+                errorMsg.textContent = 'ACCESS DENIED - INCORRECT CODE';
+                
+                // Create debris elements
+                const debrisElements = [];
+                const elementsToDestroy = ['.logo', '.input-group', '.submit-btn', '.instructions'];
+                
+                elementsToDestroy.forEach(selector => {
+                    const elem = document.querySelector(selector);
+                    const clone = elem.cloneNode(true);
+                    clone.classList.add('debris');
+                    clone.style.position = 'absolute';
+                    clone.style.left = `${elem.getBoundingClientRect().left}px`;
+                    clone.style.top = `${elem.getBoundingClientRect().top}px`;
+                    document.body.appendChild(clone);
+                    debrisElements.push(clone);
+                    elem.style.visibility = 'hidden';
+                });
+                
+                // Show black hole
+                blackhole.style.display = 'block';
+                blackholeSound.play();
+                
+                // Animate black hole growth
+                gsap.to(blackhole, {
+                    duration: 2,
+                    width: '100vmax',
+                    height: '100vmax',
+                    ease: "power2.in"
+                });
+                
+                // Animate debris being sucked in
+                debrisElements.forEach((debris, i) => {
+                    gsap.to(debris, {
+                        duration: 1.5,
+                        x: window.innerWidth / 2 - debris.getBoundingClientRect().left - debris.offsetWidth / 2,
+                        y: window.innerHeight / 2 - debris.getBoundingClientRect().top - debris.offsetHeight / 2,
+                        scale: 0.1,
+                        rotation: Math.random() * 360,
+                        opacity: 0,
+                        delay: i * 0.1,
+                        onComplete: () => {
+                            document.body.removeChild(debris);
+                        }
+                    });
+                });
+                
+                // Show catchup challenge after black hole effect
+                setTimeout(() => {
+                    catchupChallenge.style.display = 'block';
+                    const catchupNum = generateCatchupNumber();
+                    
+                    // Start countdown
+                    let timeLeft = 5;
+                    const countdownInterval = setInterval(() => {
+                        timeLeft--;
+                        countdown.textContent = `${timeLeft}s`;
+                        
+                        if (timeLeft <= 0) {
+                            clearInterval(countdownInterval);
+                            catchupNumber.textContent = "XXXXXX";
+                            catchupNumber.style.color = "#ff3366";
+                            catchupNumber.style.textShadow = "0 0 20px #ff3366";
+                        }
+                    }, 1000);
+                    
+                    // Glitch effect on number
+                    setInterval(() => {
+                        if (timeLeft > 0) {
+                            gsap.to(catchupNumber, {
+                                duration: 0.1,
+                                x: (Math.random() - 0.5) * 10,
+                                y: (Math.random() - 0.5) * 5,
+                                onComplete: () => {
+                                    gsap.to(catchupNumber, {
+                                        duration: 0.1,
+                                        x: 0,
+                                        y: 0
+                                    });
+                                }
+                            });
+                        }
+                    }, 300);
+                }, 2500);
+            }
+        });
+        
+        // Catchup challenge button
+        catchupBtn.addEventListener('click', () => {
+            if (catchupInput.value === catchupNumber.textContent && catchupNumber.textContent !== "XXXXXX") {
+                // Correct catchup number - wormhole effect
+                successSound.play();
+                catchupError.textContent = '';
+                
+                // Create wormhole
+                wormhole.style.display = 'block';
+                gsap.to(wormhole, {
+                    duration: 1,
+                    width: '100vmax',
+                    height: '100vmax',
+                    opacity: 0.8,
+                    onComplete: () => {
+                        // Reset everything
+                        wormhole.style.display = 'none';
+                        wormhole.style.width = '0';
+                        wormhole.style.height = '0';
+                        catchupChallenge.style.display = 'none';
+                        blackhole.style.display = 'none';
+                        blackhole.style.width = '0';
+                        blackhole.style.height = '0';
+                        
+                        // Reset login screen
+                        document.querySelectorAll('.input-group, .submit-btn, .instructions, .logo').forEach(elem => {
+                            elem.style.visibility = 'visible';
+                        });
+                        
+                        gsap.to('.login-screen', {
+                            duration: 1,
+                            scale: 1,
+                            opacity: 1
+                        });
+                        
+                        // Reset catchup challenge
+                        catchupNumber.textContent = "000000";
+                        catchupNumber.style.color = "#ff00cc";
+                        catchupNumber.style.textShadow = "0 0 20px #ff00cc";
+                        catchupInput.value = '';
+                    }
+                });
+            } else {
+                // Wrong catchup number
+                errorSound.play();
+                catchupError.textContent = 'INVALID RESCUE CODE';
+                
+                // Shake animation
+                gsap.to(catchupInput, {
+                    duration: 0.1,
+                    x: 10,
+                    repeat: 5,
+                    yoyo: true,
+                    onComplete: () => {
+                        gsap.to(catchupInput, { x: 0 });
+                    }
+                });
+            }
+        });
+        
+        // Galaxy map button
+        galaxyMapBtn.addEventListener('click', () => {
+            createGalaxyMap();
+            galaxyMap.style.display = 'block';
+            
+            gsap.from('.constellation', {
+                duration: 0.5,
+                scale: 0,
+                opacity: 0,
+                stagger: 0.02
+            });
+        });
+        
+        // Close galaxy map by clicking anywhere
+        galaxyMap.addEventListener('click', () => {
+            galaxyMap.style.display = 'none';
+        });
+        
+        // Initialize cosmic dust
+        createCosmicDust();
+        
+        // Input field glow effect
+        passwordInput.addEventListener('focus', () => {
+            gsap.to(passwordInput, {
+                duration: 0.5,
+                boxShadow: '0 0 20px rgba(0, 242, 254, 0.7)',
+                borderColor: '#00f2fe'
+            });
+        });
+        
+        passwordInput.addEventListener('blur', () => {
+            gsap.to(passwordInput, {
+                duration: 0.5,
+                boxShadow: '0 0 10px rgba(0, 100, 255, 0.3)',
+                borderColor: 'rgba(100, 150, 255, 0.3)'
+            });
+        });
+        
+        // Submit with Enter key
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                loginBtn.click();
+            }
+        });
+        
+        catchupInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                catchupBtn.click();
+            }
+        });
+        
+        // Window resize handler
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
