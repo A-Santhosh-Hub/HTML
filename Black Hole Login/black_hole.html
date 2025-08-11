@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Black Hole Login Experience</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glow-color: #00aaff;
+            --primary-text: #e0e0e0;
+            --background-color: #01020a;
+            --error-color: #ff4d4d;
+            --glitch-color-1: #ff00ff;
+            --glitch-color-2: #00ffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background-color: var(--background-color);
+            color: var(--primary-text);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            transition: filter 2s ease-in-out;
+        }
+
+        .scene {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+            z-index: 10;
+        }
+
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.9);
+        }
+
+        /* Login Scene */
+        #login-scene .login-container {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 170, 255, 0.3);
+            padding: 40px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(0, 170, 255, 0.2);
+        }
+        
+        #login-scene h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px var(--glow-color), 0 0 20px var(--glow-color);
+        }
+
+        #login-scene p {
+            margin-bottom: 30px;
+            color: #aaa;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        #password-input {
+            width: 300px;
+            padding: 15px;
+            background: transparent;
+            border: 2px solid var(--glow-color);
+            border-radius: 8px;
+            color: var(--primary-text);
+            font-size: 1.2rem;
+            text-align: center;
+            letter-spacing: 0.3em;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 5px var(--glow-color);
+        }
+
+        #password-input:focus {
+            outline: none;
+            box-shadow: 0 0 20px var(--glow-color), inset 0 0 10px var(--glow-color);
+            transform: scale(1.05);
+        }
+
+        #login-button {
+            padding: 15px 40px;
+            background: var(--glow-color);
+            color: var(--background-color);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px var(--glow-color);
+        }
+
+        #login-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px var(--glow-color), 0 0 40px var(--glow-color);
+        }
+
+        /* Failure Scene */
+        #failure-scene h2 {
+            font-size: 4rem;
+            text-shadow: 0 0 10px var(--error-color);
+            animation: glitch 1.5s infinite;
+            z-index: 100; /* Ensure it's above the canvas */
+        }
+
+        #failure-scene p {
+            font-size: 1.5rem;
+            margin-top: 20px;
+        }
+        
+        /* Catchup Challenge */
+        #catchup-challenge {
+            margin-top: 40px;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        #catchup-number {
+            font-size: 5rem;
+            font-weight: 700;
+            letter-spacing: 0.5em;
+            text-shadow: 0 0 10px var(--glitch-color-1), 0 0 20px var(--glitch-color-1), 0 0 30px var(--glitch-color-2), 0 0 40px var(--glitch-color-2);
+            animation: neon-glitch 0.1s infinite alternate;
+        }
+
+        #catchup-timer {
+            margin-top: 10px;
+            font-size: 1rem;
+            color: var(--error-color);
+        }
+
+        #catchup-input {
+            margin-top: 20px;
+            width: 250px;
+            padding: 10px;
+            background: transparent;
+            border: 2px solid var(--error-color);
+            border-radius: 8px;
+            color: var(--primary-text);
+            font-size: 1.5rem;
+            text-align: center;
+        }
+        
+        #catchup-input:focus {
+            outline: none;
+            box-shadow: 0 0 15px var(--error-color);
+        }
+
+
+        /* Success Scene */
+        #success-scene h1 {
+            font-size: 4rem;
+            text-shadow: 0 0 15px #0f0, 0 0 30px #0f0;
+        }
+        #success-scene #user-title {
+            font-size: 1.5rem;
+            margin-top: 10px;
+            color: #ccc;
+        }
+        #galaxy-map-button {
+            margin-top: 40px;
+            padding: 15px 30px;
+            background: transparent;
+            border: 2px solid #fff;
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        #galaxy-map-button:hover {
+            background: #fff;
+            color: #000;
+            box-shadow: 0 0 20px #fff;
+        }
+
+        /* Glitch Animations */
+        @keyframes glitch {
+            0% { transform: translate(0); text-shadow: 0 0 10px var(--error-color); }
+            20% { transform: translate(-5px, 5px); text-shadow: -3px 0 var(--glitch-color-1), 3px 0 var(--glitch-color-2); }
+            40% { transform: translate(-5px, -5px); }
+            60% { transform: translate(5px, 5px); text-shadow: 3px 0 var(--glitch-color-1), -3px 0 var(--glitch-color-2); }
+            80% { transform: translate(5px, -5px); }
+            100% { transform: translate(0); text-shadow: 0 0 10px var(--error-color); }
+        }
+
+        @keyframes neon-glitch {
+            to {
+                text-shadow: 0 0 15px var(--glitch-color-2), 0 0 25px var(--glitch-color-2), 0 0 35px var(--glitch-color-1), 0 0 45px var(--glitch-color-1);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 3D Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Login Scene -->
+    <div id="login-scene" class="scene">
+        <div class="login-container">
+            <h1 id="login-title">GALACTIC PORTAL</h1>
+            <p id="login-subtitle">Enter Access Code to Proceed</p>
+            <form id="login-form">
+                <div class="input-group">
+                    <input type="password" id="password-input" autocomplete="off">
+                </div>
+                <button type="submit" id="login-button">ENGAGE</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Success Scene -->
+    <div id="success-scene" class="scene hidden">
+        <h1>WELCOME HOME</h1>
+        <p id="user-title">Designation: Comet Chaser</p>
+        <button id="galaxy-map-button">GALAXY MAP</button>
+    </div>
+
+    <!-- Failure Scene -->
+    <div id="failure-scene" class="scene hidden">
+        <h2>YOU'RE OUT OF SPACE</h2>
+        <div id="catchup-challenge">
+            <p>EMERGENCY RESCUE PROTOCOL</p>
+            <div id="catchup-number"></div>
+            <div id="catchup-timer"></div>
+            <input type="text" id="catchup-input" placeholder="Enter Code">
+        </div>
+    </div>
+
+    <!-- Galaxy Map Scene (Easter Egg) -->
+    <div id="galaxy-map-scene" class="scene hidden">
+        <h1>SECRET GALAXY MAP</h1>
+        <p>Congratulations, you found the easter egg!</p>
+    </div>
+
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/MotionPathPlugin.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            gsap.registerPlugin(MotionPathPlugin);
+            // --- Basic Setup ---
+            const scenes = {
+                login: document.getElementById('login-scene'),
+                success: document.getElementById('success-scene'),
+                failure: document.getElementById('failure-scene'),
+                galaxyMap: document.getElementById('galaxy-map-scene'),
+            };
+            const loginForm = document.getElementById('login-form');
+            const passwordInput = document.getElementById('password-input');
+            const bgCanvas = document.getElementById('bg-canvas');
+            
+            const CORRECT_PASSWORD = '007124';
+            const GALAXY_MAP_CODE = 'STARGAZER';
+
+            // --- Audio Setup (Tone.js) ---
+            let soundsReady = false;
+            const sfx = {};
+
+            function initSounds() {
+                sfx.focus = new Tone.Synth({ oscillator: { type: 'sine' }, envelope: { attack: 0.01, decay: 0.1, sustain: 0.2, release: 0.2 } }).toDestination();
+                sfx.warp = new Tone.NoiseSynth({ noise: { type: 'pink' }, envelope: { attack: 0.1, decay: 2, sustain: 0.1, release: 1 } }).toDestination();
+                sfx.warpFilter = new Tone.AutoFilter("1n").toDestination().start();
+                sfx.warp.connect(sfx.warpFilter);
+                sfx.blackHole = new Tone.NoiseSynth({ noise: { type: 'brown' }, volume: -5, envelope: { attack: 1, decay: 3, sustain: 1, release: 4 } }).toDestination();
+                sfx.glitch = new Tone.Synth({ oscillator: { type: 'sawtooth' }, volume: -15, envelope: { attack: 0.01, decay: 0.05, sustain: 0, release: 0.1 } }).toDestination();
+                soundsReady = true;
+            }
+            document.body.addEventListener('click', () => {
+                if (Tone.context.state !== 'running') {
+                    Tone.start().then(initSounds);
+                }
+            }, { once: true });
+
+
+            // --- 3D Scene (Three.js) ---
+            const clock = new THREE.Clock();
+            const scene3d = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ canvas: bgCanvas, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            let stars, starGeo;
+            let blackHole = null;
+            const mouse = new THREE.Vector2();
+
+            function createStarfield() {
+                const starCount = 6000;
+                const positions = new Float32Array(starCount * 3);
+                starGeo = new THREE.BufferGeometry();
+
+                for (let i = 0; i < starCount; i++) {
+                    positions[i * 3] = (Math.random() - 0.5) * 100;
+                    positions[i * 3 + 1] = (Math.random() - 0.5) * 100;
+                    positions[i * 3 + 2] = (Math.random() - 0.5) * 100;
+                }
+                starGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                
+                const starMaterial = new THREE.PointsMaterial({
+                    color: 0xffffff,
+                    size: 0.05,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                stars = new THREE.Points(starGeo, starMaterial);
+                scene3d.add(stars);
+            }
+
+            // --- Interstellar Black Hole ---
+            function createBlackHole() {
+                const group = new THREE.Group();
+
+                // Event Horizon
+                const sphereGeo = new THREE.SphereGeometry(0.7, 32, 32);
+                const sphereMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+                const eventHorizon = new THREE.Mesh(sphereGeo, sphereMat);
+                group.add(eventHorizon);
+
+                // Accretion Disk
+                const diskGeo = new THREE.TorusGeometry(1.5, 0.4, 2, 100);
+                const diskMat = new THREE.ShaderMaterial({
+                    uniforms: {
+                        u_time: { value: 0.0 },
+                    },
+                    vertexShader: `
+                        varying vec2 vUv;
+                        void main() {
+                            vUv = uv;
+                            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                        }
+                    `,
+                    fragmentShader: `
+                        uniform float u_time;
+                        varying vec2 vUv;
+                        
+                        float random (vec2 st) { return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123); }
+                        float noise (vec2 st) {
+                            vec2 i = floor(st); vec2 f = fract(st);
+                            float a = random(i); float b = random(i + vec2(1.0, 0.0));
+                            float c = random(i + vec2(0.0, 1.0)); float d = random(i + vec2(1.0, 1.0));
+                            vec2 u = f*f*(3.0-2.0*f);
+                            return mix(a, b, u.x) + (c - a)* u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+                        }
+
+                        void main() {
+                            vec2 uv = vUv; float t = u_time * 0.1;
+                            uv.x += t; float n = noise(uv * 5.0);
+                            vec3 color = vec3(0.0);
+                            color = mix(color, vec3(1.0, 0.2, 0.0), smoothstep(0.3, 0.5, n));
+                            color = mix(color, vec3(1.0, 0.9, 0.7), smoothstep(0.5, 0.6, n));
+                            float intensity = pow(0.5 - abs(vUv.y - 0.5), 0.5);
+                            gl_FragColor = vec4(color, intensity);
+                        }
+                    `,
+                    side: THREE.DoubleSide,
+                    transparent: true,
+                    blending: THREE.AdditiveBlending
+                });
+
+                const accretionDisk = new THREE.Mesh(diskGeo, diskMat);
+                accretionDisk.rotation.x = Math.PI / 2;
+                group.add(accretionDisk);
+                
+                group.scale.set(0, 0, 0);
+                return group;
+            }
+
+            camera.position.z = 5;
+            createStarfield();
+
+            function onMouseMove(event) {
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            }
+            window.addEventListener('mousemove', onMouseMove);
+
+            function animate3D() {
+                requestAnimationFrame(animate3D);
+                const delta = clock.getDelta();
+                
+                stars.rotation.y += (mouse.x - stars.rotation.y) * 0.001;
+                stars.rotation.x += (mouse.y - stars.rotation.x) * 0.001;
+
+                if (blackHole) {
+                    blackHole.children[1].material.uniforms.u_time.value += delta;
+                    blackHole.rotation.y += 0.002;
+                }
+
+                renderer.render(scene3d, camera);
+            }
+            animate3D();
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            // --- UI Interaction & Animations (GSAP) ---
+            passwordInput.addEventListener('focus', () => {
+                if (soundsReady) sfx.focus.triggerAttackRelease('C4', '8n');
+            });
+
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const password = passwordInput.value;
+                passwordInput.blur();
+
+                if (password === CORRECT_PASSWORD) {
+                    handleSuccess();
+                } else if (password.toUpperCase() === GALAXY_MAP_CODE) {
+                    handleGalaxyMap();
+                } else {
+                    handleFailure();
+                }
+                passwordInput.value = '';
+            });
+
+            function switchScene(targetScene) {
+                Object.values(scenes).forEach(scene => scene.classList.add('hidden'));
+                scenes[targetScene].classList.remove('hidden');
+            }
+
+            function handleSuccess() {
+                if (soundsReady) {
+                    sfx.warp.triggerAttack();
+                    sfx.warpFilter.frequency.rampTo(2000, 2);
+                }
+
+                const tl = gsap.timeline({
+                    onComplete: () => {
+                        switchScene('success');
+                        gsap.to(stars.material, { opacity: 0.8, duration: 1 });
+                        const userTitles = ["Captain of Orion", "Star Engineer", "Comet Chaser", "Nebula Navigator", "Void Walker"];
+                        document.getElementById('user-title').textContent = `Designation: ${userTitles[Math.floor(Math.random() * userTitles.length)]}`;
+                    }
+                });
+
+                tl.to(scenes.login, { opacity: 0, duration: 0.5 })
+                  .to(stars.material, { opacity: 0.2, duration: 0.5 }, "<")
+                  .to(camera.position, { z: 0.1, duration: 2, ease: "power2.in" });
+            }
+
+            function handleGalaxyMap() {
+                 const tl = gsap.timeline({
+                    onComplete: () => switchScene('galaxyMap')
+                });
+                tl.to(scenes.login, { opacity: 0, duration: 1, scale: 1.2, ease: "power2.in" });
+            }
+
+            function handleFailure() {
+                if (soundsReady) sfx.blackHole.triggerAttack();
+                
+                if (!blackHole) {
+                    blackHole = createBlackHole();
+                    scene3d.add(blackHole);
+                }
+                
+                const loginElements = ['#login-title', '#login-subtitle', '#login-form'];
+                const tl = gsap.timeline({
+                    onComplete: () => {
+                        switchScene('failure');
+                        startCatchupChallenge();
+                    }
+                });
+
+                // 1. Black hole appears and grows
+                tl.to(blackHole.scale, { x: 1, y: 1, z: 1, duration: 3, ease: "power3.inOut" })
+                  .to(bgCanvas, { filter: 'blur(3px)', duration: 3, ease: "power2.in" }, "<");
+
+                // 2. UI elements get sucked in with a delay
+                loginElements.forEach(el => {
+                    tl.to(el, {
+                        duration: 2.5,
+                        opacity: 0,
+                        scale: 0,
+                        motionPath: {
+                            path: [{x:0, y:0}, {x:100, y:-50}, {x:0, y:-100}, {x:-100, y:-50}, {x:0, y:0}],
+                            curviness: 1.5,
+                            autoRotate: true
+                        },
+                        ease: "power2.in"
+                    }, "-=2.5"); // Start this animation 2.5s before the timeline ends
+                });
+                
+                // 3. Add camera shake for impact
+                tl.to(camera.rotation, {
+                    duration: 2,
+                    x: (Math.random() - 0.5) * 0.1,
+                    y: (Math.random() - 0.5) * 0.1,
+                    ease: "rough({ strength: 2, points: 20, template: none.out, taper: 'both', randomize: true, clamp: false})"
+                }, "-=2.5");
+            }
+            
+            // --- Catchup Challenge ---
+            let catchupTimerInterval;
+            let currentCatchupNumber = '';
+            const catchupInput = document.getElementById('catchup-input');
+            const catchupNumberEl = document.getElementById('catchup-number');
+            const catchupTimerEl = document.getElementById('catchup-timer');
+
+            function startCatchupChallenge() {
+                gsap.to('#catchup-challenge', { opacity: 1, pointerEvents: 'auto', duration: 1, delay: 1 });
+                currentCatchupNumber = String(Math.floor(1000 + Math.random() * 9000));
+                catchupNumberEl.textContent = currentCatchupNumber;
+                catchupInput.value = '';
+                catchupInput.focus();
+
+                let timeLeft = 5;
+                catchupTimerEl.textContent = `Time remaining: ${timeLeft}s`;
+
+                if (soundsReady) sfx.glitch.triggerAttackRelease('C5', '32n');
+
+                catchupTimerInterval = setInterval(() => {
+                    timeLeft--;
+                    catchupTimerEl.textContent = `Time remaining: ${timeLeft}s`;
+                    if (soundsReady) sfx.glitch.triggerAttackRelease('C5', '32n');
+
+                    if (timeLeft <= 0) {
+                        clearInterval(catchupTimerInterval);
+                        catchupNumberEl.textContent = 'FAIL';
+                        catchupTimerEl.textContent = 'SYSTEM LOCKOUT';
+                        catchupInput.disabled = true;
+                    }
+                }, 1000);
+            }
+
+            catchupInput.addEventListener('input', () => {
+                if (catchupInput.value === currentCatchupNumber) {
+                    clearInterval(catchupTimerInterval);
+                    handleRescue();
+                }
+            });
+
+            function handleRescue() {
+                catchupInput.disabled = false;
+                
+                const tl = gsap.timeline({
+                    onComplete: () => {
+                        switchScene('login');
+                        gsap.set(['#login-title', '#login-subtitle', '#login-form'], { clearProps: "all" });
+                        gsap.set(camera.rotation, {x:0, y:0, z:0}); // Reset camera
+                        camera.position.z = 5;
+                        scene3d.remove(blackHole);
+                        blackHole = null;
+                    }
+                });
+
+                tl.to('#catchup-challenge', { opacity: 0, duration: 0.5 })
+                  .to(blackHole.scale, { x: 0, y: 0, z: 0, duration: 2, ease: "power2.out" })
+                  .to(bgCanvas, { filter: 'none', duration: 1 }, "<")
+                  .to(scenes.failure, { opacity: 0, duration: 1 }, "<");
+            }
+
+        });
+    </script>
+</body>
+</html>
