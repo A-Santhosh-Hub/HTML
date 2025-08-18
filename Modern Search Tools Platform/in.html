@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Tools| Modern Search Tools Platform</title>
+    <link rel="icon" type="image/png" href="ico.png" />
+    <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%2342b883'/%3E%3Cpath d='M30,40 L50,60 L70,40' stroke='white' stroke-width='8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #42b883;
+            --primary-dark: #349e6d;
+            --secondary: #2d3748;
+            --accent: #6c63ff;
+            --dark: #121826;
+            --light: #f8fafc;
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --card-border: rgba(74, 85, 104, 0.3);
+            --glow: 0 0 15px rgba(66, 184, 131, 0.5);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: var(--light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(66, 184, 131, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(108, 99, 255, 0.1) 0%, transparent 20%),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="2" cy="2" r="1" fill="rgba(255,255,255,0.05)"/></svg>');
+            background-size: cover;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 0%, #0f172a 70%);
+            z-index: -1;
+        }
+
+        /* Header & Navigation */
+        .top-bar {
+            background: rgba(18, 24, 38, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 10px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(74, 85, 104, 0.3);
+        }
+
+        .datetime {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            color: var(--primary);
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .datetime i {
+            color: var(--accent);
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .auth-btn {
+            background: rgba(66, 184, 131, 0.15);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            border-radius: 20px;
+            padding: 6px 15px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .auth-btn:hover {
+            background: rgba(66, 184, 131, 0.3);
+        }
+
+        .admin-btn {
+            background: rgba(108, 99, 255, 0.15);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+
+        .admin-btn:hover {
+            background: rgba(108, 99, 255, 0.3);
+        }
+
+        header {
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo img {
+            height: 50px;
+            width: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+            box-shadow: var(--glow);
+        }
+
+        .logo-text {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1.8rem;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 25px;
+        }
+
+        nav li {
+            position: relative;
+        }
+
+        nav a {
+            color: var(--light);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 0;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: var(--transition);
+        }
+
+        nav a:hover {
+            color: var(--primary);
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        .nav-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 15px;
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: var(--transition);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+
+        .nav-dropdown a {
+            display: block;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(74, 85, 104, 0.2);
+        }
+
+        .nav-dropdown a:last-child {
+            border-bottom: none;
+        }
+
+        nav li:hover .nav-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-bar {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid var(--card-border);
+            border-radius: 30px;
+            padding: 10px 20px;
+            color: var(--light);
+            width: 250px;
+            transition: var(--transition);
+        }
+
+        .search-bar:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: var(--glow);
+            width: 300px;
+        }
+
+        .search-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .search-btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 80px 5% 120px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(66, 184, 131, 0.1) 0%, transparent 70%);
+            z-index: -1;
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hero h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            max-width: 700px;
+            margin: 0 auto 40px;
+            color: #cbd5e1;
+        }
+
+        .hero-search {
+            max-width: 700px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .hero-search input {
+            width: 100%;
+            padding: 18px 25px;
+            border-radius: 50px;
+            border: 2px solid var(--primary);
+            background: rgba(30, 41, 59, 0.7);
+            color: var(--light);
+            font-size: 1.1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: var(--transition);
+        }
+
+        .hero-search input:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(66, 184, 131, 0.3);
+        }
+
+        .hero-search button {
+            position: absolute;
+            right: 8px;
+            top: 8px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 40px;
+            padding: 10px 25px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .hero-search button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .stat-item {
+            text-align: center;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .stat-item:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        .stat-item:nth-child(3) {
+            animation-delay: 1s;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        /* Tools Sections */
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            text-align: center;
+            margin: 30px 0 40px;
+            position: relative;
+            display: inline-block;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
+        .tools-container {
+            padding: 0 5% 80px;
+        }
+
+        .category-section {
+            margin-bottom: 60px;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding-left: 20px;
+        }
+
+        .category-icon {
+            background: rgba(66, 184, 131, 0.1);
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--primary);
+            border: 1px solid rgba(66, 184, 131, 0.3);
+        }
+
+        .category-name {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: var(--light);
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .tool-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: var(--transition);
+            position: relative;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .tool-card:hover {
+            transform: translateY(-10px) rotateX(5deg);
+            border-color: var(--primary);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2), var(--glow);
+        }
+
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--primary);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .tool-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .tool-image {
+            height: 160px;
+            width: 100%;
+            background: linear-gradient(45deg, #1e293b, #334155);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .tool-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .tool-card:hover .tool-image img {
+            transform: scale(1.05);
+        }
+
+        .tool-content {
+            padding: 20px;
+        }
+
+        .tool-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--light);
+        }
+
+        .tool-desc {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .tool-link {
+            display: inline-block;
+            background: rgba(66, 184, 131, 0.1);
+            color: var(--primary);
+            padding: 8px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            border: 1px solid rgba(66, 184, 131, 0.3);
+        }
+
+        .tool-link:hover {
+            background: rgba(66, 184, 131, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(15, 23, 42, 0.95);
+            padding: 40px 5% 20px;
+            border-top: 1px solid rgba(74, 85, 104, 0.3);
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-col h3 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-col h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background: var(--primary);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .footer-links a i {
+            font-size: 0.8rem;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(74, 85, 104, 0.3);
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .developer {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Admin Panel */
+        .admin-panel {
+            position: fixed;
+            top: 0;
+            right: -450px;
+            width: 450px;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 30px;
+            overflow-y: auto;
+            transition: var(--transition);
+            border-left: 1px solid var(--card-border);
+            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .admin-panel.active {
+            right: 0;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .admin-title {
+            font-size: 1.8rem;
+            color: var(--primary);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .close-admin {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .close-admin:hover {
+            color: var(--primary);
+            transform: rotate(90deg);
+        }
+
+        .admin-form {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid var(--card-border);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #cbd5e1;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            color: var(--light);
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(66, 184, 131, 0.2);
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .admin-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-add {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-update {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-clear {
+            background: #64748b;
+            color: white;
+        }
+
+        .admin-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .tools-list {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid var(--card-border);
+        }
+
+        .tool-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            transition: var(--transition);
+        }
+
+        .tool-item:hover {
+            background: rgba(30, 41, 59, 0.7);
+        }
+
+        .tool-info h4 {
+            color: var(--light);
+            margin-bottom: 5px;
+        }
+
+        .tool-info p {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .tool-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .edit-btn {
+            background: rgba(66, 184, 131, 0.1);
+            color: var(--primary);
+            border: 1px solid rgba(66, 184, 131, 0.3);
+        }
+
+        .delete-btn {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            nav ul {
+                gap: 15px;
+            }
+            
+            .hero h1 {
+                font-size: 3rem;
+            }
+            
+            .tools-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .top-bar {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px;
+            }
+            
+            header {
+                flex-direction: column;
+                gap: 20px;
+                padding: 15px;
+            }
+            
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .search-container {
+                width: 100%;
+            }
+            
+            .search-bar {
+                width: 100%;
+            }
+            
+            .hero {
+                padding: 60px 5% 80px;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero-stats {
+                flex-direction: column;
+                gap: 25px;
+            }
+            
+            .admin-panel {
+                width: 100%;
+                right: -100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1.1rem;
+            }
+            
+            .hero-search input {
+                padding: 15px 20px;
+                font-size: 1rem;
+            }
+            
+            .hero-search button {
+                padding: 8px 20px;
+                position: relative;
+                width: 100%;
+                margin-top: 10px;
+                right: 0;
+                top: 0;
+                border-radius: 30px;
+            }
+            
+            .category-name {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top bar with date/time -->
+    <div class="top-bar">
+        <div class="datetime">
+            <i class="fas fa-clock"></i>
+            <span id="currentDateTime">Loading...</span>
+        </div>
+        <div class="auth-buttons">
+            <button class="auth-btn">Sign Up</button>
+            <button class="auth-btn">Log In</button>
+            <button class="auth-btn admin-btn" id="adminToggle">Admin Panel</button>
+        </div>
+    </div>
+
+    <!-- Header with navigation -->
+    <header>
+        <div class="logo">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%2342b883'/%3E%3Cpath d='M30,40 L50,60 L70,40' stroke='white' stroke-width='8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E" alt="Search Nexus Logo">
+            <div class="logo-text">SEARCH NEXUS</div>
+        </div>
+        
+        <nav>
+            <ul>
+                <li>
+                    <a href="#">Web Tools</a>
+                    <div class="nav-dropdown">
+                        <a href="#">HTML Editors</a>
+                        <a href="#">CSS Generators</a>
+                        <a href="#">JavaScript Tools</a>
+                        <a href="#">API Testers</a>
+                    </div>
+                </li>
+                <li>
+                    <a href="#">Study Tools</a>
+                    <div class="nav-dropdown">
+                        <a href="#">Code Compilers</a>
+                        <a href="#">Documentation</a>
+                        <a href="#">Learning Platforms</a>
+                        <a href="#">Cheat Sheets</a>
+                    </div>
+                </li>
+                <li>
+                    <a href="#">Media Tools</a>
+                    <div class="nav-dropdown">
+                        <a href="#">Image Editors</a>
+                        <a href="#">Video Converters</a>
+                        <a href="#">Audio Tools</a>
+                        <a href="#">Graphic Design</a>
+                    </div>
+                </li>
+                <li>
+                    <a href="#">Game Tools</a>
+                    <div class="nav-dropdown">
+                        <a href="#">Game Engines</a>
+                        <a href="#">Asset Libraries</a>
+                        <a href="#">Game Dev Tutorials</a>
+                        <a href="#">Game Stores</a>
+                    </div>
+                </li>
+                <li>
+                    <a href="#">Utilities</a>
+                    <div class="nav-dropdown">
+                        <a href="#">Converters</a>
+                        <a href="#">Encoders</a>
+                        <a href="#">Validators</a>
+                        <a href="#">Generators</a>
+                    </div>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="search-container">
+            <input type="text" class="search-bar" placeholder="Search tools...">
+            <button class="search-btn">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>UNLEASH YOUR SEARCH POWER</h1>
+        <p>Discover the ultimate collection of developer tools, resources, and utilities in one powerful platform.</p>
+        
+        <div class="hero-search">
+            <input type="text" placeholder="Search for tools, resources, or categories...">
+            <button><i class="fas fa-search"></i> Search Nexus</button>
+        </div>
+        
+        <div class="hero-stats">
+            <div class="stat-item">
+                <div class="stat-icon"><i class="fas fa-tools"></i></div>
+                <div class="stat-number">250+</div>
+                <div class="stat-label">Powerful Tools</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon"><i class="fas fa-layer-group"></i></div>
+                <div class="stat-number">15</div>
+                <div class="stat-label">Categories</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+                <div class="stat-number">10K+</div>
+                <div class="stat-label">Active Users</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tools Sections -->
+    <div class="tools-container">
+        <h2 class="section-title">Featured Tool Categories</h2>
+        
+        <!-- Web Tools -->
+        <div class="category-section">
+            <div class="category-header">
+                <div class="category-icon">
+                    <i class="fab fa-html5"></i>
+                </div>
+                <h3 class="category-name">Web Development Tools</h3>
+            </div>
+            
+            <div class="tools-grid">
+                <div class="tool-card">
+                    <div class="tool-image">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='80' height='60' x='10' y='20' fill='%232D3748'/%3E%3Ctext x='50' y='50' font-family='Arial' font-size='12' fill='white' text-anchor='middle'%3EHTML%3C/text%3E%3C/svg%3E" alt="HTML">
+                    </div>
+                    <div class="tool-content">
+                        <h4 class="tool-name">HTML Online Compiler</h4>
+                        <p class="tool-desc">Real-time HTML editor with live preview for quick prototyping.</p>
+                        <a href="https://onecompiler.com/html" class="tool-link">Open Tool <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                
+                <div class="tool-card">
+                    <div class="tool-image">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='80' height='60' x='10' y='20' fill='%232D3748'/%3E%3Ctext x='50' y='50' font-family='Arial' font-size='12' fill='white' text-anchor='middle'%3ECSS%3C/text%3E%3C/svg%3E" alt="CSS">
+                    </div>
+                    <div class="tool-content">
+                        <h4 class="tool-name">CSS Code Generator</h4>
+                        <p class="tool-desc">Generate complex CSS with simple UI controls and presets.</p>
+                        <a href="https://www.javatpoint.com/css-tutorial" class="tool-link">Open Tool <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                
+                <div class="tool-card">
+                    <div class="tool-image">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='80' height='60' x='10' y='20' fill='%232D3748'/%3E%3Ctext x='50' y='50' font-family='Arial' font-size='12' fill='white' text-anchor='middle'%3EJS%3C/text%3E%3C/svg%3E" alt="JavaScript">
+                    </div>
+                    <div class="tool-content">
+                        <h4 class="tool-name">JavaScript Playground</h4>
+                        <p class="tool-desc">Write, test, and debug JavaScript code in your browser.</p>
+                        <a href="https://playcode.io/new" class="tool-link">Open Tool <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Game Tools -->
+        <div class="category-section">
+            <div class="category-header">
+                <div class="category-icon">
+                    <i class="fas fa-gamepad"></i>
+                </div>
+                <h3 class="category-name">Game Development Tools</h3>
+            </div>
+            
+            <div class="tools-grid">
+                <div class="tool-card">
+                    <div class="tool-image">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='80' height='60' x='10' y='20' fill='%232D3748'/%3E%3Ctext x='50' y='50' font-family='Arial' font-size='12' fill='white' text-anchor='middle'%3EENGINE%3C/text%3E%3C/svg%3E" alt="Game Engine">
+                    </div>
+                    <div class="tool-content">
+                        <h4 class="tool-name">Game Engine Hub</h4>
+                        <p class="tool-desc">Collection of game engines and development frameworks.</p>
+                        <a href="https://editor.construct.net/" class="tool-link">Open Tool <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                
+                <div class="tool-card">
+                    <div class="tool-image">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='80' height='60' x='10' y='20' fill='%232D3748'/%3E%3Ctext x='50' y='50' font-family='Arial' font-size='12' fill='white' text-anchor='middle'%3EASSETS%3C/text%3E%3C/svg%3E" alt="Assets">
+                    </div>
+                    <div class="tool-content">
+                        <h4 class="tool-name">Game Asset Library</h4>
+                        <p class="tool-desc">Free and premium assets for your game development projects.</p>
+                        <a href="https://www.freepik.com/free-photos-vectors/desktop-wallpaper" class="tool-link">Open Tool <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                
+                <div class="tool-card">
+                    <div class="tool-image">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='80' height='60' x='10' y='20' fill='%232D3748'/%3E%3Ctext x='50' y='50' font-family='Arial' font-size='12' fill='white' text-anchor='middle'%3ESTORE%3C/text%3E%3C/svg%3E" alt="Game Store">
+                    </div>
+                    <div class="tool-content">
+                        <h4 class="tool-name">Game Store</h4>
+                        <p class="tool-desc">Discover and purchase games from top developers.</p>
+                        <a href="https://store.epicgames.com/en-US/collection/top-sellers" class="tool-link">Open Tool <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Programming Tools -->
+        <div class="category-section">
+            <div class="category-header">
+                <div class="category-icon">
+                    <i class="fas fa-code"></i>
+                </div>
+                <h3 class="category-name">Programming Languages</h3>
+            </div>
+            
+            <div class="tools-grid">
+                <div class="tool-card">
+                    <div class="tool-image">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='80' height='60' x='10' y='20' fill='%232D3748'/%3E%3Ctext x='50' y='50' font-family='Arial' font-size='12' fill='white' text-anchor='middle'%3EPython%3C/text%3E%3C/svg%3E" alt="Python">
+                    </div>
+                    <div class="tool-content">
+                        <h4 class="tool-name">Python Compiler</h4>
+                        <p class="tool-desc">Online Python compiler with debugging capabilities.</p>
+                        <a href="https://www.onlinegdb.com/online_python_compiler" class="tool-link">Open Tool <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                
+                <div class="tool-card">
+                    <div class="tool-image">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='80' height='60' x='10' y='20' fill='%232D3748'/%3E%3Ctext x='50' y='50' font-family='Arial' font-size='12' fill='white' text-anchor='middle'%3EJava%3C/text%3E%3C/svg%3E" alt="Java">
+                    </div>
+                    <div class="tool-content">
+                        <h4 class="tool-name">Java IDE</h4>
+                        <p class="tool-desc">Full-featured Java development environment in browser.</p>
+                        <a href="https://www.onlinegdb.com/online_java_compiler" class="tool-link">Open Tool <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                
+                <div class="tool-card">
+                    <div class="tool-image">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='80' height='60' x='10' y='20' fill='%232D3748'/%3E%3Ctext x='50' y='50' font-family='Arial' font-size='12' fill='white' text-anchor='middle'%3EC%2B%2B%3C/text%3E%3C/svg%3E" alt="C++">
+                    </div>
+                    <div class="tool-content">
+                        <h4 class="tool-name">C++ Compiler</h4>
+                        <p class="tool-desc">Online C++ compiler with multiple version support.</p>
+                        <a href="https://www.codechef.com/cpp-online-compiler" class="tool-link">Open Tool <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Panel (Hidden by default) -->
+    <div class="admin-panel" id="adminPanel">
+        <div class="admin-header">
+            <h2 class="admin-title">Admin Dashboard</h2>
+            <button class="close-admin" id="closeAdmin">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="admin-form">
+            <h3>Add/Edit Tool</h3>
+            <div class="form-group">
+                <label for="toolName">Tool Name</label>
+                <input type="text" id="toolName" class="form-control" placeholder="Enter tool name">
+            </div>
+            <div class="form-group">
+                <label for="toolCategory">Category</label>
+                <select id="toolCategory" class="form-control">
+                    <option value="Web Tools">Web Tools</option>
+                    <option value="Study Tools">Study Tools</option>
+                    <option value="Media Tools">Media Tools</option>
+                    <option value="Game Tools">Game Tools</option>
+                    <option value="Utilities">Utilities</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="toolUrl">Tool URL</label>
+                <input type="url" id="toolUrl" class="form-control" placeholder="https://example.com">
+            </div>
+            <div class="form-group">
+                <label for="toolDesc">Description</label>
+                <textarea id="toolDesc" class="form-control" placeholder="Enter tool description" rows="3"></textarea>
+            </div>
+            <div class="admin-actions">
+                <button class="admin-btn btn-add" id="addTool">Add Tool</button>
+                <button class="admin-btn btn-update" id="updateTool">Update Tool</button>
+                <button class="admin-btn btn-clear" id="clearForm">Clear</button>
+            </div>
+        </div>
+        
+        <div class="tools-list">
+            <h3>Manage Tools</h3>
+            <div class="tool-item">
+                <div class="tool-info">
+                    <h4>HTML Online Compiler</h4>
+                    <p>Web Tools</p>
+                </div>
+                <div class="tool-actions">
+                    <button class="action-btn edit-btn"><i class="fas fa-edit"></i></button>
+                    <button class="action-btn delete-btn"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+            <div class="tool-item">
+                <div class="tool-info">
+                    <h4>CSS Code Generator</h4>
+                    <p>Web Tools</p>
+                </div>
+                <div class="tool-actions">
+                    <button class="action-btn edit-btn"><i class="fas fa-edit"></i></button>
+                    <button class="action-btn delete-btn"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+            <div class="tool-item">
+                <div class="tool-info">
+                    <h4>JavaScript Playground</h4>
+                    <p>Web Tools</p>
+                </div>
+                <div class="tool-actions">
+                    <button class="action-btn edit-btn"><i class="fas fa-edit"></i></button>
+                    <button class="action-btn delete-btn"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-col">
+                <h3>Search Nexus</h3>
+                <p>The ultimate platform for developers, students, and creators to discover powerful tools and resources.</p>
+            </div>
+            <div class="footer-col">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Home</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> About Us</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Categories</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Categories</h3>
+                <ul class="footer-links">
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Web Tools</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Study Tools</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Game Tools</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Utilities</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Connect With Us</h3>
+                <ul class="footer-links">
+                    <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
+                    <li><a href="https://github.com/A-Santhosh-Hub"><i class="fab fa-github"></i> GitHub</a></li>
+                    <li><a href="#"><i class="fab fa-discord"></i> Discord</a></li>
+                    <li><a href="https://www.linkedin.com/in/santhosh-a-bb5622305?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3ByHt4b0oDQT2zF3ehZHEhuA%3D%3D"><i class="fab fa-linkedin"></i> LinkedIn</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            &copy; 2025 Search Nexus. All rights reserved. <br>
+            <span class="developer">Developed by SANTHOSH_A</span>
+        </div>
+    </footer>
+
+    <script>
+        // Update date and time
+        function updateDateTime() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                timeZone: 'Asia/Kolkata'
+            };
+            document.getElementById('currentDateTime').textContent = 
+                now.toLocaleDateString('en-IN', options);
+        }
+        
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+        
+        // Admin panel functionality
+        document.getElementById('adminToggle').addEventListener('click', function() {
+            const password = prompt('Enter admin password:');
+            if (password === '007124') {
+                document.getElementById('adminPanel').classList.add('active');
+            } else {
+                alert('Incorrect password. Access denied.');
+            }
+        });
+        
+        document.getElementById('closeAdmin').addEventListener('click', function() {
+            document.getElementById('adminPanel').classList.remove('active');
+        });
+        
+        // Tool card hover effects
+        const toolCards = document.querySelectorAll('.tool-card');
+        toolCards.forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-10px) rotateX(5deg)';
+                card.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.2), 0 0 15px rgba(66, 184, 131, 0.5)';
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = '';
+                card.style.boxShadow = '';
+            });
+        });
+        
+        // Search functionality
+        const searchInput = document.querySelector('.search-bar');
+        searchInput.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                performSearch(this.value);
+            }
+        });
+        
+        document.querySelector('.search-btn').addEventListener('click', function() {
+            performSearch(searchInput.value);
+        });
+        
+        function performSearch(query) {
+            if (query.trim() !== '') {
+                alert(`Searching for: ${query}`);
+                // In a real implementation, this would filter and display results
+            }
+        }
+        
+        // Admin form functionality
+        document.getElementById('addTool').addEventListener('click', function() {
+            const name = document.getElementById('toolName').value;
+            const category = document.getElementById('toolCategory').value;
+            const url = document.getElementById('toolUrl').value;
+            const desc = document.getElementById('toolDesc').value;
+            
+            if (name && category && url && desc) {
+                alert(`Tool added: ${name} in ${category}`);
+                // In a real implementation, this would add to the tools list and localStorage
+            } else {
+                alert('Please fill all fields');
+            }
+        });
+        
+        document.getElementById('clearForm').addEventListener('click', function() {
+            document.getElementById('toolName').value = '';
+            document.getElementById('toolCategory').value = 'Web Tools';
+            document.getElementById('toolUrl').value = '';
+            document.getElementById('toolDesc').value = '';
+        });
+        
+        // Animation on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = 1;
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        document.querySelectorAll('.tool-card, .category-section').forEach(el => {
+            el.style.opacity = 0;
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
