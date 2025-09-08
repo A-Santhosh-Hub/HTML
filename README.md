@@ -51,7 +51,7 @@
 # Projecr 25 https://santhosh2025.neocities.org/Online%20Vegetable%20&%20Fruit%20Store/in   ---  ( Fresh Veggies & Fruits )
 
 
-https://santhosh2024.neocities.org/skill/in ---[ SKILL ]
+# https://santhosh2024.neocities.org/skill/in ---[ SKILL ]
 
 
 
