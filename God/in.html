@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ta" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ஸ்ரீ சிங்கரவேலன் சிவசக்தி அருள்வாக்கு சித்தர் மடம் | Sulur</title>
+    
+    <!-- Meta Tags for SEO -->
+    <meta name="description" content="Official website for Sri Singaravelan Sivasakthi Arulvakku Siddhar Madam in Sulur, Coimbatore. Watch live poojas, book appointments for arulvaaku, and view our photo gallery.">
+    <meta name="keywords" content="Siddhar Peedam, Sulur, Arulvaaku, Pooja Live, Singaravelan Siddhar, Coimbatore Temple, Divine Messages">
+    <meta name="author" content="Sri Singaravelan Sivasakthi Arulvakku Siddhar Madam">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Tamil:wght@400;700&family=Noto+Sans+Tamil:wght@400;500;700&family=Tiro+Tamil:ital@0;1&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://www.youtube.com">
+    <link rel="preconnect" href="https://assets.calendly.com">
+    <link rel="preconnect" href="https://docs.google.com">
+
+    <!-- Structured Data for SEO (Place of Worship) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "PlaceOfWorship",
+      "name": "ஸ்ரீ சிங்கரவேலன் சிவசக்தி அருள்வாக்கு சித்தர் மடம்",
+      "alternateName": "Sri Singaravelan Sivasakthi Arulvakku Siddhar Madam",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Sulur",
+        "addressLocality": "Coimbatore",
+        "addressRegion": "Tamil Nadu",
+        "addressCountry": "IN"
+      },
+      "telephone": "+919943954335",
+      "url": "https://your-website-url.com",
+      "image": "https://placehold.co/1200x630/6D1B1B/FFF8F0?text=Siddhar+Peedam",
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "11.0264", 
+        "longitude": "77.1293"  
+      },
+      "openingHours": "Mo,Tu,We,Th,Fr,Sa,Su 08:00-20:00"
+    }
+    </script>
+    
+    <style>
+        /* Custom styles and animations */
+        :root {
+            --saffron: #E46B17;
+            --maroon: #6D1B1B;
+            --gold: #D9A441;
+            --green: #1B5E20;
+            --cream: #FFF8F0;
+        }
+
+        /* Ken Burns Effect for Hero Background Slides */
+        .hero-slide {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            animation: kenburns-effect 20s infinite;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .hero-slide.active {
+            opacity: 1;
+        }
+
+        @keyframes kenburns-effect {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Live Badge Pulsing Animation */
+        .pulse {
+            animation: pulse-animation 2s infinite;
+        }
+        @keyframes pulse-animation {
+            0% { box-shadow: 0 0 0 0 rgba(228, 107, 23, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(228, 107, 23, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(228, 107, 23, 0); }
+        }
+
+        /* Header show/hide transition */
+        .site-header {
+            transition: top 0.3s ease-in-out;
+        }
+
+        /* Scroll-reveal animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s, transform 0.8s;
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* High contrast mode */
+        body.high-contrast {
+            background-color: #000;
+            color: #fff;
+        }
+        body.high-contrast h1, body.high-contrast h2, body.high-contrast h3, body.high-contrast h4 {
+            color: #ffdd40;
+        }
+        body.high-contrast .bg-cream {
+            background-color: #111;
+        }
+        body.high-contrast .text-maroon {
+            color: #ffdd40;
+        }
+        body.high-contrast .text-gray-700 {
+            color: #eee;
+        }
+
+        /* Respect reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            .ken-burns, .pulse, .reveal {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-cream">
+    
+    <!-- Header -->
+    <header id="site-header" class="site-header bg-cream/80 backdrop-blur-md sticky top-0 z-50 shadow-md">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="logo text-xl sm:text-2xl font-bold text-maroon" style="font-family: 'Tiro Tamil', serif;">
+                    ஸ்ரீ சிங்கரவேலன்
+                </div>
+                <nav class="hidden md:flex items-center space-x-8">
+                    <a href="#about" class="text-gray-700 hover:text-saffron transition-colors">அறிமுகம்</a>
+                    <a href="#poojas" class="text-gray-700 hover:text-saffron transition-colors">பூஜைகள்</a>
+                    <a href="#live" class="text-gray-700 hover:text-saffron transition-colors">Live</a>
+                    <a href="#booking" class="text-gray-700 hover:text-saffron transition-colors">Book Slot</a>
+                    <a href="#gallery" class="text-gray-700 hover:text-saffron transition-colors">Gallery</a>
+                </nav>
+                <div class="flex items-center space-x-4">
+                     <a id="live-cta-desktop" href="#live" class="hidden sm:flex items-center space-x-2 bg-saffron text-black px-4 py-2 rounded-lg shadow-lg hover:bg-opacity-90 transition-all transform hover:scale-105">
+                        <span class="relative flex h-3 w-3">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+                        </span>
+                        <span>Watch Live</span>
+                    </a>
+                    <button id="mobile-menu-button" class="md:hidden p-2 rounded-md text-maroon hover:bg-maroon/10 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-saffron">
+                        <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="md:hidden hidden bg-cream/95 backdrop-blur-sm">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#about" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-saffron hover:bg-maroon/5">அறிமுகம்</a>
+                <a href="#poojas" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-saffron hover:bg-maroon/5">பூஜைகள்</a>
+                <a href="#live" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-saffron hover:bg-maroon/5">Live</a>
+                <a href="#booking" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-saffron hover:bg-maroon/5">Book Slot</a>
+                <a href="#gallery" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-saffron hover:bg-maroon/5">Gallery</a>
+                <a id="live-cta-mobile" href="#live" class="block w-full text-left bg-saffron text-black mt-2 px-3 py-2 rounded-md text-base font-medium">Watch Live</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="home" class="relative h-screen min-h-[600px] flex items-center justify-center text-center text-white overflow-hidden">
+            <div class="absolute inset-0 bg-black/50 z-10"></div>
+            <div id="hero-slideshow" class="absolute inset-0">
+                <div class="hero-slide" style="background-image: url('https://placehold.co/1920x1080/6D1B1B/FFF8F0?text=Siddhar+Peedam');"></div>
+                <div class="hero-slide" style="background-image: url('https://placehold.co/1920x1080/1B5E20/FFF8F0?text=Divine+Yagam');"></div>
+                <div class="hero-slide" style="background-image: url('https://placehold.co/1920x1080/E46B17/FFF8F0?text=Arulvaaku');"></div>
+            </div>
+            
+            <div class="relative z-20 p-4 max-w-4xl mx-auto">
+                <div id="live-badge" class="hidden mb-4 inline-flex items-center bg-red-600/80 backdrop-blur-sm border border-white/20 text-white text-sm font-medium px-4 py-1.5 rounded-full">
+                    <span class="relative flex h-3 w-3 mr-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+                    </span>
+                    LIVE NOW — ஐயா / அம்மன் அருள்வாக்கு
+                </div>
+                <h1 lang="ta" class="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight" style="text-shadow: 2px 2px 8px rgba(0,0,0,0.7);">ஸ்ரீ சிங்கரவேலன் சிவசக்தி அருள்வாக்கு சித்தர் மடம்</h1>
+                <p class="mt-4 text-lg md:text-xl max-w-2xl mx-auto" style="text-shadow: 1px 1px 4px rgba(0,0,0,0.7);">Divine Arulvaaku, Pournami Pooja, 108 Maha Rudra Yaagam — streamed live from the Peedam.</p>
+                <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="#live" class="w-full sm:w-auto bg-saffron text-white px-8 py-3 rounded-lg text-lg font-semibold shadow-xl hover:bg-opacity-90 transition-all transform hover:scale-105">Join Live</a>
+                    <a href="#booking" class="w-full sm:w-auto bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg text-lg font-semibold shadow-xl hover:bg-white/10 transition-all transform hover:scale-105">Book Arulvaaku</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="py-20 bg-cream">
+            <div class="container mx-auto px-6 lg:px-8">
+                <div class="text-center mb-12 reveal">
+                    <h2 class="text-3xl md:text-4xl font-bold text-maroon">Peedam History & Mission</h2>
+                    <p class="mt-4 text-lg text-gray-700 max-w-3xl mx-auto">Discover the sacred origins and divine purpose of our Siddhar Peedam.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div class="reveal">
+                        <img src="https://placehold.co/600x400/D9A441/6D1B1B?text=Siddhar+Image" alt="Siddhar" class="rounded-lg shadow-2xl w-full h-auto">
+                    </div>
+                    <div class="reveal text-gray-700 space-y-4 text-base md:text-lg">
+                        <p>ஸ்ரீ சிங்கரவேலன் சிவசக்தி அருள்வாக்கு சித்தர் மடம் சூலூரில் அமைந்துள்ளது. இங்கு சித்தர்களின் அருளாசியுடன் அருள்வாக்கு, பூஜைகள் மற்றும் யாகங்கள் சிறப்பாக நடைபெறுகின்றன.</p>
+                        <p>Our mission is to share the divine wisdom of the Siddhar tradition with devotees worldwide, fostering peace, spiritual growth, and well-being through sacred rituals and live-streamed messages.</p>
+                        <div class="mt-6 pt-6 border-t border-gold/50">
+                            <h3 class="text-xl font-semibold text-maroon mb-4">Contact Information</h3>
+                            <p><strong>Phone:</strong> <a href="tel:+919943954335" class="hover:text-saffron">99439 54335</a>, <a href="tel:+918610452123" class="hover:text-saffron">86104 52123</a></p>
+                            <p><strong>Location:</strong> Sulur, Coimbatore, Tamil Nadu</p>
+                        </div>
+                    </div>
+                </div>
+                 <!-- <div class="mt-16 reveal">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d125325.75382173163!2d77.05920644335937!3d11.026427800000002!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba857fed51a31d7%3A0xfc1752b75f56410a!2sSulur%2C%20Tamil%20Nadu!5e0!3m2!1sen!2sin!4v1668586454751!5m2!1sen!2sin" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" class="rounded-lg shadow-xl"></iframe>
+                </div> -->
+            </div>
+        </section>
+
+        <!-- Poojas & Rituals Section -->
+        <section id="poojas" class="py-20 bg-maroon/5">
+             <div class="container mx-auto px-6 lg:px-8">
+                <div class="text-center mb-12 reveal">
+                    <h2 class="text-3xl md:text-4xl font-bold text-maroon">Poojas & Rituals</h2>
+                    <p class="mt-4 text-lg text-gray-700 max-w-3xl mx-auto">Participate in our sacred ceremonies for peace and prosperity.</p>
+                </div>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Pooja Card 1 -->
+                    <div class="bg-cream rounded-lg shadow-xl p-6 flex flex-col text-center reveal transform hover:-translate-y-2 transition-transform duration-300">
+                        <h3 class="text-xl font-bold text-maroon">Pournami Pooja</h3>
+                        <p class="text-gray-600 mt-2 flex-grow">A special pooja conducted on every full moon day to receive divine blessings.</p>
+                        <p class="mt-4 font-semibold text-green">Next Date: Monthly</p>
+                        <a href="#booking" class="mt-6 bg-gold text-maroon font-bold py-2 px-4 rounded-lg hover:bg-opacity-90 transition-colors">Book Now</a>
+                    </div>
+                    <!-- Pooja Card 2 -->
+                    <div class="bg-cream rounded-lg shadow-xl p-6 flex flex-col text-center reveal transform hover:-translate-y-2 transition-transform duration-300" style="transition-delay: 100ms;">
+                        <h3 class="text-xl font-bold text-maroon">108 Maha Rudra Yaagam</h3>
+                        <p class="text-gray-600 mt-2 flex-grow">A powerful yagna invoking the blessings of Lord Shiva for universal well-being.</p>
+                         <p class="mt-4 font-semibold text-green">Next Date: To be announced</p>
+                        <a href="#booking" class="mt-6 bg-gold text-maroon font-bold py-2 px-4 rounded-lg hover:bg-opacity-90 transition-colors">Enquire</a>
+                    </div>
+                    <!-- Pooja Card 3 -->
+                    <div class="bg-cream rounded-lg shadow-xl p-6 flex flex-col text-center reveal transform hover:-translate-y-2 transition-transform duration-300" style="transition-delay: 200ms;">
+                        <h3 class="text-xl font-bold text-maroon">Chitirai Thirunal</h3>
+                        <p class="text-gray-600 mt-2 flex-grow">Grand annual festival celebrating the new year with special rituals and coverage.</p>
+                         <p class="mt-4 font-semibold text-green">Next Date: April 2026</p>
+                        <a href="#booking" class="mt-6 bg-gold text-maroon font-bold py-2 px-4 rounded-lg hover:bg-opacity-90 transition-colors">Learn More</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live / Video Feed Section -->
+        <section id="live" class="py-20 bg-cream">
+            <div class="container mx-auto px-6 lg:px-8">
+                <div class="text-center mb-12 reveal">
+                    <h2 class="text-3xl md:text-4xl font-bold text-maroon">Live Stream & Videos</h2>
+                    <p class="mt-4 text-lg text-gray-700 max-w-3xl mx-auto">Watch live events or catch up on past poojas and arulvaaku.</p>
+                </div>
+                <!-- YouTube Live Player -->
+                <div class="aspect-w-16 aspect-h-9 rounded-lg shadow-2xl overflow-hidden mb-12 reveal">
+                    <!-- DEVELOPER: Replace with your YouTube Channel's Live Stream or Playlist Embed URL -->
+                    <iframe 
+                        id="yt-player" 
+                        width="100%" 
+                        height="100%" 
+                        src="https://www.youtube.com/embed/live_stream?channel=YOUR_CHANNEL_ID_HERE" 
+                        title="YouTube video player" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                
+                <h3 class="text-2xl font-bold text-maroon text-center mb-8 reveal">Recent Videos</h3>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Placeholder for recent videos from YouTube API -->
+                    <div class="bg-white rounded-lg shadow-lg overflow-hidden reveal">
+                        <img src="https://placehold.co/400x225/E46B17/FFF8F0?text=Video+Thumbnail" alt="Video Thumbnail" class="w-full h-auto">
+                        <div class="p-4"><p class="font-semibold text-gray-800">Pournami Pooja Highlights</p></div>
+                    </div>
+                     <div class="bg-white rounded-lg shadow-lg overflow-hidden reveal" style="transition-delay: 100ms;">
+                        <img src="https://placehold.co/400x225/1B5E20/FFF8F0?text=Video+Thumbnail" alt="Video Thumbnail" class="w-full h-auto">
+                        <div class="p-4"><p class="font-semibold text-gray-800">Siddhar Arulvaaku Clip</p></div>
+                    </div>
+                     <div class="bg-white rounded-lg shadow-lg overflow-hidden reveal" style="transition-delay: 200ms;">
+                        <img src="https://placehold.co/400x225/D9A441/FFF8F0?text=Video+Thumbnail" alt="Video Thumbnail" class="w-full h-auto">
+                        <div class="p-4"><p class="font-semibold text-gray-800">Maha Rudra Yaagam Part 1</p></div>
+                    </div>
+                     <div class="bg-white rounded-lg shadow-lg overflow-hidden reveal" style="transition-delay: 300ms;">
+                        <img src="https://placehold.co/400x225/6D1B1B/FFF8F0?text=Video+Thumbnail" alt="Video Thumbnail" class="w-full h-auto">
+                        <div class="p-4"><p class="font-semibold text-gray-800">Devotee Testimonials</p></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Booking Section -->
+        <section id="booking" class="py-20 bg-maroon/5">
+             <div class="container mx-auto px-6 lg:px-8">
+                <div class="text-center mb-12 reveal">
+                    <h2 class="text-3xl md:text-4xl font-bold text-maroon">Book an Appointment</h2>
+                    <p class="mt-4 text-lg text-gray-700 max-w-3xl mx-auto">Schedule a time for in-person blessings, arulvaaku, or pooja services.</p>
+                </div>
+                <div class="grid lg:grid-cols-2 gap-12">
+                    <div class="reveal">
+                        <h3 class="text-2xl font-semibold text-maroon mb-4">Option 1: Schedule with Calendly</h3>
+                        <p class="text-gray-600 mb-6">Select an available time slot directly using our Calendly scheduler for instant confirmation.</p>
+                        <div class="rounded-lg shadow-2xl overflow-hidden h-[700px]">
+                           <!-- DEVELOPER: Replace with your Calendly URL -->
+                           <iframe src="https://calendly.com/YOUR_USERNAME_HERE" frameborder="0" loading="lazy" class="w-full h-full"></iframe>
+                        </div>
+                    </div>
+                     <div class="reveal">
+                        <h3 class="text-2xl font-semibold text-maroon mb-4">Option 2: Fill our Booking Form</h3>
+                        <p class="text-gray-600 mb-6">Alternatively, submit your details through our form, and we will contact you to confirm your appointment.</p>
+                         <div class="rounded-lg shadow-2xl overflow-hidden h-[700px]">
+                            <!-- DEVELOPER: Create a Google Form and paste the embed URL here -->
+                            <iframe src="https://docs.google.com/forms/d/e/YOUR_GOOGLE_FORM_ID_HERE/viewform?embedded=true" width="100%" height="100%" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gallery Section -->
+        <section id="gallery" class="py-20 bg-cream">
+            <div class="container mx-auto px-6 lg:px-8">
+                <div class="text-center mb-12 reveal">
+                    <h2 class="text-3xl md:text-4xl font-bold text-maroon">Gallery</h2>
+                    <p class="mt-4 text-lg text-gray-700 max-w-3xl mx-auto">Moments from our sacred events and festivals.</p>
+                </div>
+                <div id="image-gallery" class="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
+                    <!-- Images will be dynamically added or can be hardcoded -->
+                    <img class="w-full rounded-lg shadow-md break-inside-avoid cursor-pointer reveal" src="https://placehold.co/500x300/6D1B1B/FFF8F0?text=Pooja" alt="Pooja">
+                    <img class="w-full rounded-lg shadow-md break-inside-avoid cursor-pointer reveal" src="https://placehold.co/500x800/E46B17/FFF8F0?text=Festival" alt="Festival">
+                    <img class="w-full rounded-lg shadow-md break-inside-avoid cursor-pointer reveal" src="https://placehold.co/500x400/D9A441/FFF8F0?text=Yagam" alt="Yagam">
+                    <img class="w-full rounded-lg shadow-md break-inside-avoid cursor-pointer reveal" src="https://placehold.co/500x600/1B5E20/FFF8F0?text=Arulvaaku" alt="Arulvaaku">
+                    <img class="w-full rounded-lg shadow-md break-inside-avoid cursor-pointer reveal" src="https://placehold.co/500x350/6D1B1B/FFF8F0?text=Devotees" alt="Devotees">
+                    <img class="w-full rounded-lg shadow-md break-inside-avoid cursor-pointer reveal" src="https://placehold.co/500x700/E46B17/FFF8F0?text=Temple" alt="Temple">
+                    <img class="w-full rounded-lg shadow-md break-inside-avoid cursor-pointer reveal" src="https://placehold.co/500x500/D9A441/FFF8F0?text=Siddhar" alt="Siddhar">
+                    <img class="w-full rounded-lg shadow-md break-inside-avoid cursor-pointer reveal" src="https://placehold.co/500x450/1B5E20/FFF8F0?text=Alangaram" alt="Alangaram">
+                </div>
+            </div>
+        </section>
+        
+        <!-- Lightbox Modal -->
+        <div id="lightbox" class="fixed inset-0 bg-black/80 z-[100] hidden items-center justify-center p-4">
+            <div class="relative max-w-4xl max-h-full">
+                <button id="lightbox-close" class="absolute -top-4 -right-4 md:top-0 md:-right-12 text-white text-4xl">&times;</button>
+                <img id="lightbox-img" src="" alt="Gallery Image View" class="max-w-full max-h-[90vh] rounded-lg">
+                <button id="lightbox-prev" class="absolute left-0 top-1/2 -translate-y-1/2 bg-white/20 text-white text-3xl p-2 rounded-full md:-ml-12">&lt;</button>
+                <button id="lightbox-next" class="absolute right-0 top-1/2 -translate-y-1/2 bg-white/20 text-white text-3xl p-2 rounded-full md:-mr-12">&gt;</button>
+            </div>
+        </div>
+
+        <!-- Location Section -->
+        <section id="location" class="py-20 bg-cream">
+            <div class="container mx-auto px-6 lg:px-8">
+                <div class="bg-white rounded-lg shadow-2xl p-8 md:p-12 text-center reveal max-w-4xl mx-auto border-t-4 border-gold">
+                    <h2 class="text-3xl md:text-4xl font-bold text-maroon">Find Your Way to Us</h2>
+                    <p class="mt-4 text-lg text-gray-700 max-w-2xl mx-auto">Our Peedam is located in the serene town of Sulur, Coimbatore. We welcome all devotees to visit and experience the divine presence.</p>
+                    <div class="mt-8">
+                        <a href="https://www.google.com/maps/search/?api=1&query=Sulur,Coimbatore" target="_blank" rel="noopener" class="inline-flex items-center bg-saffron text-black px-8 py-3 rounded-lg text-lg font-semibold shadow-xl hover:bg-opacity-90 transition-all transform hover:scale-105">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-6 w-6"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                            Show Location on Google Maps
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-maroon text-cream/80 pt-12 pb-8">
+        <div class="container mx-auto px-6 lg:px-8">
+            <div class="grid md:grid-cols-3 gap-8 text-center md:text-left">
+                <div>
+                    <h4 class="text-xl font-semibold text-white mb-4">Contact Us</h4>
+                    <p>Sulur, Coimbatore</p>
+                    <p>Tamil Nadu, India</p>
+                    <p class="mt-2"><a href="tel:+919943954335" class="hover:text-gold">99439 54335</a></p>
+                    <p><a href="tel:+918610452123" class="hover:text-gold">86104 52123</a></p>
+                </div>
+                <div>
+                    <h4 class="text-xl font-semibold text-white mb-4">Connect with Us</h4>
+                    <div class="flex justify-center md:justify-start space-x-4">
+                        <!-- Replace with actual social links -->
+                        <a href="#" target="_blank" class="hover:text-gold transition-colors">YouTube</a>
+                        <a href="#" target="_blank" class="hover:text-gold transition-colors">Facebook</a>
+                        <a href="#" target="_blank" class="hover:text-gold transition-colors">Instagram</a>
+                    </div>
+                     <a href="https://wa.me/919943954335?text=Vanakkam%20Siddhar%20Peedam" target="_blank" rel="noopener" class="inline-block mt-4 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">Chat on WhatsApp</a>
+                </div>
+                 <div>
+                    <h4 class="text-xl font-semibold text-white mb-4">Support the Peedam</h4>
+                    <p>Your generous donations help us continue our sacred services.</p>
+                    <a href="#" class="inline-block mt-2 text-gold font-bold hover:underline">Donate Now</a>
+                </div>
+            </div>
+            <div class="mt-10 pt-6 border-t border-cream/20 text-center text-sm">
+                <p>&copy; 2025 ஸ்ரீ சிங்கரவேலன் சிவசக்தி அருள்வாக்கு சித்தர் மடம். All Rights Reserved.</p>
+                <p class="mt-2">Developed by <a href="#" target="_blank" class="font-semibold hover:text-gold">SanStudio</a></p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Accessibility Toggle -->
+    <button id="contrast-toggle" class="fixed bottom-4 right-4 bg-maroon text-white p-3 rounded-full shadow-lg z-50" title="Toggle High Contrast Mode">
+        <svg xmlns="http://www.w.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+    </button>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // --- CONFIGURATION ---
+    // Set this to true to simulate a live stream and show the "LIVE NOW" badge
+    const IS_STREAM_LIVE = true; 
+    
+    // --- HERO SLIDESHOW ---
+    const heroSlideshow = document.getElementById('hero-slideshow');
+    if (heroSlideshow) {
+        const slides = heroSlideshow.querySelectorAll('.hero-slide');
+        let currentSlide = 0;
+        
+        if (slides.length > 0) {
+            slides[currentSlide].classList.add('active'); // Show first slide immediately
+        }
+
+        setInterval(() => {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.add('active');
+        }, 5000); // Change image every 5 seconds
+    }
+
+    // --- MOBILE MENU ---
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    // Close mobile menu when a link is clicked
+    mobileMenu.addEventListener('click', (e) => {
+        if (e.target.tagName === 'A') {
+            mobileMenu.classList.add('hidden');
+        }
+    });
+
+    // --- AUTO-HIDING HEADER ---
+    const header = document.getElementById('site-header');
+    let lastScrollY = window.scrollY;
+    window.addEventListener('scroll', () => {
+        if (lastScrollY < window.scrollY && window.scrollY > header.offsetHeight) {
+            header.style.top = `-${header.offsetHeight}px`; // Hide header
+        } else {
+            header.style.top = '0'; // Show header
+        }
+        lastScrollY = window.scrollY;
+    });
+
+    // --- LIVE STATUS INDICATOR ---
+    const liveBadge = document.getElementById('live-badge');
+    const liveCtaDesktop = document.getElementById('live-cta-desktop');
+    const liveCtaMobile = document.getElementById('live-cta-mobile');
+    
+    function updateLiveStatus(isLive) {
+        if (isLive) {
+            liveBadge.classList.remove('hidden');
+            liveCtaDesktop.classList.remove('hidden');
+            liveCtaMobile.classList.remove('hidden');
+        } else {
+            liveBadge.classList.add('hidden');
+            liveCtaDesktop.classList.add('hidden');
+            liveCtaMobile.classList.add('hidden');
+        }
+    }
+    // Initial check
+    updateLiveStatus(IS_STREAM_LIVE);
+    // NOTE FOR DEVELOPER: For a real implementation, you would poll the YouTube API
+    // here periodically and call updateLiveStatus() with the result.
+    // e.g., setInterval(() => checkYouTubeApi(), 60000); 
+
+    // --- SCROLL-REVEAL ANIMATIONS ---
+    const revealElements = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, {
+        threshold: 0.1
+    });
+
+    revealElements.forEach(el => observer.observe(el));
+
+    // --- GALLERY LIGHTBOX ---
+    const gallery = document.getElementById('image-gallery');
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxClose = document.getElementById('lightbox-close');
+    const lightboxNext = document.getElementById('lightbox-next');
+    const lightboxPrev = document.getElementById('lightbox-prev');
+    
+    let currentImageIndex;
+    const galleryImages = Array.from(gallery.getElementsByTagName('img'));
+
+    gallery.addEventListener('click', e => {
+        if (e.target.tagName === 'IMG') {
+            currentImageIndex = galleryImages.indexOf(e.target);
+            openLightbox(e.target.src);
+        }
+    });
+
+    function openLightbox(src) {
+        lightboxImg.src = src;
+        lightbox.classList.remove('hidden');
+        lightbox.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+        lightbox.classList.add('hidden');
+        lightbox.classList.remove('flex');
+        document.body.style.overflow = 'auto';
+    }
+    
+    function showNextImage() {
+        currentImageIndex = (currentImageIndex + 1) % galleryImages.length;
+        lightboxImg.src = galleryImages[currentImageIndex].src;
+    }
+    
+    function showPrevImage() {
+        currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length;
+        lightboxImg.src = galleryImages[currentImageIndex].src;
+    }
+
+    lightboxClose.addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', e => {
+        if (e.target === lightbox) closeLightbox();
+    });
+    lightboxNext.addEventListener('click', showNextImage);
+    lightboxPrev.addEventListener('click', showPrevImage);
+
+    document.addEventListener('keydown', e => {
+        if (!lightbox.classList.contains('hidden')) {
+            if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'ArrowRight') showNextImage();
+            if (e.key === 'ArrowLeft') showPrevImage();
+        }
+    });
+
+    // --- ACCESSIBILITY: HIGH CONTRAST MODE ---
+    const contrastToggle = document.getElementById('contrast-toggle');
+    contrastToggle.addEventListener('click', () => {
+        document.body.classList.toggle('high-contrast');
+    });
+});
+</script>
+
+</body>
+</html>
+
+
+
+
