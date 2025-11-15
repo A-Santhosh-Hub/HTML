@@ -1,0 +1,1381 @@
+
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>AstroBooks Management</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* (Your styles unchanged) */
+        body { font-family: 'Outfit', sans-serif; background-color: #0c0a09; color: #d6d3d1; }
+        .card-bg { background-color: rgba(23, 23, 23, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 1rem; }
+        .celestial-gradient-text { background: linear-gradient(90deg, #a855f7, #6ee7b7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .btn-primary { background: linear-gradient(90deg, #a855f7, #9333ea); color: white; transition: all 0.3s ease; }
+        .btn-primary:hover { box-shadow: 0 0 15px rgba(168,85,247,0.5); transform: translateY(-2px); }
+        .btn-secondary { background: linear-gradient(90deg, #10b981, #059669); color: white; transition: all 0.3s ease; }
+        .btn-secondary:hover { box-shadow: 0 0 15px rgba(16,185,129,0.5); transform: translateY(-2px); }
+        .btn-danger { background: linear-gradient(90deg, #f43f5e, #e11d48); color: white; transition: all 0.3s ease; }
+        .btn-danger:hover { box-shadow: 0 0 15px rgba(244,63,94,0.5); transform: translateY(-2px); }
+        .btn-muted { background-color: rgba(55,65,81,0.5); color: #d4d4d8; transition: all 0.3s ease; }
+        .btn-muted:hover { background-color: rgba(55,65,81,0.8); }
+
+        .form-input, .form-select { background-color: rgba(17,24,39,0.5); border: 1px solid rgba(55,65,81,0.7); color: #e5e7eb; border-radius: 0.5rem; transition: border-color 0.3s, box-shadow 0.3s; }
+        .form-input:focus, .form-select:focus { outline: none; border-color: #a855f7; box-shadow: 0 0 0 2px rgba(168,85,247,0.4); }
+
+        .astro-table { border-collapse: separate; border-spacing: 0; width: 100%; }
+        .astro-table th { background-color: rgba(31,41,55,0.5); }
+        .astro-table th, .astro-table td { border-bottom: 1px solid rgba(55,65,81,0.5); padding: 0.75rem 1.5rem; }
+        .astro-table tr:hover td { background-color: rgba(31,41,55,0.3); }
+        .astro-table th:first-child { border-top-left-radius: 0.5rem; }
+        .astro-table th:last-child { border-top-right-radius: 0.5rem; }
+        .astro-table tr:last-child td:first-child { border-bottom-left-radius: 0.5rem; }
+        .astro-table tr:last-child td:last-child { border-bottom-right-radius: 0.5rem; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #a855f7; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9333ea; }
+
+        #toast-container { position: fixed; top: 1.5rem; right: 1.5rem; z-index: 1000; display:flex; flex-direction:column; gap:0.75rem; }
+        .toast { padding:1rem 1.5rem; border-radius:0.5rem; font-weight:500; color:white; display:flex; align-items:center; gap:0.75rem; opacity:0; transform:translateX(100%); animation: toast-in 0.5s forwards, toast-out 0.5s forwards 3s; }
+        .toast.success { background: linear-gradient(90deg, #10b981, #059669); }
+        .toast.error { background: linear-gradient(90deg, #f43f5e, #e11d48); }
+        .toast-icon { width:1.25rem; height:1.25rem; }
+        @keyframes toast-in { to { opacity:1; transform:translateX(0); } }
+        @keyframes toast-out { from { opacity:1; transform:translateX(0); } to { opacity:0; transform:translateX(100%); } }
+
+        .modal { position: fixed; inset: 0; z-index: 50; display:flex; align-items:center; justify-content:center; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(5px); opacity:0; visibility:hidden; transition: opacity 0.3s, visibility 0.3s; }
+        .modal.is-open { opacity:1; visibility:visible; }
+        .modal-content { max-height: 90vh; overflow-y:auto; transform: scale(0.95); opacity:0; transition: transform 0.3s, opacity 0.3s; }
+        .modal.is-open .modal-content { transform: scale(1); opacity:1; }
+
+        .glitch-footer { font-family:'Courier New', Courier, monospace; font-size:0.75rem; color:#6b7280; position:relative; animation: glitch-skew 1s infinite linear alternate-reverse; }
+        .glitch-footer::before, .glitch-footer::after { content:"Developed By SanStudio"; position:absolute; top:0; left:0; width:100%; height:100%; overflow:hidden; }
+        .glitch-footer::before { left:2px; text-shadow:-1px 0 #f43f5e; animation: glitch-anim-1 2s infinite linear alternate-reverse; }
+        .glitch-footer::after { left:-2px; text-shadow:-1px 0 #3b82f6; animation: glitch-anim-2 3s infinite linear alternate-reverse; }
+        @keyframes glitch-anim-1 { 0% { clip-path: inset(5% 0 85% 0); } 100% { clip-path: inset(80% 0 5% 0); } }
+        @keyframes glitch-anim-2 { 0% { clip-path: inset(70% 0 10% 0); } 100% { clip-path: inset(10% 0 75% 0); } }
+        @keyframes glitch-skew { 0% { transform: skew(0deg); } 100% { transform: skew(1deg); } }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Main App -->
+    <div id="app" class="md:flex min-h-screen">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="flex flex-col w-64 bg-stone-900 text-stone-300 fixed inset-y-0 left-0 z-40 transform -translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 md:relative">
+            <div class="flex items-center justify-center h-16 border-b border-stone-800">
+                <i data-lucide="book-heart" class="w-8 h-8 text-purple-400"></i>
+                <span class="ml-3 text-xl font-bold text-white">AstroBooks</span>
+            </div>
+            <nav class="flex-1 space-y-2 p-4">
+                <a href="#dashboard" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-stone-800">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#books" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-stone-800">
+                    <i data-lucide="book-open" class="w-5 h-5"></i>
+                    <span>Books</span>
+                </a>
+                <a href="#orders" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-stone-800">
+                    <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                    <span>Orders</span>
+                </a>
+                <a href="#reports" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-stone-800">
+                    <i data-lucide="file-text" class="w-5 h-5"></i>
+                    <span>Reports</span>
+                </a>
+                <a href="#settings" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-stone-800">
+                    <i data-lucide="settings" class="w-5 h-5"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Sidebar Overlay for Mobile -->
+        <div id="sidebar-overlay" class="hidden fixed inset-0 bg-black/60 z-30 md:hidden"></div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col min-h-screen">
+            <!-- Mobile Header -->
+            <header class="md:hidden flex items-center justify-between h-16 px-4 bg-stone-900 border-b border-stone-800 fixed top-0 left-0 right-0 z-20">
+                <button id="menu-toggle-btn" class="p-2">
+                    <i data-lucide="menu" class="w-6 h-6 text-white"></i>
+                </button>
+                <div class="flex items-center gap-2">
+                    <i data-lucide="book-heart" class="w-6 h-6 text-purple-400"></i>
+                    <span class="text-lg font-bold text-white">AstroBooks</span>
+                </div>
+                <div class="w-8"></div> <!-- Spacer -->
+            </header>
+
+            <!-- Content Area -->
+            <main class="flex-1 pt-16 md:pt-0 bg-stone-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]">
+                <div class="relative p-4 sm:p-6 lg:p-8 min-h-[calc(100vh-64px)] md:min-h-screen">
+                    <!-- Dynamic Page Content -->
+                    <div id="page-content" class="pb-16"></div>
+
+                    <!-- Footer -->
+                    <footer class="absolute bottom-4 right-4 sm:right-6 lg:right-8">
+                        <div class="glitch-footer">Developed By SanStudio</div>
+                    </footer>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modals Container -->
+    <div id="modal-container"></div>
+
+    <!-- Page Templates -->
+    <!-- (templates unchanged except settings template updated to include export/import) -->
+
+    <!-- Dashboard Template -->
+    <template id="dashboard-template">
+        <h1 class="text-3xl font-bold text-white mb-6">Dashboard</h1>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+            <div class="card-bg p-5 flex items-center space-x-4">
+                <div class="p-3 rounded-full bg-purple-500/20 text-purple-400">
+                    <i data-lucide="book-open-check" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-stone-400">Book Types</p>
+                    <p id="db-book-types" class="text-3xl font-bold text-white">0</p>
+                </div>
+            </div>
+            <div class="card-bg p-5 flex items-center space-x-4">
+                <div class="p-3 rounded-full bg-blue-500/20 text-blue-400">
+                    <i data-lucide="boxes" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-stone-400">Total Books (Stock)</p>
+                    <p id="db-total-stock" class="text-3xl font-bold text-white">0</p>
+                </div>
+            </div>
+            <div class="card-bg p-5 flex items-center space-x-4">
+                <div class="p-3 rounded-full bg-green-500/20 text-green-400">
+                    <i data-lucide="check-circle" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-stone-400">Books Sold</p>
+                    <p id="db-books-sold" class="text-3xl font-bold text-white">0</p>
+                </div>
+            </div>
+            <div class="card-bg p-5 flex items-center space-x-4">
+                <div class="p-3 rounded-full bg-yellow-500/20 text-yellow-400">
+                    <i data-lucide="archive" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-stone-400">Books Remaining</p>
+                    <p id="db-books-remaining" class="text-3xl font-bold text-white">0</p>
+                </div>
+            </div>
+             <div class="card-bg p-5 flex items-center space-x-4">
+                <div class="p-3 rounded-full bg-cyan-500/20 text-cyan-400">
+                    <i data-lucide="users" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-stone-400">Total Orders</p>
+                    <p id="db-total-orders" class="text-3xl font-bold text-white">0</p>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="text-2xl font-bold text-white mt-10 mb-6">Quick Actions</h2>
+        <div class="flex gap-4">
+            <button id="quick-add-book" class="px-5 py-2.5 rounded-lg btn-primary font-semibold flex items-center gap-2">
+                <i data-lucide="plus" class="w-5 h-5"></i>
+                <span>Add New Book</span>
+            </button>
+            <button id="quick-add-order" class="px-5 py-2.5 rounded-lg btn-secondary font-semibold flex items-center gap-2">
+                <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                <span>Place New Order</span>
+            </button>
+        </div>
+    </template>
+
+    <!-- Books Template -->
+    <template id="books-template">
+        <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+            <h1 class="text-3xl font-bold text-white">Book Management</h1>
+            <button id="add-book-btn" class="px-5 py-2.5 rounded-lg btn-primary font-semibold flex items-center gap-2">
+                <i data-lucide="plus" class="w-5 h-5"></i>
+                <span>Add New Book</span>
+            </button>
+        </div>
+
+        <div class="mb-4">
+             <input type="text" id="book-search" class="form-input w-full md:w-1/3 p-2.5" placeholder="Search books...">
+        </div>
+
+        <div class="card-bg overflow-x-auto">
+            <table class="astro-table">
+                <thead class="text-xs uppercase">
+                    <tr>
+                        <th scope="col" class="text-left">Book Name</th>
+                        <th scope="col" class="text-center">Total Stock</th>
+                        <th scope="col" class="text-center">Sold</th>
+                        <th scope="col" class="text-center">Available</th>
+                        <th scope="col" class="text-center">Last Update</th>
+                        <th scope="col" class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="books-table-body"></tbody>
+            </table>
+             <div id="books-pagination" class="flex justify-end items-center p-4"></div>
+        </div>
+    </template>
+
+    <!-- Orders Template -->
+    <template id="orders-template">
+         <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+            <h1 class="text-3xl font-bold text-white">Order Management</h1>
+            <button id="add-order-btn" class="px-5 py-2.5 rounded-lg btn-secondary font-semibold flex items-center gap-2">
+                <i data-lucide="plus" class="w-5 h-5"></i>
+                <span>Place New Order</span>
+            </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="card-bg p-4 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label for="order-start-date" class="block text-sm font-medium text-stone-300 mb-1">Start Date</label>
+                    <input type="date" id="order-start-date" class="form-input w-full p-2.5">
+                </div>
+                 <div>
+                    <label for="order-end-date" class="block text-sm font-medium text-stone-300 mb-1">End Date</label>
+                    <input type="date" id="order-end-date" class="form-input w-full p-2.5">
+                </div>
+                <div class="md:col-span-2 flex items-end gap-2">
+                    <button id="order-filter-btn" class="w-full md:w-auto px-5 py-2.5 rounded-lg btn-primary font-semibold">Filter</button>
+                    <button id="order-clear-btn" class="w-full md:w-auto px-5 py-2.5 rounded-lg btn-muted font-semibold">Clear</button>
+                </div>
+            </div>
+            <div class="mt-4">
+                 <input type="text" id="order-search" class="form-input w-full md:w-1/2 p-2.5" placeholder="Search by customer or book...">
+            </div>
+        </div>
+
+        <div class="card-bg overflow-x-auto">
+            <table class="astro-table">
+                <thead class="text-xs uppercase">
+                    <tr>
+                        <th scope="col" class="text-left">Customer</th>
+                        <th scope="col" class="text-left">Mobile</th>
+                        <th scope="col" class="text-left">Book</th>
+                        <th scope="col" class="text-center">Qty</th>
+                        <th scope="col" class="text-left">Ordered At</th>
+                        <th scope="col" class="text-left">Payment</th>
+                        <th scope="col" class="text-left">Status</th>
+                        <th scope="col" class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="orders-table-body"></tbody>
+            </table>
+             <div id="orders-pagination" class="flex justify-end items-center p-4"></div>
+        </div>
+    </template>
+
+    <!-- Reports Template -->
+    <template id="reports-template">
+        <h1 class="text-3xl font-bold text-white mb-6">Reports</h1>
+
+        <div class="space-y-8">
+            <div class="card-bg p-6">
+                <h2 class="text-xl font-semibold text-white mb-4">Book Inventory Report</h2>
+                <p class="text-stone-400 mb-4">Export a full report of all books, including stock levels, add/edit dates, and sales counts.</p>
+                <button id="export-book-inventory-csv" class="px-5 py-2.5 rounded-lg btn-primary font-semibold flex items-center gap-2">
+                    <i data-lucide="download" class="w-5 h-5"></i>
+                    <span>Export CSV</span>
+                </button>
+            </div>
+
+            <div class="card-bg p-6">
+                <h2 class="text-xl font-semibold text-white mb-4">Customer Orders Report</h2>
+                <p class="text-stone-400 mb-4">Export a pivoted report of customer orders, ideal for analysis. Optionally filter by date.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                     <div>
+                        <label for="customer-report-start" class="block text-sm font-medium text-stone-300 mb-1">Start Date (Optional)</label>
+                        <input type="date" id="customer-report-start" class="form-input w-full p-2.5">
+                    </div>
+                     <div>
+                        <label for="customer-report-end" class="block text-sm font-medium text-stone-300 mb-1">End Date (Optional)</label>
+                        <input type="date" id="customer-report-end" class="form-input w-full p-2.5">
+                    </div>
+                </div>
+                <button id="export-customer-orders-csv" class="px-5 py-2.5 rounded-lg btn-primary font-semibold flex items-center gap-2">
+                    <i data-lucide="download" class="w-5 h-5"></i>
+                    <span>Export CSV</span>
+                </button>
+                 <button id="export-customer-orders-json" class="ml-4 px-5 py-2.5 rounded-lg btn-muted font-semibold flex items-center gap-2">
+                    <i data-lucide="download" class="w-5 h-5"></i>
+                    <span>Export JSON</span>
+                </button>
+            </div>
+
+            <div class="card-bg p-6">
+                <h2 class="text-xl font-semibold text-white mb-4">Daily Sales Report</h2>
+                <p class="text-stone-400 mb-4">Export a report showing book sales aggregated by day. Requires a date range.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                     <div>
+                        <label for="sales-report-start" class="block text-sm font-medium text-stone-300 mb-1">Start Date</label>
+                        <input type="date" id="sales-report-start" class="form-input w-full p-2.5">
+                    </div>
+                     <div>
+                        <label for="sales-report-end" class="block text-sm font-medium text-stone-300 mb-1">End Date</label>
+                        <input type="date" id="sales-report-end" class="form-input w-full p-2.5">
+                    </div>
+                </div>
+                <button id="export-daily-sales-csv" class="px-5 py-2.5 rounded-lg btn-primary font-semibold flex items-center gap-2">
+                    <i data-lucide="download" class="w-5 h-5"></i>
+                    <span>Export CSV</span>
+                </button>
+            </div>
+        </div>
+    </template>
+
+    <!-- Settings Template (added Export/Import here) -->
+    <template id="settings-template">
+        <h1 class="text-3xl font-bold text-white mb-6">Settings</h1>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Data Tools -->
+            <div class="card-bg p-6 md:col-span-2">
+                <h2 class="text-xl font-semibold text-white mb-4">Data Tools</h2>
+                <p class="text-stone-400 mb-4">Backup or restore your application data (books, orders, and settings).</p>
+                <div class="flex gap-3">
+                    <button id="export-all-data-btn" class="px-5 py-2.5 rounded-lg btn-primary font-semibold flex items-center gap-2">
+                        <i data-lucide="download" class="w-5 h-5"></i>
+                        <span>Export All Data (JSON)</span>
+                    </button>
+                    <label class="px-5 py-2.5 rounded-lg btn-muted font-semibold cursor-pointer flex items-center gap-2">
+                        <i data-lucide="upload" class="w-5 h-5"></i>
+                        <span>Import Data</span>
+                        <input id="import-data-file" type="file" accept="application/json" class="hidden" />
+                    </label>
+                </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="card-bg p-6 border border-red-500/50 md:col-span-2">
+                <h2 class="text-xl font-semibold text-red-400 mb-4">Danger Zone</h2>
+                <p class="text-stone-400 mb-4">This action is irreversible and will delete all books, orders, and settings.</p>
+                <button id="reset-data-btn" class="px-5 py-2.5 rounded-lg btn-danger font-semibold flex items-center gap-2">
+                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                    <span>Reset All Data</span>
+                </button>
+            </div>
+        </div>
+    </template>
+
+    <!-- JavaScript -->
+    <script type="module">
+        // --- APP STATE ---
+        const state = {
+            currentPage: 'dashboard',
+            itemsPerPage: 10,
+            bookCurrentPage: 1,
+            orderCurrentPage: 1,
+            modals: {},
+        };
+
+        // --- STORAGE KEYS & DEFAULTS ---
+        const storageKeys = {
+            SETTINGS: 'bm_settings',
+            BOOKS: 'bm_books',
+            ORDERS: 'bm_orders',
+        };
+
+        const defaultSettings = {
+            nextBookId: 1,
+            nextOrderId: 1,
+        };
+
+        // --- STORAGE (improved) ---
+        const storage = {
+            read: (key, fallback = null) => {
+                try {
+                    const raw = localStorage.getItem(key);
+                    if (raw === null || raw === undefined) return fallback;
+                    const parsed = JSON.parse(raw);
+                    // If parsed is falsy (null) return fallback
+                    return parsed === null ? fallback : parsed;
+                } catch (e) {
+                    console.error(`Error reading ${key} from localStorage`, e);
+                    return fallback;
+                }
+            },
+            write: (key, value) => {
+                try {
+                    localStorage.setItem(key, JSON.stringify(value));
+                } catch (e) {
+                    console.error(`Error writing ${key} to localStorage`, e);
+                }
+            },
+            init: () => {
+                if (!storage.read(storageKeys.SETTINGS, null)) {
+                    storage.write(storageKeys.SETTINGS, defaultSettings);
+                }
+                if (!storage.read(storageKeys.BOOKS, null)) {
+                    storage.write(storageKeys.BOOKS, []);
+                }
+                if (!storage.read(storageKeys.ORDERS, null)) {
+                    storage.write(storageKeys.ORDERS, []);
+                }
+            }
+        };
+
+        // --- UTILITIES ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            const icon = type === 'success' ? 'check-circle' : 'alert-triangle';
+            toast.innerHTML = `
+                <i data-lucide="${icon}" class="toast-icon"></i>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            lucide.createIcons({
+                nodes: [toast.querySelector('.toast-icon')]
+            });
+            // Remove after animations
+            setTimeout(() => {
+                toast.addEventListener('animationend', () => toast.remove());
+            }, 3500);
+        }
+
+        class Modal {
+            constructor(id, options = {}) {
+                this.id = id;
+                this.title = options.title || 'Modal';
+                this.content = options.content || '';
+                this.footer = options.footer || '';
+                this.onOpen = options.onOpen || (() => {});
+                this.modalElement = this.createModalElement();
+                document.getElementById('modal-container').appendChild(this.modalElement);
+                this.attachEvents();
+                state.modals[id] = this;
+            }
+
+            createModalElement() {
+                const modal = document.createElement('div');
+                modal.id = this.id;
+                modal.className = 'modal';
+                modal.innerHTML = `
+                    <div class="modal-overlay absolute inset-0" data-modal-close></div>
+                    <div class="modal-content card-bg w-full max-w-lg m-4 p-6 space-y-4">
+                        <header class="flex justify-between items-center">
+                            <h2 class="text-xl font-semibold text-white">${this.title}</h2>
+                            <button data-modal-close class="p-1 text-stone-400 hover:text-white">
+                                <i data-lucide="x" class="w-6 h-6"></i>
+                            </button>
+                        </header>
+                        <main>${this.content}</main>
+                        <footer class="flex justify-end gap-3">${this.footer}</footer>
+                    </div>
+                `;
+                return modal;
+            }
+
+            attachEvents() {
+                this.modalElement.addEventListener('click', (e) => {
+                    if (e.target.closest('[data-modal-close]')) {
+                        this.close();
+                    }
+                });
+                const icons = this.modalElement.querySelectorAll('[data-lucide]');
+                lucide.createIcons({ nodes: Array.from(icons) });
+            }
+
+            open() {
+                this.modalElement.classList.add('is-open');
+                this.onOpen();
+            }
+
+            close() {
+                this.modalElement.classList.remove('is-open');
+            }
+
+            destroy() {
+                this.modalElement.remove();
+                delete state.modals[this.id];
+            }
+        }
+
+        function paginate(items, page, perPage) {
+            return items.slice((page - 1) * perPage, page * perPage);
+        }
+
+        function renderPagination(containerId, totalItems, currentPage, onPageClick) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const totalPages = Math.ceil(totalItems / state.itemsPerPage);
+            container.innerHTML = '';
+            if (totalPages <= 1) return;
+
+            const createButton = (text, page) => {
+                const btn = document.createElement('button');
+                btn.className = `px-3 py-1 rounded-lg ${currentPage === page ? 'btn-primary' : 'btn-muted'}`;
+                btn.textContent = text;
+                if (currentPage !== page) btn.onclick = () => onPageClick(page);
+                return btn;
+            };
+
+            const pageNumbers = [];
+            if (totalPages <= 7) {
+                for (let i = 1; i <= totalPages; i++) pageNumbers.push(i);
+            } else {
+                pageNumbers.push(1);
+                if (currentPage > 3) pageNumbers.push('...');
+                if (currentPage > 2) pageNumbers.push(currentPage - 1);
+                if (currentPage !== 1 && currentPage !== totalPages) pageNumbers.push(currentPage);
+                if (currentPage < totalPages - 1) pageNumbers.push(currentPage + 1);
+                if (currentPage < totalPages - 2) pageNumbers.push('...');
+                pageNumbers.push(totalPages);
+            }
+
+            if (currentPage > 1) container.appendChild(createButton('Prev', currentPage - 1));
+            pageNumbers.forEach(num => {
+                if (num === '...') {
+                    const span = document.createElement('span');
+                    span.textContent = '...';
+                    span.className = 'px-3 py-1';
+                    container.appendChild(span);
+                } else {
+                    container.appendChild(createButton(num, num));
+                }
+            });
+            if (currentPage < totalPages) container.appendChild(createButton('Next', currentPage + 1));
+        }
+
+        function downloadFile(filename, content, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function escapeCSV(str) {
+            if (str === null || str === undefined) return '';
+            str = String(str);
+            if (str.includes('"') || str.includes(',') || str.includes('\n')) {
+                return `"${str.replace(/"/g, '""')}"`;
+            }
+            return str;
+        }
+
+        // --- NAVIGATION ---
+        function renderPage(pageId) {
+            state.currentPage = pageId;
+            const content = document.getElementById('page-content');
+            const template = document.getElementById(`${pageId}-template`);
+            if (!template) {
+                console.error(`Template not found for page: ${pageId}`);
+                content.innerHTML = `<h1 class="text-3xl text-red-400">Error: Page template not found.</h1>`;
+                return;
+            }
+            content.innerHTML = template.innerHTML;
+
+            // Update active nav link
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.toggle('bg-purple-500/20', link.href.endsWith(`#${pageId}`));
+                link.classList.toggle('text-purple-400', link.href.endsWith(`#${pageId}`));
+            });
+
+            // Page-specific init
+            switch (pageId) {
+                case 'dashboard': initDashboard(); break;
+                case 'books': initBooksPage(); break;
+                case 'orders': initOrdersPage(); break;
+                case 'reports': initReportsPage(); break;
+                case 'settings': initSettingsPage(); break;
+            }
+
+            lucide.createIcons();
+
+            // Close mobile sidebar on navigation
+            document.getElementById('sidebar').classList.add('-translate-x-full');
+            document.getElementById('sidebar-overlay').classList.add('hidden');
+        }
+
+        function handleHashChange() {
+            const hash = window.location.hash.substring(1) || 'dashboard';
+            renderPage(hash);
+        }
+
+        // --- PAGE INITS ---
+        function initDashboard() {
+            updateDashboard();
+            document.getElementById('quick-add-book').onclick = () => renderBookModal();
+            document.getElementById('quick-add-order').onclick = () => renderOrderModal();
+        }
+
+        function updateDashboard() {
+            const books = storage.read(storageKeys.BOOKS, []) || [];
+            const orders = storage.read(storageKeys.ORDERS, []) || [];
+
+            const totalStock = books.reduce((sum, b) => sum + (Number(b.total) || 0), 0);
+            const totalSold = books.reduce((sum, b) => sum + (Number(b.sold) || 0), 0);
+
+            const elBookTypes = document.getElementById('db-book-types');
+            const elTotalStock = document.getElementById('db-total-stock');
+            const elBooksSold = document.getElementById('db-books-sold');
+            const elBooksRemaining = document.getElementById('db-books-remaining');
+            const elTotalOrders = document.getElementById('db-total-orders');
+
+            if (elBookTypes) elBookTypes.textContent = books.length;
+            if (elTotalStock) elTotalStock.textContent = totalStock;
+            if (elBooksSold) elBooksSold.textContent = totalSold;
+            if (elBooksRemaining) elBooksRemaining.textContent = (totalStock - totalSold);
+            if (elTotalOrders) elTotalOrders.textContent = orders.length;
+        }
+
+        function initBooksPage() {
+            renderBooksTable();
+            document.getElementById('add-book-btn').onclick = () => renderBookModal();
+            document.getElementById('book-search').oninput = () => {
+                state.bookCurrentPage = 1;
+                renderBooksTable();
+            };
+        }
+
+        function initOrdersPage() {
+            renderOrdersTable();
+            document.getElementById('add-order-btn').onclick = () => renderOrderModal();
+            document.getElementById('order-filter-btn').onclick = () => renderOrdersTable();
+            document.getElementById('order-clear-btn').onclick = () => {
+                document.getElementById('order-start-date').value = '';
+                document.getElementById('order-end-date').value = '';
+                document.getElementById('order-search').value = '';
+                state.orderCurrentPage = 1;
+                renderOrdersTable();
+            };
+            document.getElementById('order-search').oninput = () => {
+                state.orderCurrentPage = 1;
+                renderOrdersTable();
+            };
+        }
+
+        function initReportsPage() {
+            document.getElementById('export-book-inventory-csv').onclick = exportBookInventoryReport;
+            document.getElementById('export-customer-orders-csv').onclick = exportCustomerOrdersReport;
+            document.getElementById('export-customer-orders-json').onclick = () => exportCustomerOrdersReport(true);
+            document.getElementById('export-daily-sales-csv').onclick = exportDailySalesReport;
+        }
+
+        function initSettingsPage() {
+            // Reset button
+            document.getElementById('reset-data-btn').onclick = () => {
+                if (confirm('FIRST WARNING: Are you absolutely sure you want to delete all data? This cannot be undone.')) {
+                    if (prompt('To confirm, type "DELETE ALL" in all caps:') === 'DELETE ALL') {
+                        localStorage.clear();
+                        storage.init();
+                        showToast('All data has been reset.', 'error');
+                        renderPage('dashboard');
+                    } else {
+                        showToast('Reset cancelled.', 'success');
+                    }
+                }
+            };
+
+            // Export all data button
+            document.getElementById('export-all-data-btn').onclick = () => {
+                const data = {
+                    settings: storage.read(storageKeys.SETTINGS, defaultSettings),
+                    books: storage.read(storageKeys.BOOKS, []),
+                    orders: storage.read(storageKeys.ORDERS, [])
+                };
+                downloadFile('astrobooks_backup.json', JSON.stringify(data, null, 2), 'application/json');
+                showToast('Exported ALL data.', 'success');
+            };
+
+            // Import data file input
+            const importInput = document.getElementById('import-data-file');
+            importInput.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                try {
+                    const text = await file.text();
+                    const json = JSON.parse(text);
+                    if (!confirm('Importing will overwrite current data. Continue?')) {
+                        showToast('Import cancelled.', 'success');
+                        importInput.value = '';
+                        return;
+                    }
+
+                    // Validate basic structure
+                    if (!json || typeof json !== 'object' || !Array.isArray(json.books) || !Array.isArray(json.orders) || typeof json.settings !== 'object') {
+                        showToast('Invalid backup format. Import failed.', 'error');
+                        importInput.value = '';
+                        return;
+                    }
+
+                    // Overwrite storage
+                    storage.write(storageKeys.SETTINGS, json.settings);
+                    storage.write(storageKeys.BOOKS, json.books);
+                    storage.write(storageKeys.ORDERS, json.orders);
+
+                    showToast('Data imported successfully. Reloading view...', 'success');
+                    importInput.value = '';
+                    updateDashboard();
+                    renderPage('dashboard');
+                } catch (err) {
+                    console.error('Import error', err);
+                    showToast('Failed to import file. Check console for details.', 'error');
+                    importInput.value = '';
+                }
+            };
+        }
+
+        // --- BOOK LOGIC ---
+        function renderBooksTable() {
+            const books = storage.read(storageKeys.BOOKS, []) || [];
+            const searchInput = (document.getElementById('book-search')?.value || '').toLowerCase();
+
+            // Safe filter - guard name
+            const filteredBooks = books
+                .filter(book => (book.name || '').toLowerCase().includes(searchInput))
+                // safer sort by date (most recent first)
+                .sort((a, b) => {
+                    const da = new Date(a.lastUpdated || a.createdAt || 0).getTime();
+                    const db = new Date(b.lastUpdated || b.createdAt || 0).getTime();
+                    return db - da;
+                });
+
+            const tableBody = document.getElementById('books-table-body');
+            if (!tableBody) return;
+
+            const paginatedBooks = paginate(filteredBooks, state.bookCurrentPage, state.itemsPerPage);
+
+            tableBody.innerHTML = paginatedBooks.length === 0
+                ? `<tr><td colspan="6" class="text-center py-8">No books found.</td></tr>`
+                : paginatedBooks.map(book => {
+                    const lastStock = Number(book.lastStockUpdate || 0);
+                    let updateText = `+${lastStock}`;
+                    let updateColor = 'text-green-400';
+                    if (lastStock < 0) {
+                        updateText = `${lastStock}`;
+                        updateColor = 'text-red-400';
+                    }
+                    if (lastStock === 0) {
+                        updateText = `( ${new Date(book.lastUpdated || book.createdAt || Date.now()).toLocaleDateString()} )`;
+                        updateColor = 'text-stone-500';
+                    }
+
+                    return `
+                        <tr class="border-b border-stone-800 hover:bg-stone-800/70">
+                            <td class="px-6 py-4 font-medium text-white">${escapeHtml(book.name || '')}</td>
+                            <td class="px-6 py-4 text-center">${Number(book.total) || 0}</td>
+                            <td class="px-6 py-4 text-center">${Number(book.sold) || 0}</td>
+                            <td class="px-6 py-4 text-center">${Number(book.available) || 0}</td>
+                            <td class="px-6 py-4 text-center text-sm ${updateColor} font-medium">
+                                <div>${escapeHtml(updateText)}</div>
+                                ${ lastStock !== 0 ? `<div class="text-xs text-stone-500">${new Date(book.lastUpdated || book.createdAt || Date.now()).toLocaleDateString()}</div>` : '' }
+                            </td>
+                            <td class="px-6 py-4 text-center space-x-2">
+                                 <button data-id="${book.id}" class="edit-book-btn text-purple-400 hover:text-purple-300 p-1">Edit</button>
+                                 <button data-id="${book.id}" class="delete-book-btn text-red-400 hover:text-red-300 p-1">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+            // Bind events using the button element (not event.target), to avoid inner-node issues
+            tableBody.querySelectorAll('.edit-book-btn').forEach(btn => btn.onclick = () => renderBookModal(btn.dataset.id));
+            tableBody.querySelectorAll('.delete-book-btn').forEach(btn => btn.onclick = () => handleDeleteBook(btn.dataset.id));
+
+            renderPagination('books-pagination', filteredBooks.length, state.bookCurrentPage, (page) => {
+                state.bookCurrentPage = page;
+                renderBooksTable();
+            });
+        }
+
+        function escapeHtml(s) {
+            if (s === null || s === undefined) return '';
+            return String(s)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        function renderBookModal(bookId = null) {
+            const books = storage.read(storageKeys.BOOKS, []) || [];
+            const book = bookId ? books.find(b => b.id === bookId) : null;
+
+            const modalId = 'book-modal';
+            state.modals[modalId]?.destroy();
+
+            new Modal(modalId, {
+                title: book ? 'Edit Book' : 'Add New Book',
+                content: `
+                    <form id="book-form" class="space-y-4">
+                        <input type="hidden" name="id" value="${book?.id || ''}">
+                        <div>
+                            <label for="book-name" class="block text-sm font-medium text-stone-300 mb-1">Book Name</label>
+                            <input type="text" name="name" id="book-name" class="form-input w-full p-2.5" value="${escapeHtml(book?.name || '')}" required>
+                        </div>
+                        <div>
+                            <label for="book-total" class="block text-sm font-medium text-stone-300 mb-1">Total Stock</label>
+                            <input type="number" name="total" id="book-total" class="form-input w-full p-2.5" value="${book?.total ?? ''}" min="0" required>
+                            ${book ? `<p class="text-xs text-stone-400 mt-1">Sold: ${book.sold || 0}. Changing total will adjust available count.</p>` : ''}
+                        </div>
+                    </form>
+                `,
+                footer: `
+                    <button class="px-5 py-2.5 rounded-lg btn-muted" data-modal-close>Cancel</button>
+                    <button id="save-book-btn" class="px-5 py-2.5 rounded-lg btn-primary font-semibold">
+                        <i data-lucide="save" class="w-5 h-5 inline-block -mt-1 mr-1"></i>
+                        ${book ? 'Update Book' : 'Save Book'}
+                    </button>
+                `
+            }).open();
+
+            document.getElementById('save-book-btn').onclick = () => handleSaveBook(modalId);
+        }
+
+        function handleSaveBook(modalId) {
+            const form = document.getElementById('book-form');
+            if (!form || !form.reportValidity()) return;
+
+            const books = storage.read(storageKeys.BOOKS, []) || [];
+            const settings = storage.read(storageKeys.SETTINGS, defaultSettings) || defaultSettings;
+
+            const bookId = form.id.value;
+            const bookName = form.name.value.trim();
+            const totalStock = parseInt(form.total.value, 10) || 0;
+
+            let stockUpdateAmount = 0;
+
+            if (bookId) {
+                // Edit existing book
+                const bookIndex = books.findIndex(b => b.id === bookId);
+                if (bookIndex > -1) {
+                    const existingBook = books[bookIndex];
+                    const sold = Number(existingBook.sold) || 0;
+                    if (totalStock < sold) {
+                        showToast('Total stock cannot be less than units already sold.', 'error');
+                        return;
+                    }
+                    stockUpdateAmount = totalStock - (Number(existingBook.total) || 0);
+
+                    existingBook.name = bookName;
+                    existingBook.total = totalStock;
+                    existingBook.available = totalStock - sold;
+                    existingBook.lastUpdated = new Date().toISOString();
+                    existingBook.lastStockUpdate = stockUpdateAmount;
+                    books[bookIndex] = existingBook;
+                }
+            } else {
+                // Add new book
+                stockUpdateAmount = totalStock;
+                const newBook = {
+                    id: `b_${settings.nextBookId}`,
+                    name: bookName,
+                    total: totalStock,
+                    sold: 0,
+                    available: totalStock,
+                    createdAt: new Date().toISOString(),
+                    lastUpdated: new Date().toISOString(),
+                    lastStockUpdate: stockUpdateAmount,
+                };
+                books.push(newBook);
+                settings.nextBookId = (Number(settings.nextBookId) || 1) + 1;
+                storage.write(storageKeys.SETTINGS, settings);
+            }
+
+            storage.write(storageKeys.BOOKS, books);
+            showToast(bookId ? 'Book updated!' : 'Book added!', 'success');
+            state.modals[modalId].close();
+
+            updateDashboard();
+            if (state.currentPage === 'books') renderBooksTable();
+        }
+
+        function handleDeleteBook(bookId) {
+            if (!confirm('Are you sure you want to delete this book? This action cannot be undone.')) return;
+            let books = storage.read(storageKeys.BOOKS, []) || [];
+
+            const book = books.find(b => b.id === bookId);
+            if (book && (Number(book.sold) || 0) > 0) {
+                if (!confirm(`WARNING: This book has ${book.sold} sales records. Deleting it will NOT update order histories. Continue?`)) {
+                    return;
+                }
+            }
+
+            books = books.filter(b => b.id !== bookId);
+            storage.write(storageKeys.BOOKS, books);
+
+            showToast('Book deleted.', 'error');
+            updateDashboard();
+            if (state.currentPage === 'books') renderBooksTable();
+        }
+
+        // --- ORDER LOGIC ---
+        function renderOrderModal() {
+            const books = storage.read(storageKeys.BOOKS, []) || [];
+            const availableBooks = books.filter(b => (Number(b.available) || 0) > 0);
+
+            const modalId = 'order-modal';
+            state.modals[modalId]?.destroy();
+
+            new Modal(modalId, {
+                title: 'Place New Order',
+                content: `
+                    <form id="order-form" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="customer-name" class="block text-sm font-medium text-stone-300 mb-1">Customer Name</label>
+                                <input type="text" name="customerName" id="customer-name" class="form-input w-full p-2.5" required>
+                            </div>
+                            <div>
+                                <label for="customer-mobile" class="block text-sm font-medium text-stone-300 mb-1">Mobile Number</label>
+                                <input type="tel" name="mobile" id="customer-mobile" class="form-input w-full p-2.5" required>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="customer-location" class="block text-sm font-medium text-stone-300 mb-1">Location</label>
+                            <input type="text" name="location" id="customer-location" class="form-input w-full p-2.5" required>
+                        </div>
+                        <div>
+                            <label for="payment-method" class="block text-sm font-medium text-stone-300 mb-1">Payment Method</label>
+                            <select name="paymentMethod" id="payment-method" class="form-select w-full p-2.5" required>
+                                <option value="GPay">GPay</option>
+                                <option value="Cash on Delivery">Cash on Delivery</option>
+                            </select>
+                        </div>
+                        <hr class="border-stone-700"/>
+                        <h3 class="text-lg font-semibold text-white">Select Books</h3>
+                        <div id="book-order-list" class="space-y-3 max-h-60 overflow-y-auto pr-2">
+                            ${availableBooks.length > 0 ? availableBooks.map(book => `
+                                <div class="book-order-item grid grid-cols-3 gap-3 items-center" data-book-id="${book.id}">
+                                    <label for="book-qty-${book.id}" class="col-span-2 text-sm text-stone-300">
+                                        ${escapeHtml(book.name)} <span class="text-xs text-stone-400">(Available: ${Number(book.available) || 0})</span>
+                                    </label>
+                                    <input type="number" id="book-qty-${book.id}" data-max="${Number(book.available) || 0}"
+                                           class="form-input p-2 w-full text-right" min="0" max="${Number(book.available) || 0}" placeholder="0">
+                                </div>
+                            `).join('') : '<p class="text-stone-400">No books with available stock.</p>'}
+                        </div>
+                    </form>
+                `,
+                footer: `
+                    <button class="px-5 py-2.5 rounded-lg btn-muted" data-modal-close>Cancel</button>
+                    <button id="save-order-btn" class="px-5 py-2.5 rounded-lg btn-secondary font-semibold">
+                        <i data-lucide="send" class="w-5 h-5 inline-block -mt-1 mr-1"></i>
+                        Place Order
+                    </button>
+                `
+            }).open();
+
+            document.getElementById('save-order-btn').onclick = () => handlePlaceOrder(modalId);
+        }
+
+        function handlePlaceOrder(modalId) {
+            const form = document.getElementById('order-form');
+            if (!form || !form.reportValidity()) return;
+
+            const customerName = form.customerName.value.trim();
+            const mobile = form.mobile.value.trim();
+            const location = form.location.value.trim();
+            const paymentMethod = form.paymentMethod.value;
+
+            let orders = storage.read(storageKeys.ORDERS, []) || [];
+            let books = storage.read(storageKeys.BOOKS, []) || [];
+            let settings = storage.read(storageKeys.SETTINGS, defaultSettings) || defaultSettings;
+
+            const itemsForOrder = [];
+            const bookInputs = form.querySelectorAll('#book-order-list .book-order-item');
+
+            try {
+                bookInputs.forEach(item => {
+                    const bookId = item.dataset.bookId;
+                    const input = item.querySelector('input[type="number"]');
+                    const quantity = parseInt(input.value || '0', 10) || 0;
+
+                    if (quantity > 0) {
+                        const book = books.find(b => b.id === bookId);
+                        if (!book) throw new Error('Selected book not found.');
+                        if (quantity > (Number(book.available) || 0)) {
+                            throw new Error(`Quantity for ${book.name} (${quantity}) exceeds available stock (${book.available}).`);
+                        }
+                        itemsForOrder.push({
+                            bookId: book.id,
+                            bookName: book.name,
+                            quantity: quantity,
+                        });
+
+                        // Update in-memory stock
+                        book.sold = (Number(book.sold) || 0) + quantity;
+                        book.available = (Number(book.available) || 0) - quantity;
+                    }
+                });
+
+                if (itemsForOrder.length === 0) {
+                    showToast('You must add at least one book to the order.', 'error');
+                    return;
+                }
+
+                const orderId = `o_${settings.nextOrderId}`;
+                orders.push({
+                    id: orderId,
+                    customerName,
+                    mobile,
+                    location,
+                    paymentMethod,
+                    status: 'Pending',
+                    createdAt: new Date().toISOString(),
+                    items: itemsForOrder
+                });
+
+                settings.nextOrderId = (Number(settings.nextOrderId) || 1) + 1;
+                storage.write(storageKeys.SETTINGS, settings);
+                storage.write(storageKeys.BOOKS, books);
+                storage.write(storageKeys.ORDERS, orders);
+
+                showToast('Order placed successfully!', 'success');
+                state.modals[modalId].close();
+
+                updateDashboard();
+                if (state.currentPage === 'orders') renderOrdersTable();
+            } catch (error) {
+                console.error(error);
+                showToast(error.message || 'Failed to place order.', 'error');
+                // reload books to revert any temporary in-memory changes
+                books = storage.read(storageKeys.BOOKS, []) || [];
+            }
+        }
+
+        function renderOrdersTable() {
+            const orders = storage.read(storageKeys.ORDERS, []) || [];
+            const searchInput = (document.getElementById('order-search')?.value || '').toLowerCase();
+
+            const startDateEl = document.getElementById('order-start-date');
+            const endDateEl = document.getElementById('order-end-date');
+
+            let startDate = null;
+            if (startDateEl?.value) {
+                const [y, m, d] = startDateEl.value.split('-').map(Number);
+                startDate = new Date(y, m - 1, d); startDate.setHours(0,0,0,0);
+            }
+
+            let endDate = null;
+            if (endDateEl?.value) {
+                const [y, m, d] = endDateEl.value.split('-').map(Number);
+                endDate = new Date(y, m - 1, d); endDate.setHours(23,59,59,999);
+            }
+
+            const filteredOrders = orders
+                .filter(order => {
+                    const orderDate = new Date(order.createdAt);
+                    const matchesDate = (!startDate || orderDate >= startDate) && (!endDate || orderDate <= endDate);
+
+                    const nameMatch = (order.customerName || '').toLowerCase().includes(searchInput);
+                    const items = Array.isArray(order.items) ? order.items : [];
+                    const bookMatch = items.some(item => (item.bookName || '').toLowerCase().includes(searchInput));
+
+                    return matchesDate && (nameMatch || bookMatch);
+                })
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            const tableBody = document.getElementById('orders-table-body');
+            if (!tableBody) return;
+
+            const paginatedOrders = paginate(filteredOrders, state.orderCurrentPage, state.itemsPerPage);
+
+            if (paginatedOrders.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="8" class="text-center py-8">No orders found.</td></tr>`;
+                renderPagination('orders-pagination', 0, 1, () => {});
+                return;
+            }
+
+            let tableHtml = '';
+            paginatedOrders.forEach(order => {
+                const items = Array.isArray(order.items) ? order.items : [];
+                const itemCount = items.length || 1;
+                const formattedDate = new Date(order.createdAt).toLocaleString();
+
+                items.forEach((item, index) => {
+                    tableHtml += `<tr class="border-b border-stone-800 hover:bg-stone-800/70">`;
+
+                    if (index === 0) {
+                        tableHtml += `
+                            <td class="px-6 py-4 font-medium text-white" rowspan="${itemCount}">${escapeHtml(order.customerName || '')}</td>
+                            <td class="px-6 py-4" rowspan="${itemCount}">${escapeHtml(order.mobile || '')}</td>
+                        `;
+                    }
+
+                    tableHtml += `
+                        <td class="px-6 py-4">${escapeHtml(item.bookName || '')}</td>
+                        <td class="px-6 py-4 text-center">${Number(item.quantity) || 0}</td>
+                    `;
+
+                    if (index === 0) {
+                        tableHtml += `
+                            <td class="px-6 py-4 text-xs" rowspan="${itemCount}">${formattedDate}</td>
+                            <td class="px-6 py-4" rowspan="${itemCount}">${escapeHtml(order.paymentMethod || '')}</td>
+                            <td class="px-6 py-4" rowspan="${itemCount}">
+                                <select class="form-select p-2 text-sm order-status-select" data-order-id="${order.id}">
+                                    <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                    <option value="Delivered" ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                                    <option value="Cancelled" ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                                </select>
+                            </td>
+                        `;
+                    }
+
+                    tableHtml += `
+                        <td class="px-6 py-4 text-center">
+                            <button data-order-id="${order.id}" data-book-id="${item.bookId}" class="delete-order-item-btn text-red-400 hover:text-red-300 p-1">Delete</button>
+                        </td>
+                    `;
+
+                    tableHtml += `</tr>`;
+                });
+            });
+
+            tableBody.innerHTML = tableHtml;
+
+            // Events
+            tableBody.querySelectorAll('.order-status-select').forEach(sel => sel.onchange = handleUpdateOrderStatus);
+            tableBody.querySelectorAll('.delete-order-item-btn').forEach(btn => btn.onclick = (e) => handleDeleteOrderItem(e));
+
+            renderPagination('orders-pagination', filteredOrders.length, state.orderCurrentPage, (page) => {
+                state.orderCurrentPage = page;
+                renderOrdersTable();
+            });
+        }
+
+        function handleUpdateOrderStatus(e) {
+            const orderId = e.target.dataset.orderId;
+            const newStatus = e.target.value;
+            let orders = storage.read(storageKeys.ORDERS, []) || [];
+            const order = orders.find(o => o.id === orderId);
+            if (order) {
+                order.status = newStatus;
+                storage.write(storageKeys.ORDERS, orders);
+                showToast('Order status updated!', 'success');
+            }
+        }
+
+        function handleDeleteOrderItem(e) {
+            const btn = e.currentTarget;
+            const { orderId, bookId } = btn.dataset;
+            if (!confirm('Are you sure you want to delete this item from the order? This will restock the book.')) return;
+
+            let orders = storage.read(storageKeys.ORDERS, []) || [];
+            let books = storage.read(storageKeys.BOOKS, []) || [];
+
+            const order = orders.find(o => o.id === orderId);
+            if (!order) return;
+
+            const itemIndex = (Array.isArray(order.items) ? order.items : []).findIndex(i => i.bookId === bookId);
+            if (itemIndex === -1) return;
+
+            const [deletedItem] = order.items.splice(itemIndex, 1);
+
+            const book = books.find(b => b.id === deletedItem.bookId);
+            if (book) {
+                book.sold = Math.max(0, (Number(book.sold) || 0) - Number(deletedItem.quantity) || 0);
+                book.available = (Number(book.available) || 0) + (Number(deletedItem.quantity) || 0);
+            }
+
+            if (!order.items.length) {
+                orders = orders.filter(o => o.id !== orderId);
+            }
+
+            storage.write(storageKeys.ORDERS, orders);
+            storage.write(storageKeys.BOOKS, books);
+
+            showToast('Item removed and book restocked.', 'success');
+            renderOrdersTable();
+            updateDashboard();
+        }
+
+        // --- REPORTS ---
+        function exportBookInventoryReport() {
+            const books = storage.read(storageKeys.BOOKS, []) || [];
+            const headers = ['Book Name', 'Total Stock', 'Books Sold', 'Books Remaining', 'Date Added', 'Last Updated'];
+            const rows = books.map(b => [
+                b.name,
+                b.total,
+                b.sold,
+                b.available,
+                new Date(b.createdAt || '').toLocaleString(),
+                new Date(b.lastUpdated || '').toLocaleString()
+            ]);
+            let csv = headers.map(escapeCSV).join(',') + '\n';
+            rows.forEach(row => csv += row.map(escapeCSV).join(',') + '\n');
+            downloadFile('book_inventory_report.csv', csv, 'text/csv');
+        }
+
+        function exportCustomerOrdersReport(asJson = false) {
+            const orders = storage.read(storageKeys.ORDERS, []) || [];
+            const books = storage.read(storageKeys.BOOKS, []) || [];
+
+            const startDateEl = document.getElementById('customer-report-start');
+            const endDateEl = document.getElementById('customer-report-end');
+
+            let startDate = null;
+            if (startDateEl?.value) {
+                const [y,m,d] = startDateEl.value.split('-').map(Number);
+                startDate = new Date(y,m-1,d); startDate.setHours(0,0,0,0);
+            }
+            let endDate = null;
+            if (endDateEl?.value) {
+                const [y,m,d] = endDateEl.value.split('-').map(Number);
+                endDate = new Date(y,m-1,d); endDate.setHours(23,59,59,999);
+            }
+
+            const filteredOrders = orders.filter(order => {
+                const orderDate = new Date(order.createdAt);
+                return (!startDate || orderDate >= startDate) && (!endDate || orderDate <= endDate);
+            });
+
+            if (asJson) {
+                downloadFile('customer_orders_report.json', JSON.stringify(filteredOrders, null, 2), 'application/json');
+                return;
+            }
+
+            const bookNames = books.map(b => b.name || '');
+            const headers = ['Date', 'Name', 'Mobile', 'Location', 'Payment Method', 'Order Status', ...bookNames, 'Total_Book_Quantity'];
+
+            const rows = filteredOrders.map(order => {
+                const row = new Array(headers.length).fill('');
+                row[0] = new Date(order.createdAt).toLocaleDateString();
+                row[1] = order.customerName;
+                row[2] = order.mobile;
+                row[3] = order.location;
+                row[4] = order.paymentMethod;
+                row[5] = order.status;
+                let totalQty = 0;
+                (Array.isArray(order.items) ? order.items : []).forEach(item => {
+                    const bookIndex = bookNames.indexOf(item.bookName);
+                    if (bookIndex !== -1) {
+                        row[6 + bookIndex] = item.quantity;
+                        totalQty += item.quantity;
+                    }
+                });
+                row[row.length - 1] = totalQty;
+                return row;
+            });
+
+            let csv = headers.map(escapeCSV).join(',') + '\n';
+            rows.forEach(row => csv += row.map(escapeCSV).join(',') + '\n');
+            downloadFile('customer_orders_report.csv', csv, 'text/csv');
+        }
+
+        function exportDailySalesReport() {
+            const orders = storage.read(storageKeys.ORDERS, []) || [];
+
+            const startDateEl = document.getElementById('sales-report-start');
+            const endDateEl = document.getElementById('sales-report-end');
+
+            if (!startDateEl?.value || !endDateEl?.value) {
+                showToast('Please select both a Start and End date for this report.', 'error');
+                return;
+            }
+
+            const [sy, sm, sd] = startDateEl.value.split('-').map(Number);
+            const startDate = new Date(sy, sm - 1, sd); startDate.setHours(0,0,0,0);
+            const [ey, em, ed] = endDateEl.value.split('-').map(Number);
+            const endDate = new Date(ey, em - 1, ed); endDate.setHours(23,59,59,999);
+
+            const salesByDay = {};
+
+            orders.forEach(order => {
+                const orderDate = new Date(order.createdAt);
+                if (orderDate >= startDate && orderDate <= endDate && order.status !== 'Cancelled') {
+                    const dateString = orderDate.toISOString().split('T')[0];
+                    if (!salesByDay[dateString]) salesByDay[dateString] = {};
+                    (Array.isArray(order.items) ? order.items : []).forEach(item => {
+                        salesByDay[dateString][item.bookName] = (salesByDay[dateString][item.bookName] || 0) + item.quantity;
+                    });
+                }
+            });
+
+            const headers = ['Date', 'Book Name', 'Quantity Sold'];
+            const rows = [];
+            Object.keys(salesByDay).sort().forEach(date => {
+                Object.keys(salesByDay[date]).sort().forEach(bookName => {
+                    rows.push([date, bookName, salesByDay[date][bookName]]);
+                });
+            });
+
+            if (rows.length === 0) {
+                showToast('No sales data found for the selected range.', 'error');
+                return;
+            }
+
+            let csv = headers.map(escapeCSV).join(',') + '\n';
+            rows.forEach(row => csv += row.map(escapeCSV).join(',') + '\n');
+            downloadFile('daily_sales_report.csv', csv, 'text/csv');
+        }
+
+        // --- MOBILE UI ---
+        function setupMobileUI() {
+            const toggleBtn = document.getElementById('menu-toggle-btn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+
+            toggleBtn.onclick = () => {
+                sidebar.classList.toggle('-translate-x-full');
+                overlay.classList.toggle('hidden');
+            };
+            overlay.onclick = () => {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            };
+        }
+
+        // --- INIT APP ---
+        function initApp() {
+            try {
+                storage.init();
+
+                window.addEventListener('hashchange', handleHashChange);
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.onclick = (e) => {
+                        if (e.metaKey || e.ctrlKey) return;
+                        e.preventDefault();
+                        window.location.hash = new URL(e.currentTarget.href).hash;
+                    };
+                });
+
+                setupMobileUI();
+
+                const appPage = document.getElementById('app');
+                appPage.classList.remove('hidden'); appPage.classList.add('md:flex');
+
+                handleHashChange();
+
+                lucide.createIcons();
+                console.log("AstroBooks App Ready.");
+            } catch (e) {
+                console.error("Failed to initialize app:", e);
+                document.body.innerHTML = `<div class="p-8 text-red-400"><h1>Fatal Error</h1><p>Could not initialize the application. ${e.message}</p><p>Please try clearing your browser's local storage.</p></div>`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
