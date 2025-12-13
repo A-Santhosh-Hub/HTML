@@ -51,8 +51,9 @@
 # Projecr 25 https://santhosh2025.neocities.org/Online%20Vegetable%20&%20Fruit%20Store/in   ---  ( Fresh Veggies & Fruits )
 
 
-#Project 26
-https://a-santhosh-hub.github.io/in/Project/AI/Km.html  --( KM speed testing Ad Free)
+#Project 26  https://a-santhosh-hub.github.io/in/Project/AI/Km.html  --( KM speed testing Ad Free)
+
+# Project 27  https://sanstudio.neocities.org/TexttoAllText  --- ( Text to All Text )
 
 
 
