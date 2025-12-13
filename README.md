@@ -54,7 +54,7 @@
 
 # Project 27  https://sanstudio.neocities.org/TexttoAllText  --- ( Text to All Text )
 
-# Project 28 https://sanstudio.neocities.org/SocialMediaScheduler  ---- (  )
+# Project 28 https://sanstudio.neocities.org/SocialMediaScheduler  ---- ( Social Media Scheduler )
 
 
 
