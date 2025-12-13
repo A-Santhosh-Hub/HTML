@@ -1,0 +1,882 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to All Text | Modern Text Tool</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter and Fira Code -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Editor specific styles */
+        .editor-container {
+            counter-reset: line;
+        }
+        .line-numbers {
+            text-align: right;
+            user-select: none;
+        }
+        textarea {
+            resize: none;
+            outline: none;
+            tab-size: 4;
+        }
+        
+        /* Smooth fade transitions */
+        .fade-enter {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        .fade-enter-active {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 300ms, transform 300ms;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100 transition-colors duration-300 min-h-screen flex flex-col font-sans">
+
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-40 w-full backdrop-blur-lg bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-brand-600 text-white flex items-center justify-center shadow-lg shadow-brand-500/30">
+                        <i class="ph ph-text-aa text-xl"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-bold text-lg leading-tight tracking-tight">Text to All Text</span>
+                        <span class="text-xs text-slate-500 dark:text-slate-400">Format, clean & convert</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-600 dark:text-slate-300">
+                        <i class="ph ph-sun text-xl hidden dark:block"></i>
+                        <i class="ph ph-moon text-xl block dark:hidden"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
+        
+        <!-- Tabs -->
+        <div class="flex justify-center mb-8">
+            <div class="bg-slate-200 dark:bg-slate-800 p-1 rounded-xl inline-flex shadow-inner">
+                <button onclick="switchTab('editor')" id="tab-editor" class="px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 bg-white dark:bg-slate-700 shadow-sm text-brand-600 dark:text-white">
+                    <i class="ph ph-pencil-simple mr-1"></i> Editor
+                </button>
+                <button onclick="switchTab('upload')" id="tab-upload" class="px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200">
+                    <i class="ph ph-upload-simple mr-1"></i> Upload
+                </button>
+                <button onclick="switchTab('html')" id="tab-html" class="px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200">
+                    <i class="ph ph-browsers mr-1"></i> HTML Viewer
+                </button>
+            </div>
+        </div>
+
+        <!-- EDITOR & UPLOAD SECTION -->
+        <div id="view-editor" class="grid grid-cols-1 lg:grid-cols-3 gap-6 fade-enter-active">
+            
+            <!-- Left: Editor Area -->
+            <div class="lg:col-span-2 flex flex-col gap-4">
+                
+                <!-- Upload Dropzone -->
+                <div id="upload-zone" class="hidden border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-8 text-center hover:border-brand-500 dark:hover:border-brand-500 transition-colors cursor-pointer bg-slate-50 dark:bg-slate-800/50 group">
+                    <div class="w-12 h-12 bg-brand-100 dark:bg-slate-700 text-brand-600 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                        <i class="ph ph-file-arrow-up text-2xl"></i>
+                    </div>
+                    <h3 class="font-semibold text-lg">Drop your file here</h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Support: .txt, .md, .json, .js, .css, .html, .c, .py</p>
+                    <button onclick="document.getElementById('file-input').click()" class="px-4 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-sm font-medium shadow-sm hover:bg-slate-50 dark:hover:bg-slate-600">
+                        Browse Files
+                    </button>
+                    <input type="file" id="file-input" class="hidden" onchange="handleFileUpload(this.files[0])">
+                </div>
+
+                <!-- Text Area Container -->
+                <div class="relative flex-grow flex flex-col h-[60vh] lg:h-[70vh] bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+                    <!-- Toolbar overlay -->
+                    <div class="absolute top-2 right-2 flex gap-2 z-10">
+                        <button onclick="copyToClipboard()" class="p-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-md text-xs font-medium text-slate-600 dark:text-slate-300 transition-colors" title="Copy to Clipboard">
+                            <i class="ph ph-copy text-lg"></i>
+                        </button>
+                        <button onclick="clearEditor()" class="p-2 bg-slate-100 dark:bg-slate-700 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-md text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 transition-colors" title="Clear">
+                            <i class="ph ph-trash text-lg"></i>
+                        </button>
+                    </div>
+
+                    <textarea id="main-editor" 
+                        class="w-full h-full p-4 pr-12 font-mono text-sm bg-transparent text-slate-800 dark:text-slate-200 leading-6 border-none focus:ring-0" 
+                        placeholder="// Type or paste your code/text here..."
+                        spellcheck="false"></textarea>
+                    
+                    <!-- Stats Footer -->
+                    <div class="h-8 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 flex items-center px-4 text-xs text-slate-500 dark:text-slate-400 justify-between">
+                        <div class="flex gap-4">
+                            <span id="char-count">0 chars</span>
+                            <span id="word-count">0 words</span>
+                            <span id="line-count">0 lines</span>
+                        </div>
+                        <div id="file-info" class="hidden text-brand-600 dark:text-brand-400 font-medium">
+                            <!-- File name injected here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Controls & Options -->
+            <div class="lg:col-span-1 flex flex-col gap-6">
+                
+                <!-- Format Selection Card -->
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700">
+                    <h2 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Target Format</h2>
+                    
+                    <div class="relative mb-4">
+                        <select id="format-select" class="w-full appearance-none bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white py-3 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 transition-shadow">
+                            <optgroup label="Web & Data">
+                                <option value="json">JSON (.json)</option>
+                                <option value="html">HTML (.html)</option>
+                                <option value="css">CSS (.css)</option>
+                                <option value="js">JavaScript (.js)</option>
+                            </optgroup>
+                            <optgroup label="Programming">
+                                <option value="c">C / C++ (.c)</option>
+                                <option value="java">Java (.java)</option>
+                                <option value="py">Python (.py)</option>
+                            </optgroup>
+                            <optgroup label="Text & Docs">
+                                <option value="txt" selected>Plain Text (.txt)</option>
+                                <option value="md">Markdown (.md)</option>
+                                <option value="doc">Word Doc (.doc)</option>
+                            </optgroup>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-500">
+                            <i class="ph ph-caret-down"></i>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Options -->
+                    <div class="space-y-3" id="options-panel">
+                        <!-- Code Options -->
+                        <div id="opt-code" class="hidden space-y-3">
+                            <div class="flex items-center justify-between">
+                                <label class="text-sm text-slate-600 dark:text-slate-300">Indent Size</label>
+                                <select id="indent-size" class="bg-slate-100 dark:bg-slate-700 border-none rounded-md text-xs py-1 px-2 focus:ring-0">
+                                    <option value="2">2 Spaces</option>
+                                    <option value="4" selected>4 Spaces</option>
+                                    <option value="tab">Tab</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Text Options -->
+                        <div id="opt-text" class="space-y-2">
+                            <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer group">
+                                <input type="checkbox" id="chk-trim" checked class="rounded border-slate-300 text-brand-600 focus:ring-brand-500 bg-slate-100 dark:bg-slate-700">
+                                <span class="group-hover:text-slate-900 dark:group-hover:text-white transition-colors">Trim Edges</span>
+                            </label>
+                            <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer group">
+                                <input type="checkbox" id="chk-spaces" class="rounded border-slate-300 text-brand-600 focus:ring-brand-500 bg-slate-100 dark:bg-slate-700">
+                                <span class="group-hover:text-slate-900 dark:group-hover:text-white transition-colors">Remove Extra Spaces</span>
+                            </label>
+                            <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer group">
+                                <input type="checkbox" id="chk-lines" class="rounded border-slate-300 text-brand-600 focus:ring-brand-500 bg-slate-100 dark:bg-slate-700">
+                                <span class="group-hover:text-slate-900 dark:group-hover:text-white transition-colors">Remove Empty Lines</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions Card -->
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 flex flex-col gap-3">
+                    <button onclick="formatContent()" class="w-full py-3 bg-brand-600 hover:bg-brand-500 text-white rounded-xl font-semibold shadow-lg shadow-brand-500/30 transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2">
+                        <i class="ph ph-magic-wand text-xl"></i> Format & Clean
+                    </button>
+                    
+                    <button onclick="downloadFile()" class="w-full py-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2">
+                        <i class="ph ph-download-simple text-xl"></i> Download File
+                    </button>
+                </div>
+
+                <!-- Tip -->
+                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/30 p-4 rounded-xl">
+                    <div class="flex gap-3">
+                        <i class="ph ph-lightbulb text-amber-500 text-xl mt-0.5"></i>
+                        <div class="text-xs text-amber-800 dark:text-amber-200 leading-5">
+                            <strong>Pro Tip:</strong> Use <span class="font-mono bg-amber-100 dark:bg-amber-900/50 px-1 rounded">Ctrl+Enter</span> to quick-format and <span class="font-mono bg-amber-100 dark:bg-amber-900/50 px-1 rounded">Ctrl+S</span> to download immediately.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- HTML VIEWER SECTION -->
+        <div id="view-html" class="hidden fade-enter-active h-full flex-col">
+            <div class="max-w-3xl mx-auto text-center mt-6 mb-8">
+                <h2 class="text-2xl font-bold mb-2">Local HTML Viewer</h2>
+                <p class="text-slate-500 dark:text-slate-400">Preview HTML files instantly without a server.</p>
+            </div>
+
+            <!-- HTML Upload Zone (Shown initially) -->
+            <div id="html-upload-zone" class="max-w-xl mx-auto w-full">
+                <div class="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-12 text-center hover:border-brand-500 dark:hover:border-brand-500 transition-colors cursor-pointer bg-white dark:bg-slate-800 group shadow-lg">
+                    <div class="w-16 h-16 bg-orange-100 dark:bg-orange-900/30 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                        <i class="ph ph-browsers text-3xl"></i>
+                    </div>
+                    <h3 class="font-semibold text-xl mb-2">Select HTML File</h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Supports single .html files with inline styles/scripts.</p>
+                    
+                    <button onclick="document.getElementById('html-input').click()" class="px-6 py-3 bg-brand-600 hover:bg-brand-500 text-white rounded-xl font-medium shadow-lg shadow-brand-500/30 transition-all">
+                        Browse HTML
+                    </button>
+                    <input type="file" id="html-input" accept=".html,.htm" class="hidden" onchange="handleHtmlPreview(this.files[0])">
+                </div>
+            </div>
+
+            <!-- HTML Workspace (Hidden initially) -->
+            <div id="html-workspace" class="hidden flex-grow flex flex-col max-w-6xl mx-auto w-full h-[600px] bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+                <!-- Workspace Toolbar -->
+                <div class="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded bg-orange-100 dark:bg-orange-900/30 text-orange-600 flex items-center justify-center">
+                            <i class="ph ph-file-html text-lg"></i>
+                        </div>
+                        <span id="html-filename" class="font-medium text-sm">index.html</span>
+                    </div>
+                    <div class="flex gap-2">
+                         <button onclick="resetHtmlView()" class="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors">
+                            Close
+                        </button>
+                        <button onclick="launchPreview()" class="px-4 py-2 text-sm font-medium bg-brand-600 text-white hover:bg-brand-500 rounded-lg shadow-md transition-colors flex items-center gap-2">
+                            <i class="ph ph-rocket-launch"></i> Launch Preview
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Source Editor Area -->
+                <div class="flex-grow relative">
+                    <textarea id="html-source-editor" 
+                        class="w-full h-full p-4 font-mono text-sm bg-slate-50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-200 leading-6 border-none focus:ring-0 resize-none" 
+                        spellcheck="false"></textarea>
+                    <div class="absolute bottom-4 right-4 text-xs text-slate-400 pointer-events-none">
+                        Editable Source
+                    </div>
+                </div>
+            </div>
+            
+            <div id="html-security-note" class="max-w-xl mx-auto mt-6 p-4 bg-slate-100 dark:bg-slate-800/50 rounded-xl text-xs text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 flex items-start gap-3">
+                <i class="ph ph-shield-warning text-lg text-slate-400"></i>
+                <span><strong>Security Note:</strong> The preview opens in a new tab using a Blob URL. Only open HTML files from trusted sources. No data is sent to any server.</span>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <span class="text-sm text-slate-500">© 2025 Text to All Text. All rights reserved.</span>
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">
+                Developed By <span class="text-brand-600 dark:text-brand-400 hover:underline cursor-pointer transition-colors">SanStudio</span>
+            </span>
+        </div>
+    </footer>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <script>
+        // --- State Management ---
+        const state = {
+            mode: 'editor', // 'editor', 'upload', 'html'
+            content: '',
+            format: 'txt',
+            settings: {
+                indentSize: 4,
+                trim: true,
+                removeSpaces: false,
+                removeLines: false
+            }
+        };
+
+        // --- DOM Elements ---
+        const els = {
+            editor: document.getElementById('main-editor'),
+            formatSelect: document.getElementById('format-select'),
+            charCount: document.getElementById('char-count'),
+            wordCount: document.getElementById('word-count'),
+            lineCount: document.getElementById('line-count'),
+            optPanelCode: document.getElementById('opt-code'),
+            optPanelText: document.getElementById('opt-text'),
+            inputs: {
+                indent: document.getElementById('indent-size'),
+                trim: document.getElementById('chk-trim'),
+                spaces: document.getElementById('chk-spaces'),
+                lines: document.getElementById('chk-lines')
+            },
+            // HTML Viewer Elements
+            htmlUploadZone: document.getElementById('html-upload-zone'),
+            htmlWorkspace: document.getElementById('html-workspace'),
+            htmlFilename: document.getElementById('html-filename'),
+            htmlSource: document.getElementById('html-source-editor'),
+            htmlNote: document.getElementById('html-security-note')
+        };
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+            applyTheme();
+            updateUIForFormat();
+            updateStats();
+            
+            // Event Listeners
+            els.editor.addEventListener('input', () => {
+                state.content = els.editor.value;
+                updateStats();
+            });
+
+            els.editor.addEventListener('keydown', handleEditorKeydown);
+            els.formatSelect.addEventListener('change', (e) => {
+                state.format = e.target.value;
+                updateUIForFormat();
+                saveSettings();
+            });
+
+            // Settings Listeners
+            Object.values(els.inputs).forEach(el => {
+                el.addEventListener('change', updateSettingsFromUI);
+            });
+
+            // Theme Toggle
+            document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+
+            // Drag & Drop for Upload Mode
+            const uploadZone = document.getElementById('upload-zone');
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadZone.addEventListener(eventName, preventDefaults, false);
+            });
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadZone.addEventListener(eventName, () => uploadZone.classList.add('border-brand-500', 'bg-brand-50', 'dark:bg-brand-900/20'), false);
+            });
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadZone.addEventListener(eventName, () => uploadZone.classList.remove('border-brand-500', 'bg-brand-50', 'dark:bg-brand-900/20'), false);
+            });
+            uploadZone.addEventListener('drop', handleDrop, false);
+        });
+
+        // --- Core Logic: Formatter ---
+        function formatContent() {
+            const text = els.editor.value;
+            if (!text.trim()) {
+                showToast('Editor is empty', 'error');
+                return;
+            }
+
+            let formatted = text;
+            const fmt = state.format;
+
+            try {
+                // Code Formatting
+                if (['json', 'js', 'css', 'html', 'c', 'java', 'py'].includes(fmt)) {
+                    formatted = formatCode(text, fmt);
+                } 
+                // Plain Text Cleaning
+                else {
+                    formatted = cleanText(text);
+                }
+
+                els.editor.value = formatted;
+                state.content = formatted;
+                updateStats();
+                showToast('Formatted & Cleaned successfully!', 'success');
+            } catch (e) {
+                console.error(e);
+                showToast('Error formatting content. Check syntax.', 'error');
+            }
+        }
+
+        function cleanText(text) {
+            let res = text;
+            if (state.settings.removeLines) {
+                res = res.replace(/^\s*[\r\n]/gm, '');
+            }
+            if (state.settings.removeSpaces) {
+                res = res.replace(/[ \t]+/g, ' ');
+            }
+            if (state.settings.trim) {
+                res = res.split('\n').map(l => l.trim()).join('\n');
+            }
+            return res;
+        }
+
+        function formatCode(text, type) {
+            const indentChar = state.settings.indentSize === 'tab' ? '\t' : ' '.repeat(parseInt(state.settings.indentSize));
+
+            if (type === 'json') {
+                return JSON.stringify(JSON.parse(text), null, indentChar);
+            }
+
+            // Heuristic Formatter for C-style languages, CSS, JS
+            if (['js', 'css', 'c', 'java', 'cpp'].includes(type)) {
+                return basicBeautify(text, indentChar);
+            }
+
+            // Simple HTML Indenter
+            if (type === 'html') {
+                return formatHTML(text, indentChar);
+            }
+            
+            // Python (Basic trim/line cleanup as strict indentation implies logic we can't guess)
+            if (type === 'py') {
+                // Just cleanup lines, don't mess with indentation depth logic
+                return text.split('\n').map(line => line.trimEnd()).join('\n');
+            }
+
+            return text;
+        }
+
+        // A lightweight C-style/CSS beautifier
+        function basicBeautify(source, indentVal) {
+            let output = '';
+            let indentLevel = 0;
+            // Normalize spaces
+            source = source.replace(/\s+/g, ' ').replace(/\{/g, "{\n").replace(/\}/g, "\n}\n").replace(/;/g, ";\n");
+            
+            const lines = source.split('\n');
+            
+            lines.forEach(line => {
+                line = line.trim();
+                if (!line) return;
+
+                if (line.includes('}')) {
+                    indentLevel = Math.max(0, indentLevel - 1);
+                }
+
+                output += indentVal.repeat(indentLevel) + line + '\n';
+
+                if (line.includes('{')) {
+                    indentLevel++;
+                }
+            });
+            return output.trim();
+        }
+
+        // Simple HTML Formatter
+        function formatHTML(html, indentVal) {
+            let tab = indentVal;
+            let result = '';
+            let indent= '';
+            
+            html.split(/>\s*</).forEach(function(element) {
+                if (element.match( /^\/\w/ )) {
+                    indent = indent.substring(tab.length);
+                }
+                
+                result += indent + '<' + element + '>\r\n';
+                
+                if (element.match( /^<?\w[^>]*[^\/]$/ ) && !element.startsWith("input")  && !element.startsWith("img") && !element.startsWith("br")) { 
+                    indent += tab;              
+                }
+            });
+            
+            return result.substring(1, result.length-3);
+        }
+
+        // --- File Handling ---
+        function handleFileUpload(file) {
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                els.editor.value = e.target.result;
+                state.content = e.target.result;
+                
+                // Auto-detect format
+                const ext = file.name.split('.').pop().toLowerCase();
+                const supported = ['json', 'html', 'css', 'js', 'c', 'java', 'py', 'txt', 'md'];
+                
+                if (supported.includes(ext)) {
+                    state.format = ext;
+                    els.formatSelect.value = ext;
+                } else if (ext === 'cpp' || ext === 'h') {
+                    state.format = 'c';
+                    els.formatSelect.value = 'c';
+                } else {
+                    state.format = 'txt';
+                    els.formatSelect.value = 'txt';
+                }
+                
+                document.getElementById('file-info').textContent = file.name;
+                document.getElementById('file-info').classList.remove('hidden');
+                
+                updateUIForFormat();
+                updateStats();
+                switchTab('editor'); // Switch back to editor to show content
+                showToast(`Loaded ${file.name}`, 'success');
+            };
+            reader.readAsText(file);
+        }
+
+        function downloadFile() {
+            if (!state.content) {
+                showToast('Nothing to download!', 'error');
+                return;
+            }
+            
+            const blob = new Blob([state.content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            
+            // Generate filename
+            const date = new Date().toISOString().slice(0,19).replace(/:/g,'-');
+            let ext = state.format === 'doc' ? 'txt' : state.format; // Fallback for doc
+            if(state.format === 'c') ext = 'c'; 
+            
+            a.href = url;
+            a.download = `formatted-${date}.${ext}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Download started', 'success');
+        }
+
+        // --- HTML Viewer Logic (Fixed) ---
+        function handleHtmlPreview(file) {
+            if (!file) return;
+            
+            // 1. Show Loading UI (optional, but good for large files)
+            els.htmlFilename.textContent = file.name;
+
+            // 2. Read file to populate editor
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                els.htmlSource.value = e.target.result;
+                
+                // 3. Switch View
+                els.htmlUploadZone.classList.add('hidden');
+                els.htmlNote.classList.add('hidden');
+                els.htmlWorkspace.classList.remove('hidden');
+                
+                showToast('File loaded. Ready to launch.', 'success');
+            };
+            reader.readAsText(file);
+        }
+
+        function launchPreview() {
+            const content = els.htmlSource.value;
+            if(!content.trim()) {
+                showToast('HTML content is empty', 'error');
+                return;
+            }
+
+            const blob = new Blob([content], {type: 'text/html'});
+            const url = URL.createObjectURL(blob);
+            
+            // Direct window.open on click usually bypasses popup blockers
+            const newWindow = window.open(url, '_blank');
+            
+            if(!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+                showToast('Popup blocked! Allow popups for preview.', 'error');
+            } else {
+                showToast('Preview launched in new tab', 'success');
+            }
+        }
+
+        function resetHtmlView() {
+            els.htmlSource.value = '';
+            els.htmlWorkspace.classList.add('hidden');
+            els.htmlUploadZone.classList.remove('hidden');
+            els.htmlNote.classList.remove('hidden');
+            // Reset input
+            document.getElementById('html-input').value = '';
+        }
+
+        // --- UI & UX Helpers ---
+        function switchTab(tabName) {
+            state.mode = tabName;
+            
+            // Tab Styles
+            ['editor', 'upload', 'html'].forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === tabName) {
+                    btn.className = "px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 bg-white dark:bg-slate-700 shadow-sm text-brand-600 dark:text-white";
+                } else {
+                    btn.className = "px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200";
+                }
+            });
+
+            // View Visibility
+            const editorView = document.getElementById('view-editor');
+            const htmlView = document.getElementById('view-html');
+            const uploadZone = document.getElementById('upload-zone');
+            
+            if (tabName === 'html') {
+                // Hide Editor
+                editorView.classList.add('hidden');
+                editorView.classList.remove('fade-enter-active'); // Reset editor state
+                
+                // Show HTML View
+                htmlView.classList.remove('hidden');
+                
+                // Animation trigger
+                // We quickly cycle fade-enter to ensure the transition plays if desired, 
+                // but crucially we end on fade-enter-active to ensure visibility.
+                htmlView.classList.remove('fade-enter-active');
+                htmlView.classList.add('fade-enter');
+                
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        htmlView.classList.remove('fade-enter');
+                        htmlView.classList.add('fade-enter-active');
+                    });
+                });
+
+            } else {
+                // Hide HTML View
+                htmlView.classList.add('hidden');
+                htmlView.classList.remove('fade-enter-active');
+                
+                // Show Editor
+                editorView.classList.remove('hidden');
+                
+                // Animation trigger
+                editorView.classList.remove('fade-enter-active');
+                editorView.classList.add('fade-enter');
+                
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        editorView.classList.remove('fade-enter');
+                        editorView.classList.add('fade-enter-active');
+                    });
+                });
+                
+                // Toggle Upload Zone visibility inside Editor View
+                if (tabName === 'upload') {
+                    uploadZone.classList.remove('hidden');
+                } else {
+                    uploadZone.classList.add('hidden');
+                }
+            }
+        }
+
+        function updateUIForFormat() {
+            const isCode = ['json', 'html', 'css', 'js', 'c', 'java', 'py'].includes(state.format);
+            
+            if (isCode) {
+                els.optPanelCode.classList.remove('hidden');
+                els.optPanelText.classList.add('hidden');
+            } else {
+                els.optPanelCode.classList.add('hidden');
+                els.optPanelText.classList.remove('hidden');
+            }
+        }
+
+        function updateStats() {
+            const text = els.editor.value;
+            els.charCount.textContent = `${text.length.toLocaleString()} chars`;
+            els.wordCount.textContent = `${text.trim() === '' ? 0 : text.trim().split(/\s+/).length.toLocaleString()} words`;
+            els.lineCount.textContent = `${text.split('\n').length.toLocaleString()} lines`;
+        }
+
+        function handleEditorKeydown(e) {
+            // Support Tab key
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                const indent = state.settings.indentSize === 'tab' ? '\t' : ' '.repeat(state.settings.indentSize === 4 ? 4 : 2);
+                
+                this.value = this.value.substring(0, start) + indent + this.value.substring(end);
+                this.selectionStart = this.selectionEnd = start + indent.length;
+            }
+            // Keyboard Shortcuts
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                formatContent();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                downloadFile();
+            }
+        }
+
+        function clearEditor() {
+            if(confirm('Are you sure you want to clear the editor?')) {
+                els.editor.value = '';
+                state.content = '';
+                document.getElementById('file-info').textContent = '';
+                document.getElementById('file-info').classList.add('hidden');
+                updateStats();
+            }
+        }
+
+        function copyToClipboard() {
+            if(!els.editor.value) return;
+            navigator.clipboard.writeText(els.editor.value).then(() => {
+                showToast('Copied to clipboard!', 'success');
+            });
+        }
+
+        // --- Toast System ---
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const colors = {
+                success: 'bg-green-500 text-white',
+                error: 'bg-red-500 text-white',
+                info: 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900'
+            };
+            const icons = {
+                success: 'ph-check-circle',
+                error: 'ph-warning-circle',
+                info: 'ph-info'
+            };
+
+            toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-lg shadow-xl transform translate-y-10 opacity-0 transition-all duration-300 ${colors[type]}`;
+            toast.innerHTML = `
+                <i class="ph ${icons[type]} text-xl"></i>
+                <span class="text-sm font-medium">${message}</span>
+            `;
+
+            container.appendChild(toast);
+
+            // Animate in
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-10', 'opacity-0');
+            });
+
+            // Remove
+            setTimeout(() => {
+                toast.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // --- Settings & Persistence ---
+        function saveSettings() {
+            state.settings.indentSize = els.inputs.indent.value;
+            state.settings.trim = els.inputs.trim.checked;
+            state.settings.removeSpaces = els.inputs.spaces.checked;
+            state.settings.removeLines = els.inputs.lines.checked;
+            
+            const dataToSave = {
+                theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
+                format: state.format,
+                settings: state.settings
+            };
+            localStorage.setItem('sanstudio_texttool_config', JSON.stringify(dataToSave));
+        }
+
+        function loadSettings() {
+            const saved = localStorage.getItem('sanstudio_texttool_config');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                
+                // Theme
+                if (parsed.theme === 'dark') document.documentElement.classList.add('dark');
+                
+                // Format
+                state.format = parsed.format || 'txt';
+                els.formatSelect.value = state.format;
+                
+                // Settings
+                if (parsed.settings) {
+                    state.settings = parsed.settings;
+                    els.inputs.indent.value = state.settings.indentSize;
+                    els.inputs.trim.checked = state.settings.trim;
+                    els.inputs.spaces.checked = state.settings.removeSpaces;
+                    els.inputs.lines.checked = state.settings.removeLines;
+                }
+            }
+        }
+        
+        function applyTheme() {
+            // If settings aren't loaded (fresh visit), check system preference
+            if (!localStorage.getItem('sanstudio_texttool_config')) {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.classList.add('dark');
+                }
+            }
+        }
+
+        function updateSettingsFromUI() {
+            saveSettings();
+        }
+
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            saveSettings();
+        }
+
+        // Drag helpers
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        function handleDrop(e) {
+            preventDefaults(e);
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFileUpload(files[0]);
+        }
+    </script>
+</body>
+</html>
