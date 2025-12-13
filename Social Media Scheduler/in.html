@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Post Reminder | SanStudio</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#0f172a',
+                            light: '#f8fafc',
+                            accent: '#6366f1',
+                            glass: 'rgba(255, 255, 255, 0.05)',
+                            glassBorder: 'rgba(255, 255, 255, 0.1)',
+                        },
+                        platform: {
+                            yt: '#FF0000',
+                            ig: '#E1306C',
+                            fb: '#1877F2'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Glassmorphism Utilities */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .dark .glass-panel {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dark .glass-card {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Checkbox Animation */
+        .custom-checkbox input:checked + div {
+            background-color: #10B981;
+            border-color: #10B981;
+        }
+        .custom-checkbox input:checked + div i {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #334155;
+        }
+
+        /* Active Slot Highlight Animation */
+        @keyframes pulse-border {
+            0% { border-color: rgba(99, 102, 241, 0.4); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.2); }
+            70% { border-color: rgba(99, 102, 241, 0.8); box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
+            100% { border-color: rgba(99, 102, 241, 0.4); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+        }
+        .slot-active {
+            border: 2px solid #6366f1 !important;
+            animation: pulse-border 2s infinite;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 font-sans min-h-screen flex flex-col transition-colors duration-300">
+
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-50 glass-panel border-b border-gray-200 dark:border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Brand -->
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg">
+                        S
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-bold text-lg leading-tight tracking-tight">Post Reminder</span>
+                        <span class="text-[10px] text-gray-500 dark:text-gray-400 font-medium tracking-wide">BY SANSTUDIO</span>
+                    </div>
+                </div>
+
+                <!-- Clock & Toggle -->
+                <div class="flex items-center gap-4">
+                    <div class="hidden md:flex flex-col items-end mr-2">
+                        <span id="clock-time" class="text-lg font-mono font-bold leading-none">--:--</span>
+                        <span id="clock-date" class="text-xs text-gray-500 dark:text-gray-400">Loading...</span>
+                    </div>
+                    
+                    <button id="view-toggle" onclick="toggleView()" class="p-2 rounded-lg bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 transition-colors" title="Toggle Dashboard/Settings">
+                        <i class="fa-solid fa-gear text-gray-600 dark:text-gray-300"></i>
+                    </button>
+
+                    <button onclick="toggleTheme()" class="p-2 rounded-lg bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 transition-colors">
+                        <i id="theme-icon" class="fa-solid fa-moon text-indigo-600 dark:text-yellow-400"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-5xl w-full mx-auto px-4 py-8 relative">
+        
+        <!-- Notifications Container -->
+        <div id="toast-container" class="fixed top-20 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+        <!-- VIEW: DASHBOARD -->
+        <div id="dashboard-view" class="space-y-8 animate-fade-in">
+            
+            <!-- Welcome / Progress -->
+            <div class="flex flex-col md:flex-row justify-between items-end gap-4 mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold">Today's Schedule</h1>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage your posts across platforms.</p>
+                </div>
+                <div class="w-full md:w-64 glass-card p-3 rounded-xl">
+                    <div class="flex justify-between text-xs font-semibold mb-1">
+                        <span>Daily Progress</span>
+                        <span id="progress-text">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-2.5">
+                        <div id="progress-bar" class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Time Slots -->
+            <div id="slots-container" class="space-y-6">
+                <!-- Slots injected by JS -->
+            </div>
+            
+            <!-- Empty State -->
+            <div id="empty-state" class="hidden text-center py-12">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-slate-800 mb-4">
+                    <i class="fa-solid fa-calendar-plus text-2xl text-gray-400"></i>
+                </div>
+                <h3 class="text-lg font-medium">No schedule yet</h3>
+                <p class="text-gray-500 dark:text-gray-400 mb-6">Add accounts in settings to generate your daily plan.</p>
+                <button onclick="toggleView()" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-lg transition-all">
+                    Go to Settings
+                </button>
+            </div>
+
+        </div>
+
+        <!-- VIEW: SETTINGS / ACCOUNTS -->
+        <div id="settings-view" class="hidden space-y-8 animate-fade-in">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold">Manage Accounts</h1>
+                <button onclick="toggleView()" class="text-indigo-500 hover:text-indigo-400 font-medium">
+                    <i class="fa-solid fa-arrow-left mr-2"></i> Back to Dashboard
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- YouTube Card -->
+                <div class="glass-card p-6 rounded-2xl relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <i class="fa-brands fa-youtube text-8xl text-platform-yt"></i>
+                    </div>
+                    <div class="flex items-center gap-3 mb-6 relative z-10">
+                        <div class="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                            <i class="fa-brands fa-youtube text-platform-yt text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-lg">YouTube</h3>
+                    </div>
+                    
+                    <div id="list-youtube" class="space-y-3 mb-6 relative z-10 min-h-[50px]">
+                        <!-- Accounts List -->
+                    </div>
+
+                    <div class="flex gap-2 relative z-10">
+                        <input type="text" id="input-youtube" placeholder="Channel Name" class="flex-1 bg-white/50 dark:bg-black/20 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500 transition-colors">
+                        <button onclick="addAccount('youtube')" class="bg-platform-yt text-white w-10 h-10 rounded-lg flex items-center justify-center hover:bg-red-700 transition-colors">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Instagram Card -->
+                <div class="glass-card p-6 rounded-2xl relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <i class="fa-brands fa-instagram text-8xl text-platform-ig"></i>
+                    </div>
+                    <div class="flex items-center gap-3 mb-6 relative z-10">
+                        <div class="w-10 h-10 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
+                            <i class="fa-brands fa-instagram text-platform-ig text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-lg">Instagram</h3>
+                    </div>
+                    
+                    <div id="list-instagram" class="space-y-3 mb-6 relative z-10 min-h-[50px]">
+                        <!-- Accounts List -->
+                    </div>
+
+                    <div class="flex gap-2 relative z-10">
+                        <input type="text" id="input-instagram" placeholder="@Handle" class="flex-1 bg-white/50 dark:bg-black/20 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-pink-500 transition-colors">
+                        <button onclick="addAccount('instagram')" class="bg-platform-ig text-white w-10 h-10 rounded-lg flex items-center justify-center hover:bg-pink-700 transition-colors">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Facebook Card -->
+                <div class="glass-card p-6 rounded-2xl relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <i class="fa-brands fa-facebook text-8xl text-platform-fb"></i>
+                    </div>
+                    <div class="flex items-center gap-3 mb-6 relative z-10">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                            <i class="fa-brands fa-facebook text-platform-fb text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-lg">Facebook</h3>
+                    </div>
+                    
+                    <div id="list-facebook" class="space-y-3 mb-6 relative z-10 min-h-[50px]">
+                        <!-- Accounts List -->
+                    </div>
+
+                    <div class="flex gap-2 relative z-10">
+                        <input type="text" id="input-facebook" placeholder="Page Name" class="flex-1 bg-white/50 dark:bg-black/20 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors">
+                        <button onclick="addAccount('facebook')" class="bg-platform-fb text-white w-10 h-10 rounded-lg flex items-center justify-center hover:bg-blue-700 transition-colors">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="pt-6 border-t border-gray-200 dark:border-gray-800">
+                <button onclick="regenerateDailySchedule()" class="w-full md:w-auto px-6 py-3 bg-slate-800 dark:bg-slate-700 hover:bg-slate-700 text-white rounded-lg flex items-center justify-center gap-2 transition-all">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    Reset & Generate Today's Schedule
+                </button>
+                <p class="text-xs text-gray-500 mt-2">Warning: This will clear today's progress and rebuild the list based on current accounts.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto py-6 glass-panel border-t border-gray-200 dark:border-gray-800 text-center">
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+            Developed by <a href="https://sanstudio.neocities.org/" target="_blank" class="font-bold text-indigo-500 hover:text-indigo-400 transition-colors">SanStudio</a>
+        </p>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- CONSTANTS & CONFIG ---
+        const STORAGE_KEY = 'sanstudio_social_tool_v1';
+        
+        // Time Slots (Indian Standard Time Logic handled by generic Date obj if system is set to IST, 
+        // but explicit hour checks are robust enough for local use)
+        const TIME_SLOTS = {
+            morning: { label: 'Morning Slot', icon: 'fa-sun', start: 6, end: 11.9, range: '6:00 AM - 11:50 AM' },
+            afternoon: { label: 'Afternoon Slot', icon: 'fa-cloud-sun', start: 12, end: 16.9, range: '12:00 PM - 4:50 PM' },
+            evening: { label: 'Evening Slot', icon: 'fa-moon', start: 17, end: 22.9, range: '5:00 PM - 10:50 PM' }
+        };
+
+        const PLATFORM_ICONS = {
+            youtube: 'fa-youtube',
+            instagram: 'fa-instagram',
+            facebook: 'fa-facebook'
+        };
+
+        const PLATFORM_COLORS = {
+            youtube: 'text-platform-yt',
+            instagram: 'text-platform-ig',
+            facebook: 'text-platform-fb'
+        };
+
+        // --- STATE MANAGEMENT ---
+        let appData = {
+            accounts: {
+                youtube: [],
+                instagram: [],
+                facebook: []
+            },
+            schedule: {}, // Key: "YYYY-MM-DD"
+            theme: 'dark' // Default theme
+        };
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            initTheme();
+            startClock();
+            
+            // Check for notifications permission
+            if ("Notification" in window && Notification.permission !== "granted") {
+                Notification.requestPermission();
+            }
+
+            renderAccounts();
+            checkAndGenerateSchedule();
+            renderDashboard();
+            
+            // Auto refresh every minute to check time slots/alerts
+            setInterval(() => {
+                renderDashboard(); // Re-render to update active slots
+                checkReminders();
+            }, 60000);
+        });
+
+        // --- CORE FUNCTIONS ---
+
+        function loadData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                appData = JSON.parse(saved);
+                // Schema migration or safety checks could go here
+                if (!appData.accounts) appData.accounts = { youtube: [], instagram: [], facebook: [] };
+                if (!appData.schedule) appData.schedule = {};
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+        }
+
+        function getTodayKey() {
+            const now = new Date();
+            return now.toISOString().split('T')[0];
+        }
+
+        function getCurrentSlot() {
+            const now = new Date();
+            const hour = now.getHours() + (now.getMinutes() / 60);
+
+            if (hour >= TIME_SLOTS.morning.start && hour <= TIME_SLOTS.morning.end) return 'morning';
+            if (hour >= TIME_SLOTS.afternoon.start && hour <= TIME_SLOTS.afternoon.end) return 'afternoon';
+            if (hour >= TIME_SLOTS.evening.start && hour <= TIME_SLOTS.evening.end) return 'evening';
+            return null; // Outside posting hours
+        }
+
+        // --- ACCOUNT MANAGEMENT ---
+
+        function addAccount(platform) {
+            const input = document.getElementById(`input-${platform}`);
+            const name = input.value.trim();
+            
+            if (name) {
+                appData.accounts[platform].push(name);
+                input.value = '';
+                saveData();
+                renderAccounts();
+                showToast(`Added ${platform} account: ${name}`, 'success');
+            }
+        }
+
+        function removeAccount(platform, index) {
+            appData.accounts[platform].splice(index, 1);
+            saveData();
+            renderAccounts();
+        }
+
+        function renderAccounts() {
+            ['youtube', 'instagram', 'facebook'].forEach(platform => {
+                const container = document.getElementById(`list-${platform}`);
+                container.innerHTML = '';
+                
+                appData.accounts[platform].forEach((acc, index) => {
+                    const el = document.createElement('div');
+                    el.className = 'flex justify-between items-center bg-white/40 dark:bg-black/20 px-3 py-2 rounded-lg';
+                    el.innerHTML = `
+                        <span class="text-sm font-medium truncate">${acc}</span>
+                        <button onclick="removeAccount('${platform}', ${index})" class="text-red-500 hover:text-red-700 transition-colors text-xs">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    `;
+                    container.appendChild(el);
+                });
+            });
+        }
+
+        // --- SCHEDULING LOGIC ---
+
+        function checkAndGenerateSchedule() {
+            const today = getTodayKey();
+            if (!appData.schedule[today]) {
+                regenerateDailySchedule(false); // Generate without alert
+            }
+        }
+
+        function regenerateDailySchedule(alertUser = true) {
+            const today = getTodayKey();
+            const newSchedule = {
+                morning: [],
+                afternoon: [],
+                evening: []
+            };
+            
+            // Check if user has any accounts
+            const hasAccounts = Object.values(appData.accounts).some(arr => arr.length > 0);
+            
+            if (hasAccounts) {
+                ['morning', 'afternoon', 'evening'].forEach(slot => {
+                    ['youtube', 'instagram', 'facebook'].forEach(platform => {
+                        appData.accounts[platform].forEach(acc => {
+                            // Create a task object
+                            newSchedule[slot].push({
+                                id: crypto.randomUUID(),
+                                platform: platform,
+                                account: acc,
+                                title: '',
+                                note: '',
+                                status: 'pending', // pending, completed, missed
+                                timestamp: Date.now()
+                            });
+                        });
+                    });
+                });
+            }
+
+            appData.schedule[today] = newSchedule;
+            
+            // Cleanup old days (keep last 7 days)
+            const keys = Object.keys(appData.schedule).sort();
+            if (keys.length > 7) {
+                delete appData.schedule[keys[0]];
+            }
+
+            saveData();
+            renderDashboard();
+            if (alertUser) showToast("Schedule regenerated for today", "info");
+        }
+
+        function updateTask(slot, taskId, field, value) {
+            const today = getTodayKey();
+            const task = appData.schedule[today][slot].find(t => t.id === taskId);
+            if (task) {
+                task[field] = value;
+                saveData();
+                updateProgress(); // If status changed
+                
+                // If checking/unchecking, re-render to update UI status styles
+                if(field === 'status') renderDashboard();
+            }
+        }
+
+        // --- DASHBOARD RENDERING ---
+
+        function renderDashboard() {
+            const container = document.getElementById('slots-container');
+            const today = getTodayKey();
+            const schedule = appData.schedule[today];
+            const currentSlotKey = getCurrentSlot();
+
+            container.innerHTML = '';
+
+            // Check if empty
+            const totalTasks = Object.values(schedule).flat().length;
+            if (totalTasks === 0) {
+                document.getElementById('empty-state').classList.remove('hidden');
+                document.getElementById('dashboard-view').querySelector('.flex-col').classList.add('hidden'); // Hide progress
+                return;
+            } else {
+                document.getElementById('empty-state').classList.add('hidden');
+                document.getElementById('dashboard-view').querySelector('.flex-col').classList.remove('hidden');
+            }
+
+            // Render Slots
+            ['morning', 'afternoon', 'evening'].forEach(slotKey => {
+                const slotConfig = TIME_SLOTS[slotKey];
+                const tasks = schedule[slotKey];
+                const isActive = slotKey === currentSlotKey;
+                
+                // Determine Slot Status Logic
+                // If slot time passed and tasks pending -> Missed
+                const now = new Date();
+                const nowHour = now.getHours() + (now.getMinutes()/60);
+                const isPast = nowHour > slotConfig.end;
+
+                const card = document.createElement('div');
+                card.className = `glass-card rounded-2xl overflow-hidden transition-all duration-500 ${isActive ? 'slot-active shadow-xl scale-[1.01]' : 'opacity-80 grayscale-[0.3]'}`;
+                if(isActive) card.classList.remove('opacity-80', 'grayscale-[0.3]');
+                
+                // Header
+                let headerHTML = `
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/50">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg ${isActive ? 'bg-indigo-500 text-white' : 'bg-gray-200 dark:bg-slate-700 text-gray-500'} flex items-center justify-center">
+                                <i class="fa-solid ${slotConfig.icon}"></i>
+                            </div>
+                            <div>
+                                <h2 class="font-bold text-lg">${slotConfig.label}</h2>
+                                <p class="text-xs text-gray-500">${slotConfig.range}</p>
+                            </div>
+                        </div>
+                        <div class="text-xs font-semibold px-2 py-1 rounded bg-gray-200 dark:bg-slate-700">
+                            ${tasks.filter(t => t.status === 'completed').length} / ${tasks.length}
+                        </div>
+                    </div>
+                    <div class="p-4 space-y-3">
+                `;
+
+                // Tasks
+                if (tasks.length === 0) {
+                    headerHTML += `<p class="text-center text-sm text-gray-400 py-2">No accounts configured.</p>`;
+                } else {
+                    tasks.forEach(task => {
+                        // Auto-mark missed if time passed and not done
+                        if (isPast && task.status === 'pending') {
+                            task.status = 'missed';
+                            // No saveData here to avoid infinite loop on render, save happens naturally next interaction or batch
+                        }
+
+                        const isDone = task.status === 'completed';
+                        const isMissed = task.status === 'missed';
+                        
+                        headerHTML += `
+                            <div class="group flex flex-col sm:flex-row gap-3 p-3 rounded-xl border ${isMissed ? 'border-red-200 bg-red-50/50 dark:bg-red-900/10 dark:border-red-900/30' : 'border-gray-100 dark:border-gray-700 bg-white/50 dark:bg-slate-800/40'} hover:bg-white dark:hover:bg-slate-800 transition-colors">
+                                
+                                <div class="flex items-start gap-3 w-full">
+                                    <!-- Checkbox -->
+                                    <label class="custom-checkbox relative cursor-pointer flex-shrink-0 mt-1">
+                                        <input type="checkbox" class="sr-only" 
+                                            ${isDone ? 'checked' : ''} 
+                                            onchange="updateTask('${slotKey}', '${task.id}', 'status', this.checked ? 'completed' : 'pending')">
+                                        <div class="w-5 h-5 border-2 border-gray-300 dark:border-gray-500 rounded flex items-center justify-center transition-all">
+                                            <i class="fa-solid fa-check text-white text-xs opacity-0 transform scale-50 transition-all duration-200"></i>
+                                        </div>
+                                    </label>
+
+                                    <!-- Content -->
+                                    <div class="flex-grow min-w-0">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <i class="fa-brands ${PLATFORM_ICONS[task.platform]} ${PLATFORM_COLORS[task.platform]}"></i>
+                                            <span class="text-sm font-semibold truncate ${isDone ? 'line-through text-gray-400' : ''}">${task.account}</span>
+                                            ${isMissed ? '<span class="text-[10px] font-bold text-red-500 bg-red-100 dark:bg-red-900/50 px-1 rounded">MISSED</span>' : ''}
+                                        </div>
+                                        
+                                        <!-- Inputs -->
+                                        <input type="text" 
+                                            value="${task.title}" 
+                                            placeholder="Post Title / Content Idea" 
+                                            class="w-full bg-transparent text-sm border-b border-transparent focus:border-indigo-500 outline-none pb-0.5 mb-1 ${isDone ? 'text-gray-400' : ''}"
+                                            onchange="updateTask('${slotKey}', '${task.id}', 'title', this.value)">
+                                            
+                                        <input type="text" 
+                                            value="${task.note}" 
+                                            placeholder="+ Add note (hashtags, instructions)" 
+                                            class="w-full bg-transparent text-xs text-gray-500 border-b border-transparent focus:border-indigo-500 outline-none pb-0.5"
+                                            onchange="updateTask('${slotKey}', '${task.id}', 'note', this.value)">
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+
+                headerHTML += `</div>`;
+                card.innerHTML = headerHTML;
+                container.appendChild(card);
+            });
+
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const today = getTodayKey();
+            const schedule = appData.schedule[today];
+            const allTasks = [...schedule.morning, ...schedule.afternoon, ...schedule.evening];
+            
+            if (allTasks.length === 0) return;
+
+            const completed = allTasks.filter(t => t.status === 'completed').length;
+            const percentage = Math.round((completed / allTasks.length) * 100);
+
+            document.getElementById('progress-bar').style.width = `${percentage}%`;
+            document.getElementById('progress-text').innerText = `${percentage}%`;
+        }
+
+        // --- ALERTS & UTILS ---
+
+        function checkReminders() {
+            const currentSlot = getCurrentSlot();
+            if (!currentSlot) return;
+
+            const now = new Date();
+            const slotEndHour = TIME_SLOTS[currentSlot].end;
+            const minutesLeft = (slotEndHour * 60) - ((now.getHours() * 60) + now.getMinutes());
+            
+            // Alert if between 0 and 5 minutes left
+            if (minutesLeft > 0 && minutesLeft <= 5) {
+                const today = getTodayKey();
+                const pendingTasks = appData.schedule[today][currentSlot].filter(t => t.status === 'pending');
+                
+                if (pendingTasks.length > 0) {
+                    const msg = `⚠️ ${pendingTasks.length} posts remaining in ${TIME_SLOTS[currentSlot].label}!`;
+                    
+                    // Prevent spamming notification every second (simple throttle via localStorage timestamp)
+                    const lastAlert = localStorage.getItem('last_alert_time');
+                    if (!lastAlert || (Date.now() - parseInt(lastAlert) > 300000)) { // 5 mins throttle
+                        showToast(msg, 'warning');
+                        if (Notification.permission === "granted") {
+                            new Notification("Social Post Reminder", { body: msg });
+                        }
+                        localStorage.setItem('last_alert_time', Date.now());
+                    }
+                }
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const el = document.createElement('div');
+            
+            const colors = {
+                info: 'bg-indigo-600 text-white',
+                success: 'bg-green-600 text-white',
+                warning: 'bg-yellow-500 text-white',
+                error: 'bg-red-600 text-white'
+            };
+
+            el.className = `${colors[type]} px-4 py-3 rounded-lg shadow-xl backdrop-blur-md transform transition-all duration-300 translate-x-full opacity-0 flex items-center gap-3 min-w-[300px] pointer-events-auto`;
+            el.innerHTML = `
+                <i class="fa-solid ${type === 'success' ? 'fa-check-circle' : 'fa-info-circle'}"></i>
+                <span class="font-medium text-sm">${message}</span>
+            `;
+
+            container.appendChild(el);
+
+            // Animate in
+            requestAnimationFrame(() => {
+                el.classList.remove('translate-x-full', 'opacity-0');
+            });
+
+            // Remove after 3s
+            setTimeout(() => {
+                el.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => el.remove(), 300);
+            }, 4000);
+        }
+
+        // --- UI TOGGLES ---
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                appData.theme = 'light';
+                icon.className = 'fa-solid fa-moon text-indigo-600';
+            } else {
+                html.classList.add('dark');
+                appData.theme = 'dark';
+                icon.className = 'fa-solid fa-sun text-yellow-400';
+            }
+            saveData();
+        }
+
+        function initTheme() {
+            if (appData.theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                document.getElementById('theme-icon').className = 'fa-solid fa-sun text-yellow-400';
+            }
+        }
+
+        function toggleView() {
+            const dashboard = document.getElementById('dashboard-view');
+            const settings = document.getElementById('settings-view');
+            const isDash = !dashboard.classList.contains('hidden');
+
+            if (isDash) {
+                dashboard.classList.add('hidden');
+                settings.classList.remove('hidden');
+            } else {
+                settings.classList.add('hidden');
+                dashboard.classList.remove('hidden');
+                // Re-init dashboard in case accounts changed
+                checkAndGenerateSchedule();
+                renderDashboard();
+            }
+        }
+
+        function startClock() {
+            const update = () => {
+                const now = new Date();
+                
+                // Format Time (12hr)
+                let hours = now.getHours();
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                hours = hours ? hours : 12; 
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                
+                document.getElementById('clock-time').innerText = `${hours}:${minutes} ${ampm}`;
+                
+                // Format Date
+                const options = { weekday: 'short', month: 'short', day: 'numeric' };
+                document.getElementById('clock-date').innerText = now.toLocaleDateString('en-IN', options);
+            };
+            update();
+            setInterval(update, 1000);
+        }
+
+    </script>
+</body>
+</html>
