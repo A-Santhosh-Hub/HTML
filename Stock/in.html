@@ -1,0 +1,988 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Construction Stock Manager</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Excel Export (SheetJS) -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+    
+    <!-- PDF Export (jsPDF & AutoTable) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans h-screen flex overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-slate-900 text-white flex flex-col shadow-xl hidden md:flex z-20">
+        <div class="p-6 border-b border-slate-700 flex items-center gap-3">
+            <i class="fa-solid fa-helmet-safety text-orange-500 text-2xl"></i>
+            <div>
+                <h1 class="font-bold text-lg leading-tight">SiteManager</h1>
+                <p class="text-xs text-slate-400">Stock Control</p>
+            </div>
+        </div>
+        
+        <nav class="flex-1 overflow-y-auto py-4">
+            <ul class="space-y-1">
+                <li><button onclick="showSection('dashboard')" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-800 transition-colors border-l-4 border-transparent active-nav" id="nav-dashboard"><i class="fa-solid fa-chart-line w-6"></i> Dashboard</button></li>
+                <li><button onclick="showSection('transactions')" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-800 transition-colors border-l-4 border-transparent" id="nav-transactions"><i class="fa-solid fa-list-check w-6"></i> Transaction History</button></li>
+                <li><button onclick="showSection('materials')" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-800 transition-colors border-l-4 border-transparent" id="nav-materials"><i class="fa-solid fa-cubes w-6"></i> Materials Master</button></li>
+                <li><button onclick="showSection('stockIn')" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-800 transition-colors border-l-4 border-transparent" id="nav-stockIn"><i class="fa-solid fa-truck-ramp-box w-6"></i> Stock Entry (IN)</button></li>
+                <li><button onclick="showSection('stockOut')" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-800 transition-colors border-l-4 border-transparent" id="nav-stockOut"><i class="fa-solid fa-dolly w-6"></i> Issue Material (OUT)</button></li>
+                <li><button onclick="showSection('reports')" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-800 transition-colors border-l-4 border-transparent" id="nav-reports"><i class="fa-solid fa-file-invoice w-6"></i> Reports</button></li>
+            </ul>
+        </nav>
+
+        <div class="p-4 border-t border-slate-700 text-xs text-center text-slate-400">
+            <p>Developed by <a href="https://sanstudio.neocities.org/" target="_blank" class="text-orange-400 hover:text-orange-300 font-bold">SanStudio</a></p>
+            <p class="mt-1 opacity-75">v1.2 with Edit Mode</p>
+        </div>
+    </aside>
+
+    <!-- Mobile Header -->
+    <div class="md:hidden fixed top-0 w-full bg-slate-900 text-white z-50 flex justify-between items-center p-4 shadow-md">
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-helmet-safety text-orange-500"></i>
+            <span class="font-bold">SiteManager</span>
+        </div>
+        <button onclick="document.querySelector('aside').classList.toggle('hidden'); document.querySelector('aside').classList.toggle('absolute'); document.querySelector('aside').classList.toggle('h-full');" class="text-white">
+            <i class="fa-solid fa-bars text-xl"></i>
+        </button>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 mt-14 md:mt-0 relative">
+        
+        <!-- SECTION: DASHBOARD -->
+        <section id="dashboard" class="page-section fade-in">
+            <h2 class="text-2xl font-bold mb-6 text-slate-800">Dashboard</h2>
+            
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                    <div class="text-sm text-slate-500 font-semibold uppercase">Total Materials</div>
+                    <div class="text-3xl font-bold text-slate-800 mt-2" id="dash-total-types">0</div>
+                    <div class="text-xs text-slate-400 mt-1">Defined in system</div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                    <div class="text-sm text-slate-500 font-semibold uppercase">Current Stock Value</div>
+                    <div class="text-3xl font-bold text-blue-600 mt-2" id="dash-total-stock">0</div>
+                    <div class="text-xs text-slate-400 mt-1">Sum of all quantities</div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                    <div class="text-sm text-slate-500 font-semibold uppercase">Today's Activity</div>
+                    <div class="flex justify-between mt-2">
+                        <div>
+                            <span class="block text-xs text-green-600 font-bold">IN</span>
+                            <span class="text-xl font-bold" id="dash-today-in">0</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="block text-xs text-red-600 font-bold">OUT</span>
+                            <span class="text-xl font-bold" id="dash-today-out">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                    <div class="text-sm text-slate-500 font-semibold uppercase">This Month</div>
+                    <div class="flex justify-between mt-2">
+                        <div>
+                            <span class="block text-xs text-green-600 font-bold">IN</span>
+                            <span class="text-xl font-bold" id="dash-month-in">0</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="block text-xs text-red-600 font-bold">OUT</span>
+                            <span class="text-xl font-bold" id="dash-month-out">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-4 border-b border-slate-200 bg-slate-50 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                    <h3 class="font-bold text-lg">Recent Transactions</h3>
+                    <div class="flex flex-wrap gap-2 text-sm">
+                        <select id="dash-filter-type" onchange="renderDashboardTable()" class="border rounded px-2 py-1">
+                            <option value="ALL">All Types</option>
+                            <option value="IN">IN Only</option>
+                            <option value="OUT">OUT Only</option>
+                        </select>
+                        <select id="dash-filter-material" onchange="renderDashboardTable()" class="border rounded px-2 py-1 max-w-[150px]">
+                            <option value="ALL">All Materials</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-600 uppercase text-xs">
+                            <tr>
+                                <th class="px-6 py-3">Date</th>
+                                <th class="px-6 py-3">Type</th>
+                                <th class="px-6 py-3">Material</th>
+                                <th class="px-6 py-3 text-right">Qty</th>
+                                <th class="px-6 py-3">Person/Site</th>
+                                <th class="px-6 py-3">Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashboard-table-body" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+                <div class="p-3 text-center text-xs text-slate-400 bg-slate-50">
+                    Showing last 10 records. Go to "Transaction History" to manage all.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: TRANSACTION HISTORY -->
+        <section id="transactions" class="page-section hidden fade-in">
+            <h2 class="text-2xl font-bold mb-6">Transaction History</h2>
+            
+            <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-4 border-b border-slate-200 bg-slate-50 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                    <div>
+                        <h3 class="font-bold text-lg">All Records</h3>
+                        <p class="text-xs text-slate-500">Edit or Delete records here.</p>
+                    </div>
+                    <div class="flex gap-2 text-sm">
+                        <input type="text" id="hist-search" onkeyup="renderTransactionHistoryTable()" placeholder="Search..." class="border rounded px-2 py-1">
+                        <select id="hist-filter-type" onchange="renderTransactionHistoryTable()" class="border rounded px-2 py-1">
+                            <option value="ALL">All</option>
+                            <option value="IN">IN</option>
+                            <option value="OUT">OUT</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-600 uppercase text-xs">
+                            <tr>
+                                <th class="px-4 py-3">Date</th>
+                                <th class="px-4 py-3">ID</th>
+                                <th class="px-4 py-3">Type</th>
+                                <th class="px-4 py-3">Material</th>
+                                <th class="px-4 py-3 text-right">Qty</th>
+                                <th class="px-4 py-3">Person/Site</th>
+                                <th class="px-4 py-3 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: MATERIALS MASTER -->
+        <section id="materials" class="page-section hidden fade-in">
+            <h2 class="text-2xl font-bold mb-6">Materials Master</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Add/Edit Form -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 sticky top-4">
+                        <h3 class="font-bold text-lg mb-4 text-slate-700" id="mat-form-title">Add New Material</h3>
+                        <form id="material-form" onsubmit="handleMaterialSubmit(event)">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Material Type</label>
+                                    <input list="material-types" name="type" id="mat-type" class="w-full border border-slate-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. Cement, Steel" required>
+                                    <datalist id="material-types">
+                                        <option value="Cement">
+                                        <option value="Sand">
+                                        <option value="Aggregate">
+                                        <option value="Steel">
+                                        <option value="Bricks">
+                                        <option value="Plumbing">
+                                        <option value="Electrical">
+                                        <option value="Medical">
+                                    </datalist>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Material Name</label>
+                                    <input type="text" id="mat-name" class="w-full border border-slate-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. OPC 53 Grade" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Unit</label>
+                                    <select id="mat-unit" class="w-full border border-slate-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                                        <option value="Bag">Bag</option>
+                                        <option value="Kg">Kg</option>
+                                        <option value="Nos">Nos</option>
+                                        <option value="Pallet">Pallet</option>
+                                        <option value="Bundles">Bundles</option>
+                                        <option value="Ton">Ton</option>
+                                        <option value="Piece">Piece</option>
+                                        <option value="Litre">Litre</option>
+                                        <option value="Box">Box</option>
+                                        <option value="Meter">Meter</option>
+                                        <option value="Sq.Ft">Sq.Ft</option>
+                                        <option value="Cu.Ft">Cu.Ft</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Rate (Optional)</label>
+                                    <input type="number" id="mat-rate" class="w-full border border-slate-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="0.00">
+                                </div>
+                                
+                                <div class="flex gap-2">
+                                    <button type="submit" id="mat-submit-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">
+                                        <i class="fa-solid fa-plus mr-2"></i> Add Material
+                                    </button>
+                                    <button type="button" id="mat-cancel-btn" onclick="resetMaterialForm()" class="hidden bg-slate-300 hover:bg-slate-400 text-slate-700 font-bold py-2 px-4 rounded transition">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- List -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-lg shadow-sm border border-slate-200">
+                        <div class="p-4 border-b border-slate-200 flex justify-between items-center">
+                            <h3 class="font-bold text-lg">Material List</h3>
+                            <input type="text" id="mat-search" onkeyup="renderMaterialsTable()" placeholder="Search material..." class="text-sm border rounded px-3 py-1 w-48">
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-50 text-slate-600 uppercase text-xs">
+                                    <tr>
+                                        <th class="px-4 py-3">ID</th>
+                                        <th class="px-4 py-3">Type</th>
+                                        <th class="px-4 py-3">Name</th>
+                                        <th class="px-4 py-3">Unit</th>
+                                        <th class="px-4 py-3 text-right">Stock</th>
+                                        <th class="px-4 py-3 text-center">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="materials-table-body" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: STOCK IN -->
+        <section id="stockIn" class="page-section hidden fade-in">
+            <h2 class="text-2xl font-bold mb-6 text-green-700" id="in-page-title">Stock Entry (IN)</h2>
+            <div class="max-w-2xl bg-white p-6 rounded-lg shadow-sm border-l-4 border-green-500">
+                <form onsubmit="handleTransactionSubmit(event, 'IN')">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Date</label>
+                            <input type="date" id="in-date" class="w-full border border-slate-300 rounded-md p-2 outline-none" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Material</label>
+                            <select id="in-material" class="w-full border border-slate-300 rounded-md p-2 outline-none" required>
+                                <option value="">Select Material</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Quantity</label>
+                            <input type="number" step="0.01" min="0.01" id="in-qty" class="w-full border border-slate-300 rounded-md p-2 outline-none" placeholder="0.00" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Supplier / Source</label>
+                            <input type="text" id="in-person" class="w-full border border-slate-300 rounded-md p-2 outline-none" placeholder="e.g. ABC Hardware">
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Notes</label>
+                        <textarea id="in-notes" rows="3" class="w-full border border-slate-300 rounded-md p-2 outline-none" placeholder="Optional details..."></textarea>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="submit" id="in-submit-btn" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded transition w-full md:w-auto">
+                            <i class="fa-solid fa-download mr-2"></i> Save Stock IN
+                        </button>
+                        <button type="button" id="in-cancel-btn" onclick="resetTransactionForm('IN')" class="hidden flex-1 bg-slate-300 hover:bg-slate-400 text-slate-700 font-bold py-3 px-8 rounded transition">
+                            Cancel Edit
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- SECTION: STOCK OUT -->
+        <section id="stockOut" class="page-section hidden fade-in">
+            <h2 class="text-2xl font-bold mb-6 text-red-700" id="out-page-title">Issue Material (OUT)</h2>
+            <div class="max-w-2xl bg-white p-6 rounded-lg shadow-sm border-l-4 border-red-500">
+                <form onsubmit="handleTransactionSubmit(event, 'OUT')">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Date</label>
+                            <input type="date" id="out-date" class="w-full border border-slate-300 rounded-md p-2 outline-none" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Material</label>
+                            <select id="out-material" onchange="updateStockDisplay(this.value)" class="w-full border border-slate-300 rounded-md p-2 outline-none" required>
+                                <option value="">Select Material</option>
+                            </select>
+                            <p class="text-xs text-slate-500 mt-1" id="out-current-stock-display">Available: -</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Quantity</label>
+                            <input type="number" step="0.01" min="0.01" id="out-qty" class="w-full border border-slate-300 rounded-md p-2 outline-none" placeholder="0.00" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Issued To (Person/Site)</label>
+                            <input type="text" id="out-person" class="w-full border border-slate-300 rounded-md p-2 outline-none" placeholder="e.g. Foreman John / Block A" required>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Notes</label>
+                        <textarea id="out-notes" rows="3" class="w-full border border-slate-300 rounded-md p-2 outline-none" placeholder="Purpose..."></textarea>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="submit" id="out-submit-btn" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded transition w-full md:w-auto">
+                            <i class="fa-solid fa-upload mr-2"></i> Save Stock OUT
+                        </button>
+                        <button type="button" id="out-cancel-btn" onclick="resetTransactionForm('OUT')" class="hidden flex-1 bg-slate-300 hover:bg-slate-400 text-slate-700 font-bold py-3 px-8 rounded transition">
+                            Cancel Edit
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- SECTION: REPORTS -->
+        <section id="reports" class="page-section hidden fade-in">
+            <h2 class="text-2xl font-bold mb-6">Reports</h2>
+            <div class="flex border-b border-slate-300 mb-6 overflow-x-auto">
+                <button onclick="switchReportTab('daily')" class="report-tab px-6 py-3 font-medium text-blue-600 border-b-2 border-blue-600 focus:outline-none whitespace-nowrap" id="tab-daily">Daily Report</button>
+                <button onclick="switchReportTab('monthly')" class="report-tab px-6 py-3 font-medium text-slate-500 hover:text-blue-600 focus:outline-none whitespace-nowrap" id="tab-monthly">Monthly Summary</button>
+                <button onclick="switchReportTab('material')" class="report-tab px-6 py-3 font-medium text-slate-500 hover:text-blue-600 focus:outline-none whitespace-nowrap" id="tab-material">Material Wise</button>
+            </div>
+
+            <!-- Report Content Blocks -->
+            <div id="report-daily" class="report-content">
+                <div class="flex flex-wrap items-end gap-4 mb-4 bg-white p-4 rounded shadow-sm">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">Select Date</label>
+                        <input type="date" id="report-daily-date" onchange="generateDailyReport()" class="border p-2 rounded text-sm">
+                    </div>
+                    <div class="flex gap-2 ml-auto">
+                        <button onclick="exportToExcel('daily-table', 'Daily_Report')" class="bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700"><i class="fa-solid fa-file-excel mr-1"></i> Excel</button>
+                        <button onclick="exportToPDF('daily-table', 'Daily_Report')" class="bg-red-600 text-white px-3 py-2 rounded text-sm hover:bg-red-700"><i class="fa-solid fa-file-pdf mr-1"></i> PDF</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="bg-green-50 p-3 rounded border border-green-200 text-center">
+                        <div class="text-xs text-green-800 font-bold">Total IN Items</div>
+                        <div class="text-xl font-bold text-green-700" id="daily-total-in">0</div>
+                    </div>
+                    <div class="bg-red-50 p-3 rounded border border-red-200 text-center">
+                        <div class="text-xs text-red-800 font-bold">Total OUT Items</div>
+                        <div class="text-xl font-bold text-red-700" id="daily-total-out">0</div>
+                    </div>
+                </div>
+                <div class="bg-white shadow-sm border rounded overflow-x-auto">
+                    <table class="w-full text-sm text-left" id="daily-table">
+                        <thead class="bg-slate-100 uppercase text-xs">
+                            <tr>
+                                <th class="px-4 py-2">Type</th>
+                                <th class="px-4 py-2">Material</th>
+                                <th class="px-4 py-2 text-right">Qty</th>
+                                <th class="px-4 py-2">Unit</th>
+                                <th class="px-4 py-2">Person</th>
+                                <th class="px-4 py-2">Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="daily-report-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="report-monthly" class="report-content hidden">
+                <div class="flex flex-wrap items-end gap-4 mb-4 bg-white p-4 rounded shadow-sm">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">Select Month</label>
+                        <input type="month" id="report-month-input" onchange="generateMonthlyReport()" class="border p-2 rounded text-sm">
+                    </div>
+                    <div class="flex gap-2 ml-auto">
+                        <button onclick="exportToExcel('monthly-table', 'Monthly_Report')" class="bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700"><i class="fa-solid fa-file-excel mr-1"></i> Excel</button>
+                        <button onclick="exportToPDF('monthly-table', 'Monthly_Report')" class="bg-red-600 text-white px-3 py-2 rounded text-sm hover:bg-red-700"><i class="fa-solid fa-file-pdf mr-1"></i> PDF</button>
+                    </div>
+                </div>
+                <div class="bg-white shadow-sm border rounded overflow-x-auto">
+                    <table class="w-full text-sm text-left" id="monthly-table">
+                        <thead class="bg-slate-100 uppercase text-xs">
+                            <tr>
+                                <th class="px-4 py-2">Material</th>
+                                <th class="px-4 py-2">Unit</th>
+                                <th class="px-4 py-2 text-right">Opening Stock</th>
+                                <th class="px-4 py-2 text-right text-green-600">Total IN</th>
+                                <th class="px-4 py-2 text-right text-red-600">Total OUT</th>
+                                <th class="px-4 py-2 text-right font-bold">Closing Stock</th>
+                            </tr>
+                        </thead>
+                        <tbody id="monthly-report-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="report-material" class="report-content hidden">
+                <div class="flex flex-wrap items-end gap-4 mb-4 bg-white p-4 rounded shadow-sm">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">Select Material</label>
+                        <select id="report-mat-select" onchange="generateMaterialReport()" class="border p-2 rounded text-sm min-w-[200px]">
+                            <option value="">-- Choose --</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-2 ml-auto">
+                        <button onclick="exportToExcel('material-table', 'Material_History')" class="bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700"><i class="fa-solid fa-file-excel mr-1"></i> Excel</button>
+                        <button onclick="exportToPDF('material-table', 'Material_History')" class="bg-red-600 text-white px-3 py-2 rounded text-sm hover:bg-red-700"><i class="fa-solid fa-file-pdf mr-1"></i> PDF</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-4 mb-4 text-center">
+                    <div class="bg-slate-50 p-2 rounded border">
+                        <div class="text-xs text-slate-500">Total IN</div>
+                        <div class="font-bold text-green-600" id="mat-rep-in">0</div>
+                    </div>
+                    <div class="bg-slate-50 p-2 rounded border">
+                        <div class="text-xs text-slate-500">Total OUT</div>
+                        <div class="font-bold text-red-600" id="mat-rep-out">0</div>
+                    </div>
+                    <div class="bg-slate-50 p-2 rounded border">
+                        <div class="text-xs text-slate-500">Current Stock</div>
+                        <div class="font-bold text-blue-600" id="mat-rep-stock">0</div>
+                    </div>
+                </div>
+                <div class="bg-white shadow-sm border rounded overflow-x-auto">
+                    <table class="w-full text-sm text-left" id="material-table">
+                        <thead class="bg-slate-100 uppercase text-xs">
+                            <tr>
+                                <th class="px-4 py-2">Date</th>
+                                <th class="px-4 py-2">Type</th>
+                                <th class="px-4 py-2 text-right">Qty</th>
+                                <th class="px-4 py-2">Person</th>
+                                <th class="px-4 py-2">Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="material-report-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JS Logic -->
+    <script>
+        // --- DATA MANAGEMENT ---
+        let materials = JSON.parse(localStorage.getItem('materials')) || [];
+        let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+        
+        // --- EDIT STATE ---
+        let editingMaterialId = null;
+        let editingTransactionId = null;
+
+        function saveData() {
+            localStorage.setItem('materials', JSON.stringify(materials));
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+            refreshApp();
+        }
+
+        // --- INIT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('in-date').value = today;
+            document.getElementById('out-date').value = today;
+            document.getElementById('report-daily-date').value = today;
+            const now = new Date();
+            const monthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+            document.getElementById('report-month-input').value = monthStr;
+
+            refreshApp();
+            showSection('dashboard');
+        });
+
+        function refreshApp() {
+            populateMaterialDropdowns();
+            renderMaterialsTable();
+            updateDashboard();
+            renderTransactionHistoryTable();
+            if(!document.getElementById('report-daily').classList.contains('hidden')) generateDailyReport();
+        }
+
+        // --- NAVIGATION ---
+        function showSection(sectionId) {
+            document.querySelectorAll('.page-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(sectionId).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active-nav', 'bg-slate-800', 'border-blue-500');
+                btn.classList.add('border-transparent');
+            });
+            const activeBtn = document.getElementById(`nav-${sectionId}`);
+            if(activeBtn) {
+                activeBtn.classList.add('active-nav', 'bg-slate-800', 'border-blue-500');
+                activeBtn.classList.remove('border-transparent');
+            }
+
+            if(sectionId === 'dashboard') updateDashboard();
+            if(sectionId === 'transactions') renderTransactionHistoryTable();
+            if(sectionId === 'reports') generateDailyReport();
+        }
+
+        // --- MATERIALS MASTER LOGIC ---
+        function handleMaterialSubmit(e) {
+            e.preventDefault();
+            const type = document.getElementById('mat-type').value;
+            const name = document.getElementById('mat-name').value;
+            const unit = document.getElementById('mat-unit').value;
+            const rate = parseFloat(document.getElementById('mat-rate').value) || 0;
+
+            if (editingMaterialId) {
+                // EDIT MODE
+                const index = materials.findIndex(m => m.id === editingMaterialId);
+                if (index !== -1) {
+                    materials[index].type = type;
+                    materials[index].name = name;
+                    materials[index].unit = unit;
+                    materials[index].rate = rate;
+                    // Also update name in transaction history if needed (optional but good)
+                    // transactions.forEach(t => { if(t.materialId === editingMaterialId) { t.materialName = name; t.unit = unit; }});
+                    alert('Material Updated Successfully');
+                }
+            } else {
+                // ADD MODE
+                const id = "MAT" + Date.now().toString().slice(-6);
+                materials.push({ id, type, name, unit, rate, currentStock: 0 });
+                alert('Material Added Successfully');
+            }
+            
+            resetMaterialForm();
+            saveData();
+        }
+
+        function editMaterial(id) {
+            const mat = materials.find(m => m.id === id);
+            if (!mat) return;
+
+            document.getElementById('mat-type').value = mat.type;
+            document.getElementById('mat-name').value = mat.name;
+            document.getElementById('mat-unit').value = mat.unit;
+            document.getElementById('mat-rate').value = mat.rate;
+
+            // Enter Edit Mode
+            editingMaterialId = id;
+            document.getElementById('mat-form-title').innerText = "Edit Material (" + id + ")";
+            document.getElementById('mat-submit-btn').innerHTML = '<i class="fa-solid fa-save mr-2"></i> Update Material';
+            document.getElementById('mat-cancel-btn').classList.remove('hidden');
+            
+            // Scroll to form
+            document.getElementById('materials').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetMaterialForm() {
+            document.getElementById('material-form').reset();
+            editingMaterialId = null;
+            document.getElementById('mat-form-title').innerText = "Add New Material";
+            document.getElementById('mat-submit-btn').innerHTML = '<i class="fa-solid fa-plus mr-2"></i> Add Material';
+            document.getElementById('mat-cancel-btn').classList.add('hidden');
+        }
+
+        function renderMaterialsTable() {
+            const tbody = document.getElementById('materials-table-body');
+            const search = document.getElementById('mat-search').value.toLowerCase();
+            
+            tbody.innerHTML = materials.filter(m => m.name.toLowerCase().includes(search)).map(m => `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="px-4 py-3 font-mono text-xs text-slate-500">${m.id}</td>
+                    <td class="px-4 py-3"><span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">${m.type}</span></td>
+                    <td class="px-4 py-3 font-medium">${m.name}</td>
+                    <td class="px-4 py-3 text-sm text-slate-500">${m.unit}</td>
+                    <td class="px-4 py-3 text-right font-bold ${m.currentStock < 0 ? 'text-red-500' : 'text-slate-800'}">${m.currentStock.toFixed(2)}</td>
+                    <td class="px-4 py-3 text-center flex justify-center gap-2">
+                        <button onclick="editMaterial('${m.id}')" class="text-blue-500 hover:text-blue-700 text-xs" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteMaterial('${m.id}')" class="text-red-500 hover:text-red-700 text-xs" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function deleteMaterial(id) {
+            if(confirm('Are you sure? This removes material from master list (history kept).')) {
+                materials = materials.filter(m => m.id !== id);
+                saveData();
+            }
+        }
+
+        function populateMaterialDropdowns() {
+            const options = materials.map(m => `<option value="${m.id}">${m.name} (${m.unit})</option>`).join('');
+            const selects = ['in-material', 'out-material', 'dash-filter-material', 'report-mat-select'];
+            selects.forEach(selId => {
+                const el = document.getElementById(selId);
+                const currentVal = el.value;
+                const firstOpt = el.options[0].outerHTML;
+                el.innerHTML = firstOpt + options;
+                el.value = currentVal;
+            });
+        }
+
+        // --- TRANSACTION LOGIC (With EDIT) ---
+        function updateStockDisplay(matId) {
+            const mat = materials.find(m => m.id === matId);
+            const disp = document.getElementById('out-current-stock-display');
+            if(mat) {
+                disp.innerText = `Available: ${mat.currentStock} ${mat.unit}`;
+                disp.className = mat.currentStock <= 0 ? "text-xs text-red-600 mt-1 font-bold" : "text-xs text-green-600 mt-1";
+            } else {
+                disp.innerText = "Available: -";
+            }
+        }
+
+        function handleTransactionSubmit(e, type) {
+            e.preventDefault();
+            
+            const prefix = type === 'IN' ? 'in' : 'out';
+            const date = document.getElementById(`${prefix}-date`).value;
+            const matId = document.getElementById(`${prefix}-material`).value;
+            const qty = parseFloat(document.getElementById(`${prefix}-qty`).value);
+            const person = document.getElementById(`${prefix}-person`).value;
+            const notes = document.getElementById(`${prefix}-notes`).value;
+
+            if(!matId) return alert('Please select a material');
+            const materialIndex = materials.findIndex(m => m.id === matId);
+            if(materialIndex === -1) return alert('Material not found');
+
+            // --- REVERT OLD TRANSACTION IF EDITING ---
+            if (editingTransactionId) {
+                const oldTx = transactions.find(t => t.id === editingTransactionId);
+                const oldMatIndex = materials.findIndex(m => m.id === oldTx.materialId);
+                if (oldMatIndex !== -1) {
+                    // Revert old stock impact
+                    if (oldTx.type === 'IN') materials[oldMatIndex].currentStock -= oldTx.quantity;
+                    else materials[oldMatIndex].currentStock += oldTx.quantity;
+                }
+            }
+
+            // --- CHECK STOCK (For OUT) ---
+            // Recalculate stock logic after revert
+            if (type === 'OUT') {
+                if (materials[materialIndex].currentStock < qty) {
+                    // If editing, we might have reverted stock, so we might need to re-add the old stock if we fail here?
+                    // Actually, let's keep it simple. If fail, reload page or warn.
+                    // To be safe, if we fail, we should undo the revert above. 
+                    // But for this simple app, let's just alert.
+                     if (editingTransactionId) {
+                         alert(`Insufficient stock (Available: ${materials[materialIndex].currentStock}). Update cancelled.`);
+                         // Reload to fix state because we partially mutated RAM state above
+                         location.reload(); 
+                         return;
+                     }
+                    return alert(`Insufficient stock! Available: ${materials[materialIndex].currentStock}`);
+                }
+                materials[materialIndex].currentStock -= qty;
+            } else {
+                materials[materialIndex].currentStock += qty;
+            }
+
+            if (editingTransactionId) {
+                // UPDATE EXISTING
+                const index = transactions.findIndex(t => t.id === editingTransactionId);
+                transactions[index] = {
+                    ...transactions[index],
+                    date, materialId: matId, materialName: materials[materialIndex].name,
+                    unit: materials[materialIndex].unit, quantity: qty, person, notes
+                };
+                alert('Transaction Updated!');
+                resetTransactionForm(type);
+                // Go back to history
+                showSection('transactions');
+            } else {
+                // ADD NEW
+                const trx = {
+                    id: "TRX" + Date.now(),
+                    date, materialId: matId, materialName: materials[materialIndex].name,
+                    unit: materials[materialIndex].unit, type, quantity: qty, person, notes
+                };
+                transactions.push(trx);
+                alert('Transaction Saved!');
+                e.target.reset();
+                document.getElementById(`${prefix}-date`).value = new Date().toISOString().split('T')[0];
+            }
+            
+            saveData();
+            updateStockDisplay(matId);
+        }
+
+        function editTransaction(id) {
+            const tx = transactions.find(t => t.id === id);
+            if(!tx) return;
+
+            // Determine Page
+            const section = tx.type === 'IN' ? 'stockIn' : 'stockOut';
+            const prefix = tx.type === 'IN' ? 'in' : 'out';
+
+            // Navigate
+            showSection(section);
+
+            // Fill Form
+            document.getElementById(`${prefix}-date`).value = tx.date;
+            document.getElementById(`${prefix}-material`).value = tx.materialId;
+            document.getElementById(`${prefix}-qty`).value = tx.quantity;
+            document.getElementById(`${prefix}-person`).value = tx.person;
+            document.getElementById(`${prefix}-notes`).value = tx.notes;
+            
+            // Set Edit Mode UI
+            editingTransactionId = id;
+            document.getElementById(`${prefix}-page-title`).innerText = `Edit ${tx.type} Transaction (${id})`;
+            document.getElementById(`${prefix}-submit-btn`).innerHTML = `<i class="fa-solid fa-save mr-2"></i> Update ${tx.type}`;
+            document.getElementById(`${prefix}-cancel-btn`).classList.remove('hidden');
+
+            updateStockDisplay(tx.materialId);
+        }
+
+        function resetTransactionForm(type) {
+            const prefix = type === 'IN' ? 'in' : 'out';
+            document.getElementById(`${prefix}-submit-btn`).innerHTML = type === 'IN' 
+                ? '<i class="fa-solid fa-download mr-2"></i> Save Stock IN' 
+                : '<i class="fa-solid fa-upload mr-2"></i> Save Stock OUT';
+            document.getElementById(`${prefix}-cancel-btn`).classList.add('hidden');
+            document.getElementById(`${prefix}-page-title`).innerText = type === 'IN' ? 'Stock Entry (IN)' : 'Issue Material (OUT)';
+            
+            // Clear inputs
+            const form = document.getElementById(`${prefix}-submit-btn`).closest('form');
+            form.reset();
+            document.getElementById(`${prefix}-date`).value = new Date().toISOString().split('T')[0];
+            
+            editingTransactionId = null;
+        }
+
+        function deleteTransaction(id) {
+            const txIndex = transactions.findIndex(t => t.id === id);
+            if(txIndex === -1) return;
+            const tx = transactions[txIndex];
+            
+            if(!confirm(`Delete ${tx.type} record for ${tx.materialName}? This reverts stock.`)) return;
+
+            const matIndex = materials.findIndex(m => m.id === tx.materialId);
+            if(matIndex !== -1) {
+                if(tx.type === 'IN') {
+                    if(materials[matIndex].currentStock < tx.quantity) {
+                        if(!confirm('Warning: Deleting this IN entry results in negative stock. Continue?')) return;
+                    }
+                    materials[matIndex].currentStock -= tx.quantity;
+                } else {
+                    materials[matIndex].currentStock += tx.quantity;
+                }
+            }
+            transactions.splice(txIndex, 1);
+            saveData();
+            alert('Transaction deleted.');
+        }
+
+        function renderTransactionHistoryTable() {
+            const search = document.getElementById('hist-search').value.toLowerCase();
+            const filterType = document.getElementById('hist-filter-type').value;
+
+            let filtered = transactions.sort((a,b) => new Date(b.date) - new Date(a.date));
+
+            if(filterType !== 'ALL') filtered = filtered.filter(t => t.type === filterType);
+            if(search) filtered = filtered.filter(t => 
+                t.materialName.toLowerCase().includes(search) || 
+                (t.person && t.person.toLowerCase().includes(search)) ||
+                (t.notes && t.notes.toLowerCase().includes(search))
+            );
+
+            document.getElementById('history-table-body').innerHTML = filtered.map(t => `
+                <tr class="hover:bg-slate-50 border-b border-slate-100">
+                    <td class="px-4 py-3 whitespace-nowrap text-xs text-slate-500">${t.date}</td>
+                    <td class="px-4 py-3 whitespace-nowrap font-mono text-xs text-slate-400">${t.id}</td>
+                    <td class="px-4 py-3">
+                        <span class="${t.type === 'IN' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'} px-2 py-1 rounded text-xs font-bold">${t.type}</span>
+                    </td>
+                    <td class="px-4 py-3 font-medium">${t.materialName}</td>
+                    <td class="px-4 py-3 text-right font-mono">${t.quantity} <span class="text-slate-400 text-xs">${t.unit}</span></td>
+                    <td class="px-4 py-3 text-slate-600 text-sm">${t.person || '-'}</td>
+                    <td class="px-4 py-3 text-center flex justify-center gap-2">
+                        <button onclick="editTransaction('${t.id}')" class="text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 p-2 rounded transition" title="Edit">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button onclick="deleteTransaction('${t.id}')" class="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded transition" title="Delete">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('') || '<tr><td colspan="7" class="p-4 text-center text-slate-400">No records found</td></tr>';
+        }
+
+        // --- DASHBOARD ---
+        function updateDashboard() {
+            document.getElementById('dash-total-types').innerText = materials.length;
+            const totalStock = materials.reduce((sum, m) => sum + m.currentStock, 0);
+            document.getElementById('dash-total-stock').innerText = totalStock.toFixed(2);
+
+            const today = new Date().toISOString().split('T')[0];
+            const now = new Date();
+            const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+            const todayTrx = transactions.filter(t => t.date === today);
+            document.getElementById('dash-today-in').innerText = todayTrx.filter(t => t.type === 'IN').length;
+            document.getElementById('dash-today-out').innerText = todayTrx.filter(t => t.type === 'OUT').length;
+
+            const monthTrx = transactions.filter(t => t.date.startsWith(currentMonth));
+            document.getElementById('dash-month-in').innerText = monthTrx.filter(t => t.type === 'IN').length;
+            document.getElementById('dash-month-out').innerText = monthTrx.filter(t => t.type === 'OUT').length;
+
+            renderDashboardTable();
+        }
+
+        function renderDashboardTable() {
+            const filterType = document.getElementById('dash-filter-type').value;
+            const filterMat = document.getElementById('dash-filter-material').value;
+            let filtered = transactions.sort((a,b) => new Date(b.date) - new Date(a.date));
+            if(filterType !== 'ALL') filtered = filtered.filter(t => t.type === filterType);
+            if(filterMat !== 'ALL') filtered = filtered.filter(t => t.materialId === filterMat);
+            const recent = filtered.slice(0, 10);
+
+            document.getElementById('dashboard-table-body').innerHTML = recent.map(t => `
+                <tr class="hover:bg-slate-50">
+                    <td class="px-6 py-3 whitespace-nowrap">${t.date}</td>
+                    <td class="px-6 py-3"><span class="${t.type === 'IN' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'} px-2 py-1 rounded text-xs font-bold">${t.type}</span></td>
+                    <td class="px-6 py-3 font-medium">${t.materialName}</td>
+                    <td class="px-6 py-3 text-right">${t.quantity} <span class="text-slate-400 text-xs">${t.unit}</span></td>
+                    <td class="px-6 py-3 text-slate-600">${t.person || '-'}</td>
+                    <td class="px-6 py-3 text-slate-500 italic truncate max-w-xs">${t.notes || '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        // --- REPORTS ---
+        function switchReportTab(tab) {
+            document.querySelectorAll('.report-tab').forEach(b => {
+                b.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+                b.classList.add('text-slate-500');
+            });
+            document.getElementById(`tab-${tab}`).classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+            document.querySelectorAll('.report-content').forEach(c => c.classList.add('hidden'));
+            document.getElementById(`report-${tab}`).classList.remove('hidden');
+
+            if(tab === 'daily') generateDailyReport();
+            if(tab === 'monthly') generateMonthlyReport();
+            if(tab === 'material') generateMaterialReport();
+        }
+
+        function generateDailyReport() {
+            const date = document.getElementById('report-daily-date').value;
+            const filtered = transactions.filter(t => t.date === date);
+            let totalIn = 0, totalOut = 0;
+            filtered.forEach(t => { if(t.type === 'IN') totalIn++; else totalOut++; });
+            document.getElementById('daily-total-in').innerText = totalIn;
+            document.getElementById('daily-total-out').innerText = totalOut;
+            document.getElementById('daily-report-body').innerHTML = filtered.map(t => `
+                <tr class="border-b border-slate-100">
+                    <td class="px-4 py-2"><span class="${t.type === 'IN' ? 'text-green-600' : 'text-red-600'} font-bold">${t.type}</span></td>
+                    <td class="px-4 py-2">${t.materialName}</td>
+                    <td class="px-4 py-2 text-right font-mono">${t.quantity}</td>
+                    <td class="px-4 py-2 text-xs text-slate-500">${t.unit}</td>
+                    <td class="px-4 py-2 text-sm">${t.person || '-'}</td>
+                    <td class="px-4 py-2 text-sm italic text-slate-500">${t.notes || ''}</td>
+                </tr>
+            `).join('') || `<tr><td colspan="6" class="p-4 text-center text-slate-400">No transactions for this date</td></tr>`;
+        }
+
+        function generateMonthlyReport() {
+            const monthStr = document.getElementById('report-month-input').value;
+            if(!monthStr) return;
+            const tbody = document.getElementById('monthly-report-body');
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center p-4">Calculating...</td></tr>';
+            setTimeout(() => {
+                let reportData = materials.map(mat => {
+                    let opening = 0, periodIn = 0, periodOut = 0;
+                    transactions.filter(t => t.materialId === mat.id).forEach(t => {
+                        const tDate = t.date.substring(0, 7);
+                        if (t.date < monthStr + "-01") {
+                            if(t.type === 'IN') opening += t.quantity; else opening -= t.quantity;
+                        } else if (tDate === monthStr) {
+                            if(t.type === 'IN') periodIn += t.quantity; else periodOut += t.quantity;
+                        }
+                    });
+                    return { name: mat.name, unit: mat.unit, opening, periodIn, periodOut, closing: opening + periodIn - periodOut };
+                });
+                tbody.innerHTML = reportData.map(r => `
+                    <tr class="border-b border-slate-100 hover:bg-slate-50">
+                        <td class="px-4 py-2 font-medium">${r.name}</td>
+                        <td class="px-4 py-2 text-xs text-slate-500">${r.unit}</td>
+                        <td class="px-4 py-2 text-right font-mono text-slate-600">${r.opening.toFixed(2)}</td>
+                        <td class="px-4 py-2 text-right font-mono text-green-600">+${r.periodIn.toFixed(2)}</td>
+                        <td class="px-4 py-2 text-right font-mono text-red-600">-${r.periodOut.toFixed(2)}</td>
+                        <td class="px-4 py-2 text-right font-mono font-bold text-blue-700 bg-blue-50">${r.closing.toFixed(2)}</td>
+                    </tr>
+                `).join('');
+            }, 50);
+        }
+
+        function generateMaterialReport() {
+            const matId = document.getElementById('report-mat-select').value;
+            const tbody = document.getElementById('material-report-body');
+            if(!matId) { tbody.innerHTML = ''; return; }
+            const mat = materials.find(m => m.id === matId);
+            document.getElementById('mat-rep-stock').innerText = mat.currentStock.toFixed(2) + " " + mat.unit;
+            const relevantTrx = transactions.filter(t => t.materialId === matId).sort((a,b) => new Date(a.date) - new Date(b.date));
+            let totalIn = 0, totalOut = 0;
+            const rows = relevantTrx.map(t => {
+                if(t.type === 'IN') totalIn += t.quantity; else totalOut += t.quantity;
+                return `
+                    <tr class="border-b border-slate-100">
+                        <td class="px-4 py-2 text-sm">${t.date}</td>
+                        <td class="px-4 py-2"><span class="${t.type === 'IN' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'} text-xs px-2 py-1 rounded">${t.type}</span></td>
+                        <td class="px-4 py-2 text-right font-mono">${t.quantity}</td>
+                        <td class="px-4 py-2 text-sm text-slate-600">${t.person || '-'}</td>
+                        <td class="px-4 py-2 text-sm italic text-slate-500">${t.notes || ''}</td>
+                    </tr>
+                `;
+            }).join('');
+            document.getElementById('mat-rep-in').innerText = totalIn.toFixed(2);
+            document.getElementById('mat-rep-out').innerText = totalOut.toFixed(2);
+            tbody.innerHTML = rows;
+        }
+
+        function exportToExcel(tableId, filename) {
+            const table = document.getElementById(tableId);
+            const wb = XLSX.utils.table_to_book(table, {sheet: "Sheet1"});
+            XLSX.writeFile(wb, `${filename}_${new Date().toISOString().split('T')[0]}.xlsx`);
+        }
+
+        function exportToPDF(tableId, filename) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text("Construction Stock Report", 14, 15);
+            doc.setFontSize(10);
+            doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 22);
+            doc.autoTable({ html: `#${tableId}`, startY: 30, theme: 'grid' });
+            doc.save(`${filename}.pdf`);
+        }
+    </script>
+</body>
+</html>
