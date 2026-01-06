@@ -56,12 +56,12 @@
 
 # Project 28 https://sanstudio.neocities.org/SocialMediaScheduler  ---- ( Social Media Scheduler )
 
-# Project 28 https://santhosh2024.neocities.org/SanStudio%20Player/stock  ---- ( SiteManage Stock Control )
+# Project 29 https://santhosh2024.neocities.org/SanStudio%20Player/stock  ---- ( SiteManage Stock Control )
 
 
 
 
-# Project 29   https://santhosh2024.neocities.org/skill/in ----=-[ SKILL ]
+# Project    https://santhosh2024.neocities.org/skill/in ----=-[ SKILL ]
 
 
 
