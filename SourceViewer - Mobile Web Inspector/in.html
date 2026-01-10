@@ -1,0 +1,469 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- SEO Meta Tags -->
+    <title>SourceViewer — View Website HTML Source Online (Mobile Friendly)</title>
+    <meta name="description" content="View, copy, and download any website's HTML source code directly in your browser. A free, fast, and mobile-optimized web inspector with CORS bypass mode.">
+    <meta name="keywords" content="view source code online, mobile web inspector, inspect element mobile, website source viewer, HTML source downloader, SanStudio, web developer tools">
+    <meta name="author" content="SanStudio">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sanstudio.neocities.org/">
+    <meta property="og:title" content="SourceViewer — Online Web Source Inspector">
+    <meta property="og:description" content="Free tool to inspect and download website HTML source. Works on mobile and desktop.">
+    <meta property="og:image" content="https://sanstudio.neocities.org/assets/og-image.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+     <link rel="icon" type="image/png" href="Logo.png" />
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+            overscroll-behavior-y: contain;
+        }
+
+        .code-container {
+            font-family: 'Fira Code', monospace;
+            counter-reset: line;
+            line-height: 1.6;
+        }
+
+        .code-line {
+            display: block;
+            white-space: pre;
+            padding-left: 0.5rem;
+        }
+
+        .code-line::before {
+            counter-increment: line;
+            content: counter(line);
+            display: inline-block;
+            width: 2.5rem;
+            margin-right: 0.75rem;
+            color: #94a3b8;
+            text-align: right;
+            border-right: 1px solid #e2e8f0;
+            padding-right: 0.5rem;
+            user-select: none;
+            font-size: 0.75rem;
+        }
+
+        /* Syntax Colors */
+        .hl-tag { color: #2563eb; font-weight: 500; }
+        .hl-attr { color: #7c3aed; }
+        .hl-val { color: #059669; }
+        .hl-comm { color: #94a3b8; font-style: italic; }
+
+        .glass-header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        /* Action Pill Design - Fixes Footer Overlap */
+        .action-pill {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .history-scroll {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .history-scroll::-webkit-scrollbar { display: none; }
+
+        .btn-active:active {
+            transform: scale(0.96);
+        }
+
+        .toast {
+            transform: translate(-50%, 150px);
+            transition: transform 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            pointer-events: none;
+        }
+        .toast.show {
+            transform: translate(-50%, -95px); /* Positioned clearly above the pill */
+        }
+
+        #resultArea {
+            height: calc(100vh - 350px);
+            min-height: 400px;
+        }
+        @media (min-width: 768px) {
+            #resultArea { height: 600px; }
+        }
+
+        /* Custom scrollbar for code area */
+        #resultArea::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        #resultArea::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="glass-header sticky top-0 z-40 px-5 py-4">
+        <div class="max-w-4xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+                    <i class="fa-solid fa-code-branch text-xs"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight text-slate-900 leading-none">SourceViewer</h1>
+                    <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-1">Inspected by SanStudio</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center px-2 py-1 rounded-md text-[9px] font-black bg-slate-100 text-slate-600 border border-slate-200 uppercase tracking-tighter">Pro Tools</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow p-4 md:p-8 max-w-4xl mx-auto w-full space-y-5">
+        
+        <!-- Input Section -->
+        <section class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
+            <div class="flex flex-col gap-4">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-globe text-sm"></i>
+                    </div>
+                    <input type="url" id="urlInput" placeholder="Paste URL (e.g. https://google.com)" 
+                        class="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-medium">
+                </div>
+                
+                <div class="flex items-center gap-3">
+                    <button id="viewBtn" class="flex-grow bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all shadow-xl shadow-blue-600/20 btn-active flex items-center justify-center gap-3">
+                        <span id="btnText">Inspect Source</span>
+                        <i id="btnIcon" class="fa-solid fa-wand-magic-sparkles text-xs"></i>
+                        <i id="spinner" class="fa-solid fa-circle-notch fa-spin hidden"></i>
+                    </button>
+                    
+                    <div class="flex items-center gap-2 px-4 py-4 bg-slate-50 rounded-2xl border border-slate-200" title="Bypass CORS restrictions using proxy">
+                        <label class="switch flex items-center cursor-pointer">
+                            <input type="checkbox" id="proxyToggle" class="hidden peer" checked>
+                            <div class="w-8 h-4 bg-slate-300 rounded-full peer peer-checked:bg-blue-600 relative transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-transform peer-checked:after:translate-x-4"></div>
+                        </label>
+                        <span class="text-[9px] font-black text-slate-500 tracking-tighter uppercase">Proxy</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History Scroll -->
+            <div id="historyWrapper" class="mt-5 flex items-center gap-3 overflow-hidden">
+                <div class="w-2 h-2 rounded-full bg-blue-500 animate-pulse shrink-0"></div>
+                <div id="historyList" class="flex gap-2 overflow-x-auto history-scroll pb-1"></div>
+                <button id="clearHistory" class="text-[10px] text-red-500 font-bold shrink-0 hidden px-2 py-1 bg-red-50 rounded-md">CLEAR</button>
+            </div>
+        </section>
+
+        <!-- Status Area -->
+        <div id="statusArea" class="hidden p-4 rounded-2xl border border-amber-200 bg-amber-50 text-amber-900 text-sm">
+            <div class="flex gap-3">
+                <i class="fa-solid fa-triangle-exclamation mt-1 text-amber-600"></i>
+                <div class="space-y-1">
+                    <p class="font-bold">Access Warning</p>
+                    <p id="statusMsg" class="text-xs opacity-90"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Card -->
+        <article id="resultCard" class="bg-white rounded-3xl overflow-hidden hidden flex flex-col shadow-2xl border border-slate-200">
+            <div class="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center gap-3">
+                <div class="relative flex-grow">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+                    <input type="text" id="searchInput" placeholder="Search line..." 
+                        class="w-full pl-8 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-500 transition-colors">
+                </div>
+                <div id="lineCount" class="text-[10px] font-bold text-slate-400 bg-slate-200 px-2 py-1 rounded-md">0 LINES</div>
+            </div>
+            <div id="resultArea" class="overflow-auto bg-slate-50/30">
+                <pre id="codeDisplay" class="code-container text-[12px] text-slate-800 p-3"></pre>
+            </div>
+        </article>
+
+        <!-- Initial Placeholder -->
+        <div id="initialState" class="text-center py-20 px-6">
+            <div class="w-20 h-20 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-8 transform -rotate-6 shadow-inner">
+                <i class="fa-solid fa-code text-3xl"></i>
+            </div>
+            <h2 class="text-xl font-black text-slate-900 tracking-tight">Inspect Any Website</h2>
+            <p class="text-slate-500 text-sm mt-3 leading-relaxed max-w-xs mx-auto">Analyze, learn, and debug HTML structure on the move. Fast client-side processing by SanStudio.</p>
+        </div>
+
+        <!-- Spacer for the action pill clearance -->
+        <div class="h-32"></div>
+    </main>
+
+    <!-- Floating Action Pill -->
+    <nav id="mobileActions" class="fixed bottom-6 left-1/2 -translate-x-1/2 action-pill px-2 py-2 rounded-full z-50 transform translate-y-[200px] transition-all duration-500 flex items-center gap-1">
+        <button id="copyBtn" class="bg-blue-600 text-white px-5 py-3 rounded-full font-bold text-xs flex items-center gap-2 btn-active">
+            <i class="fa-regular fa-copy"></i> Copy
+        </button>
+        <button id="downloadBtn" class="bg-slate-800 text-slate-100 px-5 py-3 rounded-full font-bold text-xs flex items-center gap-2 btn-active">
+            <i class="fa-solid fa-download"></i> Save
+        </button>
+        <div class="w-px h-6 bg-slate-700 mx-1"></div>
+        <button id="scrollTopBtn" class="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center text-slate-300 btn-active hover:text-white">
+            <i class="fa-solid fa-arrow-up text-xs"></i>
+        </button>
+    </nav>
+
+    <!-- Footer -->
+    <footer class="p-10 text-center bg-white border-t border-slate-100 mt-auto">
+        <div class="max-w-4xl mx-auto space-y-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-left border-b border-slate-100 pb-10">
+                <div>
+                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Core Technology</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed font-medium">SourceViewer uses advanced multi-proxy logic to bypass CORS restrictions, allowing you to debug live websites directly from your mobile browser.</p>
+                </div>
+                <div>
+                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Security First</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed font-medium">All processing happens locally in your device. We don't store your URLs or source code. Privacy is built-in by SanStudio.</p>
+                </div>
+            </div>
+            
+            <div class="flex flex-col items-center gap-4">
+                <a href="https://sanstudio.neocities.org/" target="_blank" rel="noopener noreferrer" 
+                    class="group relative flex items-center gap-4 bg-slate-900 px-8 py-4 rounded-2xl hover:bg-blue-600 transition-all active:scale-95 shadow-2xl shadow-slate-900/20">
+                    <div class="flex flex-col items-start">
+                        <span class="text-[9px] font-bold text-slate-400 group-hover:text-blue-200 uppercase tracking-widest leading-none mb-1">Developed By</span>
+                        <span class="text-base font-black text-white">SanStudio</span>
+                    </div>
+                    <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center group-hover:rotate-12 transition-transform">
+                        <i class="fa-solid fa-rocket text-white"></i>
+                    </div>
+                </a>
+                <div class="flex flex-col gap-1">
+                    <p class="text-[10px] text-slate-400 tracking-widest font-black uppercase">© 2024 SourceViewer Official</p>
+                    <p class="text-[9px] text-slate-300 font-medium italic">Empowering mobile developers worldwide.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast UI -->
+    <div id="toast" class="toast fixed bottom-0 left-1/2 z-[60] bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 w-[85%] max-w-xs border border-slate-700">
+        <div class="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
+            <i class="fa-solid fa-check text-green-400"></i>
+        </div>
+        <span id="toastMsg" class="text-xs font-bold whitespace-nowrap"></span>
+    </div>
+
+    <script>
+        const urlInput = document.getElementById('urlInput');
+        const viewBtn = document.getElementById('viewBtn');
+        const btnText = document.getElementById('btnText');
+        const btnIcon = document.getElementById('btnIcon');
+        const spinner = document.getElementById('spinner');
+        const codeDisplay = document.getElementById('codeDisplay');
+        const resultCard = document.getElementById('resultCard');
+        const mobileActions = document.getElementById('mobileActions');
+        const initialState = document.getElementById('initialState');
+        const statusArea = document.getElementById('statusArea');
+        const statusMsg = document.getElementById('statusMsg');
+        const historyList = document.getElementById('historyList');
+        const clearHistoryBtn = document.getElementById('clearHistory');
+        const copyBtn = document.getElementById('copyBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const toast = document.getElementById('toast');
+        const searchInput = document.getElementById('searchInput');
+        const proxyToggle = document.getElementById('proxyToggle');
+        const scrollTopBtn = document.getElementById('scrollTopBtn');
+        const resultArea = document.getElementById('resultArea');
+        const lineCount = document.getElementById('lineCount');
+
+        let currentSource = "";
+        let history = JSON.parse(localStorage.getItem('sv_v3_history') || '[]');
+
+        function renderHistory() {
+            historyList.innerHTML = '';
+            if (history.length === 0) {
+                clearHistoryBtn.classList.add('hidden');
+                return;
+            }
+            clearHistoryBtn.classList.remove('hidden');
+            history.forEach(url => {
+                const chip = document.createElement('button');
+                chip.className = "shrink-0 text-[10px] font-black bg-white border border-slate-200 px-4 py-2 rounded-xl transition-all active:bg-blue-600 active:text-white active:border-blue-600 shadow-sm";
+                try { 
+                    const host = new URL(url).hostname;
+                    chip.textContent = host.startsWith('www.') ? host.slice(4) : host;
+                } catch(e) { chip.textContent = url; }
+                chip.onclick = () => {
+                    urlInput.value = url;
+                    fetchSource();
+                };
+                historyList.appendChild(chip);
+            });
+        }
+
+        function addToHistory(url) {
+            history = history.filter(h => h !== url);
+            history.unshift(url);
+            history = history.slice(0, 10);
+            localStorage.setItem('sv_v3_history', JSON.stringify(history));
+            renderHistory();
+        }
+
+        clearHistoryBtn.onclick = () => {
+            history = [];
+            localStorage.removeItem('sv_v3_history');
+            renderHistory();
+        };
+
+        async function fetchSource() {
+            let url = urlInput.value.trim();
+            if (!url) return showToast("Enter a URL first");
+            if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+            urlInput.value = url;
+
+            setLoading(true);
+            statusArea.classList.add('hidden');
+            resultCard.classList.add('hidden');
+            mobileActions.classList.add('translate-y-[200px]');
+            initialState.classList.add('hidden');
+
+            try {
+                let html = null;
+                if (proxyToggle.checked) {
+                    try {
+                        const res = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`);
+                        if (res.ok) html = await res.text();
+                    } catch (e) {}
+
+                    if (!html || html.length < 50) {
+                        try {
+                            const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}&ts=${Date.now()}`);
+                            const data = await res.json();
+                            if (data.contents) html = data.contents;
+                        } catch (e) {}
+                    }
+                } else {
+                    const res = await fetch(url).catch(() => null);
+                    if (res && res.ok) html = await res.text();
+                }
+
+                if (html && html.length > 5) {
+                    displayResult(html, url);
+                } else {
+                    throw new Error("Unable to retrieve source. The site may be down or blocking automated traffic.");
+                }
+            } catch (err) {
+                showError(err.message === "Failed to fetch" ? "Proxy Unavailable: Check connection or disable Ad-Blockers." : err.message);
+            }
+        }
+
+        function displayResult(html, url) {
+            currentSource = html;
+            addToHistory(url);
+            const highlighted = highlightHTML(html);
+            const lines = highlighted.split('\n');
+            lineCount.textContent = `${lines.length} LINES`;
+            codeDisplay.innerHTML = lines.map(line => `<span class="code-line">${line || ' '}</span>`).join('');
+            
+            resultCard.classList.remove('hidden');
+            setTimeout(() => {
+                mobileActions.classList.remove('translate-y-[200px]');
+                resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+            setLoading(false);
+        }
+
+        function highlightHTML(html) {
+            const escape = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            return escape(html)
+                .replace(/(&lt;!--.*?--&gt;)/gs, '<span class="hl-comm">$1</span>')
+                .replace(/(&lt;\/?[a-z1-6]+)/gi, '<span class="hl-tag">$1</span>')
+                .replace(/(\s)([a-z-]+)(=)/gi, '$1<span class="hl-attr">$2</span>$3')
+                .replace(/(=)(".*?")/g, '$1<span class="hl-val">$2</span>')
+                .replace(/(=)('.*?')/g, '$1<span class="hl-val">$2</span>');
+        }
+
+        function setLoading(isLoading) {
+            viewBtn.disabled = isLoading;
+            if (isLoading) {
+                btnIcon.classList.add('hidden');
+                spinner.classList.remove('hidden');
+                btnText.textContent = "Processing...";
+            } else {
+                btnIcon.classList.remove('hidden');
+                spinner.classList.add('hidden');
+                btnText.textContent = "Inspect Source";
+            }
+        }
+
+        function showError(msg) {
+            statusMsg.textContent = msg;
+            statusArea.classList.remove('hidden');
+            initialState.classList.remove('hidden');
+            setLoading(false);
+        }
+
+        let toastTimeout;
+        function showToast(msg) {
+            clearTimeout(toastTimeout);
+            document.getElementById('toastMsg').textContent = msg;
+            toast.classList.add('show');
+            toastTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        copyBtn.onclick = () => {
+            const el = document.createElement('textarea');
+            el.value = currentSource;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            showToast("Source code copied!");
+        };
+
+        downloadBtn.onclick = () => {
+            const blob = new Blob([currentSource], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "source_code.html";
+            a.click();
+            showToast("Download started!");
+        };
+
+        scrollTopBtn.onclick = () => {
+            resultArea.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        searchInput.oninput = (e) => {
+            const term = e.target.value.toLowerCase();
+            const lines = codeDisplay.querySelectorAll('.code-line');
+            lines.forEach(line => {
+                line.style.backgroundColor = term && line.textContent.toLowerCase().includes(term) ? '#fef9c3' : 'transparent';
+            });
+        };
+
+        viewBtn.onclick = fetchSource;
+        urlInput.onkeypress = (e) => { if (e.key === 'Enter') fetchSource(); };
+        renderHistory();
+    </script>
+</body>
+</html>
