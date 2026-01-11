@@ -85,4 +85,4 @@ engineMultiplier  // float
 
 
 
-![3D Model Viewer Screenshot](https://github.com/A-Santhosh-Hub/HTML/blob/main/SanStudio%20MiningEngine/SanStudio.png)
+![SanStudio MiningEngine Screenshot](https://github.com/A-Santhosh-Hub/HTML/blob/main/SanStudio%20MiningEngine/SanStudio.png)
