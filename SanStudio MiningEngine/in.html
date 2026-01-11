@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SanStudio Mining Engine</title>
+    <style>
+        :root {
+            --bg-dark: #000000;
+            --bg-panel: #11141d;
+            --bg-card: #1c202b;
+            --primary: #f3ba2f;
+            --primary-dim: #92752b;
+            --accent: #5e60ff;
+            --danger: #ff4a4a;
+            --success: #00e074;
+            --text-main: #ffffff;
+            --text-muted: #6f7682;
+            --font-stack: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --nav-height: 70px;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-stack);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- Animations --- */
+        @keyframes floatNum {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-100px) scale(1.2); }
+        }
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(243, 186, 47, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(243, 186, 47, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(243, 186, 47, 0); }
+        }
+        @keyframes coin-spin {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        /* --- Layout Utility --- */
+        .hidden { display: none !important; }
+        .view-container { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding-bottom: var(--nav-height); 
+            position: relative;
+        }
+        
+        /* --- Auth Screen --- */
+        #auth-layer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 999;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 2rem;
+            background: radial-gradient(circle at 50% 10%, #1c202b 0%, #000 90%);
+        }
+        .auth-logo { font-size: 5rem; margin-bottom: 20px; animation: coin-spin 3s infinite linear; }
+        .input-group { width: 100%; max-width: 320px; margin-bottom: 15px; }
+        .input-group input {
+            width: 100%; padding: 16px; border-radius: 12px;
+            background: var(--bg-card); border: 1px solid #333;
+            color: #fff; font-size: 1rem; outline: none;
+            transition: border-color 0.2s;
+        }
+        .input-group input:focus { border-color: var(--primary); }
+        .btn-main {
+            width: 100%; max-width: 320px; padding: 16px;
+            border-radius: 12px; border: none; font-weight: 700;
+            background: linear-gradient(90deg, #f3ba2f, #d4a01c);
+            color: #000; font-size: 1.1rem; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(243, 186, 47, 0.3);
+        }
+        .btn-main:active { transform: scale(0.98); }
+
+        /* --- Header --- */
+        .app-header {
+            padding: 15px 20px;
+            background: rgba(17, 20, 29, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 10;
+        }
+        .user-badge {
+            display: flex; align-items: center; gap: 10px;
+            background: var(--bg-card); padding: 5px 12px 5px 5px;
+            border-radius: 20px; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .user-avatar { 
+            width: 32px; height: 32px; border-radius: 50%; 
+            background: linear-gradient(135deg, #444, #222);
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* --- HUD Cards --- */
+        .hud-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+            padding: 15px 20px;
+        }
+        .stat-panel {
+            background: var(--bg-card); padding: 12px; border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.03);
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .stat-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-val { font-size: 1rem; font-weight: 700; color: #fff; margin-top: 4px; }
+        .stat-val.gold { color: var(--primary); }
+        .stat-val.blue { color: var(--accent); }
+
+        /* --- Main Mining View --- */
+        #view-mine {
+            display: flex; flex-direction: column; align-items: center;
+            padding-top: 20px;
+        }
+        .balance-hero {
+            text-align: center; margin-bottom: 30px;
+        }
+        .balance-amount {
+            font-size: 3rem; font-weight: 800;
+            background: linear-gradient(180deg, #fff, #bbb);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            font-variant-numeric: tabular-nums;
+        }
+        .balance-label { color: var(--text-muted); font-size: 0.9rem; }
+
+        .tap-engine {
+            width: 280px; height: 280px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #2a2f3d, #11141d);
+            border: 8px solid #252a35;
+            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; position: relative;
+            transition: transform 0.05s;
+            margin-bottom: auto;
+        }
+        .tap-engine:active { transform: scale(0.96); }
+        .hamster-core { font-size: 8rem; filter: drop-shadow(0 0 15px rgba(243, 186, 47, 0.2)); pointer-events: none; }
+        
+        /* Floating Decimals */
+        .float-digit {
+            position: absolute; color: #fff; font-weight: 800; font-size: 2rem;
+            pointer-events: none; animation: floatNum 0.8s ease-out forwards;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5); z-index: 50;
+        }
+
+        /* --- Exchange View --- */
+        .exchange-hero {
+            padding: 30px 20px; background: linear-gradient(180deg, rgba(94,96,255,0.1), transparent);
+            text-align: center;
+        }
+        .info-list { padding: 0 20px; }
+        .info-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .info-left { display: flex; align-items: center; gap: 10px; }
+        .info-icon { 
+            width: 36px; height: 36px; border-radius: 10px; 
+            background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; 
+        }
+
+        /* --- Upgrade Cards --- */
+        .upgrade-grid {
+            padding: 20px; display: grid; grid-template-columns: 1fr; gap: 15px;
+        }
+        .upgrade-item {
+            background: var(--bg-card); padding: 15px; border-radius: 16px;
+            display: flex; align-items: center; gap: 15px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.2s; position: relative; overflow: hidden;
+        }
+        .upgrade-item.locked { opacity: 0.5; filter: grayscale(1); pointer-events: none; }
+        .upgrade-item:active { transform: scale(0.98); background: #252a35; }
+        
+        .upg-icon { font-size: 2rem; }
+        .upg-info { flex: 1; }
+        .upg-name { font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
+        .upg-effect { font-size: 0.8rem; color: var(--success); }
+        
+        .upg-buy { text-align: right; }
+        .upg-cost { font-weight: 700; color: var(--primary); font-size: 0.95rem; }
+        .upg-lvl { font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; }
+
+        /* --- Stats/Graph Mock --- */
+        .graph-mock {
+            height: 150px; width: 100%; margin: 20px 0;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 40px,
+                rgba(255,255,255,0.02) 40px,
+                rgba(255,255,255,0.02) 41px
+            );
+            border-bottom: 2px solid #333; border-left: 2px solid #333;
+            position: relative;
+        }
+        .graph-line {
+            position: absolute; bottom: 0; left: 0; right: 0; top: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(94, 96, 255, 0.2) 100%);
+            clip-path: polygon(0 100%, 10% 80%, 20% 85%, 30% 60%, 40% 65%, 50% 40%, 60% 50%, 70% 30%, 80% 35%, 90% 10%, 100% 20%, 100% 100%);
+        }
+
+        /* --- Bottom Navigation --- */
+        .nav-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: var(--nav-height);
+            background: #151922; border-top: 1px solid #222;
+            display: flex; justify-content: space-around; align-items: center;
+            z-index: 100;
+        }
+        .nav-btn {
+            background: none; border: none; color: var(--text-muted);
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            font-size: 0.7rem; cursor: pointer; padding: 10px; width: 25%;
+        }
+        .nav-btn.active { color: var(--text-main); }
+        .nav-btn.active svg { fill: var(--text-main); stroke: var(--text-main); }
+        .nav-icon { width: 24px; height: 24px; fill: currentColor; }
+
+        /* --- Toast --- */
+        #toast-container {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 2000; pointer-events: none;
+        }
+        .toast {
+            background: rgba(30, 30, 30, 0.95); color: #fff; padding: 12px 24px;
+            border-radius: 30px; margin-bottom: 10px; font-size: 0.9rem;
+            border: 1px solid #444; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            animation: slideUp 0.3s ease-out; pointer-events: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Auth Layer -->
+    <div id="auth-layer">
+        <div class="auth-logo">🤖</div>
+        <h2 style="margin-bottom: 5px;">SanStudio Engine</h2>
+        <p style="color:var(--text-muted); margin-bottom: 30px;">Decentralized Mining Sim</p>
+        
+        <div class="input-group">
+            <input type="text" id="username" placeholder="Enter Codename" maxlength="15">
+        </div>
+        <button class="btn-main" onclick="Auth.login()">Initialize Connection</button>
+        <p style="margin-top:20px; font-size:0.8rem; color:var(--text-muted); cursor:pointer;" onclick="Auth.reset()">Reset Data</p>
+
+        <!-- Developer Credit -->
+        <div style="margin-top: 30px; font-size: 0.85rem; color: var(--text-muted);">
+            Developed By <a href="https://sanstudio.neocities.org/" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: bold;">SanStudio</a>
+        </div>
+    </div>
+
+    <!-- Main App Shell (Hidden initially) -->
+    <div id="app-shell" class="hidden" style="height: 100%; display: flex; flex-direction: column;">
+        
+        <!-- Top Bar -->
+        <header class="app-header">
+            <div class="user-badge">
+                <div class="user-avatar">👤</div>
+                <span style="font-weight: 600; font-size: 0.9rem;" id="ui-username">User</span>
+            </div>
+            <div style="font-size: 0.8rem; font-family: monospace; color: var(--primary);">
+                LIVE <span style="display:inline-block; width:6px; height:6px; background:var(--success); border-radius:50%; margin-left:4px;"></span>
+            </div>
+        </header>
+
+        <!-- Viewport -->
+        <div id="viewport" class="view-container">
+            
+            <!-- VIEW: MINE -->
+            <div id="view-mine" class="view-section">
+                <!-- HUD -->
+                <div class="hud-grid" style="width: 100%;">
+                    <div class="stat-panel">
+                        <span class="stat-label">Profit / Tap</span>
+                        <span class="stat-val gold" id="hud-tap-profit">+1.00</span>
+                    </div>
+                    <div class="stat-panel">
+                        <span class="stat-label">Profit / Hour</span>
+                        <span class="stat-val blue" id="hud-pph">0.00</span>
+                    </div>
+                </div>
+
+                <!-- Main Balance -->
+                <div class="balance-hero">
+                    <div class="balance-label">Total Balance</div>
+                    <div class="balance-amount">
+                        <span id="ui-balance">0.000</span>
+                    </div>
+                </div>
+
+                <!-- Tap Button -->
+                <div class="tap-engine" id="tap-btn">
+                    <div class="hamster-core">🤖</div>
+                </div>
+
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 20px;">
+                    Energy: <span id="ui-energy">1000</span> / <span id="ui-max-energy">1000</span>
+                </div>
+
+                <!-- Developer Credit (In-Game) -->
+                <div style="margin-top: 15px; margin-bottom: 10px; font-size: 0.7rem; color: var(--text-muted); opacity: 0.6;">
+                    Developed By <a href="https://sanstudio.neocities.org/" target="_blank" style="color: var(--text-main); text-decoration: none;">SanStudio</a>
+                </div>
+            </div>
+
+            <!-- VIEW: UPGRADES -->
+            <div id="view-upgrades" class="view-section hidden">
+                <div class="exchange-hero">
+                    <h2>System Upgrades</h2>
+                    <p style="color: var(--text-muted);">Boost your mining efficiency</p>
+                </div>
+                <div class="upgrade-grid" id="upgrade-list">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- VIEW: EXCHANGE -->
+            <div id="view-exchange" class="view-section hidden">
+                <div class="exchange-hero">
+                    <h2>Global Exchange</h2>
+                    <div style="font-size: 2rem; font-weight: 800; margin: 10px 0;">
+                        <span style="color:var(--text-muted); font-size:1rem;">NET WORTH:</span> 
+                        <span id="ex-networth">0.00</span>
+                    </div>
+                </div>
+                <div class="info-list">
+                    <div class="info-row">
+                        <div class="info-left">
+                            <div class="info-icon">⚡</div>
+                            <div>
+                                <div style="font-weight:700;">Engine Speed</div>
+                                <div style="font-size:0.8rem; color:var(--text-muted);">Mining Multiplier</div>
+                            </div>
+                        </div>
+                        <div style="font-weight:700;" id="ex-multiplier">1.0x</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-left">
+                            <div class="info-icon">🪙</div>
+                            <div>
+                                <div style="font-weight:700;">Tap Efficiency</div>
+                                <div style="font-size:0.8rem; color:var(--text-muted);">Coins per click</div>
+                            </div>
+                        </div>
+                        <div style="font-weight:700;" id="ex-tpc">0.00</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-left">
+                            <div class="info-icon">📈</div>
+                            <div>
+                                <div style="font-weight:700;">Passive Flow</div>
+                                <div style="font-size:0.8rem; color:var(--text-muted);">Coins per second</div>
+                            </div>
+                        </div>
+                        <div style="font-weight:700;" id="ex-pps">0.00</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: STATS -->
+            <div id="view-stats" class="view-section hidden">
+                <div class="exchange-hero" style="background: linear-gradient(180deg, rgba(255, 74, 74, 0.1), transparent);">
+                    <h2>Engine Stats</h2>
+                    <p style="color: var(--text-muted);">Real-time monitoring</p>
+                </div>
+                
+                <div class="graph-mock">
+                    <div class="graph-line"></div>
+                </div>
+
+                <div class="info-list">
+                    <div class="info-row">
+                        <div class="info-left">⏱️ Uptime Session</div>
+                        <div id="stat-uptime">00:00:00</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-left">👆 Total Taps</div>
+                        <div id="stat-taps">0</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-left">💰 Lifetime Mined</div>
+                        <div id="stat-lifetime">0.00</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Toast Container -->
+        <div id="toast-container"></div>
+
+        <!-- Bottom Nav -->
+        <nav class="nav-bar">
+            <button class="nav-btn active" onclick="UI.navigate('mine')">
+                <div class="nav-icon">⛏️</div>
+                <span>Mine</span>
+            </button>
+            <button class="nav-btn" onclick="UI.navigate('upgrades')">
+                <div class="nav-icon">🚀</div>
+                <span>Boost</span>
+            </button>
+            <button class="nav-btn" onclick="UI.navigate('exchange')">
+                <div class="nav-icon">🏦</div>
+                <span>Exchange</span>
+            </button>
+            <button class="nav-btn" onclick="UI.navigate('stats')">
+                <div class="nav-icon">📊</div>
+                <span>Stats</span>
+            </button>
+        </nav>
+    </div>
+
+    <script>
+        /**
+         * ------------------------------------------------------------------
+         * CONFIGURATION & DATA DEFINITIONS
+         * ------------------------------------------------------------------
+         */
+        const GAME_CONFIG = {
+            energyRegen: 3,
+            saveInterval: 3000,
+            version: '1.2.0'
+        };
+
+        const UPGRADES_DB = [
+            { id: 'u1', name: 'Better Mouse', baseCost: 15, growth: 1.5, type: 'tap', value: 0.5, icon: '🖱️', desc: 'Increases tap profit' },
+            { id: 'u2', name: 'GPU Mining', baseCost: 100, growth: 1.4, type: 'passive', value: 1.5, icon: '📼', desc: 'Basic passive income' },
+            { id: 'u3', name: 'Energy Drink', baseCost: 200, growth: 1.6, type: 'energy', value: 500, icon: '⚡', desc: 'Increases max energy' },
+            { id: 'u4', name: 'ASIC Miner', baseCost: 1000, growth: 1.35, type: 'passive', value: 12.5, icon: '🖥️', desc: 'Advanced passive mining' },
+            { id: 'u5', name: 'Network Node', baseCost: 5000, growth: 1.8, type: 'multiplier', value: 0.1, icon: '🌐', desc: 'Global profit multiplier +10%' },
+            { id: 'u6', name: 'Quantum Core', baseCost: 25000, growth: 1.5, type: 'passive', value: 150.0, icon: '⚛️', desc: 'Industrial grade mining' },
+            { id: 'u7', name: 'CEO Desk', baseCost: 100000, growth: 2.0, type: 'tap', value: 50.0, icon: '👔', desc: 'Executive tap power' }
+        ];
+
+        /**
+         * ------------------------------------------------------------------
+         * ENGINE MODULE (Logic & Math)
+         * ------------------------------------------------------------------
+         */
+        class GameEngine {
+            constructor() {
+                this.state = this.getInitialState();
+                this.sessionStart = Date.now();
+                this.tapsSession = 0;
+            }
+
+            getInitialState() {
+                return {
+                    username: 'User',
+                    balance: 0.000,
+                    lifetime: 0.000,
+                    totalTaps: 0,
+                    energy: 1000,
+                    maxEnergy: 1000,
+                    lastSave: Date.now(),
+                    upgrades: {} // { id: level }
+                };
+            }
+
+            // Core Calculators
+            getMultiplier() {
+                let mult = 1.0;
+                // Calculate multiplier from upgrades
+                const level = this.state.upgrades['u5'] || 0; 
+                const card = UPGRADES_DB.find(u => u.id === 'u5');
+                if(level > 0) mult += (level * card.value);
+                return mult;
+            }
+
+            getTapProfit() {
+                let base = 1.0;
+                UPGRADES_DB.filter(u => u.type === 'tap').forEach(u => {
+                    const lvl = this.state.upgrades[u.id] || 0;
+                    base += (lvl * u.value);
+                });
+                return base * this.getMultiplier();
+            }
+
+            getPassivePerSecond() {
+                let base = 0.0;
+                UPGRADES_DB.filter(u => u.type === 'passive').forEach(u => {
+                    const lvl = this.state.upgrades[u.id] || 0;
+                    base += (lvl * u.value);
+                });
+                return base * this.getMultiplier();
+            }
+
+            // Actions
+            tap() {
+                const profit = this.getTapProfit();
+                const cost = profit; // Energy cost logic roughly 1:1 or fixed? Let's make it equal to profit to balance.
+                
+                // For gameplay feel, energy cost is usually fixed or slightly scaled.
+                const energyCost = 1 + (profit * 0.1); 
+
+                if (this.state.energy < energyCost) return 0;
+
+                this.state.energy -= energyCost;
+                this.addBalance(profit);
+                this.state.totalTaps++;
+                this.tapsSession++;
+                return profit;
+            }
+
+            addBalance(amount) {
+                this.state.balance += amount;
+                this.state.lifetime += amount;
+            }
+
+            buyUpgrade(id) {
+                const card = UPGRADES_DB.find(u => u.id === id);
+                const currentLevel = this.state.upgrades[id] || 0;
+                const cost = card.baseCost * Math.pow(card.growth, currentLevel);
+
+                if (this.state.balance >= cost) {
+                    this.state.balance -= cost;
+                    this.state.upgrades[id] = currentLevel + 1;
+                    
+                    // Immediate effects for non-calculated types
+                    if (card.type === 'energy') {
+                        this.state.maxEnergy += card.value;
+                        this.state.energy = this.state.maxEnergy; // Refill on upgrade
+                    }
+                    return true;
+                }
+                return false;
+            }
+
+            // Tick Logic
+            tick(dtSeconds) {
+                // Passive Income
+                const pps = this.getPassivePerSecond();
+                if (pps > 0) {
+                    this.addBalance(pps * dtSeconds);
+                }
+
+                // Energy Regen
+                if (this.state.energy < this.state.maxEnergy) {
+                    this.state.energy = Math.min(this.state.maxEnergy, this.state.energy + (GAME_CONFIG.energyRegen * dtSeconds));
+                }
+            }
+
+            loadState(savedState) {
+                if (!savedState) return;
+                
+                // Merge save with initial to ensure new fields exist
+                this.state = { ...this.getInitialState(), ...savedState };
+
+                // Calculate Offline Earnings
+                const now = Date.now();
+                const secondsAway = (now - this.state.lastSave) / 1000;
+                if (secondsAway > 10) { // Only if away for more than 10s
+                    const pps = this.getPassivePerSecond();
+                    const earned = pps * secondsAway;
+                    if (earned > 0) {
+                        this.addBalance(earned);
+                        setTimeout(() => UI.showToast(`Offline Income: +${earned.toFixed(2)}`), 1000);
+                    }
+                }
+            }
+        }
+
+        const Engine = new GameEngine();
+
+        /**
+         * ------------------------------------------------------------------
+         * UI MODULE (DOM & Visuals)
+         * ------------------------------------------------------------------
+         */
+        const UI = {
+            els: {
+                balance: document.getElementById('ui-balance'),
+                tapBtn: document.getElementById('tap-btn'),
+                energy: document.getElementById('ui-energy'),
+                maxEnergy: document.getElementById('ui-max-energy'),
+                hudTap: document.getElementById('hud-tap-profit'),
+                hudPPH: document.getElementById('hud-pph'),
+                upgradeList: document.getElementById('upgrade-list'),
+                views: document.querySelectorAll('.view-section'),
+                navBtns: document.querySelectorAll('.nav-btn'),
+                // Exchange
+                exNet: document.getElementById('ex-networth'),
+                exMult: document.getElementById('ex-multiplier'),
+                exTpc: document.getElementById('ex-tpc'),
+                exPps: document.getElementById('ex-pps'),
+                // Stats
+                statUptime: document.getElementById('stat-uptime'),
+                statTaps: document.getElementById('stat-taps'),
+                statLife: document.getElementById('stat-lifetime')
+            },
+
+            init() {
+                // Bind Tap
+                this.els.tapBtn.addEventListener('pointerdown', (e) => {
+                    const earned = Engine.tap();
+                    if (earned > 0) {
+                        this.spawnFloater(e.clientX, e.clientY, `+${earned.toFixed(2)}`);
+                        this.triggerHaptic();
+                        this.animateButton();
+                    } else {
+                        this.spawnFloater(e.clientX, e.clientY, "No Energy!", true);
+                    }
+                    this.updateView();
+                });
+
+                // Prevent context menu
+                window.oncontextmenu = function(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return false;
+                };
+            },
+
+            navigate(viewId) {
+                // Hide all
+                this.els.views.forEach(el => el.classList.add('hidden'));
+                this.els.navBtns.forEach(btn => btn.classList.remove('active'));
+
+                // Show target
+                document.getElementById(`view-${viewId}`).classList.remove('hidden');
+                
+                // Active nav state
+                const idx = ['mine', 'upgrades', 'exchange', 'stats'].indexOf(viewId);
+                this.els.navBtns[idx].classList.add('active');
+
+                if (viewId === 'upgrades') this.renderUpgrades();
+            },
+
+            renderUpgrades() {
+                this.els.upgradeList.innerHTML = '';
+                UPGRADES_DB.forEach(u => {
+                    const level = Engine.state.upgrades[u.id] || 0;
+                    const cost = u.baseCost * Math.pow(u.growth, level);
+                    const canAfford = Engine.state.balance >= cost;
+
+                    const el = document.createElement('div');
+                    el.className = `upgrade-item ${!canAfford ? '' : ''}`; // We don't disable visually, just feedback
+                    el.onclick = () => {
+                        if (Engine.buyUpgrade(u.id)) {
+                            this.showToast(`Purchased ${u.name}!`);
+                            this.renderUpgrades(); // Re-render to update costs
+                        } else {
+                            this.showToast("Insufficient Funds");
+                        }
+                    };
+
+                    el.innerHTML = `
+                        <div class="upg-icon">${u.icon}</div>
+                        <div class="upg-info">
+                            <div class="upg-name">${u.name}</div>
+                            <div class="upg-effect">${u.desc}</div>
+                        </div>
+                        <div class="upg-buy">
+                            <div class="upg-cost">${cost.toFixed(0)}</div>
+                            <div class="upg-lvl">Lvl ${level}</div>
+                        </div>
+                    `;
+                    this.els.upgradeList.appendChild(el);
+                });
+            },
+
+            updateView() {
+                // Main Mining
+                this.els.balance.innerText = Engine.state.balance.toFixed(3);
+                this.els.energy.innerText = Math.floor(Engine.state.energy);
+                this.els.maxEnergy.innerText = Math.floor(Engine.state.maxEnergy);
+                this.els.hudTap.innerText = '+' + Engine.getTapProfit().toFixed(2);
+                
+                const pps = Engine.getPassivePerSecond();
+                this.els.hudPPH.innerText = (pps * 3600).toFixed(0);
+
+                // Exchange
+                this.els.exNet.innerText = Engine.state.balance.toFixed(2);
+                this.els.exMult.innerText = Engine.getMultiplier().toFixed(1) + 'x';
+                this.els.exTpc.innerText = Engine.getTapProfit().toFixed(2);
+                this.els.exPps.innerText = pps.toFixed(2);
+
+                // Stats
+                const uptime = Math.floor((Date.now() - Engine.sessionStart) / 1000);
+                const h = Math.floor(uptime/3600).toString().padStart(2,'0');
+                const m = Math.floor((uptime%3600)/60).toString().padStart(2,'0');
+                const s = (uptime%60).toString().padStart(2,'0');
+                this.els.statUptime.innerText = `${h}:${m}:${s}`;
+                this.els.statTaps.innerText = Engine.state.totalTaps;
+                this.els.statLife.innerText = Engine.state.lifetime.toFixed(2);
+            },
+
+            spawnFloater(x, y, text, isError = false) {
+                const el = document.createElement('div');
+                el.className = 'float-digit';
+                if(isError) el.style.color = '#ff4a4a';
+                el.innerText = text;
+                el.style.left = (x - 20) + 'px';
+                el.style.top = (y - 40) + 'px';
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 800);
+            },
+
+            animateButton() {
+                this.els.tapBtn.style.transform = 'scale(0.95)';
+                setTimeout(() => this.els.tapBtn.style.transform = 'scale(1)', 50);
+            },
+
+            triggerHaptic() {
+                if (navigator.vibrate) navigator.vibrate(10);
+            },
+
+            showToast(msg) {
+                const con = document.getElementById('toast-container');
+                const el = document.createElement('div');
+                el.className = 'toast';
+                el.innerText = msg;
+                con.appendChild(el);
+                setTimeout(() => {
+                    el.style.opacity = '0';
+                    setTimeout(() => el.remove(), 300);
+                }, 2000);
+            }
+        };
+
+        /**
+         * ------------------------------------------------------------------
+         * AUTH & SYSTEM MANAGER
+         * ------------------------------------------------------------------
+         */
+        const Auth = {
+            init() {
+                const savedUser = localStorage.getItem('hamster_user');
+                if (savedUser) {
+                    const data = JSON.parse(localStorage.getItem(`hamster_data_${savedUser}`));
+                    Engine.loadState(data);
+                    this.enterApp(savedUser);
+                }
+            },
+
+            login() {
+                const username = document.getElementById('username').value.trim();
+                if (!username) return alert('Enter a name');
+
+                // Load or Create
+                const savedData = localStorage.getItem(`hamster_data_${username}`);
+                if (savedData) {
+                    Engine.loadState(JSON.parse(savedData));
+                } else {
+                    Engine.state.username = username;
+                }
+
+                localStorage.setItem('hamster_user', username);
+                this.enterApp(username);
+            },
+
+            enterApp(username) {
+                document.getElementById('auth-layer').classList.add('hidden');
+                document.getElementById('app-shell').classList.remove('hidden');
+                document.getElementById('ui-username').innerText = username;
+                UI.init();
+                this.startGameLoop();
+            },
+
+            reset() {
+                if(confirm('Clear all data?')) {
+                    localStorage.clear();
+                    location.reload();
+                }
+            },
+
+            startGameLoop() {
+                let lastTime = Date.now();
+
+                const loop = () => {
+                    const now = Date.now();
+                    const dt = (now - lastTime) / 1000;
+                    lastTime = now;
+
+                    Engine.tick(dt);
+                    UI.updateView();
+                    requestAnimationFrame(loop);
+                };
+                loop();
+
+                // Auto Save
+                setInterval(() => {
+                    if (Engine.state.username) {
+                        Engine.state.lastSave = Date.now();
+                        localStorage.setItem(`hamster_data_${Engine.state.username}`, JSON.stringify(Engine.state));
+                    }
+                }, GAME_CONFIG.saveInterval);
+            }
+        };
+
+        // Bootstrap
+        window.onload = () => Auth.init();
+
+    </script>
+</body>
+</html>
