@@ -3,7 +3,7 @@
 A fully functional **Hamster-Kombat–inspired Tap Mining Web Application** built using only **HTML, CSS, and Vanilla JavaScript**.  
 This is not a prototype — it is a **real mining-style engine** with live decimals, passive income, upgrades, exchange view, and persistent progress.
 
-The app feels like a **real crypto mining game**, not a website.
+The app feels like a **real crypto mining game**, not a website. Live Demo : https://sanstudio.neocities.org/SanStudio%20MiningEngine
 
 ---
 
