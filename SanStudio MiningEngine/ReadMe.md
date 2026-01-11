@@ -80,3 +80,9 @@ balance           // float
 profitPerTap      // float
 profitPerSecond   // float
 engineMultiplier  // float
+```
+
+
+
+
+![3D Model Viewer Screenshot](https://github.com/A-Santhosh-Hub/HTML/blob/main/SanStudio%20MiningEngine/SanStudio.png)
