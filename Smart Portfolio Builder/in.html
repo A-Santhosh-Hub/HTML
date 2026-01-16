@@ -1,1 +1,728 @@
-Smart Portfolio Builder
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Portfolio Builder | SanStudio</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        mono: ['Space Grotesk', 'monospace'],
+                    },
+                    colors: {
+                        glass: 'rgba(255, 255, 255, 0.05)',
+                        glassBorder: 'rgba(255, 255, 255, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Animations & Utilities */
+        :root {
+            --accent: #7c3aed;
+        }
+
+        body {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 4px;
+        }
+
+        /* Glassmorphism Classes */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        /* Floating Inputs */
+        .floating-input-group {
+            position: relative;
+        }
+        .floating-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 1rem 0.75rem 0.5rem;
+            width: 100%;
+            border-radius: 0.5rem;
+            transition: all 0.3s;
+        }
+        .floating-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(255,255,255,0.08);
+        }
+        .floating-label {
+            position: absolute;
+            top: 50%;
+            left: 0.75rem;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 0.875rem;
+            pointer-events: none;
+            transition: all 0.3s;
+        }
+        .floating-input:focus ~ .floating-label,
+        .floating-input:not(:placeholder-shown) ~ .floating-label {
+            top: 0.5rem;
+            font-size: 0.7rem;
+            color: var(--accent);
+        }
+
+        /* Typing Animation */
+        .typing-cursor::after {
+            content: '|';
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Glowing Text */
+        .glow-text {
+            text-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent);
+        }
+
+        /* Tilt Effect Styles */
+        .tilt-card {
+            transform-style: preserve-3d;
+            transform: perspective(1000px);
+        }
+        .tilt-inner {
+            transform: translateZ(20px);
+        }
+
+        /* Color Picker Radio */
+        .color-radio:checked + label {
+            ring: 2px solid white;
+            transform: scale(1.2);
+        }
+
+        /* SanStudio Branding */
+        .san-footer-link {
+            position: relative;
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .san-footer-link:hover {
+            color: var(--accent);
+            text-shadow: 0 0 8px var(--accent);
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col md:flex-row overflow-hidden">
+
+    <!-- LEFT PANEL: EDITOR -->
+    <aside class="w-full md:w-1/3 lg:w-1/4 h-full glass-panel flex flex-col z-20 shadow-2xl relative">
+        <div class="p-5 border-b border-white/10 flex justify-between items-center bg-slate-900/50">
+            <div>
+                <h1 class="font-mono text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+                    <i class="fas fa-bolt mr-2 text-yellow-400"></i>Portfolio<span class="text-white">Builder</span>
+                </h1>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="resetData()" class="text-xs bg-red-500/20 hover:bg-red-500/40 text-red-400 px-2 py-1 rounded transition">Reset</button>
+                <button onclick="exportPortfolio()" class="text-xs bg-green-500/20 hover:bg-green-500/40 text-green-400 px-2 py-1 rounded transition">Export</button>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-5 space-y-6" id="editor-panel">
+            
+            <!-- Settings -->
+            <div class="space-y-3">
+                <h3 class="text-xs uppercase tracking-widest text-slate-500 font-bold">Theme</h3>
+                <div class="flex gap-3">
+                    <div class="flex items-center gap-2">
+                        <input type="radio" name="accent" value="#3b82f6" class="hidden color-radio" id="c-blue" onchange="updateSetting('accentColor', '#3b82f6')">
+                        <label for="c-blue" class="w-6 h-6 rounded-full bg-blue-500 cursor-pointer block border border-transparent transition"></label>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="radio" name="accent" value="#7c3aed" class="hidden color-radio" id="c-purple" onchange="updateSetting('accentColor', '#7c3aed')">
+                        <label for="c-purple" class="w-6 h-6 rounded-full bg-purple-600 cursor-pointer block border border-transparent transition"></label>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="radio" name="accent" value="#10b981" class="hidden color-radio" id="c-green" onchange="updateSetting('accentColor', '#10b981')">
+                        <label for="c-green" class="w-6 h-6 rounded-full bg-emerald-500 cursor-pointer block border border-transparent transition"></label>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="radio" name="accent" value="#f43f5e" class="hidden color-radio" id="c-rose" onchange="updateSetting('accentColor', '#f43f5e')">
+                        <label for="c-rose" class="w-6 h-6 rounded-full bg-rose-500 cursor-pointer block border border-transparent transition"></label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Section -->
+            <div class="space-y-4">
+                <h3 class="text-xs uppercase tracking-widest text-slate-500 font-bold">Profile</h3>
+                
+                <div class="floating-input-group">
+                    <input type="text" id="inp-name" class="floating-input" placeholder=" " oninput="updateProfile('name', this.value)">
+                    <label class="floating-label">Full Name</label>
+                </div>
+
+                <div class="floating-input-group">
+                    <input type="text" id="inp-title" class="floating-input" placeholder=" " oninput="updateProfile('title', this.value)">
+                    <label class="floating-label">Role / Title</label>
+                </div>
+
+                <div class="floating-input-group">
+                    <textarea id="inp-about" class="floating-input h-24 resize-none" placeholder=" " oninput="updateProfile('about', this.value)"></textarea>
+                    <label class="floating-label">About Me</label>
+                </div>
+                
+                <div class="border border-dashed border-slate-700 rounded-lg p-3 text-center cursor-pointer hover:bg-white/5 transition relative">
+                    <input type="file" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer" accept="image/*" onchange="handleImageUpload(this)">
+                    <div class="text-sm text-slate-400">
+                        <i class="fas fa-cloud-upload-alt mb-1"></i><br>
+                        Upload Photo
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Links -->
+            <div class="space-y-3">
+                <h3 class="text-xs uppercase tracking-widest text-slate-500 font-bold">Socials</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" placeholder="GitHub URL" class="bg-slate-800/50 border border-slate-700 rounded px-2 py-1 text-sm text-white focus:border-purple-500 outline-none" oninput="updateSocial('github', this.value)" id="inp-github">
+                    <input type="text" placeholder="LinkedIn URL" class="bg-slate-800/50 border border-slate-700 rounded px-2 py-1 text-sm text-white focus:border-purple-500 outline-none" oninput="updateSocial('linkedin', this.value)" id="inp-linkedin">
+                    <input type="text" placeholder="Email" class="bg-slate-800/50 border border-slate-700 rounded px-2 py-1 text-sm text-white focus:border-purple-500 outline-none" oninput="updateSocial('email', this.value)" id="inp-email">
+                    <input type="text" placeholder="Website" class="bg-slate-800/50 border border-slate-700 rounded px-2 py-1 text-sm text-white focus:border-purple-500 outline-none" oninput="updateSocial('website', this.value)" id="inp-website">
+                </div>
+            </div>
+
+            <!-- Skills -->
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xs uppercase tracking-widest text-slate-500 font-bold">Skills</h3>
+                    <button onclick="addSkill()" class="text-xs bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-white"><i class="fas fa-plus"></i></button>
+                </div>
+                <div id="skills-list" class="space-y-2">
+                    <!-- Dynamic Skills -->
+                </div>
+            </div>
+
+            <!-- Projects -->
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xs uppercase tracking-widest text-slate-500 font-bold">Projects</h3>
+                    <button onclick="addProject()" class="text-xs bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-white"><i class="fas fa-plus"></i></button>
+                </div>
+                <div id="projects-list" class="space-y-4">
+                    <!-- Dynamic Projects -->
+                </div>
+            </div>
+
+             <!-- Education -->
+             <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xs uppercase tracking-widest text-slate-500 font-bold">Education</h3>
+                    <button onclick="addEducation()" class="text-xs bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-white"><i class="fas fa-plus"></i></button>
+                </div>
+                <div id="education-list" class="space-y-4">
+                    <!-- Dynamic Education -->
+                </div>
+            </div>
+
+        </div>
+
+        <div class="p-4 border-t border-white/10 text-center text-xs text-slate-500">
+            Built for 2026 Web
+        </div>
+    </aside>
+
+    <!-- RIGHT PANEL: PREVIEW -->
+    <main class="flex-1 bg-black relative overflow-y-auto" id="preview-container">
+        
+        <!-- Background Elements -->
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
+            <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[100px]" id="bg-glow-1"></div>
+            <div class="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[100px]" id="bg-glow-2"></div>
+        </div>
+
+        <!-- Portfolio Content -->
+        <div id="portfolio-preview" class="relative z-10 max-w-5xl mx-auto p-6 md:p-12 space-y-20 min-h-screen flex flex-col">
+            
+            <!-- Navbar -->
+            <nav class="flex justify-between items-center animate-fade-in-down">
+                <div class="font-mono text-2xl font-bold tracking-tighter" id="prev-logo">
+                    <!-- Initials generated by JS -->
+                </div>
+                <div class="flex gap-4" id="prev-socials-top">
+                    <!-- Icons -->
+                </div>
+            </nav>
+
+            <!-- Hero Section -->
+            <section class="flex flex-col-reverse md:flex-row items-center gap-10 pt-10">
+                <div class="flex-1 space-y-4 text-center md:text-left">
+                    <div class="inline-block px-3 py-1 rounded-full bg-white/10 text-xs font-mono tracking-wide text-[var(--accent)] border border-white/10">
+                        Hello, I am
+                    </div>
+                    <h1 class="text-5xl md:text-7xl font-bold leading-tight">
+                        <span id="prev-name" class="bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400"></span>
+                    </h1>
+                    <h2 class="text-xl md:text-2xl text-slate-400 font-mono">
+                        <span id="prev-title" class="typing-cursor text-[var(--accent)]"></span>
+                    </h2>
+                    <p class="text-slate-400 max-w-lg mx-auto md:mx-0 leading-relaxed" id="prev-about">
+                    </p>
+                    <div class="pt-4 flex gap-4 justify-center md:justify-start">
+                        <a href="#projects" class="px-6 py-3 bg-[var(--accent)] text-white rounded-lg font-bold hover:opacity-90 transition shadow-lg shadow-[var(--accent)]/50">View Work</a>
+                        <a href="#contact" class="px-6 py-3 border border-white/20 hover:bg-white/10 rounded-lg font-bold transition">Contact</a>
+                    </div>
+                </div>
+                <div class="w-48 h-48 md:w-80 md:h-80 relative group">
+                    <div class="absolute inset-0 bg-[var(--accent)] rounded-2xl rotate-6 opacity-50 group-hover:rotate-12 transition duration-500"></div>
+                    <img id="prev-photo" src="https://via.placeholder.com/300" class="w-full h-full object-cover rounded-2xl relative z-10 border-2 border-white/20 shadow-2xl grayscale group-hover:grayscale-0 transition duration-500">
+                </div>
+            </section>
+
+            <!-- Skills Section -->
+            <section>
+                <h3 class="text-2xl font-bold mb-8 flex items-center gap-2">
+                    <span class="text-[var(--accent)]">#</span> Skills
+                </h3>
+                <div class="flex flex-wrap gap-3" id="prev-skills">
+                    <!-- Rendered Skills -->
+                </div>
+            </section>
+
+             <!-- Education Section -->
+             <section>
+                <h3 class="text-2xl font-bold mb-8 flex items-center gap-2">
+                    <span class="text-[var(--accent)]">#</span> Education
+                </h3>
+                <div class="space-y-4" id="prev-education">
+                    <!-- Rendered Education -->
+                </div>
+            </section>
+
+            <!-- Projects Section -->
+            <section id="projects">
+                <h3 class="text-2xl font-bold mb-8 flex items-center gap-2">
+                    <span class="text-[var(--accent)]">#</span> Selected Works
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="prev-projects">
+                    <!-- Rendered Projects -->
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="mt-auto py-10 border-t border-white/10 text-center space-y-4" id="contact">
+                <div class="flex justify-center gap-6 text-xl" id="prev-socials-bottom">
+                    <!-- Bottom Socials -->
+                </div>
+                <p class="text-slate-500 text-sm">
+                    &copy; 2026 <span id="prev-name-footer"></span>. All rights reserved.
+                </p>
+                <div class="pt-4 text-xs font-mono">
+                    <a href="https://sanstudio.neocities.org/" target="_blank" class="san-footer-link">
+                        Developed By <span class="glow-text">SanStudio</span>
+                    </a>
+                </div>
+            </footer>
+        </div>
+    </main>
+
+    <script>
+        // --- DATA STRUCTURE ---
+        const defaultData = {
+            profile: {
+                name: "Alex Designer",
+                title: "Creative Developer",
+                photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
+                about: "I craft digital experiences that blend aesthetics with functionality. Obsessed with clean code and pixel-perfect design."
+            },
+            skills: [
+                { id: 1, name: "JavaScript", level: 90 },
+                { id: 2, name: "React", level: 85 },
+                { id: 3, name: "Tailwind CSS", level: 95 },
+                { id: 4, name: "UI/UX", level: 80 }
+            ],
+            education: [
+                { id: 1, institute: "Tech University", course: "B.Sc Computer Science", year: "2023 - 2026" }
+            ],
+            projects: [
+                { id: 1, title: "NeoBank App", image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", description: "A futuristic banking dashboard with real-time crypto tracking.", link: "#" },
+                { id: 2, title: "AI Image Gen", image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", description: "Generative AI wrapper using OpenAI API for custom art.", link: "#" }
+            ],
+            socialLinks: {
+                github: "https://github.com",
+                linkedin: "https://linkedin.com",
+                website: "https://mysite.com",
+                email: "mailto:hello@alex.com"
+            },
+            settings: {
+                theme: "dark",
+                accentColor: "#7c3aed"
+            }
+        };
+
+        let portfolioData = JSON.parse(localStorage.getItem('smartPortfolioData')) || defaultData;
+
+        // --- CORE FUNCTIONS ---
+
+        function init() {
+            renderForm();
+            renderPreview();
+            applySettings();
+        }
+
+        function saveData() {
+            localStorage.setItem('smartPortfolioData', JSON.stringify(portfolioData));
+            renderPreview();
+            applySettings();
+        }
+
+        function resetData() {
+            if(confirm("Reset all data to default?")) {
+                portfolioData = JSON.parse(JSON.stringify(defaultData)); // Deep copy
+                saveData();
+                renderForm();
+            }
+        }
+
+        function updateProfile(key, value) {
+            portfolioData.profile[key] = value;
+            saveData();
+        }
+
+        function updateSocial(key, value) {
+            portfolioData.socialLinks[key] = value;
+            saveData();
+        }
+
+        function updateSetting(key, value) {
+            portfolioData.settings[key] = value;
+            saveData();
+        }
+
+        function applySettings() {
+            const root = document.documentElement;
+            root.style.setProperty('--accent', portfolioData.settings.accentColor);
+            
+            // Update Glows
+            document.getElementById('bg-glow-1').style.backgroundColor = portfolioData.settings.accentColor + '33'; // 20% opacity hex
+            
+            // Check radio button
+            const radios = document.querySelectorAll('input[name="accent"]');
+            radios.forEach(r => {
+                if(r.value === portfolioData.settings.accentColor) r.checked = true;
+            });
+        }
+
+        function handleImageUpload(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    updateProfile('photo', e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // --- DYNAMIC SECTIONS (SKILLS, PROJECTS, EDUCATION) ---
+
+        // Skills
+        function addSkill() {
+            portfolioData.skills.push({ id: Date.now(), name: "New Skill", level: 50 });
+            saveData();
+            renderForm();
+        }
+        function updateSkill(id, key, value) {
+            const idx = portfolioData.skills.findIndex(s => s.id == id);
+            portfolioData.skills[idx][key] = value;
+            saveData();
+        }
+        function removeSkill(id) {
+            portfolioData.skills = portfolioData.skills.filter(s => s.id != id);
+            saveData();
+            renderForm();
+        }
+
+        // Projects
+        function addProject() {
+            portfolioData.projects.push({ id: Date.now(), title: "New Project", description: "Description here...", image: "https://via.placeholder.com/500", link: "#" });
+            saveData();
+            renderForm();
+        }
+        function updateProject(id, key, value) {
+            const idx = portfolioData.projects.findIndex(p => p.id == id);
+            portfolioData.projects[idx][key] = value;
+            saveData();
+        }
+        function removeProject(id) {
+            portfolioData.projects = portfolioData.projects.filter(p => p.id != id);
+            saveData();
+            renderForm();
+        }
+
+        // Education
+        function addEducation() {
+            portfolioData.education.push({ id: Date.now(), institute: "Institute Name", course: "Course Name", year: "2024" });
+            saveData();
+            renderForm();
+        }
+        function updateEducation(id, key, value) {
+            const idx = portfolioData.education.findIndex(e => e.id == id);
+            portfolioData.education[idx][key] = value;
+            saveData();
+        }
+        function removeEducation(id) {
+            portfolioData.education = portfolioData.education.filter(e => e.id != id);
+            saveData();
+            renderForm();
+        }
+
+
+        // --- RENDERING ---
+
+        function renderForm() {
+            // Profile
+            document.getElementById('inp-name').value = portfolioData.profile.name;
+            document.getElementById('inp-title').value = portfolioData.profile.title;
+            document.getElementById('inp-about').value = portfolioData.profile.about;
+
+            // Socials
+            document.getElementById('inp-github').value = portfolioData.socialLinks.github;
+            document.getElementById('inp-linkedin').value = portfolioData.socialLinks.linkedin;
+            document.getElementById('inp-email').value = portfolioData.socialLinks.email;
+            document.getElementById('inp-website').value = portfolioData.socialLinks.website;
+
+            // Skills List
+            const skillsContainer = document.getElementById('skills-list');
+            skillsContainer.innerHTML = portfolioData.skills.map(skill => `
+                <div class="flex gap-2 items-center bg-slate-800/50 p-2 rounded">
+                    <input type="text" value="${skill.name}" oninput="updateSkill(${skill.id}, 'name', this.value)" class="bg-transparent text-sm w-full outline-none text-white">
+                    <button onclick="removeSkill(${skill.id})" class="text-slate-500 hover:text-red-400"><i class="fas fa-times"></i></button>
+                </div>
+            `).join('');
+
+            // Projects List
+            const projectsContainer = document.getElementById('projects-list');
+            projectsContainer.innerHTML = portfolioData.projects.map(proj => `
+                <div class="bg-slate-800/50 p-3 rounded space-y-2 border border-slate-700">
+                    <div class="flex justify-between">
+                        <input type="text" value="${proj.title}" oninput="updateProject(${proj.id}, 'title', this.value)" class="bg-transparent font-bold text-sm w-full outline-none text-white">
+                        <button onclick="removeProject(${proj.id})" class="text-slate-500 hover:text-red-400"><i class="fas fa-times"></i></button>
+                    </div>
+                    <textarea oninput="updateProject(${proj.id}, 'description', this.value)" class="w-full bg-slate-900/50 text-xs p-2 rounded text-slate-300 resize-none h-16 outline-none">${proj.description}</textarea>
+                    <input type="text" value="${proj.link}" placeholder="Project Link" oninput="updateProject(${proj.id}, 'link', this.value)" class="bg-slate-900/50 text-xs p-1 rounded w-full text-slate-400 outline-none">
+                </div>
+            `).join('');
+
+             // Education List
+             const eduContainer = document.getElementById('education-list');
+             eduContainer.innerHTML = portfolioData.education.map(edu => `
+                <div class="bg-slate-800/50 p-3 rounded space-y-2 border border-slate-700">
+                    <div class="flex justify-between">
+                        <input type="text" value="${edu.institute}" oninput="updateEducation(${edu.id}, 'institute', this.value)" class="bg-transparent font-bold text-sm w-full outline-none text-white">
+                        <button onclick="removeEducation(${edu.id})" class="text-slate-500 hover:text-red-400"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" value="${edu.course}" oninput="updateEducation(${edu.id}, 'course', this.value)" class="bg-slate-900/50 text-xs p-1 rounded w-full text-slate-400 outline-none">
+                        <input type="text" value="${edu.year}" oninput="updateEducation(${edu.id}, 'year', this.value)" class="bg-slate-900/50 text-xs p-1 rounded w-20 text-slate-400 outline-none">
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderPreview() {
+            // Profile
+            document.getElementById('prev-name').textContent = portfolioData.profile.name || 'Your Name';
+            document.getElementById('prev-name-footer').textContent = portfolioData.profile.name || 'Your Name';
+            document.getElementById('prev-title').textContent = portfolioData.profile.title || 'Your Title';
+            document.getElementById('prev-about').textContent = portfolioData.profile.about || 'About you...';
+            document.getElementById('prev-photo').src = portfolioData.profile.photo || 'https://via.placeholder.com/300';
+            
+            // Logo (Initials)
+            const initials = (portfolioData.profile.name || 'XY').split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+            document.getElementById('prev-logo').innerHTML = `<span class="text-[var(--accent)]">${initials}</span>.`;
+
+            // Socials
+            const socialHTML = `
+                ${portfolioData.socialLinks.github ? `<a href="${portfolioData.socialLinks.github}" target="_blank" class="hover:text-[var(--accent)] transition"><i class="fab fa-github"></i></a>` : ''}
+                ${portfolioData.socialLinks.linkedin ? `<a href="${portfolioData.socialLinks.linkedin}" target="_blank" class="hover:text-[var(--accent)] transition"><i class="fab fa-linkedin"></i></a>` : ''}
+                ${portfolioData.socialLinks.website ? `<a href="${portfolioData.socialLinks.website}" target="_blank" class="hover:text-[var(--accent)] transition"><i class="fas fa-globe"></i></a>` : ''}
+                ${portfolioData.socialLinks.email ? `<a href="${portfolioData.socialLinks.email}" class="hover:text-[var(--accent)] transition"><i class="fas fa-envelope"></i></a>` : ''}
+            `;
+            document.getElementById('prev-socials-top').innerHTML = socialHTML;
+            document.getElementById('prev-socials-bottom').innerHTML = socialHTML;
+
+            // Skills
+            document.getElementById('prev-skills').innerHTML = portfolioData.skills.map(s => `
+                <div class="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm hover:border-[var(--accent)] transition cursor-default">
+                    ${s.name}
+                </div>
+            `).join('');
+
+            // Education
+            document.getElementById('prev-education').innerHTML = portfolioData.education.map(e => `
+                <div class="glass-card p-6 rounded-xl flex justify-between items-center group">
+                    <div>
+                        <h4 class="font-bold text-lg group-hover:text-[var(--accent)] transition">${e.institute}</h4>
+                        <p class="text-slate-400">${e.course}</p>
+                    </div>
+                    <span class="text-sm px-3 py-1 bg-white/5 rounded-full border border-white/10 text-slate-300 font-mono">${e.year}</span>
+                </div>
+            `).join('');
+
+            // Projects
+            document.getElementById('prev-projects').innerHTML = portfolioData.projects.map(p => `
+                <a href="${p.link}" target="_blank" class="glass-card rounded-xl overflow-hidden group block tilt-card" onmousemove="handleTilt(event, this)" onmouseleave="resetTilt(this)">
+                    <div class="h-48 overflow-hidden relative">
+                         <div class="absolute inset-0 bg-[var(--accent)] opacity-0 group-hover:opacity-20 transition z-10"></div>
+                        <img src="${p.image}" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500">
+                    </div>
+                    <div class="p-6 tilt-inner">
+                        <h4 class="text-xl font-bold mb-2 group-hover:text-[var(--accent)] transition">${p.title} <i class="fas fa-arrow-up-right-from-square text-xs opacity-0 group-hover:opacity-100 transition"></i></h4>
+                        <p class="text-slate-400 text-sm leading-relaxed">${p.description}</p>
+                    </div>
+                </a>
+            `).join('');
+        }
+
+        // --- TILT EFFECT LOGIC ---
+        function handleTilt(e, card) {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const rotateX = ((y - centerY) / centerY) * -5; // Max 5deg
+            const rotateY = ((x - centerX) / centerX) * 5;
+
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        }
+
+        function resetTilt(card) {
+            card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg)`;
+        }
+
+        // --- EXPORT LOGIC ---
+        function exportPortfolio() {
+            // We need to capture the preview HTML and CSS to create a standalone file.
+            // To make this robust, we will regenerate the HTML string based on the current data,
+            // wrapping it in a complete HTML document structure.
+
+            const accent = portfolioData.settings.accentColor;
+            
+            const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${portfolioData.profile.name} - Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"><\/script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'], mono: ['Space Grotesk', 'monospace'] },
+                    colors: { glass: 'rgba(255, 255, 255, 0.05)' }
+                }
+            }
+        }
+    <\/script>
+    <style>
+        :root { --accent: ${accent}; }
+        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Outfit', sans-serif; overflow-x: hidden; }
+        .glass-card { background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); }
+        .typing-cursor::after { content: '|'; animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        .glow-text { text-shadow: 0 0 10px var(--accent); }
+        .san-footer-link { text-decoration: none; color: white; font-weight: bold; }
+        .san-footer-link:hover { color: var(--accent); }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="fixed inset-0 pointer-events-none z-0">
+        <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full blur-[100px]" style="background-color: ${accent}33"></div>
+        <div class="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[100px]"></div>
+    </div>
+    
+    <!-- EXTRACTED CONTENT -->
+    ${document.getElementById('portfolio-preview').outerHTML.replace('id="portfolio-preview"', 'class="relative z-10 max-w-5xl mx-auto p-6 md:p-12 space-y-20 flex flex-col min-h-screen"')}
+    
+    <script>
+        // Simple Tilt Script for Standalone
+        document.querySelectorAll('.tilt-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.transform = \`perspective(1000px) rotateX(\${((y - rect.height/2)/rect.height)*-5}deg) rotateY(\${((x - rect.width/2)/rect.width)*5}deg)\`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+            });
+        });
+    <\/script>
+</body>
+</html>
+            `;
+
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${portfolioData.profile.name.replace(/\s+/g, '_')}_Portfolio.html`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Initialize on Load
+        window.addEventListener('DOMContentLoaded', init);
+
+    </script>
+</body>
+</html>
