@@ -189,6 +189,12 @@
                         <label for="c-rose" class="w-6 h-6 rounded-full bg-rose-500 cursor-pointer block border border-transparent transition"></label>
                     </div>
                 </div>
+                
+                <!-- Branding Toggle -->
+                <div class="flex items-center justify-between pt-2 border-t border-white/10 mt-2">
+                    <label for="inp-branding" class="text-xs uppercase tracking-widest text-slate-500 font-bold cursor-pointer hover:text-white transition">Footer Credit</label>
+                    <input type="checkbox" id="inp-branding" class="accent-[var(--accent)] w-4 h-4 cursor-pointer rounded" onchange="updateSetting('showBranding', this.checked)">
+                </div>
             </div>
 
             <!-- Profile Section -->
@@ -225,8 +231,11 @@
                 <div class="grid grid-cols-2 gap-2">
                     <input type="text" placeholder="GitHub URL" class="bg-slate-800/50 border border-slate-700 rounded px-2 py-1 text-sm text-white focus:border-purple-500 outline-none" oninput="updateSocial('github', this.value)" id="inp-github">
                     <input type="text" placeholder="LinkedIn URL" class="bg-slate-800/50 border border-slate-700 rounded px-2 py-1 text-sm text-white focus:border-purple-500 outline-none" oninput="updateSocial('linkedin', this.value)" id="inp-linkedin">
-                    <input type="text" placeholder="Email" class="bg-slate-800/50 border border-slate-700 rounded px-2 py-1 text-sm text-white focus:border-purple-500 outline-none" oninput="updateSocial('email', this.value)" id="inp-email">
+                    <input type="text" placeholder="Email (e.g. me@gmail.com)" class="bg-slate-800/50 border border-slate-700 rounded px-2 py-1 text-sm text-white focus:border-purple-500 outline-none" oninput="updateSocial('email', this.value)" id="inp-email">
                     <input type="text" placeholder="Website" class="bg-slate-800/50 border border-slate-700 rounded px-2 py-1 text-sm text-white focus:border-purple-500 outline-none" oninput="updateSocial('website', this.value)" id="inp-website">
+                    <input type="text" placeholder="WhatsApp (Number)" class="bg-slate-800/50 border border-slate-700 rounded px-2 py-1 text-sm text-white focus:border-purple-500 outline-none" oninput="updateSocial('whatsapp', this.value)" id="inp-whatsapp">
+                    <input type="text" placeholder="Instagram URL" class="bg-slate-800/50 border border-slate-700 rounded px-2 py-1 text-sm text-white focus:border-purple-500 outline-none" oninput="updateSocial('instagram', this.value)" id="inp-instagram">
+                    <input type="text" placeholder="Twitter / X URL" class="bg-slate-800/50 border border-slate-700 rounded px-2 py-1 text-sm text-white focus:border-purple-500 outline-none" oninput="updateSocial('twitter', this.value)" id="inp-twitter">
                 </div>
             </div>
 
@@ -355,7 +364,7 @@
                 <p class="text-slate-500 text-sm">
                     &copy; 2026 <span id="prev-name-footer"></span>. All rights reserved.
                 </p>
-                <div class="pt-4 text-xs font-mono">
+                <div class="pt-4 text-xs font-mono" id="prev-branding-container">
                     <a href="https://sanstudio.neocities.org/" target="_blank" class="san-footer-link">
                         Developed By <span class="glow-text">SanStudio</span>
                     </a>
@@ -363,6 +372,51 @@
             </footer>
         </div>
     </main>
+
+    <!-- HOSTING GUIDE MODAL -->
+    <div id="hosting-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-white/10 rounded-xl max-w-lg w-full p-6 shadow-2xl relative transform transition-all scale-100">
+            <button onclick="closeHostingModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
+            
+            <h2 class="text-2xl font-bold mb-2 text-white flex items-center">
+                <i class="fas fa-rocket text-[var(--accent)] mr-3"></i>Portfolio Ready!
+            </h2>
+            <p class="text-slate-400 mb-6 text-sm">Your HTML file has been downloaded. Here are the best free ways to publish it online:</p>
+            
+            <div class="space-y-3">
+                <!-- Netlify -->
+                <div class="p-4 bg-white/5 rounded-lg border border-white/5 hover:border-[var(--accent)] transition group">
+                    <div class="flex justify-between items-center mb-1">
+                        <h3 class="font-bold text-white flex items-center"><i class="fas fa-bolt text-teal-400 mr-2"></i>Netlify Drop <span class="ml-2 text-[10px] bg-teal-500/20 text-teal-300 px-1 rounded uppercase">Easiest</span></h3>
+                        <a href="https://app.netlify.com/drop" target="_blank" class="text-xs bg-slate-700 hover:bg-[var(--accent)] text-white px-3 py-1.5 rounded transition">Open Link</a>
+                    </div>
+                    <p class="text-xs text-slate-400">Drag and drop your generated HTML file directly onto their page. No account needed for quick testing.</p>
+                </div>
+
+                <!-- Neocities -->
+                <div class="p-4 bg-white/5 rounded-lg border border-white/5 hover:border-[var(--accent)] transition group">
+                    <div class="flex justify-between items-center mb-1">
+                        <h3 class="font-bold text-white flex items-center"><i class="fas fa-cat text-orange-400 mr-2"></i>Neocities</h3>
+                        <a href="https://neocities.org/" target="_blank" class="text-xs bg-slate-700 hover:bg-[var(--accent)] text-white px-3 py-1.5 rounded transition">Open Link</a>
+                    </div>
+                    <p class="text-xs text-slate-400">Create a free account and upload your `index.html`. Perfect for a customized, creative web presence.</p>
+                </div>
+
+                <!-- GitHub Pages -->
+                <div class="p-4 bg-white/5 rounded-lg border border-white/5 hover:border-[var(--accent)] transition group">
+                    <div class="flex justify-between items-center mb-1">
+                        <h3 class="font-bold text-white flex items-center"><i class="fab fa-github text-white mr-2"></i>GitHub Pages</h3>
+                        <a href="https://pages.github.com/" target="_blank" class="text-xs bg-slate-700 hover:bg-[var(--accent)] text-white px-3 py-1.5 rounded transition">Open Link</a>
+                    </div>
+                    <p class="text-xs text-slate-400">Rename file to `index.html`, push to a repository named `username.github.io`. Best for developers.</p>
+                </div>
+            </div>
+
+            <div class="mt-6 text-center">
+                <button onclick="closeHostingModal()" class="text-sm text-slate-500 hover:text-white transition">Close</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // --- DATA STRUCTURE ---
@@ -390,15 +444,21 @@
                 github: "https://github.com",
                 linkedin: "https://linkedin.com",
                 website: "https://mysite.com",
-                email: "mailto:hello@alex.com"
+                email: "hello@alex.com",
+                whatsapp: "1234567890",
+                instagram: "",
+                twitter: ""
             },
             settings: {
                 theme: "dark",
-                accentColor: "#7c3aed"
+                accentColor: "#7c3aed",
+                showBranding: true
             }
         };
 
         let portfolioData = JSON.parse(localStorage.getItem('smartPortfolioData')) || defaultData;
+        // Ensure legacy data has the key
+        if (portfolioData.settings.showBranding === undefined) portfolioData.settings.showBranding = true;
 
         // --- CORE FUNCTIONS ---
 
@@ -519,6 +579,9 @@
         // --- RENDERING ---
 
         function renderForm() {
+            // Settings
+            document.getElementById('inp-branding').checked = portfolioData.settings.showBranding;
+
             // Profile
             document.getElementById('inp-name').value = portfolioData.profile.name;
             document.getElementById('inp-title').value = portfolioData.profile.title;
@@ -529,6 +592,9 @@
             document.getElementById('inp-linkedin').value = portfolioData.socialLinks.linkedin;
             document.getElementById('inp-email').value = portfolioData.socialLinks.email;
             document.getElementById('inp-website').value = portfolioData.socialLinks.website;
+            document.getElementById('inp-whatsapp').value = portfolioData.socialLinks.whatsapp || '';
+            document.getElementById('inp-instagram').value = portfolioData.socialLinks.instagram || '';
+            document.getElementById('inp-twitter').value = portfolioData.socialLinks.twitter || '';
 
             // Skills List
             const skillsContainer = document.getElementById('skills-list');
@@ -569,6 +635,11 @@
         }
 
         function renderPreview() {
+            // Settings
+            const showBranding = portfolioData.settings.showBranding;
+            const brandingContainer = document.getElementById('prev-branding-container');
+            if(brandingContainer) brandingContainer.style.display = showBranding ? 'block' : 'none';
+
             // Profile
             document.getElementById('prev-name').textContent = portfolioData.profile.name || 'Your Name';
             document.getElementById('prev-name-footer').textContent = portfolioData.profile.name || 'Your Name';
@@ -581,11 +652,24 @@
             document.getElementById('prev-logo').innerHTML = `<span class="text-[var(--accent)]">${initials}</span>.`;
 
             // Socials
+            // Helper to clean WhatsApp number
+            const waNum = (portfolioData.socialLinks.whatsapp || '').replace(/\D/g, '');
+            const waLink = waNum ? `https://wa.me/${waNum}` : '';
+
+            // Helper for Email
+            let emailLink = portfolioData.socialLinks.email || '';
+            if (emailLink && !emailLink.startsWith('mailto:')) {
+                emailLink = 'mailto:' + emailLink;
+            }
+
             const socialHTML = `
-                ${portfolioData.socialLinks.github ? `<a href="${portfolioData.socialLinks.github}" target="_blank" class="hover:text-[var(--accent)] transition"><i class="fab fa-github"></i></a>` : ''}
-                ${portfolioData.socialLinks.linkedin ? `<a href="${portfolioData.socialLinks.linkedin}" target="_blank" class="hover:text-[var(--accent)] transition"><i class="fab fa-linkedin"></i></a>` : ''}
-                ${portfolioData.socialLinks.website ? `<a href="${portfolioData.socialLinks.website}" target="_blank" class="hover:text-[var(--accent)] transition"><i class="fas fa-globe"></i></a>` : ''}
-                ${portfolioData.socialLinks.email ? `<a href="${portfolioData.socialLinks.email}" class="hover:text-[var(--accent)] transition"><i class="fas fa-envelope"></i></a>` : ''}
+                ${portfolioData.socialLinks.github ? `<a href="${portfolioData.socialLinks.github}" target="_blank" title="GitHub" class="hover:text-[var(--accent)] transition"><i class="fab fa-github"></i></a>` : ''}
+                ${portfolioData.socialLinks.linkedin ? `<a href="${portfolioData.socialLinks.linkedin}" target="_blank" title="LinkedIn" class="hover:text-[var(--accent)] transition"><i class="fab fa-linkedin"></i></a>` : ''}
+                ${portfolioData.socialLinks.website ? `<a href="${portfolioData.socialLinks.website}" target="_blank" title="Website" class="hover:text-[var(--accent)] transition"><i class="fas fa-globe"></i></a>` : ''}
+                ${emailLink ? `<a href="${emailLink}" title="Email" class="hover:text-[var(--accent)] transition"><i class="fas fa-envelope"></i></a>` : ''}
+                ${waLink ? `<a href="${waLink}" target="_blank" title="WhatsApp" class="hover:text-[var(--accent)] transition"><i class="fab fa-whatsapp"></i></a>` : ''}
+                ${portfolioData.socialLinks.instagram ? `<a href="${portfolioData.socialLinks.instagram}" target="_blank" title="Instagram" class="hover:text-[var(--accent)] transition"><i class="fab fa-instagram"></i></a>` : ''}
+                ${portfolioData.socialLinks.twitter ? `<a href="${portfolioData.socialLinks.twitter}" target="_blank" title="Twitter/X" class="hover:text-[var(--accent)] transition"><i class="fab fa-x-twitter"></i></a>` : ''}
             `;
             document.getElementById('prev-socials-top').innerHTML = socialHTML;
             document.getElementById('prev-socials-bottom').innerHTML = socialHTML;
@@ -642,6 +726,14 @@
             card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg)`;
         }
 
+        // --- MODAL LOGIC ---
+        function showHostingModal() {
+            document.getElementById('hosting-modal').classList.remove('hidden');
+        }
+        function closeHostingModal() {
+            document.getElementById('hosting-modal').classList.add('hidden');
+        }
+
         // --- EXPORT LOGIC ---
         function exportPortfolio() {
             // We need to capture the preview HTML and CSS to create a standalone file.
@@ -649,6 +741,7 @@
             // wrapping it in a complete HTML document structure.
 
             const accent = portfolioData.settings.accentColor;
+            const showBranding = portfolioData.settings.showBranding;
             
             const htmlContent = `
 <!DOCTYPE html>
@@ -694,6 +787,12 @@
     ${document.getElementById('portfolio-preview').outerHTML.replace('id="portfolio-preview"', 'class="relative z-10 max-w-5xl mx-auto p-6 md:p-12 space-y-20 flex flex-col min-h-screen"')}
     
     <script>
+        // Remove branding if disabled (double check for exported static HTML)
+        if(${!showBranding}) {
+            const el = document.getElementById('prev-branding-container');
+            if(el) el.remove();
+        }
+
         // Simple Tilt Script for Standalone
         document.querySelectorAll('.tilt-card').forEach(card => {
             card.addEventListener('mousemove', (e) => {
@@ -718,6 +817,9 @@
             a.download = `${portfolioData.profile.name.replace(/\s+/g, '_')}_Portfolio.html`;
             a.click();
             URL.revokeObjectURL(url);
+            
+            // Show the hosting guide
+            showHostingModal();
         }
 
         // Initialize on Load
