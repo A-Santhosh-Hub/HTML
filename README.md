@@ -138,13 +138,13 @@ Fast, free, mobile-optimized with CORS bypass. Built by SanStudio.
 **Try it now:** https://sanstudio.neocities.org/SimpleWebSourceViewer
 
 
-## Project 31 https://santhosh2025.neocities.org/Smart%20Portfolio%20Builder/in
+## Project 31   Smart Portfolio Builder  ( https://santhosh2025.neocities.org/Smart%20Portfolio%20Builder/in )
 
 
 
 
 
-## Project Smart Portfolio Builder   https://santhosh2024.neocities.org/skill/in ----=-[ SKILL ]
+## Project  https://santhosh2024.neocities.org/skill/in ----=-[ SKILL ]
 
 
 
