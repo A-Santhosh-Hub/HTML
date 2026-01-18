@@ -140,7 +140,7 @@ Fast, free, mobile-optimized with CORS bypass. Built by SanStudio.
 
 ## Project 31   Smart Portfolio Builder  ( https://santhosh2025.neocities.org/Smart%20Portfolio%20Builder/in )
 
-## Project 32--------- (https://qr-code-test-7ec7c.web.app/)
+## Project 32   A self-contained logic engine for your physical QR codes. Switch destinations, track scans, and manage campaigns from a single dashboar  --------- (https://qr-code-test-7ec7c.web.app/)
 
 
 
