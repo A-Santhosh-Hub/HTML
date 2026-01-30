@@ -34,7 +34,7 @@ The interface includes headings like *Admin Portal* and *Summon New Memory*, plu
 
 # Project 05   https://santhosh2025.neocities.org/Blender%203D/  ( Blender 3D MODELS WEB SITE )
 
-# Project 06   https://santhosh2025.neocities.org/Gamer's%20Repacks/Index   ---- ( Gamer Repacks )
+# Project 06   https://santhosh2025.neocities.org/Gamer's%20Repacks/Index   ------- ( Gamer Repacks )
 
 # Project 07   https://santhosh2025.neocities.org/Project%2001/Game%20WebSite  ----- ( Game WebSite )
 
