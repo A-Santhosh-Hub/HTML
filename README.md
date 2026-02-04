@@ -144,7 +144,7 @@ Fast, free, mobile-optimized with CORS bypass. Built by SanStudio.
 
 
 
-## Project  https://santhosh2024.neocities.org/skill/in ----=-[ SKILL ]
+## Project  https://santhosh2024.neocities.org/skill/in ---[ SKILL ]
 
 
 
