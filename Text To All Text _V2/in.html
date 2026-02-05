@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SanText Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --neon-green: #0f0;
+        --neon-cyan: #0ff;
+        --neon-pink: #f0f;
+        --dark-bg: #050a0f;
+      }
+      
+      body {
+        background-color: var(--dark-bg);
+        color: #e0e0e0;
+        font-family: 'JetBrains Mono', monospace;
+        overflow-x: hidden;
+      }
+
+      /* Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #000; 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #333; 
+        border: 1px solid var(--neon-green);
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--neon-green);
+      }
+
+      /* CRT Scanline Effect */
+      .scanlines {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: linear-gradient(
+          to bottom,
+          rgba(255,255,255,0),
+          rgba(255,255,255,0) 50%,
+          rgba(0,0,0,0.1) 50%,
+          rgba(0,0,0,0.1)
+        );
+        background-size: 100% 4px;
+        pointer-events: none;
+        z-index: 50;
+        opacity: 0.6;
+      }
+
+      /* Glitch Text Animation */
+      @keyframes glitch {
+        0% { text-shadow: 2px 2px var(--neon-pink), -2px -2px var(--neon-cyan); }
+        25% { text-shadow: -2px 2px var(--neon-pink), 2px -2px var(--neon-cyan); }
+        50% { text-shadow: 2px -2px var(--neon-pink), -2px 2px var(--neon-cyan); }
+        75% { text-shadow: -2px -2px var(--neon-pink), 2px 2px var(--neon-cyan); }
+        100% { text-shadow: 2px 2px var(--neon-pink), -2px -2px var(--neon-cyan); }
+      }
+      
+      .glitch-hover:hover {
+        animation: glitch 0.3s infinite;
+      }
+
+      .font-tech {
+        font-family: 'Share Tech Mono', monospace;
+      }
+
+      /* Utility classes for glass/cyber look */
+      .cyber-glass {
+        background: rgba(10, 20, 30, 0.7);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(0, 255, 0, 0.2);
+        box-shadow: 0 0 10px rgba(0, 255, 0, 0.1);
+      }
+
+      .text-glow {
+        text-shadow: 0 0 5px rgba(0, 255, 0, 0.7);
+      }
+      
+      .text-glow-cyan {
+        text-shadow: 0 0 5px rgba(0, 255, 255, 0.7);
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.561.0"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+    <div class="scanlines"></div>
+  </body>
+</html>
