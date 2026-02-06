@@ -142,7 +142,7 @@ Fast, free, mobile-optimized with CORS bypass. Built by SanStudio.
 
 ## Project 32   A self-contained logic engine for your physical QR codes. Switch destinations, track scans, and manage campaigns from a single dashboar  --------- (https://qr-code-test-7ec7c.web.app/)
 
-## Project 33 https://santhosh2024.neocities.org/HTML%20Splitter/in
+## Project 33  HTML Code Splitter ----- (https://santhosh2024.neocities.org/HTML%20Splitter/in)
 
 
 ## Project  https://santhosh2024.neocities.org/skill/in ---[ SKILL ]
