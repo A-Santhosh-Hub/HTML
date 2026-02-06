@@ -1,1 +1,420 @@
 
+
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Code Splitter Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(var(--border))",
+                        input: "hsl(var(--input))",
+                        ring: "hsl(var(--ring))",
+                        background: "hsl(var(--background))",
+                        foreground: "hsl(var(--foreground))",
+                        primary: {
+                            DEFAULT: "#38bdf8",
+                            foreground: "#0f172a",
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+
+        :root {
+            --bg-main: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --accent: #0284c7;
+        }
+
+        .dark {
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Text Bar Effect: Glowing Focus */
+        .editor-focus-effect {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        
+        .editor-focus-effect:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15), 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .glass-panel {
+            background: rgba(var(--bg-card), 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        .tab-active {
+            border-bottom: 2px solid var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-action {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-action:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.1);
+        }
+        .btn-action:active {
+            transform: translateY(0);
+        }
+
+        .output-pane {
+            transition: opacity 0.2s ease;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            background: #10b981;
+            color: white;
+            border-radius: 0.75rem;
+            transform: translateY(150%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .toast.show {
+            transform: translateY(0);
+        }
+
+        /* Floating Animation for icons */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-sky-500 rounded-xl flex items-center justify-center text-white text-2xl shadow-lg shadow-sky-500/20 animate-float">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold bg-gradient-to-r from-sky-400 to-blue-600 bg-clip-text text-transparent">
+                        HTML Code Splitter
+                    </h1>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm">Organize monolithic code into modular files.</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3 bg-slate-200/50 dark:bg-slate-800/50 p-1.5 rounded-xl border border-slate-300 dark:border-slate-700">
+                <!-- Theme Toggle -->
+                <button onclick="toggleTheme()" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-slate-300" title="Toggle Theme">
+                    <i id="theme-icon" class="fas fa-moon text-lg"></i>
+                </button>
+                <div class="w-[1px] h-6 bg-slate-300 dark:bg-slate-700 mx-1"></div>
+                <button onclick="handleSplit()" class="btn-action bg-sky-500 hover:bg-sky-400 text-white px-5 py-2 rounded-lg font-semibold flex items-center gap-2 shadow-lg shadow-sky-500/20">
+                    <i class="fas fa-wand-magic-sparkles"></i> <span>Split Now</span>
+                </button>
+                <button onclick="resetAll()" class="btn-action bg-slate-500/10 hover:bg-slate-500/20 text-slate-600 dark:text-slate-300 px-4 py-2 rounded-lg font-medium">
+                    <i class="fas fa-rotate-right mr-2"></i>Reset
+                </button>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Input Side -->
+            <div class="flex flex-col gap-4">
+                <div class="flex items-center justify-between px-1">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <i class="fas fa-file-code text-sky-500"></i> Source HTML
+                    </label>
+                    <div id="input-stats" class="text-[10px] font-mono bg-slate-200 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-500">0 characters</div>
+                </div>
+                <div class="h-[500px] lg:h-[600px] editor-focus-effect rounded-2xl overflow-hidden bg-white dark:bg-slate-900 shadow-xl">
+                    <textarea 
+                        id="input-code" 
+                        class="w-full h-full bg-transparent p-6 code-font text-sm text-slate-800 dark:text-sky-100 outline-none resize-none custom-scrollbar"
+                        placeholder="Paste your code here...&#10;&#10;<html>&#10;  <style>...</style>&#10;  <script>...</script>&#10;</html>"
+                        oninput="updateInputStats()"
+                    ></textarea>
+                </div>
+            </div>
+
+            <!-- Output Side -->
+            <div class="flex flex-col gap-4">
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800">
+                    <div class="flex gap-6">
+                        <button onclick="switchTab('html')" id="tab-html" class="pb-3 text-xs font-bold uppercase tracking-widest transition-all tab-active flex items-center gap-2">
+                            <i class="fab fa-html5"></i> HTML
+                        </button>
+                        <button onclick="switchTab('css')" id="tab-css" class="pb-3 text-xs font-bold uppercase tracking-widest text-slate-400 transition-all flex items-center gap-2">
+                            <i class="fab fa-css3-alt"></i> CSS
+                        </button>
+                        <button onclick="switchTab('js')" id="tab-js" class="pb-3 text-xs font-bold uppercase tracking-widest text-slate-400 transition-all flex items-center gap-2">
+                            <i class="fab fa-js"></i> JS
+                        </button>
+                    </div>
+                    <div class="flex gap-1 pb-2">
+                        <button onclick="copyCurrent()" class="w-9 h-9 flex items-center justify-center rounded-lg text-slate-400 hover:text-sky-500 hover:bg-sky-50 dark:hover:bg-sky-500/10 transition-all" title="Copy to clipboard">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button onclick="downloadCurrent()" class="w-9 h-9 flex items-center justify-center rounded-lg text-slate-400 hover:text-sky-500 hover:bg-sky-50 dark:hover:bg-sky-500/10 transition-all" title="Download file">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="h-[500px] lg:h-[600px] relative rounded-2xl overflow-hidden bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-inner">
+                    <!-- HTML Output -->
+                    <pre id="output-html" class="output-pane absolute inset-0 w-full h-full p-6 code-font text-sm text-indigo-600 dark:text-green-300 overflow-auto custom-scrollbar"></pre>
+                    
+                    <!-- CSS Output -->
+                    <pre id="output-css" class="output-pane hidden absolute inset-0 w-full h-full p-6 code-font text-sm text-pink-600 dark:text-pink-300 overflow-auto custom-scrollbar"></pre>
+                    
+                    <!-- JS Output -->
+                    <pre id="output-js" class="output-pane hidden absolute inset-0 w-full h-full p-6 code-font text-sm text-amber-600 dark:text-yellow-200 overflow-auto custom-scrollbar"></pre>
+
+                    <!-- Empty State -->
+                    <div id="empty-state" class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 bg-slate-50 dark:bg-slate-900/80 pointer-events-none">
+                        <div class="w-16 h-16 mb-4 flex items-center justify-center rounded-full bg-slate-200 dark:bg-slate-800">
+                            <i class="fas fa-terminal text-2xl"></i>
+                        </div>
+                        <p class="font-medium">Waiting for code to process...</p>
+                        <p class="text-xs text-slate-500 mt-1">Output will appear here after splitting.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Help -->
+        <footer class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="p-6 rounded-2xl bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 flex gap-4">
+                <div class="text-sky-500 text-xl"><i class="fas fa-bolt"></i></div>
+                <div>
+                    <h3 class="font-bold text-sm mb-1">Instant Extraction</h3>
+                    <p class="text-xs text-slate-500">Pulls internal styles and scripts into virtual files.</p>
+                </div>
+            </div>
+            <div class="p-6 rounded-2xl bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 flex gap-4">
+                <div class="text-purple-500 text-xl"><i class="fas fa-link"></i></div>
+                <div>
+                    <h3 class="font-bold text-sm mb-1">Smart Linking</h3>
+                    <p class="text-xs text-slate-500">Injects standard link/script tags into your new HTML.</p>
+                </div>
+            </div>
+            <div class="p-6 rounded-2xl bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 flex gap-4">
+                <div class="text-emerald-500 text-xl"><i class="fas fa-cloud-arrow-down"></i></div>
+                <div>
+                    <h3 class="font-bold text-sm mb-1">Ready to Deploy</h3>
+                    <p class="text-xs text-slate-500">Download individual files ready for hosting.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-circle-check"></i>
+            <span id="toast-message" class="font-medium text-sm">Copied!</span>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'html';
+        let splitData = { html: '', css: '', js: '' };
+
+        // Initialize Theme
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+            // Uncomment below if you want to respect system light mode by default
+            // document.documentElement.classList.remove('dark');
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            const icon = document.getElementById('theme-icon');
+            icon.className = isDark ? 'fas fa-moon text-lg' : 'fas fa-sun text-lg';
+            showToast(isDark ? "Dark Mode Enabled" : "Light Mode Enabled");
+        }
+
+        function updateInputStats() {
+            const text = document.getElementById('input-code').value;
+            document.getElementById('input-stats').innerText = `${text.length.toLocaleString()} characters`;
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        function switchTab(type) {
+            currentTab = type;
+            ['html', 'css', 'js'].forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                const pane = document.getElementById(`output-${t}`);
+                if (t === type) {
+                    btn.classList.add('tab-active');
+                    btn.classList.remove('text-slate-400');
+                    pane.classList.remove('hidden');
+                } else {
+                    btn.classList.remove('tab-active');
+                    btn.classList.add('text-slate-400');
+                    pane.classList.add('hidden');
+                }
+            });
+        }
+
+        function handleSplit() {
+            const raw = document.getElementById('input-code').value;
+            if (!raw.trim()) {
+                showToast("Empty input!");
+                return;
+            }
+
+            try {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(raw, 'text/html');
+                let extractedCSS = "";
+                let extractedJS = "";
+
+                // Styles
+                const styles = doc.querySelectorAll('style');
+                styles.forEach(s => {
+                    extractedCSS += s.innerHTML + "\n\n";
+                    s.remove();
+                });
+
+                // Scripts
+                const scripts = doc.querySelectorAll('script');
+                scripts.forEach(s => {
+                    if (!s.src) {
+                        extractedJS += s.innerHTML + "\n\n";
+                        s.remove();
+                    }
+                });
+
+                // Linking
+                if (extractedCSS.trim()) {
+                    const link = doc.createElement('link');
+                    link.rel = 'stylesheet';
+                    link.href = 'style.css';
+                    doc.head.appendChild(link);
+                }
+                if (extractedJS.trim()) {
+                    const script = doc.createElement('script');
+                    script.src = 'script.js';
+                    doc.body.appendChild(script);
+                }
+
+                let finalHTML = doc.documentElement.outerHTML;
+                finalHTML = finalHTML.replace(/> </g, '>\n<');
+
+                splitData = {
+                    html: finalHTML,
+                    css: extractedCSS.trim(),
+                    js: extractedJS.trim()
+                };
+
+                document.getElementById('output-html').textContent = splitData.html;
+                document.getElementById('output-css').textContent = splitData.css || "/* No internal CSS detected */";
+                document.getElementById('output-js').textContent = splitData.js || "// No internal JavaScript detected";
+
+                document.getElementById('empty-state').classList.add('hidden');
+                showToast("Magic complete! Code split.");
+
+            } catch (err) {
+                showToast("Oops! Parsing failed.");
+            }
+        }
+
+        function resetAll() {
+            document.getElementById('input-code').value = '';
+            document.getElementById('output-html').textContent = '';
+            document.getElementById('output-css').textContent = '';
+            document.getElementById('output-js').textContent = '';
+            document.getElementById('empty-state').classList.remove('hidden');
+            splitData = { html: '', css: '', js: '' };
+            updateInputStats();
+            showToast("Workspace reset");
+        }
+
+        function copyCurrent() {
+            const text = splitData[currentTab];
+            if (!text) return;
+            
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showToast(`${currentTab.toUpperCase()} copied!`);
+        }
+
+        function downloadCurrent() {
+            const content = splitData[currentTab];
+            if (!content) return;
+            const ext = { html: 'html', css: 'css', js: 'js' };
+            const names = { html: 'index', css: 'style', js: 'script' };
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${names[currentTab]}.${ext[currentTab]}`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
