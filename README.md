@@ -145,7 +145,7 @@ Fast, free, mobile-optimized with CORS bypass. Built by SanStudio.
 ## Project 33  HTML Code Splitter ----- (https://santhosh2024.neocities.org/HTML%20Splitter/in)
 
 
-## Project  https://santhosh2024.neocities.org/skill/in ---[ SKILL ]
+
 
 
 
