@@ -1,758 +1,1031 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SanStudio — Creative Web Design, AI & 3D Studio in Chennai</title>
+    <title>Drive ID Extractor</title>
     
-    <!-- SEO Meta Tags -->
-    <meta name="description" content="SanStudio is a creative studio in Chennai, India, specializing in web design, AI tools, 3D showcases, and UI/UX-driven projects for businesses worldwide and sanstudio.neocities, sanstudio.neocities.">
-    <meta name="keywords" content="web design chennai, ai development india, 3d artist portfolio, frontend developer tamil nadu, creative studio, web development, ui/ux design">
-    <meta name="author" content="SanStudio">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://www.sanstudio.dev/">
-
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://www.sanstudio.dev/">
-    <meta property="og:title" content="SanStudio — Creative Web Design, AI & 3D Studio in Chennai">
-    <meta property="og:description" content="We build stunning digital experiences that blend art, technology, and user-centric design to elevate your brand.">
-    <meta property="og:image" content="https://placehold.co/1200x630/113F4E/FFFFFF?text=SanStudio">
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://www.sanstudio.dev/">
-    <meta property="twitter:title" content="SanStudio — Creative Web Design, AI & 3D Studio in Chennai">
-    <meta property="twitter:description" content="We build stunning digital experiences that blend art, technology, and user-centric design to elevate your brand.">
-    <meta property="twitter:image" content="https://placehold.co/1200x630/113F4E/FFFFFF?text=SanStudio">
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Google Fonts: Inter for Body, Poppins for Headlines -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="icon" type="image/png" href="Logo.png" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-
-    <!-- Three.js for 3D Hero Animation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
-
-    <!-- JSON-LD Structured Data -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "ProfessionalService",
-      "name": "SanStudio",
-      "image": "https://placehold.co/512x512/113F4E/FFFFFF?text=S",
-      "@id": "https://www.sanstudio.dev/",
-      "url": "https://www.sanstudio.dev/",
-      "telephone": "+91-9003356047",
-      "description": "SanStudio is a creative studio in Chennai, specializing in high-performance web design, AI prompt engineering, and 3D visual showcases.",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "123 Creative Lane",
-        "addressLocality": "Chennai",
-        "postalCode": "600001",
-        "addressRegion": "TN",
-        "addressCountry": "IN"
-      },
-      "openingHoursSpecification": {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": [
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday"
-        ],
-        "opens": "09:00",
-        "closes": "18:00"
-      }
-    }
-    </script>
-
+    <meta name="description" content="Extract Google Drive File IDs to JSON/JS format">
     <style>
-        /* CSS Custom Properties for Theming */
         :root {
-            --color-background-start: #113F4E;
-            --color-background-end: #0B2B33;
-            --color-text: #F9FAFB;
-            --color-text-muted: #A0AEC0;
-            --color-accent: #3B82F6; /* Tailwind Blue-500 */
-            --color-accent-hover: #2563EB; /* Tailwind Blue-600 */
-            --color-surface: #1A3A4A; 
-            --color-border: #2D4A5A;
-            --font-headline: 'Poppins', sans-serif;
-            --font-body: 'Inter', sans-serif;
+            /* Default Dark Theme */
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --input-bg: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --border: #334155;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            
+            /* Specifics */
+            --btn-secondary-bg: #334155;
+            --btn-secondary-text: #ffffff;
+            --code-bg: #0b1120;
+            --code-text: #a5b4fc;
         }
 
-        /* Basic Setup */
+        /* Light Theme Overrides */
+        [data-theme="light"] {
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --input-bg: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --border: #e2e8f0;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+            
+            /* Specifics */
+            --btn-secondary-bg: #e2e8f0;
+            --btn-secondary-text: #1e293b;
+            --code-bg: #1e293b; /* Keep code box dark for contrast */
+            --code-text: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
         body {
-            background-image: linear-gradient(to bottom right, var(--color-background-start), var(--color-background-end));
-            color: var(--color-text);
-            font-family: var(--font-body);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
         }
 
-        h1, h2, h3, h4, h5, h6 {
-            font-family: var(--font-headline);
+        /* Layout & Card */
+        .container {
+            width: 100%;
+            max-width: 650px;
+            animation: fadeIn 0.5s ease-out;
+            margin-bottom: 2rem;
+            position: relative;
         }
 
-        /* Header Blur on Scroll */
-        header.scrolled {
-            background-color: rgba(17, 63, 78, 0.7); /* Adjusted for new theme */
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom-width: 1px;
-            border-color: var(--color-border);
+        /* Top Right Controls */
+        .top-controls {
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: flex;
+            gap: 0.5rem;
         }
 
-        /* Scroll Reveal Animations */
-        .reveal-on-scroll {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.6s cubic-bezier(0.645, 0.045, 0.355, 1), transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1);
+        .icon-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.5rem;
+            border-radius: 50%;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            box-shadow: var(--shadow);
         }
-        .reveal-on-scroll.is-visible {
-            opacity: 1;
+
+        .icon-btn:hover {
+            transform: scale(1.1);
+            border-color: var(--accent);
+        }
+
+        .icon-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            margin-top: 1rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #60a5fa, #a855f7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            border: 1px solid var(--border);
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        /* Inputs */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-main);
+            font-size: 1rem;
+            transition: all 0.2s;
+            resize: vertical;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        textarea {
+            min-height: 120px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            font-size: 1rem;
+            width: 100%;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            width: auto;
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:active {
             transform: translateY(0);
         }
 
-        /* Respects user's motion preference */
-        @media (prefers-reduced-motion: reduce) {
-            .reveal-on-scroll,
-            .transition-all,
-            .transition {
-                transition: none !important;
-                animation: none !important;
-            }
-            #hero-canvas {
-                display: none; /* Hide performance-intensive animation */
-            }
-            .hero-fallback {
-                display: block !important;
-            }
-        }
-        
-        /* Custom Focus State */
-        :focus-visible {
-            outline: 2px solid var(--color-accent);
-            outline-offset: 2px;
-            border-radius: 6px;
+        /* Button Group for Extract/Clear */
+        .button-group {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            gap: 1rem;
         }
 
-        /* Hero Canvas Styling */
-        #hero-canvas {
-            position: absolute;
+        .btn-clear {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+        
+        .btn-clear:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Output Section */
+        .output-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            display: none; /* Hidden by default */
+        }
+        
+        .output-section.active {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .result-box {
+            background-color: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            color: var(--code-text);
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+            width: 100%;
+            height: 150px;
+            overflow-y: auto;
+            white-space: pre;
+            margin-bottom: 1rem;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            font-size: 0.9rem;
+            padding: 0.5rem;
+        }
+
+        .btn-outline:hover {
+            background-color: var(--input-bg);
+            border-color: var(--text-muted);
+        }
+
+        .btn-copy {
+            grid-column: span 3;
+            background-color: var(--btn-secondary-bg);
+            color: var(--btn-secondary-text);
+        }
+
+        .btn-copy:hover {
+            opacity: 0.9;
+        }
+
+        /* History Section */
+        .history-container {
+            margin-top: 2.5rem;
+            width: 100%;
+            border-top: 1px solid var(--border);
+            padding-top: 1.5rem;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .history-header h2 {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .btn-text {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.85rem;
+            text-decoration: underline;
+        }
+        
+        .btn-text:hover { color: var(--danger); }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .history-item {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: border-color 0.2s, background-color 0.3s;
+        }
+
+        .history-item:hover {
+            border-color: var(--accent);
+        }
+
+        .history-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-title {
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .history-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 3rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-align: center;
+            opacity: 0.7;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: var(--success);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.27);
+            z-index: 200;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Tour Styles */
+        .tour-overlay {
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 0;
-            opacity: 0.8;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 1000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s;
         }
 
-        /* Process Timeline Styling */
-        .timeline-item {
-            position: relative;
-            padding-bottom: 2.5rem;
-        }
-        .timeline-item:not(:last-child)::before {
-            content: '';
-            position: absolute;
-            top: 28px; /* Vertically center with the icon */
-            left: 28px; /* Horizontally center with the icon */
-            width: calc(100% - 56px);
-            height: 2px;
-            background-color: var(--color-border);
-        }
-        @media (max-width: 1023px) {
-            .timeline-item:not(:last-child)::before {
-                width: 2px;
-                height: calc(100% - 56px);
-                top: 56px;
-            }
-        }
-
-        /* Portfolio Modal Styling */
-        .modal {
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-        .modal.is-open {
+        .tour-overlay.active {
+            display: block;
             opacity: 1;
-            visibility: visible;
         }
-        .modal-content {
-            background-color: var(--color-surface);
-            transform: scale(0.95);
-            transition: transform 0.3s ease;
+
+        .tour-highlight {
+            position: relative;
+            z-index: 1001;
+            box-shadow: 0 0 0 4px var(--accent), 0 0 0 5000px rgba(0, 0, 0, 0.75);
+            transition: box-shadow 0.3s;
+            border-radius: 0.5rem;
         }
-        .modal.is-open .modal-content {
-            transform: scale(1);
+
+        .tour-tooltip {
+            position: fixed;
+            background: var(--card-bg);
+            color: var(--text-main);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            width: 300px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            z-index: 1002;
+            display: none;
+            border: 1px solid var(--border);
+            animation: fadeIn 0.3s;
+        }
+
+        .tour-tooltip h3 {
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+            font-size: 1.1rem;
+        }
+
+        .tour-tooltip p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .tour-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tour-step-counter {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .tour-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.4rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .tour-btn-skip {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; height: 0; overflow: hidden; }
+            to { opacity: 1; height: auto; overflow: visible; }
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .card { padding: 1.5rem; }
+            .action-grid { grid-template-columns: 1fr; }
+            .btn-copy { grid-column: span 1; }
+            .history-item { flex-direction: column; align-items: flex-start; gap: 1rem; }
+            .history-actions { width: 100%; justify-content: flex-end; }
+            .button-group { grid-template-columns: 1fr; }
+            .top-controls { top: -50px; right: 0; }
+            .container { margin-top: 3rem; }
+            .tour-tooltip {
+                width: 90%;
+                left: 5% !important;
+                top: 50% !important;
+                transform: translateY(-50%) !important;
+                position: fixed;
+            }
+            /* Simplify highlight on mobile */
+            .tour-highlight {
+                box-shadow: 0 0 0 2px var(--accent);
+            }
         }
     </style>
 </head>
+<body>
 
-<body class="bg-background text-main font-body antialiased">
+    <div class="container">
+        <!-- Top Controls (Theme & Help) -->
+        <div class="top-controls">
+            <!-- Help/Tour Button -->
+            <button class="icon-btn" onclick="startTour()" aria-label="Start Tour">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+            </button>
 
-    <!-- Header -->
-    <header id="main-header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <!-- Logo -->
-            <a href="#" class="flex items-center space-x-2">
-                <span class="font-headline font-bold text-2xl text-white">SanStudio</span>
-            </a>
-
-            <!-- Desktop Navigation -->
-            <nav class="hidden md:flex items-center space-x-6">
-                <a href="#services" class="text-gray-300 hover:text-white transition-colors">Services</a>
-                <a href="#portfolio" class="text-gray-300 hover:text-white transition-colors">Portfolio</a>
-                <a href="#about" class="text-gray-300 hover:text-white transition-colors">About</a>
-                <a href="#contact" class="text-gray-300 hover:text-white transition-colors">Contact</a>
-            </nav>
-
-            <!-- Mobile Menu Button -->
-            <button id="mobile-menu-btn" class="md:hidden z-50 text-white">
-                <svg id="menu-open-icon" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                <svg id="menu-close-icon" class="w-7 h-7 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            <!-- Theme Toggle Button -->
+            <button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle Theme">
+                <!-- Sun Icon -->
+                <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="display:none;">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <!-- Moon Icon -->
+                <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
             </button>
         </div>
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden absolute top-0 left-0 w-full h-screen" style="background-image: linear-gradient(to bottom right, var(--color-background-start), var(--color-background-end));">
-             <div class="flex flex-col items-center justify-center h-full space-y-8 text-2xl font-headline">
-                <a href="#services" class="mobile-nav-link text-gray-300 hover:text-white transition-colors">Services</a>
-                <a href="#portfolio" class="mobile-nav-link text-gray-300 hover:text-white transition-colors">Portfolio</a>
-                <a href="#about" class="mobile-nav-link text-gray-300 hover:text-white transition-colors">About</a>
-                <a href="#contact" class="mobile-nav-link text-gray-300 hover:text-white transition-colors">Contact</a>
-            </div>
+
+        <div class="header">
+            <h1>Drive ID Extractor</h1>
+            <p>Convert Google Drive links into structured JSON data instantly.</p>
         </div>
-    </header>
 
-    <main>
-
-        <!-- Hero Section -->
-        <section class="relative h-screen min-h-[700px] flex items-center justify-center overflow-hidden">
-            <canvas id="hero-canvas"></canvas>
-            <div class="hero-fallback hidden absolute inset-0 opacity-50"></div>
-            <div class="container mx-auto px-6 text-center z-10">
-                <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold font-headline leading-tight mb-4 reveal-on-scroll text-white">
-                    Creative Studio for Web Design,<br> AI & 3D Experiences
-                </h1>
-                <p class="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto mb-8 reveal-on-scroll" style="transition-delay: 150ms;">
-                    We build stunning digital experiences that blend art, technology, and user-centric design to elevate your brand in Chennai and beyond.
-                </p>
-                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 reveal-on-scroll" style="transition-delay: 300ms;">
-                    <a href="#contact" class="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg shadow-blue-500/30">
-                        Contact Us
-                    </a>
-                    <a href="#portfolio" class="w-full sm:w-auto bg-black/20 hover:bg-black/40 text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 border border-white/20 backdrop-blur-sm">
-                        View Portfolio
-                    </a>
-                </div>
+        <div class="card">
+            <!-- Inputs -->
+            <div class="form-group" id="step-event">
+                <label for="eventName">Event Name</label>
+                <input type="text" id="eventName" placeholder="e.g., Birthday, Wedding, CAM, Album" autocomplete="off">
             </div>
-        </section>
 
-        <!-- What We Do / Services -->
-        <section id="services" class="py-20 lg:py-32">
-            <div class="container mx-auto px-6">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold font-headline reveal-on-scroll text-white">Our Services</h2>
-                    <p class="text-lg text-gray-300 mt-2 reveal-on-scroll" style="transition-delay: 150ms;">We build beautiful digital products that people love to use.</p>
-                </div>
-                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <!-- Service Cards - Re-styled for new theme -->
-                    <div class="bg-surface p-8 rounded-2xl border border-strong transform hover:-translate-y-2 transition-transform duration-300 reveal-on-scroll">
-                        <div class="bg-accent/10 text-accent p-3 rounded-lg inline-block mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/><path d="M12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/><path d="M19 19L14.8 14.8"/><path d="M2 12h.01"/><path d="M12 22v-.01"/><path d="M22 12h-.01"/><path d="M12 2v.01"/><path d="M4.2 19.8l.01-.01"/><path d="M19.8 4.2l-.01.01"/><path d="M4.2 4.2l.01.01"/><path d="M19.8 19.8l-.01-.01"/></svg>
-                        </div>
-                        <h3 class="text-xl font-bold mb-2 text-white">Web Design & Development</h3>
-                        <p class="text-text-muted">Creating stunning, responsive, and high-performance websites from scratch. We focus on clean code and user-centric design for businesses in India.</p>
-                    </div>
-                    <div class="bg-surface p-8 rounded-2xl border border-strong transform hover:-translate-y-2 transition-transform duration-300 reveal-on-scroll" style="transition-delay: 150ms;">
-                        <div class="bg-accent/10 text-accent p-3 rounded-lg inline-block mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 1.9a2.5 2.5 0 0 0 0 3.54l1.9 1.9"/><path d="m12 21 1.9-1.9a2.5 2.5 0 0 0 0-3.54l-1.9-1.9"/><path d="M3 12h18"/></svg>
-                        </div>
-                        <h3 class="text-xl font-bold mb-2 text-white">AI Prompt Engineering</h3>
-                        <p class="text-text-muted">Leveraging advanced AI models to generate creative content, automate tasks, and build intelligent tools for your business.</p>
-                    </div>
-                    <div class="bg-surface p-8 rounded-2xl border border-strong transform hover:-translate-y-2 transition-transform duration-300 reveal-on-scroll" style="transition-delay: 300ms;">
-                        <div class="bg-accent/10 text-accent p-3 rounded-lg inline-block mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="m12 9 1.8 3.1a2 2 0 0 1 0 1.8L12 17"/></svg>
-                        </div>
-                        <h3 class="text-xl font-bold mb-2 text-white">3D Visuals & Intros</h3>
-                        <p class="text-text-muted">Using Blender and other 3D tools to create eye-catching product showcases, video intros, and interactive web experiences.</p>
-                    </div>
-                </div>
+            <div class="form-group" id="step-links">
+                <label for="inputLinks">Paste Links (Comma or Line separated)</label>
+                <textarea id="inputLinks" placeholder="https://drive.google.com/file/d/ABC123/view&#10;https://drive.google.com/file/d/XYZ456/view"></textarea>
             </div>
-        </section>
 
-        <!-- Featured Projects / Portfolio -->
-        <section id="portfolio" class="py-20 lg:py-32 bg-black/20">
-            <div class="container mx-auto px-6">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold font-headline reveal-on-scroll text-white">Featured Projects</h2>
-                    <p class="text-lg text-gray-300 mt-2 reveal-on-scroll" style="transition-delay: 150ms;">A selection of our favorite work.</p>
-                </div>
-                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8" id="portfolio-grid">
-                    <!-- Portfolio items will be injected here by JavaScript -->
-                </div>
+            <div class="button-group">
+                <button class="btn btn-primary" id="step-extract" onclick="extractIds()">Extract IDs</button>
+                <button class="btn btn-clear" id="step-clear" onclick="clearForm()">Clear</button>
             </div>
-        </section>
 
-        <!-- Process Section -->
-        <section id="process" class="py-20 lg:py-32">
-            <div class="container mx-auto px-6">
-                <div class="text-center mb-16">
-                    <h2 class="text-3xl md:text-4xl font-bold font-headline reveal-on-scroll text-white">How We Work</h2>
-                    <p class="text-lg text-gray-300 mt-2 reveal-on-scroll" style="transition-delay: 150ms;">A streamlined process to bring your ideas to life.</p>
-                </div>
-                <div class="flex flex-col lg:flex-row justify-between gap-8">
-                    <!-- Steps re-styled for new theme -->
-                    <div class="timeline-item lg:w-1/4 flex lg:block items-start reveal-on-scroll">
-                        <div class="flex-shrink-0 mr-6 lg:mr-0 lg:mb-4">
-                            <div class="w-14 h-14 bg-surface border-2 border-strong rounded-full flex items-center justify-center">
-                                <span class="text-accent font-bold text-xl">1</span>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-bold mb-2 text-white">Discovery</h3>
-                            <p class="text-text-muted">We start by understanding your vision, goals, and audience to create a solid project foundation.</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item lg:w-1/4 flex lg:block items-start reveal-on-scroll" style="transition-delay: 150ms;">
-                        <div class="flex-shrink-0 mr-6 lg:mr-0 lg:mb-4">
-                           <div class="w-14 h-14 bg-surface border-2 border-strong rounded-full flex items-center justify-center">
-                                <span class="text-accent font-bold text-xl">2</span>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-bold mb-2 text-white">Design & Prototype</h3>
-                            <p class="text-text-muted">Crafting wireframes and high-fidelity mockups to visualize the user experience before development.</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item lg:w-1/4 flex lg:block items-start reveal-on-scroll" style="transition-delay: 300ms;">
-                        <div class="flex-shrink-0 mr-6 lg:mr-0 lg:mb-4">
-                           <div class="w-14 h-14 bg-surface border-2 border-strong rounded-full flex items-center justify-center">
-                                <span class="text-accent font-bold text-xl">3</span>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-bold mb-2 text-white">Develop & Build</h3>
-                            <p class="text-text-muted">Writing clean, efficient, and scalable code to bring the approved designs to life on the web.</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item lg:w-1/4 flex lg:block items-start reveal-on-scroll" style="transition-delay: 450ms;">
-                         <div class="flex-shrink-0 mr-6 lg:mr-0 lg:mb-4">
-                           <div class="w-14 h-14 bg-surface border-2 border-strong rounded-full flex items-center justify-center">
-                                <span class="text-accent font-bold text-xl">4</span>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-bold mb-2 text-white">Deploy & Support</h3>
-                            <p class="text-text-muted">Launching the project and providing ongoing support to ensure everything runs smoothly.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- About Section -->
-        <section id="about" class="py-20 lg:py-32 bg-black/20">
-            <div class="container mx-auto px-6">
-                 <div class="max-w-3xl mx-auto text-center">
-                    <h2 class="text-3xl md:text-4xl font-bold font-headline reveal-on-scroll text-white">About SanStudio</h2>
-                    <p class="text-lg text-gray-300 mt-4 reveal-on-scroll" style="transition-delay: 150ms;">
-                        We are a small, passionate team of designers and developers based in Chennai, India, dedicated to crafting exceptional digital experiences. Our philosophy is simple: combine beautiful design with robust technology to create products that are not only aesthetically pleasing but also intuitive and performant. From small businesses to creative individuals, we partner with clients to turn their visions into reality.
-                    </p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Contact Section -->
-        <section id="contact" class="py-20 lg:py-32">
-            <div class="container mx-auto px-6">
-                <div class="max-w-3xl mx-auto text-center">
-                    <h2 class="text-3xl md:text-4xl font-bold font-headline reveal-on-scroll text-white">Let's Build Something Great</h2>
-                    <p class="text-lg text-gray-300 mt-2 mb-8 reveal-on-scroll" style="transition-delay: 150ms;">Have a project in mind? Fill the form to send us a message on WhatsApp.</p>
-                </div>
-                <div class="max-w-xl mx-auto reveal-on-scroll bg-surface p-8 rounded-2xl border border-strong" style="transition-delay: 300ms;">
-                    <form id="contact-form" class="space-y-6">
-                        <div>
-                            <label for="name" class="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
-                            <input type="text" id="name" name="name" required class="w-full bg-gray-200 border border-gray-400 text-gray-900 rounded-lg px-4 py-3 focus:ring-2 focus:ring-accent focus:outline-none transition-shadow">
-                        </div>
-                         <div>
-                            <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
-                            <input type="email" id="email" name="email" required class="w-full bg-gray-200 border border-gray-400 text-gray-900 rounded-lg px-4 py-3 focus:ring-2 focus:ring-accent focus:outline-none transition-shadow">
-                        </div>
-                        <div>
-                            <label for="project-type" class="block text-sm font-medium text-gray-300 mb-2">Project Type</label>
-                            <select id="project-type" name="projectType" required class="w-full bg-gray-200 border border-gray-400 text-gray-900 rounded-lg px-4 py-3 appearance-none focus:ring-2 focus:ring-accent focus:outline-none transition-shadow">
-                                <option>Web Design</option>
-                                <option>AI Integration</option>
-                                <option>3D Showcase</option>
-                                <option>Other</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="message" class="block text-sm font-medium text-gray-300 mb-2">Message</label>
-                            <textarea id="message" name="message" rows="4" required class="w-full bg-gray-200 border border-gray-400 text-gray-900 rounded-lg px-4 py-3 focus:ring-2 focus:ring-accent focus:outline-none transition-shadow"></textarea>
-                        </div>
-                        <div class="flex flex-col sm:flex-row gap-4 items-center">
-                            <button type="submit" class="w-full sm:w-auto bg-accent hover:bg-accent-hover text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105">
-                                Send via WhatsApp
-                            </button>
-                            <div id="form-feedback" class="text-sm"></div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </section>
-
-    </main>
-    
-    <!-- Footer -->
-    <footer class="border-t border-strong">
-        <div class="container mx-auto px-6 py-8">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-                <div class="text-center md:text-left">
-                    <p class="text-text-muted">&copy; 2025 SanStudio. All rights reserved.</p>
-                    <p class="text-sm text-text-muted/70">Creative Web Design in Chennai, IN | Developed by <a href="#" class="hover:text-accent transition-colors">SanStudio</a></p>
-                </div>
-                <div class="flex items-center space-x-6">
-                    <a href="mailto:hello@sanstudio.dev" aria-label="Email" class="text-text-muted hover:text-accent transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0 1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                    </a>
-                    <a href="https://wa.me/919003356047" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" class="text-text-muted hover:text-accent transition-colors">
-                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </footer>
-    
-    <!-- Portfolio Modal -->
-    <div id="portfolio-modal" class="modal fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 opacity-0 invisible" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-        <div class="modal-content w-full max-w-4xl max-h-[90vh] rounded-2xl overflow-y-auto border border-strong shadow-2xl">
-            <div class="p-6 md:p-8">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h2 id="modal-title" class="text-2xl md:text-3xl font-bold font-headline text-white">Project Title</h2>
-                        <p id="modal-category" class="text-accent">Category</p>
-                    </div>
-                    <button id="modal-close-btn" class="text-gray-400 hover:text-white" aria-label="Close dialog">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            <!-- Output -->
+            <div class="output-section" id="outputSection">
+                <label>Generated Output</label>
+                <textarea id="outputResult" class="result-box" readonly></textarea>
+                
+                <div class="action-grid">
+                    <button class="btn btn-copy" onclick="copyToClipboard()">
+                        <span id="copyText">Copy to Clipboard</span>
                     </button>
-                </div>
-                <img id="modal-image" src="https://placehold.co/800x500/1A3A4A/F9FAFB?text=Project+Image" alt="Project image" class="w-full h-auto object-cover rounded-lg my-6">
-                <div id="modal-description" class="prose prose-invert max-w-none text-text-muted">
-                    <p>Project description will go here...</p>
+                    <button class="btn btn-outline" onclick="downloadFile('js')">Download .JS</button>
+                    <button class="btn btn-outline" onclick="downloadFile('json')">Download .JSON</button>
+                    <button class="btn btn-outline" onclick="downloadFile('txt')">Download .TXT</button>
                 </div>
             </div>
+
+            <!-- History Section -->
+            <div class="history-container" id="step-history">
+                <div class="history-header">
+                    <h2>Recent History</h2>
+                    <button class="btn-text" onclick="clearHistory()">Clear All</button>
+                </div>
+                <div id="historyList" class="history-list">
+                    <!-- History items will be injected here -->
+                    <p style="text-align:center; color: var(--text-muted); font-size: 0.9rem;">No history yet.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Developed by Santhosh_A
         </div>
     </div>
 
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">Copied to clipboard!</div>
 
-    <script type="module">
-        /**
-         * ----------------------------------------------------------------
-         * Main Application Logic (Vanilla JS)
-         * ----------------------------------------------------------------
-         * This script is organized into conceptual modules for clarity:
-         * - UIModule: Handles UI interactions like navigation, modals.
-         * - AnimationModule: Manages scroll animations and the hero 3D scene.
-         * - App: Initializes all modules.
-         */
+    <!-- Tour Elements -->
+    <div class="tour-overlay" id="tourOverlay"></div>
+    <div class="tour-tooltip" id="tourTooltip">
+        <h3 id="tourTitle">Title</h3>
+        <p id="tourText">Description</p>
+        <div class="tour-controls">
+            <button class="tour-btn tour-btn-skip" onclick="endTour()">Close</button>
+            <span class="tour-step-counter" id="tourCounter">1/4</span>
+            <button class="tour-btn" onclick="nextStep()" id="tourNextBtn">Next</button>
+        </div>
+    </div>
 
-        // --- Data ---
-        const portfolioData = [
-            { id: 1, title: 'AI-Powered Data Dashboard for Businesses', category: 'Web Application', img: 'https://placehold.co/600x400/3B82F6/FFFFFF?text=Project+One', description: '<p>A comprehensive dashboard that leverages AI to visualize complex data sets in real-time. Built with a focus on performance and intuitive user experience. Users can generate reports, identify trends, and make data-driven decisions with ease.</p><p>Tech stack: Vanilla JS, D3.js, Tailwind CSS.</p>' },
-            { id: 2, title: 'E-commerce Store for a Temple in India', category: 'Web Design', img: 'https://placehold.co/600x400/1A3A4A/F9FAFB?text=Project+Two', description: '<p>A serene and accessible e-commerce platform for a local temple, enabling online donations and sale of religious items. The design reflects traditional aesthetics while providing a modern, seamless shopping experience.</p><p>Tech stack: HTML, CSS, JavaScript.</p>' },
-            { id: 3, title: 'Interactive 3D Product Configurator', category: '3D Showcase', img: 'https://placehold.co/600x400/3B82F6/FFFFFF?text=Project+Three', description: '<p>An interactive 3D product configurator for a furniture brand. Customers can customize materials, colors, and features in real-time, viewing their creation from any angle. This project significantly boosted user engagement and sales.</p><p>Tech stack: Three.js, WebGL, Vanilla JS.</p>' },
-            { id: 4, title: 'Web Portfolio for a Local Artist', category: 'Frontend Build', img: 'https://placehold.co/600x400/1A3A4A/F9FAFB?text=Project+Four', description: '<p>A visually rich portfolio website for a local photographer. The site features a masonry grid layout, lazy-loaded high-resolution images, and a clean, minimal design that puts the artwork front and center.</p><p>Tech stack: HTML, CSS Grid, Intersection Observer API.</p>' },
-            { id: 5, title: 'Generative Art Application with AI', category: 'AI Tools', img: 'https://placehold.co/600x400/3B82F6/FFFFFF?text=Project+Five', description: '<p>A web-based tool that uses AI to generate unique abstract art based on user inputs like keywords and color palettes. A fun project exploring the intersection of creativity and artificial intelligence.</p><p>Tech stack: TensorFlow.js, Vanilla JS, HTML5 Canvas.</p>' },
-            { id: 6, title: 'Animated Brand Video Intro', category: 'Video Intro', img: 'https://placehold.co/600x400/1A3A4A/F9FAFB?text=Project+Six', description: '<p>A dynamic and professional video intro created in Blender for a YouTube tech channel. The animation features a sleek logo reveal and motion graphics that align with the channel\'s modern branding.</p><p>Tech stack: Blender, After Effects.</p>' },
+    <script>
+        const ID_REGEX = /\/d\/([a-zA-Z0-9_-]+)/;
+        const KEY_INPUT_NAME = 'drive_extractor_name';
+        const KEY_INPUT_LINKS = 'drive_extractor_links';
+        const KEY_HISTORY = 'drive_extractor_history';
+        const KEY_THEME = 'drive_extractor_theme';
+        
+        let lastExtractedData = [];
+        let extractionHistory = [];
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            loadTheme();
+            loadInputs();
+            loadHistory();
+            renderHistory();
+        });
+
+        // --- Theme Logic ---
+        function loadTheme() {
+            const savedTheme = localStorage.getItem(KEY_THEME);
+            if (savedTheme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+                updateThemeIcon(true);
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                updateThemeIcon(false);
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            if (currentTheme === 'light') {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem(KEY_THEME, 'dark');
+                updateThemeIcon(false);
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem(KEY_THEME, 'light');
+                updateThemeIcon(true);
+            }
+        }
+
+        function updateThemeIcon(isLight) {
+            const sun = document.getElementById('icon-sun');
+            const moon = document.getElementById('icon-moon');
+            if (isLight) {
+                sun.style.display = 'none';
+                moon.style.display = 'block';
+            } else {
+                sun.style.display = 'block';
+                moon.style.display = 'none';
+            }
+        }
+
+        // --- Core Logic ---
+        // Auto-save inputs listeners
+        document.getElementById('eventName').addEventListener('input', (e) => {
+            localStorage.setItem(KEY_INPUT_NAME, e.target.value);
+        });
+
+        document.getElementById('inputLinks').addEventListener('input', (e) => {
+            localStorage.setItem(KEY_INPUT_LINKS, e.target.value);
+        });
+
+        function loadInputs() {
+            const savedName = localStorage.getItem(KEY_INPUT_NAME);
+            const savedLinks = localStorage.getItem(KEY_INPUT_LINKS);
+            if (savedName) document.getElementById('eventName').value = savedName;
+            if (savedLinks) document.getElementById('inputLinks').value = savedLinks;
+        }
+
+        function extractIds() {
+            const eventNameInput = document.getElementById('eventName').value.trim();
+            const linksInput = document.getElementById('inputLinks').value;
+            const outputSection = document.getElementById('outputSection');
+            const outputResult = document.getElementById('outputResult');
+
+            const baseName = eventNameInput || "Event";
+            const rawLinks = linksInput.split(/[\n,]+/);
+            
+            const processedData = [];
+            let counter = 1;
+
+            rawLinks.forEach(link => {
+                const cleanLink = link.trim();
+                if (!cleanLink) return;
+
+                const match = cleanLink.match(ID_REGEX);
+                
+                if (match && match[1]) {
+                    processedData.push({
+                        id: match[1],
+                        name: `${baseName} ${counter}`
+                    });
+                    counter++;
+                }
+            });
+
+            if (processedData.length === 0) {
+                if(linksInput.trim() !== "") alert("No valid Google Drive IDs found.");
+                outputSection.classList.remove('active');
+                return;
+            }
+
+            lastExtractedData = processedData;
+
+            const formattedLines = processedData.map(item => 
+                `{ id: "${item.id}", name: "${item.name}" },`
+            );
+            
+            const finalOutput = formattedLines.join('\n');
+
+            outputResult.value = finalOutput;
+            outputSection.classList.add('active');
+
+            // Add to history
+            addToHistory(baseName, processedData.length, linksInput, finalOutput);
+        }
+
+        function clearForm() {
+            document.getElementById('eventName').value = '';
+            document.getElementById('inputLinks').value = '';
+            document.getElementById('outputResult').value = '';
+            document.getElementById('outputSection').classList.remove('active');
+            
+            localStorage.removeItem(KEY_INPUT_NAME);
+            localStorage.removeItem(KEY_INPUT_LINKS);
+            
+            showToastMessage("Form cleared!");
+        }
+
+        // --- History Functions ---
+        function loadHistory() {
+            const stored = localStorage.getItem(KEY_HISTORY);
+            if (stored) {
+                try {
+                    extractionHistory = JSON.parse(stored);
+                } catch(e) {
+                    extractionHistory = [];
+                }
+            }
+        }
+
+        function addToHistory(name, count, links, result) {
+            const newItem = {
+                id: Date.now(),
+                eventName: name,
+                count: count,
+                links: links,
+                result: result,
+                timestamp: new Date().toLocaleString()
+            };
+
+            extractionHistory.unshift(newItem);
+            if (extractionHistory.length > 5) {
+                extractionHistory = extractionHistory.slice(0, 5);
+            }
+
+            localStorage.setItem(KEY_HISTORY, JSON.stringify(extractionHistory));
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('historyList');
+            container.innerHTML = '';
+
+            if (extractionHistory.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color: var(--text-muted); font-size: 0.9rem;">No history yet.</p>';
+                return;
+            }
+
+            extractionHistory.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `
+                    <div class="history-info">
+                        <span class="history-title">${item.eventName}</span>
+                        <span class="history-meta">${item.count} items • ${item.timestamp}</span>
+                    </div>
+                    <div class="history-actions">
+                        <button class="btn btn-outline btn-sm" onclick="restoreHistory(${index})">Load</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function restoreHistory(index) {
+            const item = extractionHistory[index];
+            if (!item) return;
+
+            document.getElementById('eventName').value = item.eventName;
+            document.getElementById('inputLinks').value = item.links;
+            localStorage.setItem(KEY_INPUT_NAME, item.eventName);
+            localStorage.setItem(KEY_INPUT_LINKS, item.links);
+
+            document.getElementById('outputResult').value = item.result;
+            document.getElementById('outputSection').classList.add('active');
+
+            rebuildLastData(item.eventName, item.links);
+
+            document.querySelector('.container').scrollIntoView({ behavior: 'smooth' });
+            showToastMessage("History loaded!");
+        }
+
+        function rebuildLastData(eventName, linksInput) {
+             const baseName = eventName || "Event";
+             const rawLinks = linksInput.split(/[\n,]+/);
+             lastExtractedData = [];
+             let counter = 1;
+             rawLinks.forEach(link => {
+                const match = link.trim().match(ID_REGEX);
+                if (match && match[1]) {
+                    lastExtractedData.push({ id: match[1], name: `${baseName} ${counter}` });
+                    counter++;
+                }
+            });
+        }
+
+        function clearHistory() {
+            if(confirm('Clear all recent history?')) {
+                extractionHistory = [];
+                localStorage.removeItem(KEY_HISTORY);
+                renderHistory();
+            }
+        }
+
+        // --- Common Utils ---
+        function copyToClipboard() {
+            const outputResult = document.getElementById('outputResult');
+            outputResult.select();
+            outputResult.setSelectionRange(0, 99999);
+            try {
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(outputResult.value).then(() => showToastMessage("Copied to clipboard!"));
+                } else {
+                    document.execCommand('copy');
+                    showToastMessage("Copied to clipboard!");
+                }
+            } catch (err) {
+                console.error('Failed to copy', err);
+            }
+        }
+
+        function showToastMessage(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function downloadFile(type) {
+            const outputResult = document.getElementById('outputResult').value;
+            if(!outputResult) return;
+
+            let content = "";
+            let filename = "";
+            let mimeType = "text/plain";
+
+            if (type === 'js') {
+                content = outputResult; 
+                filename = "output.js";
+                mimeType = "text/javascript";
+            } else if (type === 'json') {
+                content = JSON.stringify(lastExtractedData, null, 2);
+                filename = "output.json";
+                mimeType = "application/json";
+            } else if (type === 'txt') {
+                content = outputResult; 
+                filename = "output.txt";
+                mimeType = "text/plain";
+            }
+
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // --- TOUR FUNCTIONALITY ---
+        let currentStep = 0;
+        const steps = [
+            {
+                elementId: null,
+                title: "Welcome!",
+                text: "Let's take a quick tour of the Drive ID Extractor. Learn how to convert your links in seconds."
+            },
+            {
+                elementId: 'step-event',
+                title: "1. Event Name",
+                text: "Start by entering a name (e.g., 'Wedding'). This will be used to label your files in the output."
+            },
+            {
+                elementId: 'step-links',
+                title: "2. Paste Links",
+                text: "Copy your Google Drive links and paste them here. We accept multiple links separated by commas or new lines."
+            },
+            {
+                elementId: 'step-extract',
+                title: "3. Extract IDs",
+                text: "Click this button to process the links. Your structured code will appear below automatically."
+            },
+            {
+                elementId: 'step-clear',
+                title: "4. Clear Form",
+                text: "Want to start over? Click 'Clear' to reset all inputs and remove the current output."
+            },
+            {
+                elementId: 'step-history',
+                title: "5. History",
+                text: "Your sessions are auto-saved locally. You can reload previous extractions from this list anytime."
+            }
         ];
 
+        function startTour() {
+            currentStep = 0;
+            document.getElementById('tourOverlay').classList.add('active');
+            document.getElementById('tourTooltip').style.display = 'block';
+            updateTour();
+        }
 
-        /**
-         * @module UIModule
-         * Handles general UI interactions.
-         */
-        const UIModule = {
-            init() {
-                this.handleHeaderScroll();
-                this.handleMobileMenu();
-                this.populatePortfolio();
-                this.handlePortfolioModal();
-                this.handleContactForm();
-            },
+        function endTour() {
+            document.getElementById('tourOverlay').classList.remove('active');
+            document.getElementById('tourTooltip').style.display = 'none';
+            // Remove highlight from any existing element
+            const active = document.querySelector('.tour-highlight');
+            if(active) active.classList.remove('tour-highlight');
+        }
 
-            handleHeaderScroll() {
-                const header = document.getElementById('main-header');
-                window.addEventListener('scroll', () => {
-                    if (window.scrollY > 50) {
-                        header.classList.add('scrolled');
-                    } else {
-                        header.classList.remove('scrolled');
-                    }
-                });
-            },
-            
-            handleMobileMenu() {
-                const menuBtn = document.getElementById('mobile-menu-btn');
-                const mobileMenu = document.getElementById('mobile-menu');
-                const openIcon = document.getElementById('menu-open-icon');
-                const closeIcon = document.getElementById('menu-close-icon');
-                const navLinks = mobileMenu.querySelectorAll('.mobile-nav-link');
-
-                const toggleMenu = () => {
-                    mobileMenu.classList.toggle('hidden');
-                    openIcon.classList.toggle('hidden');
-                    closeIcon.classList.toggle('hidden');
-                    document.body.style.overflow = mobileMenu.classList.contains('hidden') ? '' : 'hidden';
-                };
-
-                menuBtn.addEventListener('click', toggleMenu);
-                navLinks.forEach(link => link.addEventListener('click', toggleMenu));
-            },
-
-            populatePortfolio() {
-                const grid = document.getElementById('portfolio-grid');
-                if (!grid) return;
-                
-                portfolioData.forEach((project, index) => {
-                    const delay = index * 100;
-                    const item = document.createElement('div');
-                    item.className = 'group relative overflow-hidden rounded-2xl cursor-pointer reveal-on-scroll bg-surface border border-strong';
-                    item.style.transitionDelay = `${delay}ms`;
-                    item.setAttribute('data-project-id', project.id);
-                    item.setAttribute('tabindex', '0');
-                    item.setAttribute('role', 'button');
-                    item.setAttribute('aria-label', `View details for ${project.title}`);
-
-                    item.innerHTML = `
-                        <img loading="lazy" src="${project.img}" alt="${project.title}" class="w-full h-48 object-cover transform group-hover:scale-105 transition-transform duration-500">
-                        <div class="p-6">
-                            <p class="text-sm text-accent font-semibold">${project.category}</p>
-                            <h3 class="text-xl font-bold text-white mt-1">${project.title}</h3>
-                        </div>
-                        <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                           <span class="text-white font-semibold border-2 border-white rounded-full px-4 py-2">View Project</span>
-                        </div>
-                    `;
-                    grid.appendChild(item);
-                });
-            },
-            
-            handlePortfolioModal() {
-                const modal = document.getElementById('portfolio-modal');
-                const closeBtn = document.getElementById('modal-close-btn');
-                const grid = document.getElementById('portfolio-grid');
-
-                const openModal = (project) => {
-                    document.getElementById('modal-title').textContent = project.title;
-                    document.getElementById('modal-category').textContent = project.category;
-                    document.getElementById('modal-image').src = project.img.replace('600x400', '800x500'); // Get higher res for modal
-                    document.getElementById('modal-image').alt = project.title;
-                    document.getElementById('modal-description').innerHTML = project.description;
-                    
-                    modal.classList.add('is-open');
-                    document.body.style.overflow = 'hidden';
-                    closeBtn.focus();
-                };
-
-                const closeModal = () => {
-                    modal.classList.remove('is-open');
-                    document.body.style.overflow = '';
-                };
-
-                grid.addEventListener('click', (e) => {
-                    const projectCard = e.target.closest('[data-project-id]');
-                    if (projectCard) {
-                        const projectId = parseInt(projectCard.dataset.projectId);
-                        const project = portfolioData.find(p => p.id === projectId);
-                        if (project) openModal(project);
-                    }
-                });
-                
-                grid.addEventListener('keydown', (e) => {
-                     if (e.key === 'Enter' || e.key === ' ') {
-                        const projectCard = e.target.closest('[data-project-id]');
-                        if (projectCard) {
-                           e.preventDefault();
-                           const projectId = parseInt(projectCard.dataset.projectId);
-                           const project = portfolioData.find(p => p.id === projectId);
-                           if (project) openModal(project);
-                        }
-                     }
-                });
-
-                closeBtn.addEventListener('click', closeModal);
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) closeModal();
-                });
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape' && modal.classList.contains('is-open')) {
-                        closeModal();
-                    }
-                });
-            },
-            
-            handleContactForm() {
-                const form = document.getElementById('contact-form');
-                if (!form) return;
-
-                form.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    
-                    const name = form.elements.name.value;
-                    const email = form.elements.email.value;
-                    const projectType = form.elements.projectType.value;
-                    const message = form.elements.message.value;
-
-                    const whatsappMessage = `Hello SanStudio, I'd like to discuss a project.\n\n*Name:*\n${name}\n\n*Email:*\n${email}\n\n*Project Type:*\n${projectType}\n\n*Message:*\n${message}`;
-                    
-                    const encodedMessage = encodeURIComponent(whatsappMessage);
-                    const whatsappURL = `https://wa.me/919003356047?text=${encodedMessage}`;
-
-                    window.open(whatsappURL, '_blank');
-                    
-                    form.reset();
-                });
+        function nextStep() {
+            currentStep++;
+            if (currentStep >= steps.length) {
+                endTour();
+            } else {
+                updateTour();
             }
-        };
+        }
 
+        function updateTour() {
+            const step = steps[currentStep];
+            const titleEl = document.getElementById('tourTitle');
+            const textEl = document.getElementById('tourText');
+            const counterEl = document.getElementById('tourCounter');
+            const nextBtn = document.getElementById('tourNextBtn');
+            const tooltip = document.getElementById('tourTooltip');
 
-        /**
-         * @module AnimationModule
-         * Manages animations and 3D hero scene.
-         */
-        const AnimationModule = {
-            init() {
-                this.setupScrollObserver();
-                this.initHeroScene();
-            },
+            // Content
+            titleEl.textContent = step.title;
+            textEl.textContent = step.text;
+            counterEl.textContent = `${currentStep + 1}/${steps.length}`;
+            nextBtn.textContent = (currentStep === steps.length - 1) ? "Finish" : "Next";
 
-            setupScrollObserver() {
-                const options = {
-                    root: null,
-                    rootMargin: '0px',
-                    threshold: 0.1
-                };
+            // Cleanup previous highlight
+            const prevActive = document.querySelector('.tour-highlight');
+            if(prevActive) prevActive.classList.remove('tour-highlight');
 
-                const observer = new IntersectionObserver((entries, observer) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            entry.target.classList.add('is-visible');
-                            observer.unobserve(entry.target);
-                        }
-                    });
-                }, options);
+            if (step.elementId) {
+                // Highlighting Logic
+                const element = document.getElementById(step.elementId);
+                if (element) {
+                    element.classList.add('tour-highlight');
+                    
+                    // Positioning logic (Simple/Desktop)
+                    const rect = element.getBoundingClientRect();
+                    const tooltipRect = tooltip.getBoundingClientRect();
+                    
+                    // Default: Position to the right
+                    let top = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
+                    let left = rect.right + 20;
 
-                document.querySelectorAll('.reveal-on-scroll').forEach(el => {
-                    observer.observe(el);
-                });
-            },
-
-            initHeroScene() {
-                const canvas = document.getElementById('hero-canvas');
-                if (!canvas || typeof THREE === 'undefined') return;
-
-                const scene = new THREE.Scene();
-                const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-                const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialiias: true });
-                const clock = new THREE.Clock();
-
-                renderer.setSize(window.innerWidth, window.innerHeight);
-                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-                const shapes = new THREE.Group();
-                const materialOptions = { metalness: 0.1, roughness: 0.7 };
-
-                const shapesData = [
-                    { geometry: new THREE.SphereGeometry(1.5, 32, 32), material: new THREE.MeshStandardMaterial({ color: 0xD2B48C, ...materialOptions }), position: [-4, 1, -5] },
-                    { geometry: new THREE.BoxGeometry(1.5, 3, 1.5), material: new THREE.MeshStandardMaterial({ color: 0xE48B6B, ...materialOptions }), position: [5, -2, -8] },
-                    { geometry: new THREE.SphereGeometry(0.8, 32, 32), material: new THREE.MeshStandardMaterial({ color: 0x4682B4, ...materialOptions }), position: [0, -3, -4] },
-                    { geometry: new THREE.TorusGeometry(1, 0.4, 16, 100), material: new THREE.MeshStandardMaterial({ color: 0x8FBC8F, ...materialOptions }), position: [-6, -4, -10] },
-                    { geometry: new THREE.SphereGeometry(0.5, 32, 32), material: new THREE.MeshStandardMaterial({ color: 0xFFD700, ...materialOptions }), position: [8, 4, -12] },
-                ];
-
-                shapesData.forEach(data => {
-                    const mesh = new THREE.Mesh(data.geometry, data.material);
-                    mesh.position.set(...data.position);
-                    mesh.userData.initialPosition = new THREE.Vector3(...data.position);
-                    mesh.userData.randomFactor = Math.random() * Math.PI * 2;
-                    shapes.add(mesh);
-                });
-                
-                scene.add(shapes);
-                camera.position.z = 5;
-
-                const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-                scene.add(ambientLight);
-                
-                const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-                directionalLight.position.set(5, 5, 5);
-                scene.add(directionalLight);
-
-                let mouseX = 0;
-                let mouseY = 0;
-                
-                const onMouseMove = (event) => {
-                    mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-                    mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-                };
-                window.addEventListener('mousemove', onMouseMove);
-                
-                const animate = () => {
-                    requestAnimationFrame(animate);
-                    const elapsedTime = clock.getElapsedTime();
-
-                    // Animate shapes
-                    shapes.children.forEach(shape => {
-                        shape.rotation.y += 0.002;
-                        shape.rotation.x += 0.001;
+                    // Mobile/Responsive Fallback: If tooltip goes off-screen right, put it below
+                    if (window.innerWidth < 800 || (left + tooltipRect.width > window.innerWidth)) {
+                        left = rect.left + (rect.width / 2) - (tooltipRect.width / 2); // Center horizontally
+                        top = rect.bottom + 20; // Below
                         
-                        // Floating motion
-                        const yOffset = Math.sin(elapsedTime + shape.userData.randomFactor) * 0.2;
-                        shape.position.y = shape.userData.initialPosition.y + yOffset;
-                    });
+                        // If it goes off-screen left
+                        if (left < 10) left = 10;
+                    }
+
+                    // Apply
+                    tooltip.style.top = `${top}px`;
+                    tooltip.style.left = `${left}px`;
                     
-                    // Parallax mouse effect on the whole group
-                    shapes.rotation.y += (mouseX * 0.2 - shapes.rotation.y) * 0.03;
-                    shapes.rotation.x += (mouseY * 0.2 - shapes.rotation.x) * 0.03;
-
-                    renderer.render(scene, camera);
-                };
-
-                animate();
-
-                window.addEventListener('resize', () => {
-                    camera.aspect = window.innerWidth / window.innerHeight;
-                    camera.updateProjectionMatrix();
-                    renderer.setSize(window.innerWidth, window.innerHeight);
-                });
+                    // Ensure it scrolls into view
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            } else {
+                // Intro step (Center screen)
+                tooltip.style.top = '50%';
+                tooltip.style.left = '50%';
+                tooltip.style.transform = 'translate(-50%, -50%)';
             }
-        };
-
-        /**
-         * @module App
-         * Initializes the application.
-         */
-        const App = {
-            init() {
-                document.addEventListener('DOMContentLoaded', () => {
-                    UIModule.init();
-                    AnimationModule.init();
-                });
-            }
-        };
-
-        App.init();
-
+        }
     </script>
-
 </body>
 </html>
-
