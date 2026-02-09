@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SanStudio — Creative Web Design, AI & 3D Studio in Chennai</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="SanStudio is a creative studio in Chennai, India, specializing in web design, AI tools, 3D showcases, and UI/UX-driven projects for businesses worldwide and sanstudio.neocities, sanstudio.neocities.">
+    <meta name="keywords" content="web design chennai, ai development india, 3d artist portfolio, frontend developer tamil nadu, creative studio, web development, ui/ux design">
+    <meta name="author" content="SanStudio">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://www.sanstudio.dev/">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.sanstudio.dev/">
+    <meta property="og:title" content="SanStudio — Creative Web Design, AI & 3D Studio in Chennai">
+    <meta property="og:description" content="We build stunning digital experiences that blend art, technology, and user-centric design to elevate your brand.">
+    <meta property="og:image" content="https://placehold.co/1200x630/113F4E/FFFFFF?text=SanStudio">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://www.sanstudio.dev/">
+    <meta property="twitter:title" content="SanStudio — Creative Web Design, AI & 3D Studio in Chennai">
+    <meta property="twitter:description" content="We build stunning digital experiences that blend art, technology, and user-centric design to elevate your brand.">
+    <meta property="twitter:image" content="https://placehold.co/1200x630/113F4E/FFFFFF?text=SanStudio">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Inter for Body, Poppins for Headlines -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="icon" type="image/png" href="Logo.png" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Three.js for 3D Hero Animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ProfessionalService",
+      "name": "SanStudio",
+      "image": "https://placehold.co/512x512/113F4E/FFFFFF?text=S",
+      "@id": "https://www.sanstudio.dev/",
+      "url": "https://www.sanstudio.dev/",
+      "telephone": "+91-9003356047",
+      "description": "SanStudio is a creative studio in Chennai, specializing in high-performance web design, AI prompt engineering, and 3D visual showcases.",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "123 Creative Lane",
+        "addressLocality": "Chennai",
+        "postalCode": "600001",
+        "addressRegion": "TN",
+        "addressCountry": "IN"
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday"
+        ],
+        "opens": "09:00",
+        "closes": "18:00"
+      }
+    }
+    </script>
+
+    <style>
+        /* CSS Custom Properties for Theming */
+        :root {
+            --color-background-start: #113F4E;
+            --color-background-end: #0B2B33;
+            --color-text: #F9FAFB;
+            --color-text-muted: #A0AEC0;
+            --color-accent: #3B82F6; /* Tailwind Blue-500 */
+            --color-accent-hover: #2563EB; /* Tailwind Blue-600 */
+            --color-surface: #1A3A4A; 
+            --color-border: #2D4A5A;
+            --font-headline: 'Poppins', sans-serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        /* Basic Setup */
+        body {
+            background-image: linear-gradient(to bottom right, var(--color-background-start), var(--color-background-end));
+            color: var(--color-text);
+            font-family: var(--font-body);
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-headline);
+        }
+
+        /* Header Blur on Scroll */
+        header.scrolled {
+            background-color: rgba(17, 63, 78, 0.7); /* Adjusted for new theme */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom-width: 1px;
+            border-color: var(--color-border);
+        }
+
+        /* Scroll Reveal Animations */
+        .reveal-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s cubic-bezier(0.645, 0.045, 0.355, 1), transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1);
+        }
+        .reveal-on-scroll.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Respects user's motion preference */
+        @media (prefers-reduced-motion: reduce) {
+            .reveal-on-scroll,
+            .transition-all,
+            .transition {
+                transition: none !important;
+                animation: none !important;
+            }
+            #hero-canvas {
+                display: none; /* Hide performance-intensive animation */
+            }
+            .hero-fallback {
+                display: block !important;
+            }
+        }
+        
+        /* Custom Focus State */
+        :focus-visible {
+            outline: 2px solid var(--color-accent);
+            outline-offset: 2px;
+            border-radius: 6px;
+        }
+
+        /* Hero Canvas Styling */
+        #hero-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.8;
+        }
+
+        /* Process Timeline Styling */
+        .timeline-item {
+            position: relative;
+            padding-bottom: 2.5rem;
+        }
+        .timeline-item:not(:last-child)::before {
+            content: '';
+            position: absolute;
+            top: 28px; /* Vertically center with the icon */
+            left: 28px; /* Horizontally center with the icon */
+            width: calc(100% - 56px);
+            height: 2px;
+            background-color: var(--color-border);
+        }
+        @media (max-width: 1023px) {
+            .timeline-item:not(:last-child)::before {
+                width: 2px;
+                height: calc(100% - 56px);
+                top: 56px;
+            }
+        }
+
+        /* Portfolio Modal Styling */
+        .modal {
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal.is-open {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: var(--color-surface);
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .modal.is-open .modal-content {
+            transform: scale(1);
+        }
+    </style>
+</head>
+
+<body class="bg-background text-main font-body antialiased">
+
+    <!-- Header -->
+    <header id="main-header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <!-- Logo -->
+            <a href="#" class="flex items-center space-x-2">
+                <span class="font-headline font-bold text-2xl text-white">SanStudio</span>
+            </a>
+
+            <!-- Desktop Navigation -->
+            <nav class="hidden md:flex items-center space-x-6">
+                <a href="#services" class="text-gray-300 hover:text-white transition-colors">Services</a>
+                <a href="#portfolio" class="text-gray-300 hover:text-white transition-colors">Portfolio</a>
+                <a href="#about" class="text-gray-300 hover:text-white transition-colors">About</a>
+                <a href="#contact" class="text-gray-300 hover:text-white transition-colors">Contact</a>
+            </nav>
+
+            <!-- Mobile Menu Button -->
+            <button id="mobile-menu-btn" class="md:hidden z-50 text-white">
+                <svg id="menu-open-icon" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                <svg id="menu-close-icon" class="w-7 h-7 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden absolute top-0 left-0 w-full h-screen" style="background-image: linear-gradient(to bottom right, var(--color-background-start), var(--color-background-end));">
+             <div class="flex flex-col items-center justify-center h-full space-y-8 text-2xl font-headline">
+                <a href="#services" class="mobile-nav-link text-gray-300 hover:text-white transition-colors">Services</a>
+                <a href="#portfolio" class="mobile-nav-link text-gray-300 hover:text-white transition-colors">Portfolio</a>
+                <a href="#about" class="mobile-nav-link text-gray-300 hover:text-white transition-colors">About</a>
+                <a href="#contact" class="mobile-nav-link text-gray-300 hover:text-white transition-colors">Contact</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+
+        <!-- Hero Section -->
+        <section class="relative h-screen min-h-[700px] flex items-center justify-center overflow-hidden">
+            <canvas id="hero-canvas"></canvas>
+            <div class="hero-fallback hidden absolute inset-0 opacity-50"></div>
+            <div class="container mx-auto px-6 text-center z-10">
+                <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold font-headline leading-tight mb-4 reveal-on-scroll text-white">
+                    Creative Studio for Web Design,<br> AI & 3D Experiences
+                </h1>
+                <p class="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto mb-8 reveal-on-scroll" style="transition-delay: 150ms;">
+                    We build stunning digital experiences that blend art, technology, and user-centric design to elevate your brand in Chennai and beyond.
+                </p>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 reveal-on-scroll" style="transition-delay: 300ms;">
+                    <a href="#contact" class="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg shadow-blue-500/30">
+                        Contact Us
+                    </a>
+                    <a href="#portfolio" class="w-full sm:w-auto bg-black/20 hover:bg-black/40 text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 border border-white/20 backdrop-blur-sm">
+                        View Portfolio
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- What We Do / Services -->
+        <section id="services" class="py-20 lg:py-32">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold font-headline reveal-on-scroll text-white">Our Services</h2>
+                    <p class="text-lg text-gray-300 mt-2 reveal-on-scroll" style="transition-delay: 150ms;">We build beautiful digital products that people love to use.</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Service Cards - Re-styled for new theme -->
+                    <div class="bg-surface p-8 rounded-2xl border border-strong transform hover:-translate-y-2 transition-transform duration-300 reveal-on-scroll">
+                        <div class="bg-accent/10 text-accent p-3 rounded-lg inline-block mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/><path d="M12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/><path d="M19 19L14.8 14.8"/><path d="M2 12h.01"/><path d="M12 22v-.01"/><path d="M22 12h-.01"/><path d="M12 2v.01"/><path d="M4.2 19.8l.01-.01"/><path d="M19.8 4.2l-.01.01"/><path d="M4.2 4.2l.01.01"/><path d="M19.8 19.8l-.01-.01"/></svg>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2 text-white">Web Design & Development</h3>
+                        <p class="text-text-muted">Creating stunning, responsive, and high-performance websites from scratch. We focus on clean code and user-centric design for businesses in India.</p>
+                    </div>
+                    <div class="bg-surface p-8 rounded-2xl border border-strong transform hover:-translate-y-2 transition-transform duration-300 reveal-on-scroll" style="transition-delay: 150ms;">
+                        <div class="bg-accent/10 text-accent p-3 rounded-lg inline-block mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 1.9a2.5 2.5 0 0 0 0 3.54l1.9 1.9"/><path d="m12 21 1.9-1.9a2.5 2.5 0 0 0 0-3.54l-1.9-1.9"/><path d="M3 12h18"/></svg>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2 text-white">AI Prompt Engineering</h3>
+                        <p class="text-text-muted">Leveraging advanced AI models to generate creative content, automate tasks, and build intelligent tools for your business.</p>
+                    </div>
+                    <div class="bg-surface p-8 rounded-2xl border border-strong transform hover:-translate-y-2 transition-transform duration-300 reveal-on-scroll" style="transition-delay: 300ms;">
+                        <div class="bg-accent/10 text-accent p-3 rounded-lg inline-block mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="m12 9 1.8 3.1a2 2 0 0 1 0 1.8L12 17"/></svg>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2 text-white">3D Visuals & Intros</h3>
+                        <p class="text-text-muted">Using Blender and other 3D tools to create eye-catching product showcases, video intros, and interactive web experiences.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Projects / Portfolio -->
+        <section id="portfolio" class="py-20 lg:py-32 bg-black/20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold font-headline reveal-on-scroll text-white">Featured Projects</h2>
+                    <p class="text-lg text-gray-300 mt-2 reveal-on-scroll" style="transition-delay: 150ms;">A selection of our favorite work.</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8" id="portfolio-grid">
+                    <!-- Portfolio items will be injected here by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Process Section -->
+        <section id="process" class="py-20 lg:py-32">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold font-headline reveal-on-scroll text-white">How We Work</h2>
+                    <p class="text-lg text-gray-300 mt-2 reveal-on-scroll" style="transition-delay: 150ms;">A streamlined process to bring your ideas to life.</p>
+                </div>
+                <div class="flex flex-col lg:flex-row justify-between gap-8">
+                    <!-- Steps re-styled for new theme -->
+                    <div class="timeline-item lg:w-1/4 flex lg:block items-start reveal-on-scroll">
+                        <div class="flex-shrink-0 mr-6 lg:mr-0 lg:mb-4">
+                            <div class="w-14 h-14 bg-surface border-2 border-strong rounded-full flex items-center justify-center">
+                                <span class="text-accent font-bold text-xl">1</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2 text-white">Discovery</h3>
+                            <p class="text-text-muted">We start by understanding your vision, goals, and audience to create a solid project foundation.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item lg:w-1/4 flex lg:block items-start reveal-on-scroll" style="transition-delay: 150ms;">
+                        <div class="flex-shrink-0 mr-6 lg:mr-0 lg:mb-4">
+                           <div class="w-14 h-14 bg-surface border-2 border-strong rounded-full flex items-center justify-center">
+                                <span class="text-accent font-bold text-xl">2</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2 text-white">Design & Prototype</h3>
+                            <p class="text-text-muted">Crafting wireframes and high-fidelity mockups to visualize the user experience before development.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item lg:w-1/4 flex lg:block items-start reveal-on-scroll" style="transition-delay: 300ms;">
+                        <div class="flex-shrink-0 mr-6 lg:mr-0 lg:mb-4">
+                           <div class="w-14 h-14 bg-surface border-2 border-strong rounded-full flex items-center justify-center">
+                                <span class="text-accent font-bold text-xl">3</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2 text-white">Develop & Build</h3>
+                            <p class="text-text-muted">Writing clean, efficient, and scalable code to bring the approved designs to life on the web.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item lg:w-1/4 flex lg:block items-start reveal-on-scroll" style="transition-delay: 450ms;">
+                         <div class="flex-shrink-0 mr-6 lg:mr-0 lg:mb-4">
+                           <div class="w-14 h-14 bg-surface border-2 border-strong rounded-full flex items-center justify-center">
+                                <span class="text-accent font-bold text-xl">4</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2 text-white">Deploy & Support</h3>
+                            <p class="text-text-muted">Launching the project and providing ongoing support to ensure everything runs smoothly.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="py-20 lg:py-32 bg-black/20">
+            <div class="container mx-auto px-6">
+                 <div class="max-w-3xl mx-auto text-center">
+                    <h2 class="text-3xl md:text-4xl font-bold font-headline reveal-on-scroll text-white">About SanStudio</h2>
+                    <p class="text-lg text-gray-300 mt-4 reveal-on-scroll" style="transition-delay: 150ms;">
+                        We are a small, passionate team of designers and developers based in Chennai, India, dedicated to crafting exceptional digital experiences. Our philosophy is simple: combine beautiful design with robust technology to create products that are not only aesthetically pleasing but also intuitive and performant. From small businesses to creative individuals, we partner with clients to turn their visions into reality.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="py-20 lg:py-32">
+            <div class="container mx-auto px-6">
+                <div class="max-w-3xl mx-auto text-center">
+                    <h2 class="text-3xl md:text-4xl font-bold font-headline reveal-on-scroll text-white">Let's Build Something Great</h2>
+                    <p class="text-lg text-gray-300 mt-2 mb-8 reveal-on-scroll" style="transition-delay: 150ms;">Have a project in mind? Fill the form to send us a message on WhatsApp.</p>
+                </div>
+                <div class="max-w-xl mx-auto reveal-on-scroll bg-surface p-8 rounded-2xl border border-strong" style="transition-delay: 300ms;">
+                    <form id="contact-form" class="space-y-6">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+                            <input type="text" id="name" name="name" required class="w-full bg-gray-200 border border-gray-400 text-gray-900 rounded-lg px-4 py-3 focus:ring-2 focus:ring-accent focus:outline-none transition-shadow">
+                        </div>
+                         <div>
+                            <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                            <input type="email" id="email" name="email" required class="w-full bg-gray-200 border border-gray-400 text-gray-900 rounded-lg px-4 py-3 focus:ring-2 focus:ring-accent focus:outline-none transition-shadow">
+                        </div>
+                        <div>
+                            <label for="project-type" class="block text-sm font-medium text-gray-300 mb-2">Project Type</label>
+                            <select id="project-type" name="projectType" required class="w-full bg-gray-200 border border-gray-400 text-gray-900 rounded-lg px-4 py-3 appearance-none focus:ring-2 focus:ring-accent focus:outline-none transition-shadow">
+                                <option>Web Design</option>
+                                <option>AI Integration</option>
+                                <option>3D Showcase</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="message" class="block text-sm font-medium text-gray-300 mb-2">Message</label>
+                            <textarea id="message" name="message" rows="4" required class="w-full bg-gray-200 border border-gray-400 text-gray-900 rounded-lg px-4 py-3 focus:ring-2 focus:ring-accent focus:outline-none transition-shadow"></textarea>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-4 items-center">
+                            <button type="submit" class="w-full sm:w-auto bg-accent hover:bg-accent-hover text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105">
+                                Send via WhatsApp
+                            </button>
+                            <div id="form-feedback" class="text-sm"></div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <!-- Footer -->
+    <footer class="border-t border-strong">
+        <div class="container mx-auto px-6 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="text-center md:text-left">
+                    <p class="text-text-muted">&copy; 2025 SanStudio. All rights reserved.</p>
+                    <p class="text-sm text-text-muted/70">Creative Web Design in Chennai, IN | Developed by <a href="#" class="hover:text-accent transition-colors">SanStudio</a></p>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="mailto:hello@sanstudio.dev" aria-label="Email" class="text-text-muted hover:text-accent transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0 1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    </a>
+                    <a href="https://wa.me/919003356047" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" class="text-text-muted hover:text-accent transition-colors">
+                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Portfolio Modal -->
+    <div id="portfolio-modal" class="modal fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 opacity-0 invisible" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-content w-full max-w-4xl max-h-[90vh] rounded-2xl overflow-y-auto border border-strong shadow-2xl">
+            <div class="p-6 md:p-8">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h2 id="modal-title" class="text-2xl md:text-3xl font-bold font-headline text-white">Project Title</h2>
+                        <p id="modal-category" class="text-accent">Category</p>
+                    </div>
+                    <button id="modal-close-btn" class="text-gray-400 hover:text-white" aria-label="Close dialog">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <img id="modal-image" src="https://placehold.co/800x500/1A3A4A/F9FAFB?text=Project+Image" alt="Project image" class="w-full h-auto object-cover rounded-lg my-6">
+                <div id="modal-description" class="prose prose-invert max-w-none text-text-muted">
+                    <p>Project description will go here...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="module">
+        /**
+         * ----------------------------------------------------------------
+         * Main Application Logic (Vanilla JS)
+         * ----------------------------------------------------------------
+         * This script is organized into conceptual modules for clarity:
+         * - UIModule: Handles UI interactions like navigation, modals.
+         * - AnimationModule: Manages scroll animations and the hero 3D scene.
+         * - App: Initializes all modules.
+         */
+
+        // --- Data ---
+        const portfolioData = [
+            { id: 1, title: 'AI-Powered Data Dashboard for Businesses', category: 'Web Application', img: 'https://placehold.co/600x400/3B82F6/FFFFFF?text=Project+One', description: '<p>A comprehensive dashboard that leverages AI to visualize complex data sets in real-time. Built with a focus on performance and intuitive user experience. Users can generate reports, identify trends, and make data-driven decisions with ease.</p><p>Tech stack: Vanilla JS, D3.js, Tailwind CSS.</p>' },
+            { id: 2, title: 'E-commerce Store for a Temple in India', category: 'Web Design', img: 'https://placehold.co/600x400/1A3A4A/F9FAFB?text=Project+Two', description: '<p>A serene and accessible e-commerce platform for a local temple, enabling online donations and sale of religious items. The design reflects traditional aesthetics while providing a modern, seamless shopping experience.</p><p>Tech stack: HTML, CSS, JavaScript.</p>' },
+            { id: 3, title: 'Interactive 3D Product Configurator', category: '3D Showcase', img: 'https://placehold.co/600x400/3B82F6/FFFFFF?text=Project+Three', description: '<p>An interactive 3D product configurator for a furniture brand. Customers can customize materials, colors, and features in real-time, viewing their creation from any angle. This project significantly boosted user engagement and sales.</p><p>Tech stack: Three.js, WebGL, Vanilla JS.</p>' },
+            { id: 4, title: 'Web Portfolio for a Local Artist', category: 'Frontend Build', img: 'https://placehold.co/600x400/1A3A4A/F9FAFB?text=Project+Four', description: '<p>A visually rich portfolio website for a local photographer. The site features a masonry grid layout, lazy-loaded high-resolution images, and a clean, minimal design that puts the artwork front and center.</p><p>Tech stack: HTML, CSS Grid, Intersection Observer API.</p>' },
+            { id: 5, title: 'Generative Art Application with AI', category: 'AI Tools', img: 'https://placehold.co/600x400/3B82F6/FFFFFF?text=Project+Five', description: '<p>A web-based tool that uses AI to generate unique abstract art based on user inputs like keywords and color palettes. A fun project exploring the intersection of creativity and artificial intelligence.</p><p>Tech stack: TensorFlow.js, Vanilla JS, HTML5 Canvas.</p>' },
+            { id: 6, title: 'Animated Brand Video Intro', category: 'Video Intro', img: 'https://placehold.co/600x400/1A3A4A/F9FAFB?text=Project+Six', description: '<p>A dynamic and professional video intro created in Blender for a YouTube tech channel. The animation features a sleek logo reveal and motion graphics that align with the channel\'s modern branding.</p><p>Tech stack: Blender, After Effects.</p>' },
+        ];
+
+
+        /**
+         * @module UIModule
+         * Handles general UI interactions.
+         */
+        const UIModule = {
+            init() {
+                this.handleHeaderScroll();
+                this.handleMobileMenu();
+                this.populatePortfolio();
+                this.handlePortfolioModal();
+                this.handleContactForm();
+            },
+
+            handleHeaderScroll() {
+                const header = document.getElementById('main-header');
+                window.addEventListener('scroll', () => {
+                    if (window.scrollY > 50) {
+                        header.classList.add('scrolled');
+                    } else {
+                        header.classList.remove('scrolled');
+                    }
+                });
+            },
+            
+            handleMobileMenu() {
+                const menuBtn = document.getElementById('mobile-menu-btn');
+                const mobileMenu = document.getElementById('mobile-menu');
+                const openIcon = document.getElementById('menu-open-icon');
+                const closeIcon = document.getElementById('menu-close-icon');
+                const navLinks = mobileMenu.querySelectorAll('.mobile-nav-link');
+
+                const toggleMenu = () => {
+                    mobileMenu.classList.toggle('hidden');
+                    openIcon.classList.toggle('hidden');
+                    closeIcon.classList.toggle('hidden');
+                    document.body.style.overflow = mobileMenu.classList.contains('hidden') ? '' : 'hidden';
+                };
+
+                menuBtn.addEventListener('click', toggleMenu);
+                navLinks.forEach(link => link.addEventListener('click', toggleMenu));
+            },
+
+            populatePortfolio() {
+                const grid = document.getElementById('portfolio-grid');
+                if (!grid) return;
+                
+                portfolioData.forEach((project, index) => {
+                    const delay = index * 100;
+                    const item = document.createElement('div');
+                    item.className = 'group relative overflow-hidden rounded-2xl cursor-pointer reveal-on-scroll bg-surface border border-strong';
+                    item.style.transitionDelay = `${delay}ms`;
+                    item.setAttribute('data-project-id', project.id);
+                    item.setAttribute('tabindex', '0');
+                    item.setAttribute('role', 'button');
+                    item.setAttribute('aria-label', `View details for ${project.title}`);
+
+                    item.innerHTML = `
+                        <img loading="lazy" src="${project.img}" alt="${project.title}" class="w-full h-48 object-cover transform group-hover:scale-105 transition-transform duration-500">
+                        <div class="p-6">
+                            <p class="text-sm text-accent font-semibold">${project.category}</p>
+                            <h3 class="text-xl font-bold text-white mt-1">${project.title}</h3>
+                        </div>
+                        <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                           <span class="text-white font-semibold border-2 border-white rounded-full px-4 py-2">View Project</span>
+                        </div>
+                    `;
+                    grid.appendChild(item);
+                });
+            },
+            
+            handlePortfolioModal() {
+                const modal = document.getElementById('portfolio-modal');
+                const closeBtn = document.getElementById('modal-close-btn');
+                const grid = document.getElementById('portfolio-grid');
+
+                const openModal = (project) => {
+                    document.getElementById('modal-title').textContent = project.title;
+                    document.getElementById('modal-category').textContent = project.category;
+                    document.getElementById('modal-image').src = project.img.replace('600x400', '800x500'); // Get higher res for modal
+                    document.getElementById('modal-image').alt = project.title;
+                    document.getElementById('modal-description').innerHTML = project.description;
+                    
+                    modal.classList.add('is-open');
+                    document.body.style.overflow = 'hidden';
+                    closeBtn.focus();
+                };
+
+                const closeModal = () => {
+                    modal.classList.remove('is-open');
+                    document.body.style.overflow = '';
+                };
+
+                grid.addEventListener('click', (e) => {
+                    const projectCard = e.target.closest('[data-project-id]');
+                    if (projectCard) {
+                        const projectId = parseInt(projectCard.dataset.projectId);
+                        const project = portfolioData.find(p => p.id === projectId);
+                        if (project) openModal(project);
+                    }
+                });
+                
+                grid.addEventListener('keydown', (e) => {
+                     if (e.key === 'Enter' || e.key === ' ') {
+                        const projectCard = e.target.closest('[data-project-id]');
+                        if (projectCard) {
+                           e.preventDefault();
+                           const projectId = parseInt(projectCard.dataset.projectId);
+                           const project = portfolioData.find(p => p.id === projectId);
+                           if (project) openModal(project);
+                        }
+                     }
+                });
+
+                closeBtn.addEventListener('click', closeModal);
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) closeModal();
+                });
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && modal.classList.contains('is-open')) {
+                        closeModal();
+                    }
+                });
+            },
+            
+            handleContactForm() {
+                const form = document.getElementById('contact-form');
+                if (!form) return;
+
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    const name = form.elements.name.value;
+                    const email = form.elements.email.value;
+                    const projectType = form.elements.projectType.value;
+                    const message = form.elements.message.value;
+
+                    const whatsappMessage = `Hello SanStudio, I'd like to discuss a project.\n\n*Name:*\n${name}\n\n*Email:*\n${email}\n\n*Project Type:*\n${projectType}\n\n*Message:*\n${message}`;
+                    
+                    const encodedMessage = encodeURIComponent(whatsappMessage);
+                    const whatsappURL = `https://wa.me/919003356047?text=${encodedMessage}`;
+
+                    window.open(whatsappURL, '_blank');
+                    
+                    form.reset();
+                });
+            }
+        };
+
+
+        /**
+         * @module AnimationModule
+         * Manages animations and 3D hero scene.
+         */
+        const AnimationModule = {
+            init() {
+                this.setupScrollObserver();
+                this.initHeroScene();
+            },
+
+            setupScrollObserver() {
+                const options = {
+                    root: null,
+                    rootMargin: '0px',
+                    threshold: 0.1
+                };
+
+                const observer = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-visible');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, options);
+
+                document.querySelectorAll('.reveal-on-scroll').forEach(el => {
+                    observer.observe(el);
+                });
+            },
+
+            initHeroScene() {
+                const canvas = document.getElementById('hero-canvas');
+                if (!canvas || typeof THREE === 'undefined') return;
+
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialiias: true });
+                const clock = new THREE.Clock();
+
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+                const shapes = new THREE.Group();
+                const materialOptions = { metalness: 0.1, roughness: 0.7 };
+
+                const shapesData = [
+                    { geometry: new THREE.SphereGeometry(1.5, 32, 32), material: new THREE.MeshStandardMaterial({ color: 0xD2B48C, ...materialOptions }), position: [-4, 1, -5] },
+                    { geometry: new THREE.BoxGeometry(1.5, 3, 1.5), material: new THREE.MeshStandardMaterial({ color: 0xE48B6B, ...materialOptions }), position: [5, -2, -8] },
+                    { geometry: new THREE.SphereGeometry(0.8, 32, 32), material: new THREE.MeshStandardMaterial({ color: 0x4682B4, ...materialOptions }), position: [0, -3, -4] },
+                    { geometry: new THREE.TorusGeometry(1, 0.4, 16, 100), material: new THREE.MeshStandardMaterial({ color: 0x8FBC8F, ...materialOptions }), position: [-6, -4, -10] },
+                    { geometry: new THREE.SphereGeometry(0.5, 32, 32), material: new THREE.MeshStandardMaterial({ color: 0xFFD700, ...materialOptions }), position: [8, 4, -12] },
+                ];
+
+                shapesData.forEach(data => {
+                    const mesh = new THREE.Mesh(data.geometry, data.material);
+                    mesh.position.set(...data.position);
+                    mesh.userData.initialPosition = new THREE.Vector3(...data.position);
+                    mesh.userData.randomFactor = Math.random() * Math.PI * 2;
+                    shapes.add(mesh);
+                });
+                
+                scene.add(shapes);
+                camera.position.z = 5;
+
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+                scene.add(ambientLight);
+                
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+                directionalLight.position.set(5, 5, 5);
+                scene.add(directionalLight);
+
+                let mouseX = 0;
+                let mouseY = 0;
+                
+                const onMouseMove = (event) => {
+                    mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+                    mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+                };
+                window.addEventListener('mousemove', onMouseMove);
+                
+                const animate = () => {
+                    requestAnimationFrame(animate);
+                    const elapsedTime = clock.getElapsedTime();
+
+                    // Animate shapes
+                    shapes.children.forEach(shape => {
+                        shape.rotation.y += 0.002;
+                        shape.rotation.x += 0.001;
+                        
+                        // Floating motion
+                        const yOffset = Math.sin(elapsedTime + shape.userData.randomFactor) * 0.2;
+                        shape.position.y = shape.userData.initialPosition.y + yOffset;
+                    });
+                    
+                    // Parallax mouse effect on the whole group
+                    shapes.rotation.y += (mouseX * 0.2 - shapes.rotation.y) * 0.03;
+                    shapes.rotation.x += (mouseY * 0.2 - shapes.rotation.x) * 0.03;
+
+                    renderer.render(scene, camera);
+                };
+
+                animate();
+
+                window.addEventListener('resize', () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+            }
+        };
+
+        /**
+         * @module App
+         * Initializes the application.
+         */
+        const App = {
+            init() {
+                document.addEventListener('DOMContentLoaded', () => {
+                    UIModule.init();
+                    AnimationModule.init();
+                });
+            }
+        };
+
+        App.init();
+
+    </script>
+
+</body>
+</html>
+
