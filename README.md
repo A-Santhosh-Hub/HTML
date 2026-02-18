@@ -150,6 +150,8 @@ Fast, free, mobile-optimized with CORS bypass. Built by SanStudio.
 
 ## Project 35 Financial Overview  Track your monthly flow effectively ------->  (https://sanstudio.neocities.org/WalletFlow )
 
+ScreenSnap : = ( https://sanstudio.neocities.org/ScreenSnap )
+
 
 ## Project  https://santhosh2024.neocities.org/skill/in ---[ SKILL ]
 
