@@ -2,8 +2,8 @@
 <html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ScreenSnap Pro | Modern Screen Recorder</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ScreenSnap Pro | Mobile Ready Recorder</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -67,6 +67,7 @@
             background-color: #0f172a; /* Slate 900 */
             overflow-x: hidden;
             transition: background-color 0.3s ease;
+            touch-action: pan-y; /* Allow vertical scroll but prevent other gestures */
         }
 
         /* Glassmorphism Classes */
@@ -153,6 +154,17 @@
             transition: opacity 0.3s;
         }
         .dark .bg-blob { opacity: 0.3; }
+        
+        /* Mobile specific fixes */
+        @media (max-width: 768px) {
+            #editor-tools {
+                flex-direction: row;
+                width: 100%;
+                overflow-x: auto;
+                justify-content: space-between;
+                padding-bottom: 10px;
+            }
+        }
     </style>
 </head>
 <body class="text-slate-800 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300">
@@ -163,7 +175,7 @@
     <div class="bg-blob bg-pink-500 w-80 h-80 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-blob animation-delay-4000"></div>
 
     <!-- Toast Notification -->
-    <div id="toast" class="fixed top-24 right-5 z-50 transform translate-x-[150%] transition-transform duration-300">
+    <div id="toast" class="fixed top-24 right-5 z-50 transform translate-x-[150%] transition-transform duration-300 max-w-[90vw]">
         <div class="glass-panel px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 border-l-4 border-brand-500">
             <i data-lucide="info" class="w-5 h-5 text-brand-500"></i>
             <span id="toast-msg" class="font-medium text-sm">Notification</span>
@@ -180,7 +192,7 @@
                     </div>
                     <div>
                         <span class="font-bold text-xl tracking-tight block leading-none">ScreenSnap</span>
-                        <span class="text-[10px] font-bold text-brand-500 tracking-widest uppercase">Pro Edition</span>
+                        <span class="text-[10px] font-bold text-brand-500 tracking-widest uppercase">Mobile Pro</span>
                     </div>
                 </div>
                 
@@ -199,7 +211,7 @@
     </header>
 
     <!-- History Panel (Side Drawer) -->
-    <div id="history-panel" class="fixed inset-y-0 right-0 w-80 glass-panel z-50 transform translate-x-full transition-transform duration-300 shadow-2xl p-6 flex flex-col">
+    <div id="history-panel" class="fixed inset-y-0 right-0 w-full md:w-80 glass-panel z-50 transform translate-x-full transition-transform duration-300 shadow-2xl p-6 flex flex-col">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-xl font-bold flex items-center gap-2"><i data-lucide="archive" class="w-5 h-5"></i> Local History</h2>
             <button onclick="toggleHistory()" class="p-2 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition-colors">
@@ -218,62 +230,76 @@
     <main class="flex-grow container mx-auto px-4 py-8 relative z-10">
         
         <!-- Welcome / Actions Dashboard -->
-        <div id="dashboard" class="max-w-5xl mx-auto space-y-12 animate-slide-up">
+        <div id="dashboard" class="max-w-5xl mx-auto space-y-8 animate-slide-up">
             
-            <div class="text-center space-y-4 pt-10 pb-6">
+            <div class="text-center space-y-4 pt-4 pb-4">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 text-brand-500 text-xs font-bold uppercase tracking-wider mb-2 border border-brand-500/20">
-                    <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span> v2.0 Live
+                    <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span> v2.5 Mobile Ready
                 </div>
-                <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight">
-                    Capture Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-500 to-purple-500">Vision</span>
+                <h1 class="text-3xl md:text-6xl font-extrabold tracking-tight">
+                    Capture Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-500 to-purple-500">World</span>
                 </h1>
-                <p class="text-lg opacity-60 max-w-2xl mx-auto font-light">
-                    Professional screen recording and screenshot tools directly in your browser. No installs. No watermarks.
+                <p class="text-sm md:text-lg opacity-60 max-w-2xl mx-auto font-light">
+                    Record screen on desktop, or capture camera on mobile.
                 </p>
             </div>
 
-            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                <!-- Screenshot Card -->
-                <div class="glass-panel p-1 rounded-3xl transition-all duration-300 hover:scale-[1.02] group cursor-pointer" onclick="initScreenshot()">
-                    <div class="bg-white/50 dark:bg-slate-800/50 p-8 rounded-[22px] h-full relative overflow-hidden group-hover:bg-white/60 dark:group-hover:bg-slate-800/70 transition-colors">
-                        <div class="absolute top-0 right-0 bg-brand-500/10 p-6 rounded-bl-[40px] transition-transform group-hover:scale-110">
-                            <i data-lucide="camera" class="w-8 h-8 text-brand-500"></i>
+            <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                <!-- Screenshot Card (Desktop Focus) -->
+                <div class="glass-panel p-1 rounded-3xl transition-all duration-300 hover:scale-[1.02] active:scale-95 group cursor-pointer" onclick="initCapture('screen')">
+                    <div class="bg-white/50 dark:bg-slate-800/50 p-6 rounded-[22px] h-full relative overflow-hidden group-hover:bg-white/60 dark:group-hover:bg-slate-800/70 transition-colors">
+                        <div class="absolute top-0 right-0 bg-brand-500/10 p-4 rounded-bl-[30px]">
+                            <i data-lucide="monitor" class="w-6 h-6 text-brand-500"></i>
                         </div>
-                        <div class="mt-4">
-                            <h3 class="text-2xl font-bold mb-2">Screenshot</h3>
-                            <p class="opacity-60 mb-8 text-sm leading-relaxed">Instantly capture any window, tab, or full screen. Annotate with our built-in editor.</p>
-                            <span class="inline-flex items-center text-sm font-bold text-brand-500 group-hover:gap-2 transition-all">
-                                Capture Now <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
-                            </span>
+                        <h3 class="text-xl font-bold mb-2">Screen Snap</h3>
+                        <p class="opacity-60 mb-6 text-xs leading-relaxed">Capture Desktop screen, windows, or tabs. (PC Only)</p>
+                        <span class="inline-flex items-center text-sm font-bold text-brand-500">
+                            Capture <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
+                        </span>
+                    </div>
+                </div>
+
+                 <!-- Camera Card (Mobile Focus) -->
+                 <div class="glass-panel p-1 rounded-3xl transition-all duration-300 hover:scale-[1.02] active:scale-95 group cursor-pointer border-2 border-transparent hover:border-green-500/30" onclick="initCapture('camera')">
+                    <div class="bg-white/50 dark:bg-slate-800/50 p-6 rounded-[22px] h-full relative overflow-hidden group-hover:bg-white/60 dark:group-hover:bg-slate-800/70 transition-colors">
+                        <div class="absolute top-0 right-0 bg-green-500/10 p-4 rounded-bl-[30px]">
+                            <i data-lucide="camera" class="w-6 h-6 text-green-500"></i>
                         </div>
+                        <div class="flex items-center gap-2 mb-2">
+                             <h3 class="text-xl font-bold">Camera</h3>
+                             <span class="text-[10px] bg-green-500 text-white px-2 py-0.5 rounded-full">Mobile</span>
+                        </div>
+                        <p class="opacity-60 mb-6 text-xs leading-relaxed">Use your Front/Back camera to take photos or record.</p>
+                        <span class="inline-flex items-center text-sm font-bold text-green-500">
+                            Use Camera <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
+                        </span>
                     </div>
                 </div>
 
                 <!-- Record Card -->
-                <div class="glass-panel p-1 rounded-3xl transition-all duration-300 hover:scale-[1.02] group">
-                    <div class="bg-white/50 dark:bg-slate-800/50 p-8 rounded-[22px] h-full relative overflow-hidden">
-                        <div class="absolute top-0 right-0 bg-red-500/10 p-6 rounded-bl-[40px]">
-                            <i data-lucide="video" class="w-8 h-8 text-red-500"></i>
+                <div class="glass-panel p-1 rounded-3xl transition-all duration-300 hover:scale-[1.02] active:scale-95 group">
+                    <div class="bg-white/50 dark:bg-slate-800/50 p-6 rounded-[22px] h-full relative overflow-hidden">
+                        <div class="absolute top-0 right-0 bg-red-500/10 p-4 rounded-bl-[30px]">
+                            <i data-lucide="video" class="w-6 h-6 text-red-500"></i>
                         </div>
                         
-                        <h3 class="text-2xl font-bold mb-2">Screen Recorder</h3>
-                        <p class="opacity-60 mb-6 text-sm">Record high-quality video with system audio or microphone narration.</p>
+                        <h3 class="text-xl font-bold mb-2">Recorder</h3>
+                        
+                        <!-- Toggle Source -->
+                        <div class="flex bg-black/5 dark:bg-white/5 p-1 rounded-lg mb-4">
+                            <button onclick="setRecSource('screen')" id="btn-src-screen" class="flex-1 py-1.5 text-xs font-bold rounded-md bg-white dark:bg-slate-700 shadow-sm transition-all">Screen</button>
+                            <button onclick="setRecSource('camera')" id="btn-src-camera" class="flex-1 py-1.5 text-xs font-bold rounded-md opacity-60 hover:opacity-100 transition-all">Camera</button>
+                        </div>
                         
                         <!-- Audio Settings -->
-                        <div class="flex items-center gap-3 mb-8">
-                            <label class="cursor-pointer select-none">
-                                <input type="checkbox" id="chk-mic" class="peer sr-only">
-                                <div class="px-4 py-2 rounded-lg bg-black/5 dark:bg-white/5 peer-checked:bg-red-500/10 peer-checked:text-red-500 peer-checked:border-red-500/50 border border-transparent flex items-center gap-2 text-sm font-medium transition-all hover:bg-black/10 dark:hover:bg-white/10">
-                                    <i data-lucide="mic" class="w-4 h-4"></i> Microphone
-                                </div>
-                            </label>
-                            <div class="text-[10px] opacity-50 flex items-center leading-tight max-w-[120px]">
-                                <i data-lucide="info" class="w-3 h-3 mr-1 flex-shrink-0"></i> 
-                                Check "Share Audio" in popup for System Sound
+                        <label class="flex items-center gap-2 mb-4 cursor-pointer select-none">
+                            <input type="checkbox" id="chk-mic" class="peer sr-only">
+                            <div class="w-full px-3 py-2 rounded-lg bg-black/5 dark:bg-white/5 peer-checked:bg-red-500/10 peer-checked:text-red-500 peer-checked:border-red-500/50 border border-transparent flex items-center justify-center gap-2 text-xs font-medium transition-all">
+                                <i data-lucide="mic" class="w-3 h-3"></i> Add Microphone
                             </div>
-                        </div>
+                        </label>
 
-                        <button onclick="startRecording()" class="w-full py-3 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white rounded-xl shadow-lg shadow-red-500/25 transition-all transform active:scale-95 flex justify-center items-center gap-2 font-semibold">
+                        <button onclick="startRecording()" class="w-full py-2.5 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white rounded-xl shadow-lg shadow-red-500/25 transition-all transform active:scale-95 flex justify-center items-center gap-2 font-semibold text-sm">
                             <div class="w-2 h-2 rounded-full bg-white animate-pulse"></div>
                             Start Recording
                         </button>
@@ -281,8 +307,8 @@
                 </div>
             </div>
             
-            <div class="flex justify-center gap-8 opacity-40 grayscale hover:grayscale-0 transition-all duration-500">
-                <div class="flex items-center gap-1"><i data-lucide="shield-check" class="w-4 h-4"></i><span class="text-xs">Secure</span></div>
+            <div class="flex justify-center flex-wrap gap-4 md:gap-8 opacity-40 grayscale hover:grayscale-0 transition-all duration-500 pb-10">
+                <div class="flex items-center gap-1"><i data-lucide="smartphone" class="w-4 h-4"></i><span class="text-xs">Mobile Ready</span></div>
                 <div class="flex items-center gap-1"><i data-lucide="zap" class="w-4 h-4"></i><span class="text-xs">Fast</span></div>
                 <div class="flex items-center gap-1"><i data-lucide="hard-drive" class="w-4 h-4"></i><span class="text-xs">Local Only</span></div>
             </div>
@@ -298,10 +324,10 @@
                     </div>
                 </div>
                 
-                <h2 class="text-3xl font-bold mb-2 text-white tracking-tight">Recording Live</h2>
+                <h2 class="text-3xl font-bold mb-2 text-white tracking-tight">Recording</h2>
                 <div class="text-5xl font-mono mb-8 text-red-400 font-medium tracking-wider" id="recording-timer">00:00</div>
                 
-                <button onclick="stopRecording()" class="w-full py-3.5 bg-white text-slate-900 font-bold rounded-xl hover:bg-slate-100 transition-colors flex items-center justify-center gap-2 shadow-lg">
+                <button onclick="stopRecording()" class="w-full py-3.5 bg-white text-slate-900 font-bold rounded-xl hover:bg-slate-100 transition-colors flex items-center justify-center gap-2 shadow-lg active:scale-95 transform">
                     <i data-lucide="square" class="w-5 h-5 fill-current"></i> Stop & Save
                 </button>
             </div>
@@ -310,24 +336,24 @@
         <!-- Editor / Preview Section (Hidden by default) -->
         <div id="preview-section" class="hidden max-w-7xl mx-auto animate-slide-up pb-20">
             <!-- Toolbar -->
-            <div class="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
+            <div class="flex flex-col md:flex-row items-center justify-between mb-4 gap-4">
                 <button onclick="resetApp()" class="flex items-center gap-2 text-sm font-medium opacity-60 hover:opacity-100 transition-opacity px-4 py-2 hover:bg-white/5 rounded-lg">
-                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Dashboard
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Back
                 </button>
                 
-                <div class="flex items-center gap-3 bg-black/5 dark:bg-white/5 p-1.5 rounded-xl">
-                    <button id="download-btn" class="bg-brand-500 hover:bg-brand-600 text-white px-5 py-2 rounded-lg text-sm font-semibold shadow-lg shadow-brand-500/20 transition-all flex items-center gap-2">
-                        <i data-lucide="download" class="w-4 h-4"></i> Download
+                <div class="flex items-center gap-3 bg-black/5 dark:bg-white/5 p-1.5 rounded-xl w-full md:w-auto justify-center">
+                    <button id="download-btn" class="bg-brand-500 hover:bg-brand-600 text-white px-5 py-2 rounded-lg text-sm font-semibold shadow-lg shadow-brand-500/20 transition-all flex items-center gap-2 active:scale-95">
+                        <i data-lucide="download" class="w-4 h-4"></i> <span class="hidden md:inline">Download</span> <span class="md:hidden">Save</span>
                     </button>
-                    <button id="copy-btn" class="glass-button px-4 py-2 rounded-lg text-sm font-medium hidden hover:text-brand-500" title="Copy to Clipboard">
+                    <button id="copy-btn" class="glass-button px-4 py-2 rounded-lg text-sm font-medium hidden hover:text-brand-500 active:scale-95" title="Copy to Clipboard">
                         <i data-lucide="copy" class="w-4 h-4"></i>
                     </button>
                 </div>
             </div>
 
-            <div class="flex flex-col lg:flex-row gap-6 h-[calc(100vh-200px)]">
-                <!-- Editor Tools (Only for Screenshot) -->
-                <div id="editor-tools" class="hidden w-full lg:w-20 glass-panel p-3 rounded-2xl flex-shrink-0 flex lg:flex-col gap-3 justify-center lg:justify-start overflow-x-auto">
+            <div class="flex flex-col lg:flex-row gap-6 h-auto md:h-[calc(100vh-200px)]">
+                <!-- Editor Tools (Screenshot only) -->
+                <div id="editor-tools" class="hidden w-full lg:w-20 glass-panel p-2 rounded-2xl flex-shrink-0 flex lg:flex-col gap-2 justify-center lg:justify-start">
                     <button onclick="setTool('pen')" id="tool-pen" class="p-3 rounded-xl hover:bg-brand-500/20 text-brand-500 transition-colors tooltip relative group flex flex-col items-center gap-1">
                         <i data-lucide="pen-tool" class="w-6 h-6"></i>
                     </button>
@@ -351,54 +377,39 @@
                 </div>
 
                 <!-- Canvas Container -->
-                <div id="image-editor-container" class="hidden flex-grow glass-panel p-4 rounded-2xl overflow-auto bg-slate-900/50 flex justify-center items-center relative shadow-inner">
+                <div id="image-editor-container" class="hidden flex-grow glass-panel p-2 md:p-4 rounded-2xl overflow-hidden bg-slate-900/50 flex justify-center items-center relative shadow-inner min-h-[50vh]">
                     <div class="absolute inset-0 pattern-grid opacity-10 pointer-events-none"></div>
-                    <canvas id="editor-canvas" class="max-w-full shadow-2xl rounded-lg cursor-crosshair"></canvas>
+                    <!-- Overflow auto wrapper for mobile scrolling if image huge -->
+                    <div class="w-full h-full overflow-auto flex justify-center items-center">
+                        <canvas id="editor-canvas" class="max-w-full shadow-2xl rounded-lg cursor-crosshair touch-none"></canvas>
+                    </div>
                 </div>
 
                 <!-- Video Player Container -->
-                <div id="video-preview-container" class="hidden flex-grow glass-panel p-0 rounded-2xl overflow-hidden relative group bg-black shadow-2xl flex items-center justify-center">
+                <div id="video-preview-container" class="hidden flex-grow glass-panel p-0 rounded-2xl overflow-hidden relative group bg-black shadow-2xl flex items-center justify-center min-h-[50vh]">
                     <video id="recorded-video" class="w-full h-full max-h-[80vh] bg-black" playsinline></video>
                     
                     <!-- Custom Controls Overlay -->
-                    <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div class="absolute bottom-0 left-0 right-0 p-4 md:p-6 bg-gradient-to-t from-black via-black/60 to-transparent opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <!-- Progress -->
                         <div class="relative w-full h-1 bg-white/20 rounded-full mb-4 cursor-pointer group/seek">
                             <input type="range" id="seek-bar" value="0" step="0.1" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
                             <div id="seek-fill" class="h-full bg-brand-500 rounded-full w-0 pointer-events-none relative">
-                                <div class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full scale-0 group-hover/seek:scale-100 transition-transform shadow-lg"></div>
+                                <div class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full scale-100 md:scale-0 group-hover/seek:scale-100 transition-transform shadow-lg"></div>
                             </div>
                         </div>
                         
                         <div class="flex items-center justify-between text-white">
-                            <div class="flex items-center gap-6">
-                                <button id="play-pause" class="hover:text-brand-500 transition-colors transform hover:scale-110">
-                                    <i data-lucide="play" class="w-8 h-8 fill-current"></i>
+                            <div class="flex items-center gap-4">
+                                <button id="play-pause" class="hover:text-brand-500 transition-colors transform active:scale-95">
+                                    <i data-lucide="play" class="w-6 h-6 md:w-8 md:h-8 fill-current"></i>
                                 </button>
                                 
-                                <div class="flex flex-col">
-                                    <span id="video-time" class="text-sm font-mono font-medium tracking-wide">00:00 / 00:00</span>
-                                </div>
-
-                                <div class="flex items-center gap-2 group/vol pl-4 border-l border-white/10">
-                                    <button id="mute-btn"><i data-lucide="volume-2" class="w-5 h-5"></i></button>
-                                    <div class="w-0 overflow-hidden group-hover/vol:w-24 transition-all duration-300">
-                                        <input type="range" id="volume-bar" min="0" max="1" step="0.1" value="1" class="w-20 ml-2">
-                                    </div>
-                                </div>
+                                <span id="video-time" class="text-xs md:text-sm font-mono font-medium tracking-wide">00:00 / 00:00</span>
                             </div>
 
                             <div class="flex items-center gap-4">
-                                <div class="relative group/speed">
-                                    <button class="text-xs font-bold bg-white/10 px-3 py-1.5 rounded-md hover:bg-brand-500 hover:text-white transition-colors">1x</button>
-                                    <div class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 glass-panel p-1 rounded-lg flex-col gap-1 hidden group-hover/speed:flex">
-                                        <button onclick="setSpeed(0.5)" class="px-3 py-1 text-xs hover:bg-white/10 rounded">0.5x</button>
-                                        <button onclick="setSpeed(1)" class="px-3 py-1 text-xs hover:bg-white/10 rounded font-bold text-brand-500">1x</button>
-                                        <button onclick="setSpeed(1.5)" class="px-3 py-1 text-xs hover:bg-white/10 rounded">1.5x</button>
-                                        <button onclick="setSpeed(2)" class="px-3 py-1 text-xs hover:bg-white/10 rounded">2x</button>
-                                    </div>
-                                </div>
-                                <button id="fullscreen-btn" class="hover:text-brand-500 transition-transform hover:scale-110">
+                                <button id="fullscreen-btn" class="hover:text-brand-500 transition-transform active:scale-95">
                                     <i data-lucide="maximize" class="w-5 h-5"></i>
                                 </button>
                             </div>
@@ -413,7 +424,7 @@
     <!-- Footer -->
     <footer class="glass-panel mt-auto border-t border-white/5 z-10 relative">
         <div class="max-w-7xl mx-auto py-6 px-4 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p class="text-sm opacity-50">Designed for modern browsers. No data leaves your device.</p>
+            <p class="text-sm opacity-50">Mobile & Desktop Ready.</p>
             
             <a href="https://sanstudio.neocities.org/" target="_blank" class="group flex items-center gap-2 text-sm font-medium hover:text-brand-500 transition-colors bg-white/5 px-4 py-2 rounded-full hover:bg-white/10">
                 <span>Developed By SanStudio</span>
@@ -434,7 +445,6 @@
         const themeToggle = document.getElementById('theme-toggle');
         const html = document.documentElement;
         
-        // Check system preference first
         if (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             localStorage.setItem('theme', 'dark');
         }
@@ -471,7 +481,7 @@
         let timerInterval;
         let isRecording = false;
         let stream = null;
-        let currentMode = null; // 'image' or 'video'
+        let recordingSource = 'screen'; // 'screen' or 'camera'
 
         // --- Utility Functions ---
         function showToast(msg, type = 'info') {
@@ -479,7 +489,6 @@
             toastContent.innerText = msg;
             toastEl.classList.remove('translate-x-[150%]');
             
-            // Icon handling
             const icon = toastEl.querySelector('svg');
             if(type === 'error') toastContent.parentNode.classList.add('border-red-500');
             else toastContent.parentNode.classList.replace('border-red-500', 'border-brand-500');
@@ -490,7 +499,6 @@
         }
 
         function resetApp() {
-            // Stop tracks if any
             if(stream) {
                 stream.getTracks().forEach(track => track.stop());
                 stream = null;
@@ -504,7 +512,6 @@
             editorTools.classList.add('hidden');
             copyBtn.classList.add('hidden');
             
-            // Clear canvas history
             canvasHistory = [];
             historyStep = -1;
         }
@@ -515,93 +522,68 @@
             return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
         }
 
-        function addToHistory(type, label) {
-            const date = new Date().toLocaleTimeString();
-            const historyItem = { type, label, date };
-            let history = JSON.parse(localStorage.getItem('snaps_history') || '[]');
-            history.unshift(historyItem);
-            if(history.length > 20) history.pop(); // Keep last 20
-            localStorage.setItem('snaps_history', JSON.stringify(history));
-            renderHistory();
+        function setRecSource(source) {
+            recordingSource = source;
+            document.getElementById('btn-src-screen').className = source === 'screen' ? 'flex-1 py-1.5 text-xs font-bold rounded-md bg-white dark:bg-slate-700 shadow-sm transition-all' : 'flex-1 py-1.5 text-xs font-bold rounded-md opacity-60 hover:opacity-100 transition-all';
+            document.getElementById('btn-src-camera').className = source === 'camera' ? 'flex-1 py-1.5 text-xs font-bold rounded-md bg-white dark:bg-slate-700 shadow-sm transition-all' : 'flex-1 py-1.5 text-xs font-bold rounded-md opacity-60 hover:opacity-100 transition-all';
         }
 
-        function renderHistory() {
-            let history = JSON.parse(localStorage.getItem('snaps_history') || '[]');
-            historyList.innerHTML = '';
-            
-            if(history.length === 0) {
-                historyList.innerHTML = '<p class="text-sm opacity-50 text-center mt-10">No recent captures.</p>';
-                return;
-            }
-
-            history.forEach(item => {
-                const icon = item.type === 'video' ? 'video' : 'camera';
-                const color = item.type === 'video' ? 'text-red-500' : 'text-brand-500';
-                const el = document.createElement('div');
-                el.className = 'bg-black/5 dark:bg-white/5 p-3 rounded-lg flex items-center gap-3 text-sm';
-                el.innerHTML = `
-                    <div class="p-2 rounded-full bg-white/10 ${color}">
-                        <i data-lucide="${icon}" class="w-4 h-4"></i>
-                    </div>
-                    <div>
-                        <div class="font-medium">${item.label}</div>
-                        <div class="text-xs opacity-50">${item.date}</div>
-                    </div>
-                `;
-                historyList.appendChild(el);
-            });
-            lucide.createIcons();
-        }
+        // --- Capture & Recording Logic ---
         
-        function toggleHistory() {
-            historyPanel.classList.toggle('translate-x-full');
-            renderHistory();
+        async function getStream(type) {
+            try {
+                if (type === 'screen') {
+                    return await navigator.mediaDevices.getDisplayMedia({
+                        video: { cursor: "always" },
+                        audio: true 
+                    });
+                } else {
+                    // Camera
+                    return await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: 'environment' }, // Uses back camera on mobile if available
+                        audio: true
+                    });
+                }
+            } catch (err) {
+                if (err.name === 'NotAllowedError') {
+                    showToast("Permission denied.", "error");
+                } else if (err.name === 'NotFoundError') {
+                    showToast("No device found.", "error");
+                } else {
+                    // Mobile safari often throws here for getDisplayMedia
+                    if(type === 'screen' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+                        showToast("Screen capture restricted on Mobile. Use Camera mode.", "error");
+                    } else {
+                        showToast("Capture failed: " + err.message, "error");
+                    }
+                }
+                throw err;
+            }
         }
 
-        function clearHistory() {
-            localStorage.removeItem('snaps_history');
-            renderHistory();
-        }
-
-        // --- Screenshot Logic ---
-        async function initScreenshot() {
+        // Screenshot
+        async function initCapture(source) {
             try {
                 const videoElem = document.getElementById('screenshot-video');
-                
-                stream = await navigator.mediaDevices.getDisplayMedia({
-                    video: { cursor: "always" },
-                    audio: false
-                });
-
+                stream = await getStream(source);
                 videoElem.srcObject = stream;
                 
-                // Wait for video to play to get dimensions
                 videoElem.onloadedmetadata = () => {
                     videoElem.play();
-                    // Small delay to ensure frame is ready
-                    setTimeout(async () => {
-                        // Set canvas size
+                    setTimeout(() => {
                         editorCanvas.width = videoElem.videoWidth;
                         editorCanvas.height = videoElem.videoHeight;
-                        
-                        // Draw
                         ctx.drawImage(videoElem, 0, 0, editorCanvas.width, editorCanvas.height);
                         
-                        // Stop stream immediately
                         stream.getTracks().forEach(track => track.stop());
                         stream = null;
                         
-                        // Switch UI
-                        currentMode = 'image';
                         showEditor();
-                        saveHistory(); // Initial state
-                        addToHistory('image', 'Screenshot Captured');
-                    }, 300); // 300ms buffer
+                        saveHistory(); 
+                    }, 500); 
                 };
-
             } catch (err) {
-                console.error("Error: " + err);
-                // User likely cancelled
+                console.error(err);
             }
         }
 
@@ -614,31 +596,116 @@
             videoPreviewContainer.classList.add('hidden');
             copyBtn.classList.remove('hidden');
             
-            // Setup Download for Image
             downloadBtn.onclick = () => {
                 const link = document.createElement('a');
-                link.download = `screenshot-${Date.now()}.png`;
+                link.download = `snap-${Date.now()}.png`;
                 link.href = editorCanvas.toDataURL();
                 link.click();
-                showToast("Screenshot Downloaded!");
+                showToast("Image Saved!");
             };
             
-            // Setup Copy
             copyBtn.onclick = () => {
                 editorCanvas.toBlob(blob => {
                     try {
-                        navigator.clipboard.write([
-                            new ClipboardItem({ 'image/png': blob })
-                        ]);
-                        showToast("Copied to clipboard!");
-                    } catch (e) {
-                        showToast("Failed to copy", "error");
-                    }
+                        navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+                        showToast("Copied!");
+                    } catch (e) { showToast("Copy failed", "error"); }
                 });
             };
         }
 
-        // --- Image Editor Logic ---
+        // Recording
+        async function startRecording() {
+            const useMic = document.getElementById('chk-mic').checked;
+            recordedChunks = [];
+
+            try {
+                // 1. Main Video Stream (Screen or Camera)
+                let mainStream = await getStream(recordingSource);
+                
+                // 2. If Mic requested AND we are in Screen mode (Camera mode already has audio), try to add mic
+                // However, simple merge:
+                if (useMic && recordingSource === 'screen') {
+                    try {
+                        const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        mainStream = new MediaStream([
+                            ...mainStream.getVideoTracks(),
+                            ...mainStream.getAudioTracks(),
+                            ...micStream.getAudioTracks()
+                        ]);
+                    } catch (e) { console.log("Mic fail", e); }
+                }
+
+                stream = mainStream;
+
+                const mimeTypes = ['video/webm; codecs=vp9', 'video/webm', 'video/mp4'];
+                let options = { mimeType: mimeTypes.find(type => MediaRecorder.isTypeSupported(type)) };
+
+                mediaRecorder = new MediaRecorder(stream, options);
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) recordedChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = showVideoPreview;
+
+                // Stop if stream ends
+                stream.getVideoTracks()[0].onended = stopRecording;
+
+                mediaRecorder.start();
+                isRecording = true;
+                
+                dashboard.classList.add('hidden');
+                recordingOverlay.classList.remove('hidden');
+                
+                let seconds = 0;
+                const timerEl = document.getElementById('recording-timer');
+                timerEl.innerText = "00:00";
+                clearInterval(timerInterval);
+                timerInterval = setInterval(() => {
+                    seconds++;
+                    timerEl.innerText = formatTime(seconds);
+                }, 1000);
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function stopRecording() {
+            if (isRecording && mediaRecorder && mediaRecorder.state !== "inactive") {
+                mediaRecorder.stop();
+                isRecording = false;
+                clearInterval(timerInterval);
+                if(stream) stream.getTracks().forEach(track => track.stop());
+            }
+        }
+
+        function showVideoPreview() {
+            recordingOverlay.classList.add('hidden');
+            dashboard.classList.add('hidden');
+            previewSection.classList.remove('hidden');
+            videoPreviewContainer.classList.remove('hidden');
+            imageEditorContainer.classList.add('hidden');
+            editorTools.classList.add('hidden');
+            copyBtn.classList.add('hidden');
+
+            const blob = new Blob(recordedChunks, { type: 'video/webm' });
+            const url = URL.createObjectURL(blob);
+            const video = document.getElementById('recorded-video');
+            video.src = url;
+            
+            downloadBtn.onclick = () => {
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `rec-${Date.now()}.webm`;
+                link.click();
+            };
+
+            initVideoControls(video);
+        }
+
+        // --- Canvas Logic (Mouse + Touch) ---
         let painting = false;
         let currentTool = 'pen';
         let canvasHistory = [];
@@ -647,24 +714,34 @@
 
         function setTool(tool) {
             currentTool = tool;
-            // Update UI
             ['pen', 'text', 'mask'].forEach(t => {
                 const btn = document.getElementById(`tool-${t}`);
                 if (t === tool) btn.classList.add('bg-brand-500/20', 'border', 'border-brand-500/50');
                 else btn.classList.remove('bg-brand-500/20', 'border', 'border-brand-500/50');
             });
-            
-            editorCanvas.classList.remove('cursor-pen', 'cursor-text');
-            if(tool === 'pen' || tool === 'mask') editorCanvas.classList.add('cursor-pen');
-            if(tool === 'text') editorCanvas.classList.add('cursor-text');
         }
 
-        function startPosition(e) {
+        function getPos(e) {
+            const rect = editorCanvas.getBoundingClientRect();
+            const scaleX = editorCanvas.width / rect.width;
+            const scaleY = editorCanvas.height / rect.height;
+            
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
+        function startPaint(e) {
+            if(e.cancelable) e.preventDefault(); // Prevent scroll on mobile
             painting = true;
             draw(e);
         }
 
-        function finishedPosition() {
+        function endPaint() {
             if(painting) {
                 painting = false;
                 ctx.beginPath();
@@ -672,20 +749,11 @@
             }
         }
 
-        function getMousePos(evt) {
-            const rect = editorCanvas.getBoundingClientRect();
-            const scaleX = editorCanvas.width / rect.width;
-            const scaleY = editorCanvas.height / rect.height;
-            return {
-                x: (evt.clientX - rect.left) * scaleX,
-                y: (evt.clientY - rect.top) * scaleY
-            };
-        }
-
         function draw(e) {
             if (!painting || currentTool === 'text') return;
+            if(e.cancelable) e.preventDefault();
             
-            const pos = getMousePos(e);
+            const pos = getPos(e);
 
             if (currentTool === 'pen') {
                 ctx.lineWidth = 5;
@@ -696,16 +764,27 @@
                 ctx.beginPath();
                 ctx.moveTo(pos.x, pos.y);
             } else if (currentTool === 'mask') {
-                ctx.fillStyle = "#000000"; // Black out
+                ctx.fillStyle = "#000000";
                 ctx.fillRect(pos.x - 15, pos.y - 15, 30, 30);
             }
         }
         
-        // Text Tool Click
+        // Listeners
+        editorCanvas.addEventListener('mousedown', startPaint);
+        editorCanvas.addEventListener('mouseup', endPaint);
+        editorCanvas.addEventListener('mousemove', draw);
+        
+        // Touch Listeners
+        editorCanvas.addEventListener('touchstart', startPaint, {passive: false});
+        editorCanvas.addEventListener('touchend', endPaint);
+        editorCanvas.addEventListener('touchmove', draw, {passive: false});
+        
+        // Text tool
         editorCanvas.addEventListener('click', (e) => {
-            if(currentTool === 'text') {
-                const pos = getMousePos(e);
-                const text = prompt("Enter text annotation:", "");
+             // Avoid double fire on touch devices if mapped
+            if(currentTool === 'text' && !e.touches) {
+                const pos = getPos(e);
+                const text = prompt("Enter text:", "");
                 if(text) {
                     ctx.font = "bold 40px Inter, sans-serif";
                     ctx.fillStyle = colorPicker.value;
@@ -714,10 +793,6 @@
                 }
             }
         });
-
-        editorCanvas.addEventListener('mousedown', startPosition);
-        editorCanvas.addEventListener('mouseup', finishedPosition);
-        editorCanvas.addEventListener('mousemove', draw);
 
         function saveHistory() {
             historyStep++;
@@ -737,145 +812,15 @@
             }
         }
 
-        // --- Screen Recording Logic ---
-        async function startRecording() {
-            const useMic = document.getElementById('chk-mic').checked;
-            recordedChunks = [];
-
-            try {
-                // 1. Get Screen Stream
-                const displayStream = await navigator.mediaDevices.getDisplayMedia({
-                    video: { cursor: "always" },
-                    audio: true // Request system audio
-                });
-
-                let finalStream = displayStream;
-
-                // 2. If Mic requested, get mic stream and merge
-                if (useMic) {
-                    try {
-                        const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                        
-                        // Combine tracks: Keep display video, mix audios
-                        const tracks = [
-                            ...displayStream.getVideoTracks(),
-                            ...displayStream.getAudioTracks(),
-                            ...micStream.getAudioTracks()
-                        ];
-                        
-                        finalStream = new MediaStream(tracks);
-                    } catch (err) {
-                        showToast("Mic access denied. Recording System Audio only.", "error");
-                    }
-                }
-
-                stream = finalStream;
-
-                // 3. Init Recorder
-                // Try to use best codec
-                const mimeTypes = [
-                    'video/webm; codecs=vp9,opus',
-                    'video/webm; codecs=vp8,opus',
-                    'video/webm'
-                ];
-                let options = { mimeType: mimeTypes.find(type => MediaRecorder.isTypeSupported(type)) };
-
-                mediaRecorder = new MediaRecorder(stream, options);
-
-                mediaRecorder.ondataavailable = (event) => {
-                    if (event.data.size > 0) {
-                        recordedChunks.push(event.data);
-                    }
-                };
-
-                mediaRecorder.onstop = showVideoPreview;
-
-                // Stop if user stops sharing via browser UI
-                displayStream.getVideoTracks()[0].onended = () => {
-                    stopRecording();
-                };
-
-                // Start
-                mediaRecorder.start();
-                isRecording = true;
-                
-                // UI Updates
-                dashboard.classList.add('hidden');
-                recordingOverlay.classList.remove('hidden');
-                
-                // Timer
-                let seconds = 0;
-                const timerEl = document.getElementById('recording-timer');
-                timerEl.innerText = "00:00";
-                clearInterval(timerInterval);
-                timerInterval = setInterval(() => {
-                    seconds++;
-                    timerEl.innerText = formatTime(seconds);
-                }, 1000);
-
-            } catch (err) {
-                console.error(err);
-                showToast("Recording Cancelled", "info");
-            }
-        }
-
-        function stopRecording() {
-            if (isRecording && mediaRecorder && mediaRecorder.state !== "inactive") {
-                mediaRecorder.stop();
-                isRecording = false;
-                clearInterval(timerInterval);
-                
-                // Stop all tracks (Screen + Mic)
-                stream.getTracks().forEach(track => track.stop());
-            }
-        }
-
-        function showVideoPreview() {
-            recordingOverlay.classList.add('hidden');
-            dashboard.classList.add('hidden');
-            previewSection.classList.remove('hidden');
-            videoPreviewContainer.classList.remove('hidden');
-            imageEditorContainer.classList.add('hidden');
-            editorTools.classList.add('hidden');
-            editorTools.classList.remove('flex');
-            copyBtn.classList.add('hidden');
-
-            const blob = new Blob(recordedChunks, { type: 'video/webm' });
-            const url = URL.createObjectURL(blob);
-            const video = document.getElementById('recorded-video');
-            
-            video.src = url;
-            addToHistory('video', `Recording (${document.getElementById('recording-timer').innerText})`);
-            
-            // Setup Download
-            downloadBtn.onclick = () => {
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `recording-${Date.now()}.webm`;
-                link.click();
-                showToast("Video Downloaded!");
-            };
-
-            initVideoControls(video);
-        }
-
-        // --- Video Player Controls ---
-        function setSpeed(speed) {
-            const video = document.getElementById('recorded-video');
-            video.playbackRate = speed;
-        }
-
+        // --- Video Controls ---
         function initVideoControls(video) {
             const playBtn = document.getElementById('play-pause');
             const seekBar = document.getElementById('seek-bar');
             const seekFill = document.getElementById('seek-fill');
-            const volumeBar = document.getElementById('volume-bar');
             const timeDisplay = document.getElementById('video-time');
             const fullScreenBtn = document.getElementById('fullscreen-btn');
             const icon = playBtn.querySelector('i');
-            const muteBtn = document.getElementById('mute-btn');
 
-            // Play/Pause
             playBtn.onclick = () => {
                 if(video.paused) {
                     video.play();
@@ -887,12 +832,6 @@
                 lucide.createIcons();
             };
             
-            video.onended = () => {
-                 icon.setAttribute('data-lucide', 'rotate-cw');
-                 lucide.createIcons();
-            };
-
-            // Update Seek Bar & Time
             video.ontimeupdate = () => {
                 const value = (100 / video.duration) * video.currentTime;
                 seekBar.value = value || 0;
@@ -902,33 +841,25 @@
                 const curSecs = Math.floor(video.currentTime % 60);
                 const durMins = Math.floor(video.duration / 60) || 0;
                 const durSecs = Math.floor(video.duration % 60) || 0;
-                
                 timeDisplay.innerText = `${curMins}:${curSecs < 10 ? '0'+curSecs : curSecs} / ${durMins}:${durSecs < 10 ? '0'+durSecs : durSecs}`;
             };
 
-            // Seek
             seekBar.oninput = () => {
                 const time = video.duration * (seekBar.value / 100);
                 video.currentTime = time;
                 seekFill.style.width = `${seekBar.value}%`;
             };
 
-            // Volume
-            volumeBar.oninput = () => {
-                video.volume = volumeBar.value;
-                if(video.volume === 0) muteBtn.innerHTML = '<i data-lucide="volume-x" class="w-5 h-5"></i>';
-                else muteBtn.innerHTML = '<i data-lucide="volume-2" class="w-5 h-5"></i>';
-                lucide.createIcons();
-            };
-
-            // Fullscreen
             fullScreenBtn.onclick = () => {
                 if (video.requestFullscreen) video.requestFullscreen();
             };
         }
-
-        // Init History
-        renderHistory();
+        
+        // History Logic (Visual only for now)
+        function toggleHistory() {
+            document.getElementById('history-panel').classList.toggle('translate-x-full');
+        }
+        function clearHistory() { document.getElementById('history-list').innerHTML = '<p class="text-sm opacity-50 text-center mt-10">Cleared.</p>'; }
 
     </script>
 </body>
