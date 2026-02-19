@@ -152,6 +152,8 @@ Fast, free, mobile-optimized with CORS bypass. Built by SanStudio.
 
 ## Project 36 ScreenSnap -------------->  ( https://sanstudio.neocities.org/ScreenSnap )
 
+# Project 37 PayLink UPI & Link QR Generator ---- [ https://sanstudio.neocities.org/PayLink ]
+
 
 ## Project   https://santhosh2024.neocities.org/skill/in ---[ SKILL ]
 
