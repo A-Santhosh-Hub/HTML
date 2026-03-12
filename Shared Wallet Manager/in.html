@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en" class="light">
 <head>
@@ -460,9 +461,9 @@
         </div>
 
         <!-- Floating Action Button -->
-        <div class="fixed bottom-20 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:bottom-10 md:right-10 z-30">
-            <button onclick="app.openTransactionModal()" class="fab w-14 h-14 bg-primary text-white rounded-full shadow-lg hover:shadow-primary/50 flex items-center justify-center text-2xl transition-all">
-                <i class="ph ph-plus"></i>
+        <div id="draggable-fab" class="fixed bottom-20 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:bottom-10 md:right-10 z-30 touch-none">
+            <button class="fab w-14 h-14 bg-primary text-white rounded-full shadow-lg hover:shadow-primary/50 flex items-center justify-center text-2xl transition-all cursor-move">
+                <i class="ph ph-plus pointer-events-none"></i>
             </button>
         </div>
 
@@ -670,7 +671,115 @@
                 document.getElementById('tx-filter-type').addEventListener('change', () => this.renderTransactions());
                 document.getElementById('tx-date').valueAsDate = new Date();
 
+                this.setupDraggableFab();
                 this.renderAll();
+            },
+
+            setupDraggableFab() {
+                const fab = document.getElementById('draggable-fab');
+                let startX, startY, initialLeft, initialTop;
+                let hasMoved = false;
+
+                // Load saved position from previous sessions
+                const savedPos = localStorage.getItem('wallet_fab_pos');
+                if (savedPos) {
+                    try {
+                        const { left, top } = JSON.parse(savedPos);
+                        fab.style.left = left;
+                        fab.style.top = top;
+                        fab.style.transform = 'none'; // Overrides Tailwind centering classes
+                        fab.style.bottom = 'auto';
+                        fab.style.right = 'auto';
+                    } catch(e) {}
+                }
+
+                const onDown = (e) => {
+                    const touch = e.touches ? e.touches[0] : e;
+                    startX = touch.clientX;
+                    startY = touch.clientY;
+                    
+                    const rect = fab.getBoundingClientRect();
+                    initialLeft = rect.left;
+                    initialTop = rect.top;
+                    hasMoved = false;
+
+                    document.addEventListener('mousemove', onMove, { passive: false });
+                    document.addEventListener('mouseup', onUp);
+                    document.addEventListener('touchmove', onMove, { passive: false });
+                    document.addEventListener('touchend', onUp);
+                };
+
+                const onMove = (e) => {
+                    const touch = e.touches ? e.touches[0] : e;
+                    const dx = touch.clientX - startX;
+                    const dy = touch.clientY - startY;
+
+                    // Small threshold (5px) to distinguish a quick tap from a deliberate drag
+                    if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+                        hasMoved = true;
+                        e.preventDefault(); // Prevents page scrolling while dragging the button
+                        
+                        let newLeft = initialLeft + dx;
+                        let newTop = initialTop + dy;
+
+                        // Keep the button within the screen boundaries
+                        const maxX = window.innerWidth - fab.offsetWidth;
+                        const maxY = window.innerHeight - fab.offsetHeight;
+                        
+                        newLeft = Math.max(0, Math.min(newLeft, maxX));
+                        newTop = Math.max(0, Math.min(newTop, maxY));
+
+                        fab.style.left = `${newLeft}px`;
+                        fab.style.top = `${newTop}px`;
+                        fab.style.transform = 'none';
+                        fab.style.bottom = 'auto';
+                        fab.style.right = 'auto';
+                    }
+                };
+
+                const onUp = () => {
+                    document.removeEventListener('mousemove', onMove);
+                    document.removeEventListener('mouseup', onUp);
+                    document.removeEventListener('touchmove', onMove);
+                    document.removeEventListener('touchend', onUp);
+
+                    if (hasMoved) {
+                        // Save the new location so it stays there next time
+                        localStorage.setItem('wallet_fab_pos', JSON.stringify({
+                            left: fab.style.left,
+                            top: fab.style.top
+                        }));
+                        
+                        // Short delay before resetting moved state so the click event doesn't fire
+                        setTimeout(() => { hasMoved = false; }, 50);
+                    }
+                };
+
+                // Add drag listeners
+                fab.addEventListener('mousedown', onDown);
+                fab.addEventListener('touchstart', onDown, { passive: false });
+
+                // Click handler wrapper (prevents modal opening if it was just dragged)
+                fab.addEventListener('click', (e) => {
+                    if (hasMoved) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return;
+                    }
+                    this.openTransactionModal();
+                });
+
+                // Window resize handler to prevent button getting lost off-screen on orientation change
+                window.addEventListener('resize', () => {
+                    if (fab.style.left) {
+                        const currentLeft = parseFloat(fab.style.left);
+                        const currentTop = parseFloat(fab.style.top);
+                        const maxX = window.innerWidth - fab.offsetWidth;
+                        const maxY = window.innerHeight - fab.offsetHeight;
+                        fab.style.left = `${Math.max(0, Math.min(currentLeft, maxX))}px`;
+                        fab.style.top = `${Math.max(0, Math.min(currentTop, maxY))}px`;
+                    }
+                });
             },
 
             saveData(key) {
