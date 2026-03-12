@@ -1,0 +1,1563 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shared Wallet - Multi Person Manager</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- html2pdf.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        darkBg: '#0F172A',
+                        darkCard: '#1E293B',
+                        darkBorder: '#334155'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .dark .glass {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .slide-up {
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Nav Link Active State */
+        .nav-item.active {
+            background-color: #EEF2FF;
+            color: #4F46E5;
+            font-weight: 600;
+        }
+
+        .dark .nav-item.active {
+            background-color: rgba(79, 70, 229, 0.2);
+            color: #818CF8;
+        }
+
+        /* Floating Action Button Pulse */
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(0.8);
+                box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7);
+            }
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 10px rgba(79, 70, 229, 0);
+            }
+            100% {
+                transform: scale(0.8);
+                box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
+            }
+        }
+
+        .fab:hover {
+            animation: pulse-ring 2s infinite;
+        }
+
+        /* Hide number input spinners */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-darkBg dark:text-slate-100 transition-colors duration-300 flex h-screen overflow-hidden">
+
+    <!-- Sidebar / Navigation (Desktop Only) -->
+    <aside class="hidden md:flex w-20 lg:w-64 shrink-0 flex-col justify-between border-r border-slate-200 dark:border-darkBorder bg-white dark:bg-darkCard transition-colors z-20">
+        <div>
+            <div class="h-16 flex items-center justify-center lg:justify-start lg:px-6 border-b border-slate-200 dark:border-darkBorder">
+                <i class="ph-fill ph-wallet text-primary text-2xl md:text-3xl"></i>
+                <span class="ml-3 font-bold text-xl hidden lg:block tracking-tight">Shared<span class="text-primary">Wallet</span></span>
+            </div>
+            <nav class="p-2 lg:p-4 space-y-2 mt-4">
+                <button onclick="app.navigate('dashboard')" class="nav-item active w-full flex items-center p-3 rounded-xl transition-all hover:bg-slate-100 dark:hover:bg-slate-800" data-target="dashboard">
+                    <i class="ph ph-squares-four text-2xl"></i>
+                    <span class="ml-3 hidden lg:block">Dashboard</span>
+                </button>
+                <button onclick="app.navigate('transactions')" class="nav-item w-full flex items-center p-3 rounded-xl transition-all hover:bg-slate-100 dark:hover:bg-slate-800" data-target="transactions">
+                    <i class="ph ph-list-dashes text-2xl"></i>
+                    <span class="ml-3 hidden lg:block">Transactions</span>
+                </button>
+                <button onclick="app.navigate('users')" class="nav-item w-full flex items-center p-3 rounded-xl transition-all hover:bg-slate-100 dark:hover:bg-slate-800" data-target="users">
+                    <i class="ph ph-users text-2xl"></i>
+                    <span class="ml-3 hidden lg:block">Users</span>
+                </button>
+                <button onclick="app.navigate('settings')" class="nav-item w-full flex items-center p-3 rounded-xl transition-all hover:bg-slate-100 dark:hover:bg-slate-800" data-target="settings">
+                    <i class="ph ph-gear text-2xl"></i>
+                    <span class="ml-3 hidden lg:block">Settings</span>
+                </button>
+                <button onclick="app.navigate('split')" class="nav-item w-full flex items-center p-3 rounded-xl transition-all hover:bg-slate-100 dark:hover:bg-slate-800" data-target="split">
+                    <i class="ph ph-scales text-2xl"></i>
+                    <span class="ml-3 hidden lg:block">Fair Split</span>
+                </button>
+                <button onclick="app.navigate('summary')" class="nav-item w-full flex items-center p-3 rounded-xl transition-all hover:bg-slate-100 dark:hover:bg-slate-800" data-target="summary">
+                    <i class="ph ph-chart-pie-slice text-2xl"></i>
+                    <span class="ml-3 hidden lg:block">Monthly Summary</span>
+                </button>
+            </nav>
+        </div>
+
+        <div class="p-4 border-t border-slate-200 dark:border-darkBorder text-center lg:text-left text-sm text-slate-500 dark:text-slate-400">
+            <button onclick="app.toggleTheme()" class="w-full flex items-center justify-center lg:justify-start p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors mb-4">
+                <i id="theme-icon" class="ph ph-moon text-2xl"></i>
+                <span id="theme-text" class="ml-3 hidden lg:block">Dark Mode</span>
+            </button>
+            <div class="hidden lg:block text-xs">
+                <p>Developed By</p>
+                <a href="https://a-santhosh-hub.github.io/in/" target="_blank" class="font-semibold text-primary hover:underline">Santhosh A</a>
+            </div>
+            <a href="https://a-santhosh-hub.github.io/in/" target="_blank" class="block lg:hidden text-primary flex justify-center mt-2">
+                <i class="ph ph-code text-2xl"></i>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative w-full">
+        <!-- Topbar -->
+        <header class="h-16 flex items-center justify-between px-4 md:px-6 border-b border-slate-200 dark:border-darkBorder bg-white/80 dark:bg-darkCard/80 backdrop-blur-md z-10 shrink-0">
+            <div class="flex items-center gap-2 overflow-hidden">
+                <i class="ph-fill ph-wallet text-primary text-2xl md:hidden shrink-0"></i>
+                <h2 id="page-title" class="text-lg md:text-xl font-semibold capitalize truncate pr-2">Dashboard</h2>
+            </div>
+
+            <div class="flex items-center gap-2 md:gap-4 shrink-0">
+                <!-- Mobile Dark Mode Toggle -->
+                <button onclick="app.toggleTheme()" class="p-1.5 md:hidden rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500 dark:text-slate-400">
+                    <i id="theme-icon-mobile" class="ph ph-moon text-xl"></i>
+                </button>
+
+                <!-- Month Filter for Dashboard -->
+                <div id="month-filter-container" class="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+                    <button onclick="app.changeMonth(-1)" class="p-1 rounded hover:bg-white dark:hover:bg-slate-700"><i class="ph ph-caret-left"></i></button>
+                    <span id="current-month-display" class="px-1 md:px-3 text-xs md:text-sm font-medium w-24 md:w-32 text-center truncate">Current Month</span>
+                    <button onclick="app.changeMonth(1)" class="p-1 rounded hover:bg-white dark:hover:bg-slate-700"><i class="ph ph-caret-right"></i></button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Scrollable Content -->
+        <div id="export-content" class="flex-1 overflow-y-auto p-4 md:p-6 pb-36 md:pb-6">
+            <!-- VIEW: DASHBOARD -->
+            <section id="view-dashboard" class="view-section slide-up max-w-7xl mx-auto w-full">
+                <!-- Smart Alerts -->
+                <div id="smart-alerts" class="mb-6 space-y-2 empty:hidden"></div>
+
+                <!-- Balance Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <!-- Total Bank Balance -->
+                    <div class="glass p-6 rounded-2xl md:col-span-3 lg:col-span-1 relative overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg">
+                        <div class="relative z-10">
+                            <p class="text-indigo-100 text-sm font-medium mb-1">Total Net Balance</p>
+                            <h3 class="text-4xl font-bold tracking-tight" id="dash-total-balance">₹0</h3>
+                            <div class="mt-4 pt-4 border-t border-white/20 flex justify-between text-sm">
+                                <div><span class="opacity-80">Income:</span> <span class="font-semibold" id="dash-total-income">₹0</span></div>
+                                <div><span class="opacity-80">Expense:</span> <span class="font-semibold" id="dash-total-expense">₹0</span></div>
+                            </div>
+                        </div>
+                        <i class="ph ph-bank absolute -right-6 -bottom-6 text-9xl opacity-10"></i>
+                    </div>
+
+                    <!-- User Balances Container -->
+                    <div class="md:col-span-3 lg:col-span-2 flex gap-4 overflow-x-auto pb-2 snap-x" id="dash-user-balances">
+                        <!-- User cards injected here via JS -->
+                    </div>
+                </div>
+
+                <!-- Charts & Summaries -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Expense by Category Chart -->
+                    <div class="glass p-5 rounded-2xl shadow-sm bg-white dark:bg-darkCard lg:col-span-2">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-semibold text-lg">Income & Expenses</h3>
+                        </div>
+                        <div class="h-64 relative w-full">
+                            <canvas id="barChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Balance Distribution Chart -->
+                    <div class="glass p-5 rounded-2xl shadow-sm bg-white dark:bg-darkCard flex flex-col">
+                        <h3 class="font-semibold text-lg mb-4">Wallet Share</h3>
+                        <div class="flex-1 relative w-full flex items-center justify-center min-h-[200px]">
+                            <canvas id="doughnutChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Transactions -->
+                <div class="glass p-5 rounded-2xl shadow-sm bg-white dark:bg-darkCard">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-semibold text-lg">Recent Transactions</h3>
+                        <button onclick="app.navigate('transactions')" class="text-primary text-sm font-medium hover:underline">View All</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="text-slate-500 dark:text-slate-400 text-sm border-b border-slate-200 dark:border-darkBorder">
+                                    <th class="pb-3 font-medium">Date</th>
+                                    <th class="pb-3 font-medium">User</th>
+                                    <th class="pb-3 font-medium">Details</th>
+                                    <th class="pb-3 font-medium text-right">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dash-recent-tx" class="text-sm">
+                                <!-- Injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: MONTHLY SUMMARY -->
+            <section id="view-summary" class="view-section hidden fade-in max-w-7xl mx-auto w-full">
+                <div class="mb-6">
+                    <h3 class="text-xl font-semibold mb-2">Overall Account Monthly Breakdown</h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Total transaction flow for the currently selected month across all users.</p>
+                </div>
+
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8" id="summary-overall-cards">
+                    <!-- Injected via JS -->
+                </div>
+
+                <div class="mb-6 border-t border-slate-200 dark:border-darkBorder pt-6">
+                    <h3 class="text-xl font-semibold mb-2">Breakdown By User</h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Individual contributions and expenses for the selected month.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="summary-users-grid">
+                    <!-- Injected via JS -->
+                </div>
+            </section>
+
+            <!-- VIEW: TRANSACTIONS -->
+            <section id="view-transactions" class="view-section hidden fade-in max-w-7xl mx-auto w-full">
+                <div class="glass p-5 rounded-2xl shadow-sm bg-white dark:bg-darkCard mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
+                    <div class="relative w-full sm:w-64">
+                        <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="tx-search" placeholder="Search note or category..." class="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all">
+                    </div>
+                    <div class="flex gap-2 w-full sm:w-auto overflow-x-auto">
+                        <select id="tx-filter-user" class="px-3 py-2 rounded-lg border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-slate-800 focus:outline-none min-w-[120px]">
+                            <option value="all">All Users</option>
+                        </select>
+                        <select id="tx-filter-type" class="px-3 py-2 rounded-lg border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-slate-800 focus:outline-none">
+                            <option value="all">All Types</option>
+                            <option value="income">Income</option>
+                            <option value="expense">Expense</option>
+                            <option value="lent">Lent</option>
+                            <option value="borrowed">Borrowed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="glass rounded-2xl shadow-sm bg-white dark:bg-darkCard overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead>
+                                <tr class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-sm border-b border-slate-200 dark:border-darkBorder">
+                                    <th class="p-4 font-medium">Date</th>
+                                    <th class="p-4 font-medium">User</th>
+                                    <th class="p-4 font-medium">Type</th>
+                                    <th class="p-4 font-medium">Category/Note</th>
+                                    <th class="p-4 font-medium text-right">Amount</th>
+                                    <th class="p-4 font-medium text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tx-list-full" class="text-sm divide-y divide-slate-100 dark:divide-darkBorder">
+                                <!-- Injected via JS -->
+                            </tbody>
+                        </table>
+                        <div id="tx-empty-state" class="hidden flex-col items-center justify-center py-12 text-slate-400">
+                            <i class="ph ph-receipt text-6xl mb-3 opacity-50"></i>
+                            <p>No transactions found</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: USERS -->
+            <section id="view-users" class="view-section hidden fade-in max-w-7xl mx-auto w-full">
+                <div class="flex justify-between items-center mb-6">
+                    <p class="text-slate-500 dark:text-slate-400">Manage wallet members and their details.</p>
+                    <button onclick="app.openUserModal()" class="bg-primary hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md transition-all flex items-center">
+                        <i class="ph ph-plus mr-2"></i> Add User
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="users-grid">
+                    <!-- Injected via JS -->
+                </div>
+            </section>
+
+            <!-- VIEW: SETTINGS -->
+            <section id="view-settings" class="view-section hidden fade-in max-w-3xl mx-auto">
+                <div class="glass p-6 rounded-2xl shadow-sm bg-white dark:bg-darkCard mb-6">
+                    <h3 class="text-lg font-semibold mb-4 border-b border-slate-200 dark:border-darkBorder pb-2">Data & Backup</h3>
+                    
+                    <div class="space-y-6">
+                        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                            <div>
+                                <h4 class="font-medium">Export Monthly Report (PDF)</h4>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">Download a summary of the current selected month.</p>
+                            </div>
+                            <button onclick="app.exportPDF()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg shadow transition-all flex items-center justify-center min-w-[140px]">
+                                <i class="ph ph-file-pdf mr-2 text-xl"></i> Export PDF
+                            </button>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                            <div>
+                                <h4 class="font-medium">Export Backup (JSON)</h4>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">Save all your data to a file for safekeeping.</p>
+                            </div>
+                            <button onclick="app.exportJSON()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow transition-all flex items-center justify-center min-w-[140px]">
+                                <i class="ph ph-download-simple mr-2 text-xl"></i> Download
+                            </button>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-t border-slate-100 dark:border-darkBorder pt-4">
+                            <div>
+                                <h4 class="font-medium">Import Backup (JSON)</h4>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">Restore your data from a previous backup file.</p>
+                            </div>
+                            <div class="relative min-w-[140px]">
+                                <input type="file" id="import-file" accept=".json" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="app.importJSON(event)">
+                                <button class="w-full bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 rounded-lg shadow transition-all flex items-center justify-center">
+                                    <i class="ph ph-upload-simple mr-2 text-xl"></i> Upload File
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-t border-slate-100 dark:border-darkBorder pt-4">
+                            <div>
+                                <h4 class="font-medium text-red-500">Danger Zone</h4>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">Permanently delete all data from this browser.</p>
+                            </div>
+                            <button onclick="app.resetData()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg shadow transition-all flex items-center justify-center min-w-[140px]">
+                                <i class="ph ph-trash mr-2 text-xl"></i> Reset Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center text-slate-500 text-sm mt-8">
+                    <p>Shared Wallet v1.0.0</p>
+                    <p>Local Storage Active</p>
+                    <p class="mt-2 text-xs">Developed By <a href="https://a-santhosh-hub.github.io/in/" target="_blank" class="font-semibold text-primary hover:underline">Santhosh A</a></p>
+                </div>
+            </section>
+
+            <!-- VIEW: SPLIT CALCULATOR -->
+            <section id="view-split" class="view-section hidden fade-in max-w-4xl mx-auto w-full">
+                <div class="glass p-6 rounded-2xl shadow-sm bg-white dark:bg-darkCard mb-6">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-primary">
+                            <i class="ph ph-scales text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold">Fair Proportional Split</h3>
+                    </div>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mb-6 border-b border-slate-100 dark:border-darkBorder pb-4">Calculate how much each person should contribute to a target amount based on their current balance. People with a larger share of the total balance pay proportionally more.</p>
+                    
+                    <div class="flex flex-col sm:flex-row gap-4 items-end">
+                        <div class="flex-1 w-full">
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Target Amount to Send/Pay (₹)</label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-semibold">₹</span>
+                                <input type="number" id="split-target" min="1" step="0.01" placeholder="e.g. 25000" class="w-full pl-8 pr-4 py-3 text-lg font-bold rounded-xl border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all">
+                            </div>
+                        </div>
+                        <button onclick="app.calculateSplit()" class="w-full sm:w-auto bg-primary hover:bg-indigo-700 text-white px-8 py-3 rounded-xl shadow-md transition-all font-medium flex items-center justify-center gap-2 whitespace-nowrap">
+                            <i class="ph ph-calculator text-lg"></i> Calculate
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Results Table -->
+                <div id="split-results-container" class="hidden glass rounded-2xl shadow-sm bg-white dark:bg-darkCard overflow-hidden">
+                    <!-- table injected via js -->
+                </div>
+            </section>
+        </div>
+
+        <!-- Floating Action Button -->
+        <div class="fixed bottom-20 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:bottom-10 md:right-10 z-30">
+            <button onclick="app.openTransactionModal()" class="fab w-14 h-14 bg-primary text-white rounded-full shadow-lg hover:shadow-primary/50 flex items-center justify-center text-2xl transition-all">
+                <i class="ph ph-plus"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Bottom Navigation -->
+        <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-darkCard/90 backdrop-blur-md border-t border-slate-200 dark:border-darkBorder flex justify-between items-center h-16 z-40 px-2 pb-safe overflow-x-auto">
+            <button onclick="app.navigate('dashboard')" class="nav-item active shrink-0 flex flex-col items-center justify-center w-[16%] h-12 rounded-xl transition-all text-slate-500 dark:text-slate-400" data-target="dashboard">
+                <i class="ph ph-squares-four text-xl mb-0.5"></i>
+                <span class="text-[9px] font-medium leading-none">Dash</span>
+            </button>
+            <button onclick="app.navigate('transactions')" class="nav-item shrink-0 flex flex-col items-center justify-center w-[16%] h-12 rounded-xl transition-all text-slate-500 dark:text-slate-400" data-target="transactions">
+                <i class="ph ph-list-dashes text-xl mb-0.5"></i>
+                <span class="text-[9px] font-medium leading-none">Activity</span>
+            </button>
+            <button onclick="app.navigate('summary')" class="nav-item shrink-0 flex flex-col items-center justify-center w-[16%] h-12 rounded-xl transition-all text-slate-500 dark:text-slate-400" data-target="summary">
+                <i class="ph ph-chart-pie-slice text-xl mb-0.5"></i>
+                <span class="text-[9px] font-medium leading-none">Summary</span>
+            </button>
+            <button onclick="app.navigate('users')" class="nav-item shrink-0 flex flex-col items-center justify-center w-[16%] h-12 rounded-xl transition-all text-slate-500 dark:text-slate-400" data-target="users">
+                <i class="ph ph-users text-xl mb-0.5"></i>
+                <span class="text-[9px] font-medium leading-none">Users</span>
+            </button>
+            <button onclick="app.navigate('split')" class="nav-item shrink-0 flex flex-col items-center justify-center w-[16%] h-12 rounded-xl transition-all text-slate-500 dark:text-slate-400" data-target="split">
+                <i class="ph ph-scales text-xl mb-0.5"></i>
+                <span class="text-[9px] font-medium leading-none">Split</span>
+            </button>
+            <button onclick="app.navigate('settings')" class="nav-item shrink-0 flex flex-col items-center justify-center w-[16%] h-12 rounded-xl transition-all text-slate-500 dark:text-slate-400" data-target="settings">
+                <i class="ph ph-gear text-xl mb-0.5"></i>
+                <span class="text-[9px] font-medium leading-none">Settings</span>
+            </button>
+        </nav>
+    </main>
+
+    <!-- Overlay & Modals -->
+    <div id="modal-overlay" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
+
+    <!-- Transaction Modal -->
+    <div id="modal-transaction" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-md max-h-[90dvh] overflow-y-auto glass bg-white dark:bg-darkCard rounded-2xl shadow-2xl z-50 hidden opacity-0 scale-95 transition-all duration-300 p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold" id="tx-modal-title">New Transaction</h3>
+            <button onclick="app.closeModals()" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"><i class="ph ph-x text-2xl"></i></button>
+        </div>
+        
+        <form id="tx-form" onsubmit="app.saveTransaction(event)" class="space-y-4">
+            <input type="hidden" id="tx-id">
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm text-slate-500 dark:text-slate-400 mb-1">Type</label>
+                    <select id="tx-type" required onchange="app.handleTxTypeChange()" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/50">
+                        <option value="expense">Expense</option>
+                        <option value="income">Income</option>
+                        <option value="lent">Lent</option>
+                        <option value="borrowed">Borrowed</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-500 dark:text-slate-400 mb-1">User</label>
+                    <select id="tx-user" required class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/50">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm text-slate-500 dark:text-slate-400 mb-1">Amount (₹)</label>
+                <input type="number" id="tx-amount" required min="1" step="0.01" placeholder="0.00" class="w-full px-3 py-2 text-lg font-semibold rounded-lg border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/50">
+            </div>
+
+            <div id="tx-category-group">
+                <label class="block text-sm text-slate-500 dark:text-slate-400 mb-1" id="tx-cat-label">Category</label>
+                <input type="text" id="tx-category" required placeholder="e.g. Food, Rent, Salary..." list="category-suggestions" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/50">
+                <datalist id="category-suggestions">
+                    <option value="Food & Dining">
+                    <option value="Housing & Rent">
+                    <option value="Transportation">
+                    <option value="Salary">
+                    <option value="Shopping">
+                    <option value="Utilities">
+                    <option value="Entertainment">
+                </datalist>
+            </div>
+
+            <div>
+                <label class="block text-sm text-slate-500 dark:text-slate-400 mb-1">Date</label>
+                <input type="date" id="tx-date" required class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/50">
+            </div>
+
+            <div>
+                <label class="block text-sm text-slate-500 dark:text-slate-400 mb-1">Note (Optional)</label>
+                <input type="text" id="tx-note" placeholder="Short description..." class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/50">
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="app.closeModals()" class="w-1/3 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-medium py-3 rounded-xl transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" class="w-2/3 bg-primary hover:bg-indigo-700 text-white font-medium py-3 rounded-xl shadow-md transition-colors">
+                    Save Transaction
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- User Modal -->
+    <div id="modal-user" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-sm max-h-[90dvh] overflow-y-auto glass bg-white dark:bg-darkCard rounded-2xl shadow-2xl z-50 hidden opacity-0 scale-95 transition-all duration-300 p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold" id="user-modal-title">Add User</h3>
+            <button onclick="app.closeModals()" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"><i class="ph ph-x text-2xl"></i></button>
+        </div>
+        
+        <form id="user-form" onsubmit="app.saveUser(event)" class="space-y-4">
+            <input type="hidden" id="user-id">
+            
+            <div>
+                <label class="block text-sm text-slate-500 dark:text-slate-400 mb-1">Name</label>
+                <input type="text" id="user-name" required placeholder="John Doe" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/50">
+            </div>
+
+            <div>
+                <label class="block text-sm text-slate-500 dark:text-slate-400 mb-1">Theme Color</label>
+                <div class="flex items-center gap-3">
+                    <input type="color" id="user-color" value="#4F46E5" class="w-10 h-10 rounded cursor-pointer border-0 p-0 bg-transparent">
+                    <span class="text-xs text-slate-500">Used for charts and UI</span>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm text-slate-500 dark:text-slate-400 mb-1">Salary Day (1-31)</label>
+                <input type="number" id="user-salary" min="1" max="31" placeholder="e.g. 5" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/50">
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="app.closeModals()" class="w-1/3 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-medium py-3 rounded-xl transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" class="w-2/3 bg-primary hover:bg-indigo-700 text-white font-medium py-3 rounded-xl shadow-md transition-colors">
+                    Save User
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="modal-confirm" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-sm glass bg-white dark:bg-darkCard rounded-2xl shadow-2xl z-50 hidden opacity-0 scale-95 transition-all duration-300 p-6 text-center">
+        <div class="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4 border border-red-200 dark:border-red-800/50">
+            <i class="ph ph-warning-circle text-3xl text-red-500"></i>
+        </div>
+        <h3 class="text-xl font-bold mb-2" id="confirm-title">Are you sure?</h3>
+        <p class="text-slate-500 dark:text-slate-400 mb-6 text-sm" id="confirm-msg">This action cannot be undone.</p>
+        <div class="flex gap-3">
+            <button onclick="app.closeModals()" class="w-1/2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-medium py-3 rounded-xl transition-colors">Cancel</button>
+            <button onclick="app.executeConfirm()" class="w-1/2 bg-red-500 hover:bg-red-600 text-white font-medium py-3 rounded-xl shadow-md transition-colors">Yes, Delete</button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 right-4 bg-slate-800 text-white px-4 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full opacity-0 z-50 flex items-center gap-2">
+        <i id="toast-icon" class="ph ph-check-circle text-emerald-400 text-xl"></i>
+        <span id="toast-msg">Success</span>
+    </div>
+
+    <!-- App Logic -->
+    <script>
+        const app = {
+            data: {
+                users: [],
+                transactions: [],
+                settings: { darkMode: false }
+            },
+            currentView: 'dashboard',
+            currentDate: new Date(),
+            charts: { bar: null, doughnut: null },
+            pendingAction: null,
+
+            fmtCurrency: (num) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(num || 0),
+            fmtDate: (dateStr) => new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(dateStr)),
+            
+            init() {
+                const savedUsers = localStorage.getItem('wallet_users');
+                const savedTx = localStorage.getItem('wallet_transactions');
+                const savedSettings = localStorage.getItem('wallet_settings');
+
+                if(savedUsers) this.data.users = JSON.parse(savedUsers);
+                if(savedTx) this.data.transactions = JSON.parse(savedTx);
+                if(savedSettings) {
+                    this.data.settings = JSON.parse(savedSettings);
+                    if(this.data.settings.darkMode) document.documentElement.classList.add('dark');
+                } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                     document.documentElement.classList.add('dark');
+                     this.data.settings.darkMode = true;
+                }
+
+                this.updateThemeUI();
+                
+                if(this.data.users.length === 0) {
+                    this.data.users = [
+                        { id: 'u1', name: 'Me', color: '#4F46E5', salaryDate: 5 },
+                        { id: 'u2', name: 'Partner', color: '#ec4899', salaryDate: 10 }
+                    ];
+                    this.saveData('users');
+                }
+
+                document.getElementById('tx-search').addEventListener('input', () => this.renderTransactions());
+                document.getElementById('tx-filter-user').addEventListener('change', () => this.renderTransactions());
+                document.getElementById('tx-filter-type').addEventListener('change', () => this.renderTransactions());
+                document.getElementById('tx-date').valueAsDate = new Date();
+
+                this.renderAll();
+            },
+
+            saveData(key) {
+                if(key === 'users' || !key) localStorage.setItem('wallet_users', JSON.stringify(this.data.users));
+                if(key === 'transactions' || !key) localStorage.setItem('wallet_transactions', JSON.stringify(this.data.transactions));
+                if(key === 'settings' || !key) localStorage.setItem('wallet_settings', JSON.stringify(this.data.settings));
+            },
+
+            navigate(viewId) {
+                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll(`.nav-item[data-target="${viewId}"]`).forEach(el => el.classList.add('active'));
+
+                document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+                const targetView = document.getElementById(`view-${viewId}`);
+                targetView.classList.remove('hidden');
+                
+                document.getElementById('page-title').innerText = viewId;
+                this.currentView = viewId;
+
+                const monthFilter = document.getElementById('month-filter-container');
+                if(viewId === 'dashboard' || viewId === 'summary') monthFilter.classList.remove('hidden');
+                else monthFilter.classList.add('hidden');
+
+                if(viewId === 'dashboard') setTimeout(() => this.renderCharts(), 100);
+            },
+
+            toggleTheme() {
+                this.data.settings.darkMode = !this.data.settings.darkMode;
+                document.documentElement.classList.toggle('dark');
+                this.updateThemeUI();
+                this.saveData('settings');
+                if(this.currentView === 'dashboard') this.renderCharts();
+            },
+
+            updateThemeUI() {
+                const icon = document.getElementById('theme-icon');
+                const text = document.getElementById('theme-text');
+                const mobileIcon = document.getElementById('theme-icon-mobile');
+                
+                if(this.data.settings.darkMode) {
+                    if(icon) icon.classList.replace('ph-moon', 'ph-sun');
+                    if(mobileIcon) mobileIcon.classList.replace('ph-moon', 'ph-sun');
+                    if(text) text.innerText = 'Light Mode';
+                } else {
+                    if(icon) icon.classList.replace('ph-sun', 'ph-moon');
+                    if(mobileIcon) mobileIcon.classList.replace('ph-sun', 'ph-moon');
+                    if(text) text.innerText = 'Dark Mode';
+                }
+            },
+
+            showToast(msg, type = 'success') {
+                const toast = document.getElementById('toast');
+                document.getElementById('toast-msg').innerText = msg;
+                const icon = document.getElementById('toast-icon');
+                
+                if(type === 'success') {
+                    icon.className = 'ph ph-check-circle text-emerald-400 text-xl';
+                } else {
+                    icon.className = 'ph ph-warning-circle text-red-400 text-xl';
+                }
+                
+                toast.className = `fixed top-4 right-4 ${type === 'success' ? 'bg-slate-800' : 'bg-red-900'} text-white px-4 py-3 rounded-lg shadow-lg transform transition-all duration-300 z-50 flex items-center gap-2 translate-x-0 opacity-100`;
+                
+                setTimeout(() => {
+                    toast.classList.add('translate-x-full', 'opacity-0');
+                    toast.classList.remove('translate-x-0', 'opacity-100');
+                }, 3000);
+            },
+
+            changeMonth(delta) {
+                this.currentDate.setMonth(this.currentDate.getMonth() + delta);
+                this.renderAll();
+            },
+
+            calculateSplit() {
+                const targetInput = document.getElementById('split-target').value;
+                const target = Number(targetInput);
+
+                if (!target || target <= 0) {
+                    this.showToast('Please enter a valid target amount.', 'error');
+                    return;
+                }
+
+                // Get all transactions to determine current total accurate balances
+                const allTx = this.data.transactions;
+                let totalPool = 0;
+                const userStats = [];
+
+                this.data.users.forEach(u => {
+                    const bal = this.getUserBalance(u.id, allTx);
+                    if (bal > 0) {
+                        totalPool += bal;
+                        userStats.push({ name: u.name, color: u.color, balance: bal });
+                    }
+                });
+
+                if (target > totalPool) {
+                    this.showToast(`Target amount exceeds your total positive balance (${this.fmtCurrency(totalPool)})`, 'error');
+                    return;
+                }
+
+                if (userStats.length === 0) {
+                    this.showToast('No users have a positive balance to split.', 'error');
+                    return;
+                }
+
+                let html = `
+                    <div class="p-5 border-b border-slate-100 dark:border-darkBorder bg-slate-50 dark:bg-slate-800/50 flex flex-col sm:flex-row justify-between gap-4 sm:items-center">
+                        <div>
+                            <h3 class="font-semibold text-lg text-slate-800 dark:text-slate-100">Calculation Results</h3>
+                            <p class="text-sm text-slate-500 mt-1">Fair proportional split based on current balances.</p>
+                        </div>
+                        <div class="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300 px-4 py-2 rounded-lg border border-indigo-200 dark:border-indigo-800/50 text-right">
+                            <p class="text-xs uppercase font-bold tracking-wider opacity-80 mb-0.5">Target Amount</p>
+                            <p class="text-xl font-bold">${this.fmtCurrency(target)}</p>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto p-1">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead>
+                                <tr class="text-slate-500 dark:text-slate-400 text-sm border-b border-slate-200 dark:border-darkBorder">
+                                    <th class="p-4 font-medium">Person</th>
+                                    <th class="p-4 font-medium text-right">Current Bal</th>
+                                    <th class="p-4 font-medium text-right">Share %</th>
+                                    <th class="p-4 font-medium text-right text-primary">Send Amount</th>
+                                    <th class="p-4 font-medium text-right">Remaining</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm divide-y divide-slate-100 dark:divide-darkBorder">
+                `;
+
+                let totalSent = 0;
+
+                userStats.forEach(u => {
+                    const shareRatio = u.balance / totalPool;
+                    const percentage = (shareRatio * 100).toFixed(2);
+                    const contribution = target * shareRatio;
+                    const remaining = u.balance - contribution;
+
+                    totalSent += contribution;
+
+                    html += `
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                            <td class="p-4 font-medium flex items-center gap-2">
+                                <div class="w-3 h-3 rounded-full shadow-sm" style="background-color: ${u.color}"></div>
+                                ${u.name}
+                            </td>
+                            <td class="p-4 text-right text-slate-600 dark:text-slate-300">${this.fmtCurrency(u.balance)}</td>
+                            <td class="p-4 text-right text-slate-400">${percentage}%</td>
+                            <td class="p-4 text-right font-bold text-primary text-base">${this.fmtCurrency(contribution)}</td>
+                            <td class="p-4 text-right font-medium text-slate-700 dark:text-slate-200">${this.fmtCurrency(remaining)}</td>
+                        </tr>
+                    `;
+                });
+
+                html += `
+                            </tbody>
+                            <tfoot class="bg-slate-50 dark:bg-slate-800/50 font-bold border-t border-slate-200 dark:border-darkBorder">
+                                <tr>
+                                    <td class="p-4 text-slate-700 dark:text-slate-200">Total</td>
+                                    <td class="p-4 text-right text-slate-700 dark:text-slate-200">${this.fmtCurrency(totalPool)}</td>
+                                    <td class="p-4 text-right text-slate-500">100%</td>
+                                    <td class="p-4 text-right text-primary text-lg">${this.fmtCurrency(totalSent)}</td>
+                                    <td class="p-4 text-right text-slate-700 dark:text-slate-200">${this.fmtCurrency(totalPool - totalSent)}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                `;
+
+                const container = document.getElementById('split-results-container');
+                container.innerHTML = html;
+                container.classList.remove('hidden');
+            },
+
+            getFilteredTransactions() {
+                const year = this.currentDate.getFullYear();
+                const month = this.currentDate.getMonth();
+                const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59);
+                return this.data.transactions.filter(tx => new Date(tx.date) <= endOfMonth);
+            },
+
+            getMonthlyTransactions() {
+                const year = this.currentDate.getFullYear();
+                const month = this.currentDate.getMonth();
+                return this.data.transactions.filter(tx => {
+                    const d = new Date(tx.date);
+                    return d.getFullYear() === year && d.getMonth() === month;
+                });
+            },
+
+            getUserBalance(userId, allTx) {
+                let balance = 0;
+                allTx.forEach(tx => {
+                    if (tx.userId === userId) {
+                        if (tx.type === 'income' || tx.type === 'borrowed') balance += Number(tx.amount);
+                        if (tx.type === 'expense' || tx.type === 'lent') balance -= Number(tx.amount);
+                    }
+                });
+                return balance;
+            },
+
+            renderAll() {
+                const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                document.getElementById('current-month-display').innerText = `${monthNames[this.currentDate.getMonth()]} ${this.currentDate.getFullYear()}`;
+
+                const userFilter = document.getElementById('tx-filter-user');
+                const userSelect = document.getElementById('tx-user');
+                
+                let filterHtml = '<option value="all">All Users</option>';
+                let selectHtml = '';
+                
+                this.data.users.forEach(u => {
+                    const opt = `<option value="${u.id}">${u.name}</option>`;
+                    filterHtml += opt;
+                    selectHtml += opt;
+                });
+                
+                const currFilter = userFilter.value;
+                userFilter.innerHTML = filterHtml;
+                userFilter.value = currFilter || 'all';
+                userSelect.innerHTML = selectHtml;
+
+                this.renderDashboard();
+                this.renderSummary();
+                this.renderTransactions();
+                this.renderUsers();
+                if(this.currentView === 'dashboard') setTimeout(() => this.renderCharts(), 50);
+            },
+
+            renderSummary() {
+                const monthTx = this.getMonthlyTransactions();
+                
+                // Overall Stats
+                let totalIncome = 0, totalExpense = 0, totalLent = 0, totalBorrowed = 0;
+                
+                // User Stats structure
+                const userStats = {};
+                this.data.users.forEach(u => {
+                    userStats[u.id] = { name: u.name, color: u.color, income: 0, expense: 0, lent: 0, borrowed: 0 };
+                });
+
+                // Calculate Totals
+                monthTx.forEach(tx => {
+                    const amount = Number(tx.amount);
+                    if(tx.type === 'income') {
+                        totalIncome += amount;
+                        if(userStats[tx.userId]) userStats[tx.userId].income += amount;
+                    }
+                    if(tx.type === 'expense') {
+                        totalExpense += amount;
+                        if(userStats[tx.userId]) userStats[tx.userId].expense += amount;
+                    }
+                    if(tx.type === 'lent') {
+                        totalLent += amount;
+                        if(userStats[tx.userId]) userStats[tx.userId].lent += amount;
+                    }
+                    if(tx.type === 'borrowed') {
+                        totalBorrowed += amount;
+                        if(userStats[tx.userId]) userStats[tx.userId].borrowed += amount;
+                    }
+                });
+
+                // Render Overall Cards
+                const overallHtml = `
+                    <div class="glass p-5 rounded-xl border-l-4 border-emerald-500 bg-white dark:bg-darkCard">
+                        <div class="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 mb-2">
+                            <i class="ph ph-trend-up text-xl"></i>
+                            <span class="font-medium">Total Income</span>
+                        </div>
+                        <p class="text-2xl font-bold">${this.fmtCurrency(totalIncome)}</p>
+                    </div>
+                    <div class="glass p-5 rounded-xl border-l-4 border-red-500 bg-white dark:bg-darkCard">
+                        <div class="flex items-center gap-2 text-red-600 dark:text-red-400 mb-2">
+                            <i class="ph ph-trend-down text-xl"></i>
+                            <span class="font-medium">Total Expense</span>
+                        </div>
+                        <p class="text-2xl font-bold">${this.fmtCurrency(totalExpense)}</p>
+                    </div>
+                    <div class="glass p-5 rounded-xl border-l-4 border-orange-500 bg-white dark:bg-darkCard">
+                        <div class="flex items-center gap-2 text-orange-600 dark:text-orange-400 mb-2">
+                            <i class="ph ph-export text-xl"></i>
+                            <span class="font-medium">Total Lent</span>
+                        </div>
+                        <p class="text-2xl font-bold">${this.fmtCurrency(totalLent)}</p>
+                    </div>
+                    <div class="glass p-5 rounded-xl border-l-4 border-blue-500 bg-white dark:bg-darkCard">
+                        <div class="flex items-center gap-2 text-blue-600 dark:text-blue-400 mb-2">
+                            <i class="ph ph-import text-xl"></i>
+                            <span class="font-medium">Total Borrowed</span>
+                        </div>
+                        <p class="text-2xl font-bold">${this.fmtCurrency(totalBorrowed)}</p>
+                    </div>
+                `;
+                document.getElementById('summary-overall-cards').innerHTML = overallHtml;
+
+                // Render User Cards
+                let usersHtml = '';
+                Object.values(userStats).forEach(u => {
+                    const netMonthlyFlow = (u.income + u.borrowed) - (u.expense + u.lent);
+                    const flowColor = netMonthlyFlow >= 0 ? 'text-emerald-500' : 'text-red-500';
+
+                    usersHtml += `
+                        <div class="glass p-5 rounded-2xl bg-white dark:bg-darkCard shadow-sm border border-slate-200 dark:border-darkBorder">
+                            <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100 dark:border-darkBorder">
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-sm" style="background-color: ${u.color}">
+                                    ${u.name.charAt(0)}
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg leading-tight">${u.name}</h4>
+                                    <p class="text-xs text-slate-500">Net Flow: <span class="font-semibold ${flowColor}">${this.fmtCurrency(netMonthlyFlow)}</span></p>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-3 text-sm">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-slate-500 flex items-center gap-1"><i class="ph ph-trend-up text-emerald-500"></i> Income</span>
+                                    <span class="font-medium">${this.fmtCurrency(u.income)}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-slate-500 flex items-center gap-1"><i class="ph ph-trend-down text-red-500"></i> Expense</span>
+                                    <span class="font-medium">${this.fmtCurrency(u.expense)}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-slate-500 flex items-center gap-1"><i class="ph ph-export text-orange-500"></i> Lent</span>
+                                    <span class="font-medium">${this.fmtCurrency(u.lent)}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-slate-500 flex items-center gap-1"><i class="ph ph-import text-blue-500"></i> Borrowed</span>
+                                    <span class="font-medium">${this.fmtCurrency(u.borrowed)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                if(Object.keys(userStats).length === 0) {
+                    usersHtml = `<div class="col-span-full text-center text-slate-500 py-8">No users found. Please add users first.</div>`;
+                }
+                
+                document.getElementById('summary-users-grid').innerHTML = usersHtml;
+            },
+
+            renderDashboard() {
+                const allTx = this.getFilteredTransactions();
+                const monthTx = this.getMonthlyTransactions();
+                
+                let totalBankBal = 0;
+                let monthIncome = 0;
+                let monthExpense = 0;
+
+                monthTx.forEach(tx => {
+                    if(tx.type === 'income') monthIncome += Number(tx.amount);
+                    if(tx.type === 'expense') monthExpense += Number(tx.amount);
+                });
+
+                let userCardsHtml = '';
+                let alertsHtml = '';
+                const today = new Date();
+
+                this.data.users.forEach(u => {
+                    const bal = this.getUserBalance(u.id, allTx);
+                    totalBankBal += bal;
+
+                    if (bal < 0) {
+                        alertsHtml += `
+                            <div class="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 p-3 rounded-lg flex items-center text-sm border border-red-200 dark:border-red-800/50">
+                                <i class="ph-fill ph-warning-circle text-lg mr-2"></i>
+                                <span><strong>${u.name}'s</strong> balance is negative (${this.fmtCurrency(bal)}).</span>
+                            </div>`;
+                    }
+                    if (u.salaryDate) {
+                        const testDate = new Date(today.getFullYear(), today.getMonth(), u.salaryDate);
+                        const diffTime = testDate - today;
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        
+                        if (diffDays >= 0 && diffDays <= 3) {
+                            alertsHtml += `
+                            <div class="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 p-3 rounded-lg flex items-center text-sm border border-blue-200 dark:border-blue-800/50">
+                                <i class="ph-fill ph-calendar-check text-lg mr-2"></i>
+                                <span>Salary expected for <strong>${u.name}</strong> in ${diffDays === 0 ? 'today!' : diffDays + ' day(s)'}.</span>
+                            </div>`;
+                        }
+                    }
+
+                    userCardsHtml += `
+                        <div class="glass min-w-[240px] p-5 rounded-2xl relative overflow-hidden bg-white dark:bg-darkCard shadow-sm border-t-4" style="border-top-color: ${u.color}">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="font-medium text-slate-600 dark:text-slate-300">${u.name}</span>
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm" style="background-color: ${u.color}">${u.name.charAt(0)}</div>
+                            </div>
+                            <h4 class="text-2xl font-bold ${bal < 0 ? 'text-red-500' : ''}">${this.fmtCurrency(bal)}</h4>
+                            <p class="text-xs text-slate-500 mt-2 flex justify-between">
+                                <span>Wallet Share</span>
+                            </p>
+                        </div>
+                    `;
+                });
+
+                if(this.data.users.length === 0) {
+                    userCardsHtml = `<div class="p-4 text-slate-400 text-sm">No users added yet. Go to Users tab.</div>`;
+                }
+
+                document.getElementById('smart-alerts').innerHTML = alertsHtml;
+                document.getElementById('dash-total-balance').innerText = this.fmtCurrency(totalBankBal);
+                document.getElementById('dash-total-income').innerText = this.fmtCurrency(monthIncome);
+                document.getElementById('dash-total-expense').innerText = this.fmtCurrency(monthExpense);
+                document.getElementById('dash-user-balances').innerHTML = userCardsHtml;
+
+                const recent = [...this.data.transactions].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+                let recentHtml = '';
+                if(recent.length === 0) recentHtml = `<tr><td colspan="4" class="py-4 text-center text-slate-400">No transactions yet</td></tr>`;
+                
+                recent.forEach(tx => {
+                    const user = this.data.users.find(u => u.id === tx.userId) || { name: '?', color: '#ccc' };
+                    const isPositive = ['income', 'borrowed'].includes(tx.type);
+                    const amountClass = isPositive ? 'text-emerald-500' : 'text-red-500';
+                    const prefix = isPositive ? '+' : '-';
+                    
+                    recentHtml += `
+                        <tr class="border-b border-slate-100 dark:border-darkBorder last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                            <td class="py-3 pr-2 whitespace-nowrap">${this.fmtDate(tx.date)}</td>
+                            <td class="py-3 px-2">
+                                <span class="px-2 py-1 rounded-full text-xs font-medium text-white" style="background-color: ${user.color}">${user.name}</span>
+                            </td>
+                            <td class="py-3 px-2">
+                                <p class="font-medium truncate max-w-[150px]">${tx.category}</p>
+                                <p class="text-xs text-slate-400 capitalize">${tx.type}</p>
+                            </td>
+                            <td class="py-3 pl-2 text-right font-semibold ${amountClass}">
+                                ${prefix}${this.fmtCurrency(tx.amount)}
+                            </td>
+                        </tr>
+                    `;
+                });
+                document.getElementById('dash-recent-tx').innerHTML = recentHtml;
+            },
+
+            renderCharts() {
+                if(!document.getElementById('barChart') || this.currentView !== 'dashboard') return;
+                
+                const isDark = this.data.settings.darkMode;
+                const textColor = isDark ? '#cbd5e1' : '#475569';
+                const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+
+                const monthTx = this.getMonthlyTransactions();
+                const userLabels = this.data.users.map(u => u.name);
+                const userIncomes = this.data.users.map(u => {
+                    return monthTx.filter(tx => tx.userId === u.id && tx.type === 'income').reduce((sum, tx) => sum + Number(tx.amount), 0);
+                });
+                const userExpenses = this.data.users.map(u => {
+                    return monthTx.filter(tx => tx.userId === u.id && tx.type === 'expense').reduce((sum, tx) => sum + Number(tx.amount), 0);
+                });
+
+                if(this.charts.bar) this.charts.bar.destroy();
+                this.charts.bar = new Chart(document.getElementById('barChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: userLabels,
+                        datasets: [
+                            { label: 'Income', data: userIncomes, backgroundColor: '#10b981', borderRadius: 4 },
+                            { label: 'Expense', data: userExpenses, backgroundColor: '#ef4444', borderRadius: 4 }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { labels: { color: textColor } } },
+                        scales: {
+                            y: { grid: { color: gridColor }, ticks: { color: textColor } },
+                            x: { grid: { display: false }, ticks: { color: textColor } }
+                        }
+                    }
+                });
+
+                const allTx = this.getFilteredTransactions();
+                let validBalances = [];
+                let validColors = [];
+                let validLabels = [];
+
+                this.data.users.forEach(u => {
+                    const bal = this.getUserBalance(u.id, allTx);
+                    if(bal > 0) {
+                        validBalances.push(bal);
+                        validColors.push(u.color);
+                        validLabels.push(u.name);
+                    }
+                });
+
+                if(this.charts.doughnut) this.charts.doughnut.destroy();
+                
+                if(validBalances.length === 0) {
+                    validBalances = [1];
+                    validColors = [gridColor];
+                    validLabels = ['No Balances'];
+                }
+
+                this.charts.doughnut = new Chart(document.getElementById('doughnutChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: validLabels,
+                        datasets: [{
+                            data: validBalances,
+                            backgroundColor: validColors,
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: textColor, padding: 20, usePointStyle: true } }
+                        }
+                    }
+                });
+            },
+
+            renderTransactions() {
+                const search = document.getElementById('tx-search').value.toLowerCase();
+                const userFilter = document.getElementById('tx-filter-user').value;
+                const typeFilter = document.getElementById('tx-filter-type').value;
+
+                let filtered = [...this.data.transactions].sort((a,b) => new Date(b.date) - new Date(a.date));
+
+                if(search) {
+                    filtered = filtered.filter(tx => 
+                        (tx.category && tx.category.toLowerCase().includes(search)) || 
+                        (tx.note && tx.note.toLowerCase().includes(search))
+                    );
+                }
+                if(userFilter !== 'all') filtered = filtered.filter(tx => tx.userId === userFilter);
+                if(typeFilter !== 'all') filtered = filtered.filter(tx => tx.type === typeFilter);
+
+                const tbody = document.getElementById('tx-list-full');
+                const emptyState = document.getElementById('tx-empty-state');
+                
+                if(filtered.length === 0) {
+                    tbody.innerHTML = '';
+                    emptyState.classList.remove('hidden');
+                    emptyState.classList.add('flex');
+                } else {
+                    emptyState.classList.add('hidden');
+                    emptyState.classList.remove('flex');
+                    
+                    let html = '';
+                    filtered.forEach(tx => {
+                        const user = this.data.users.find(u => u.id === tx.userId) || { name: 'Deleted User', color: '#94a3b8' };
+                        const isPositive = ['income', 'borrowed'].includes(tx.type);
+                        const amountClass = isPositive ? 'text-emerald-500' : 'text-red-500';
+                        const prefix = isPositive ? '+' : '-';
+                        
+                        let icon = 'ph-arrows-left-right';
+                        if(tx.type === 'income') icon = 'ph-trend-up text-emerald-500';
+                        if(tx.type === 'expense') icon = 'ph-trend-down text-red-500';
+                        if(tx.type === 'lent') icon = 'ph-export text-orange-500';
+                        if(tx.type === 'borrowed') icon = 'ph-import text-blue-500';
+
+                        html += `
+                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
+                                <td class="p-4 whitespace-nowrap">${this.fmtDate(tx.date)}</td>
+                                <td class="p-4">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold" style="background-color: ${user.color}">${user.name.charAt(0)}</div>
+                                        <span>${user.name}</span>
+                                    </div>
+                                </td>
+                                <td class="p-4 capitalize flex items-center gap-2">
+                                    <i class="ph ${icon} text-lg"></i> ${tx.type}
+                                </td>
+                                <td class="p-4">
+                                    <p class="font-medium">${tx.category}</p>
+                                    ${tx.note ? `<p class="text-xs text-slate-500">${tx.note}</p>` : ''}
+                                </td>
+                                <td class="p-4 text-right font-bold ${amountClass}">
+                                    ${prefix}${this.fmtCurrency(tx.amount)}
+                                </td>
+                                <td class="p-4 text-center">
+                                    <div class="opacity-0 group-hover:opacity-100 transition-opacity flex justify-center gap-2">
+                                        <button onclick="app.openTransactionModal('${tx.id}')" class="text-blue-500 hover:text-blue-700 p-1"><i class="ph ph-pencil-simple text-lg"></i></button>
+                                        <button onclick="app.deleteTransaction('${tx.id}')" class="text-red-500 hover:text-red-700 p-1"><i class="ph ph-trash text-lg"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    tbody.innerHTML = html;
+                }
+            },
+
+            renderUsers() {
+                const grid = document.getElementById('users-grid');
+                let html = '';
+                
+                this.data.users.forEach(u => {
+                    const bal = this.getUserBalance(u.id, this.data.transactions);
+                    html += `
+                        <div class="glass p-5 rounded-2xl bg-white dark:bg-darkCard shadow-sm border border-slate-200 dark:border-darkBorder relative overflow-hidden group">
+                            <div class="absolute top-0 left-0 w-full h-2" style="background-color: ${u.color}"></div>
+                            <div class="flex justify-between items-start mt-2">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-full flex items-center justify-center text-white text-xl font-bold shadow-md" style="background-color: ${u.color}">
+                                        ${u.name.charAt(0)}
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-lg">${u.name}</h4>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400">Salary Day: ${u.salaryDate || 'Not set'}</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button onclick="app.openUserModal('${u.id}')" class="text-slate-400 hover:text-blue-500 p-1"><i class="ph ph-pencil-simple text-lg"></i></button>
+                                    <button onclick="app.deleteUser('${u.id}')" class="text-slate-400 hover:text-red-500 p-1"><i class="ph ph-trash text-lg"></i></button>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-slate-100 dark:border-darkBorder">
+                                <p class="text-sm text-slate-500 mb-1">Current Balance</p>
+                                <p class="text-xl font-bold ${bal < 0 ? 'text-red-500' : ''}">${this.fmtCurrency(bal)}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                grid.innerHTML = html;
+            },
+
+            openModal(id) {
+                const overlay = document.getElementById('modal-overlay');
+                const modal = document.getElementById(id);
+                overlay.classList.remove('hidden');
+                modal.classList.remove('hidden');
+                void overlay.offsetWidth;
+                overlay.classList.remove('opacity-0');
+                modal.classList.remove('opacity-0', 'scale-95');
+            },
+
+            closeModals() {
+                const overlay = document.getElementById('modal-overlay');
+                const modals = [
+                    document.getElementById('modal-transaction'), 
+                    document.getElementById('modal-user'),
+                    document.getElementById('modal-confirm')
+                ];
+                overlay.classList.add('opacity-0');
+                modals.forEach(m => m.classList.add('opacity-0', 'scale-95'));
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                    modals.forEach(m => m.classList.add('hidden'));
+                }, 300);
+                this.pendingAction = null;
+            },
+
+            confirmAction(title, msg, callback) {
+                document.getElementById('confirm-title').innerText = title;
+                document.getElementById('confirm-msg').innerText = msg;
+                this.pendingAction = callback;
+                this.openModal('modal-confirm');
+            },
+
+            executeConfirm() {
+                if(this.pendingAction) {
+                    this.pendingAction();
+                    this.pendingAction = null;
+                }
+            },
+
+            handleTxTypeChange() {
+                const type = document.getElementById('tx-type').value;
+                const catLabel = document.getElementById('tx-cat-label');
+                const catInput = document.getElementById('tx-category');
+
+                if(type === 'lent') {
+                    catLabel.innerText = "Lent To";
+                    catInput.placeholder = "e.g. John";
+                } else if(type === 'borrowed') {
+                    catLabel.innerText = "Borrowed From";
+                    catInput.placeholder = "e.g. Bank, Alice";
+                } else if(type === 'income') {
+                    catLabel.innerText = "Income Source";
+                    catInput.placeholder = "e.g. Salary, Freelance";
+                } else {
+                    catLabel.innerText = "Category";
+                    catInput.placeholder = "e.g. Food, Rent";
+                }
+            },
+
+            openTransactionModal(txId = null) {
+                if(this.data.users.length === 0) {
+                    this.showToast('Please add a user first!', 'error');
+                    this.navigate('users');
+                    return;
+                }
+
+                document.getElementById('tx-form').reset();
+                document.getElementById('tx-date').valueAsDate = new Date();
+                this.handleTxTypeChange();
+
+                if(txId) {
+                    const tx = this.data.transactions.find(t => t.id === txId);
+                    if(tx) {
+                        document.getElementById('tx-modal-title').innerText = 'Edit Transaction';
+                        document.getElementById('tx-id').value = tx.id;
+                        document.getElementById('tx-type').value = tx.type;
+                        this.handleTxTypeChange();
+                        document.getElementById('tx-user').value = tx.userId;
+                        document.getElementById('tx-amount').value = tx.amount;
+                        document.getElementById('tx-category').value = tx.category;
+                        document.getElementById('tx-date').value = tx.date;
+                        document.getElementById('tx-note').value = tx.note || '';
+                    }
+                } else {
+                    document.getElementById('tx-modal-title').innerText = 'New Transaction';
+                    document.getElementById('tx-id').value = '';
+                }
+                this.openModal('modal-transaction');
+            },
+
+            saveTransaction(e) {
+                e.preventDefault();
+                const id = document.getElementById('tx-id').value;
+                const tx = {
+                    id: id || 'tx_' + Date.now(),
+                    type: document.getElementById('tx-type').value,
+                    userId: document.getElementById('tx-user').value,
+                    amount: Number(document.getElementById('tx-amount').value),
+                    category: document.getElementById('tx-category').value,
+                    date: document.getElementById('tx-date').value,
+                    note: document.getElementById('tx-note').value
+                };
+
+                if(id) {
+                    const idx = this.data.transactions.findIndex(t => t.id === id);
+                    if(idx !== -1) this.data.transactions[idx] = tx;
+                } else {
+                    this.data.transactions.push(tx);
+                }
+
+                this.saveData('transactions');
+                this.closeModals();
+                this.renderAll();
+                this.showToast('Transaction saved!');
+            },
+
+            deleteTransaction(id) {
+                this.confirmAction('Delete Transaction?', 'Are you sure?', () => {
+                    this.data.transactions = this.data.transactions.filter(t => t.id !== id);
+                    this.saveData('transactions');
+                    this.renderAll();
+                    this.closeModals();
+                    this.showToast('Deleted.');
+                });
+            },
+
+            openUserModal(userId = null) {
+                document.getElementById('user-form').reset();
+                if(userId) {
+                    const u = this.data.users.find(u => u.id === userId);
+                    if(u) {
+                        document.getElementById('user-modal-title').innerText = 'Edit User';
+                        document.getElementById('user-id').value = u.id;
+                        document.getElementById('user-name').value = u.name;
+                        document.getElementById('user-color').value = u.color;
+                        document.getElementById('user-salary').value = u.salaryDate || '';
+                    }
+                } else {
+                    document.getElementById('user-modal-title').innerText = 'Add User';
+                    document.getElementById('user-id').value = '';
+                    const colors = ['#4F46E5', '#ec4899', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4'];
+                    document.getElementById('user-color').value = colors[Math.floor(Math.random() * colors.length)];
+                }
+                this.openModal('modal-user');
+            },
+
+            saveUser(e) {
+                e.preventDefault();
+                const id = document.getElementById('user-id').value;
+                const u = {
+                    id: id || 'u_' + Date.now(),
+                    name: document.getElementById('user-name').value,
+                    color: document.getElementById('user-color').value,
+                    salaryDate: document.getElementById('user-salary').value || null
+                };
+
+                if(id) {
+                    const idx = this.data.users.findIndex(x => x.id === id);
+                    if(idx !== -1) this.data.users[idx] = u;
+                } else {
+                    this.data.users.push(u);
+                }
+
+                this.saveData('users');
+                this.closeModals();
+                this.renderAll();
+                this.showToast('User saved!');
+            },
+
+            deleteUser(id) {
+                const hasTx = this.data.transactions.some(t => t.userId === id);
+                if(hasTx) {
+                    this.showToast('Cannot delete user with transactions.', 'error');
+                    return;
+                }
+
+                this.confirmAction('Remove User?', 'Are you sure?', () => {
+                    this.data.users = this.data.users.filter(u => u.id !== id);
+                    this.saveData('users');
+                    this.renderAll();
+                    this.closeModals();
+                    this.showToast('User removed.');
+                });
+            },
+
+            exportJSON() {
+                const dataStr = JSON.stringify(this.data, null, 2);
+                const blob = new Blob([dataStr], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `wallet_backup_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                this.showToast('Backup downloaded');
+            },
+
+            importJSON(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const importedData = JSON.parse(e.target.result);
+                        if(importedData.users && importedData.transactions) {
+                            this.data = importedData;
+                            this.saveData();
+                            this.renderAll();
+                            this.showToast('Data imported!');
+                        }
+                    } catch (err) {
+                        this.showToast('Invalid JSON file.', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            },
+
+            resetData() {
+                this.confirmAction('Erase All Data?', 'Permanently delete ALL data?', () => {
+                    localStorage.clear();
+                    this.data.users = [];
+                    this.data.transactions = [];
+                    this.renderAll();
+                    this.closeModals();
+                    this.showToast('Data erased.', 'error');
+                });
+            },
+
+            exportPDF() {
+                const prevView = this.currentView;
+                if(prevView !== 'dashboard') this.navigate('dashboard');
+                this.showToast('Generating PDF...');
+                const element = document.getElementById('view-dashboard');
+                
+                const titleEl = document.createElement('div');
+                titleEl.innerHTML = `<h1 style="text-align:center; padding: 20px; font-size: 24px;">Shared Wallet Summary - ${document.getElementById('current-month-display').innerText}</h1>`;
+                element.insertBefore(titleEl, element.firstChild);
+
+                setTimeout(() => {
+                    const opt = {
+                        margin: 0.5,
+                        filename: `Wallet_Report.pdf`,
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2, useCORS: true },
+                        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+                    };
+
+                    html2pdf().set(opt).from(element).save().then(() => {
+                        element.removeChild(titleEl);
+                        if(prevView !== 'dashboard') this.navigate(prevView);
+                        this.showToast('Exported!');
+                    });
+                }, 500);
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+    </script>
+</body>
+</html>
