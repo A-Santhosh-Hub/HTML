@@ -1,0 +1,3792 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HallMaster Pro — Smart Hall Booking System</title>
+<link rel="manifest" href="#" />
+<meta name="theme-color" content="#0d1117"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.6.0/jspdf.plugin.autotable.min.js"></script>
+<style>
+/* ============================================================
+   CSS VARIABLES & RESET
+   ============================================================ */
+:root {
+  --bg-primary:    #0d1117;
+  --bg-secondary:  #161b24;
+  --bg-card:       rgba(22,27,36,0.85);
+  --bg-glass:      rgba(255,255,255,0.04);
+  --bg-glass-hover:rgba(255,255,255,0.07);
+  --border:        rgba(255,255,255,0.08);
+  --border-gold:   rgba(245,158,11,0.35);
+  --gold:          #f59e0b;
+  --gold-light:    #fbbf24;
+  --gold-dark:     #d97706;
+  --emerald:       #10b981;
+  --rose:          #f43f5e;
+  --sky:           #38bdf8;
+  --violet:        #8b5cf6;
+  --text-primary:  #f0f6fc;
+  --text-secondary:#8b949e;
+  --text-muted:    #484f58;
+  --shadow-sm:     0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md:     0 4px 20px rgba(0,0,0,0.5);
+  --shadow-lg:     0 8px 40px rgba(0,0,0,0.6);
+  --shadow-gold:   0 0 30px rgba(245,158,11,0.15);
+  --radius-sm:     8px;
+  --radius-md:     12px;
+  --radius-lg:     18px;
+  --radius-xl:     24px;
+  --nav-width:     260px;
+  --transition:    all 0.22s cubic-bezier(0.4,0,0.2,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-size: 15px;
+  line-height: 1.6;
+}
+body::before {
+  content: '';
+  position: fixed;
+  top: -200px; right: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(245,158,11,0.06) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -200px; left: -200px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(139,92,246,0.05) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* ============================================================
+   SIDEBAR NAV
+   ============================================================ */
+.sidebar {
+  width: var(--nav-width);
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 100;
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  overflow-y: auto;
+}
+.sidebar-brand {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.brand-logo {
+  display: flex; align-items: center; gap: 12px;
+}
+.brand-icon {
+  width: 42px; height: 42px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+  box-shadow: 0 4px 15px rgba(245,158,11,0.3);
+}
+.brand-text h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px; font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+.brand-text span {
+  font-size: 11px; color: var(--gold);
+  font-weight: 600; letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Hall selector */
+.hall-selector {
+  margin: 16px 14px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 8px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.hall-selector:hover { background: var(--bg-glass-hover); border-color: var(--border-gold); }
+.hall-selector select {
+  background: transparent; border: none; outline: none;
+  color: var(--text-primary); font-family: 'Nunito', sans-serif;
+  font-size: 13px; font-weight: 600; width: 100%; cursor: pointer;
+}
+.hall-selector select option { background: var(--bg-secondary); }
+
+.nav-section-label {
+  font-size: 10px; font-weight: 800; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--text-muted);
+  padding: 12px 20px 6px;
+}
+.nav-items { padding: 4px 10px; flex: 1; }
+.nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 14px; border-radius: var(--radius-sm);
+  cursor: pointer; color: var(--text-secondary);
+  transition: var(--transition);
+  font-weight: 600; font-size: 14px;
+  margin-bottom: 2px; position: relative;
+}
+.nav-item:hover { background: var(--bg-glass-hover); color: var(--text-primary); }
+.nav-item.active {
+  background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.05));
+  color: var(--gold);
+  border: 1px solid rgba(245,158,11,0.2);
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute; left: 0; top: 20%; bottom: 20%;
+  width: 3px; background: var(--gold);
+  border-radius: 0 3px 3px 0;
+}
+.nav-item .nav-icon { font-size: 18px; width: 22px; text-align: center; flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto; background: var(--rose);
+  color: white; font-size: 10px; font-weight: 800;
+  padding: 2px 7px; border-radius: 20px; min-width: 20px; text-align: center;
+}
+
+.sidebar-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  font-size: 12px; text-align: center;
+  color: var(--text-muted);
+}
+.sidebar-footer a { color: var(--gold); text-decoration: none; font-weight: 600; }
+.sidebar-footer a:hover { text-decoration: underline; }
+
+/* ============================================================
+   MAIN CONTENT
+   ============================================================ */
+.main-content {
+  margin-left: var(--nav-width);
+  flex: 1; padding: 0;
+  display: flex; flex-direction: column;
+  min-height: 100vh;
+  position: relative; z-index: 1;
+}
+
+/* Top header bar */
+.topbar {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(13,17,23,0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px;
+}
+.topbar-left { display: flex; align-items: center; gap: 14px; }
+.hamburger {
+  display: none;
+  background: none; border: none;
+  color: var(--text-secondary); font-size: 22px;
+  cursor: pointer; padding: 4px; border-radius: 6px;
+}
+.page-title {
+  font-size: 18px; font-weight: 800; color: var(--text-primary);
+}
+.page-subtitle { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.btn-icon {
+  width: 38px; height: 38px;
+  background: var(--bg-glass); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 17px; transition: var(--transition);
+  color: var(--text-secondary);
+}
+.btn-icon:hover { background: var(--bg-glass-hover); color: var(--text-primary); }
+.status-dot {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; color: var(--emerald);
+  background: rgba(16,185,129,0.1); padding: 5px 12px;
+  border-radius: 20px; border: 1px solid rgba(16,185,129,0.2);
+}
+.status-dot::before {
+  content: ''; width: 7px; height: 7px;
+  background: var(--emerald); border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+/* ============================================================
+   PAGE VIEWS
+   ============================================================ */
+.view { display: none; padding: 28px; flex: 1; }
+.view.active { display: block; animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+@keyframes slideInRight { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+.dashboard-greeting {
+  margin-bottom: 28px;
+}
+.greeting-text { font-size: 24px; font-weight: 900; color: var(--text-primary); }
+.greeting-sub { color: var(--text-secondary); font-size: 14px; margin-top: 4px; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px; margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  position: relative; overflow: hidden;
+  transition: var(--transition);
+  backdrop-filter: blur(10px);
+}
+.stat-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-gold);
+  box-shadow: var(--shadow-gold);
+}
+.stat-card::before {
+  content: '';
+  position: absolute; top: 0; right: 0;
+  width: 80px; height: 80px;
+  background: radial-gradient(circle, var(--accent-color, var(--gold)) 0%, transparent 70%);
+  opacity: 0.15; border-radius: 50%; transform: translate(20%, -20%);
+}
+.stat-icon {
+  font-size: 26px; margin-bottom: 12px;
+  display: inline-block;
+}
+.stat-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px; font-weight: 700;
+  color: var(--text-primary); line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-label { font-size: 12px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-change {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 12px; font-weight: 700; margin-top: 8px;
+  padding: 3px 8px; border-radius: 20px;
+}
+.stat-change.up { background: rgba(16,185,129,0.12); color: var(--emerald); }
+.stat-change.down { background: rgba(244,63,94,0.12); color: var(--rose); }
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 20px; margin-bottom: 24px;
+}
+.chart-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  backdrop-filter: blur(10px);
+}
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 18px;
+}
+.card-title {
+  font-size: 15px; font-weight: 800; color: var(--text-primary);
+}
+.card-badge {
+  font-size: 11px; padding: 4px 10px; border-radius: 20px;
+  background: rgba(245,158,11,0.12); color: var(--gold);
+  font-weight: 700; border: 1px solid rgba(245,158,11,0.2);
+}
+.chart-wrapper { position: relative; height: 220px; }
+
+/* Upcoming events panel */
+.upcoming-list { display: flex; flex-direction: column; gap: 10px; }
+.upcoming-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: var(--transition); cursor: pointer;
+}
+.upcoming-item:hover { background: var(--bg-glass-hover); border-color: var(--border-gold); }
+.upcoming-date-box {
+  min-width: 44px; text-align: center;
+  background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(245,158,11,0.05));
+  border: 1px solid rgba(245,158,11,0.3);
+  border-radius: 8px; padding: 6px 4px;
+}
+.upcoming-date-box .day { font-size: 18px; font-weight: 900; color: var(--gold); line-height: 1; }
+.upcoming-date-box .mon { font-size: 10px; color: var(--gold); font-weight: 700; text-transform: uppercase; }
+.upcoming-info { flex: 1; min-width: 0; }
+.upcoming-name { font-size: 13px; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.upcoming-event { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+.upcoming-amount { font-size: 13px; font-weight: 800; color: var(--gold); }
+
+/* Calendar quick view */
+.cal-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  gap: 4px; margin-top: 12px;
+}
+.cal-header { font-size: 10px; font-weight: 700; text-align: center; color: var(--text-muted); padding: 4px; }
+.cal-day {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  border-radius: 6px; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: var(--transition); position: relative;
+  color: var(--text-secondary);
+}
+.cal-day:hover { background: var(--bg-glass); color: var(--text-primary); }
+.cal-day.today {
+  background: rgba(245,158,11,0.15);
+  color: var(--gold); font-weight: 900;
+  border: 1px solid rgba(245,158,11,0.3);
+}
+.cal-day.booked {
+  background: rgba(244,63,94,0.12);
+  color: var(--rose);
+}
+.cal-day.booked::after {
+  content: ''; position: absolute; bottom: 3px;
+  width: 4px; height: 4px; border-radius: 50%; background: var(--rose);
+}
+.cal-day.available { color: var(--emerald); }
+.cal-day.other-month { opacity: 0.3; }
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 22px; border-radius: var(--radius-md);
+  font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700;
+  cursor: pointer; border: none; outline: none;
+  transition: var(--transition); white-space: nowrap;
+  text-decoration: none;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  color: #0d1117;
+  box-shadow: 0 4px 15px rgba(245,158,11,0.3);
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(245,158,11,0.4);
+}
+.btn-primary:active { transform: translateY(0); }
+.btn-secondary {
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+.btn-secondary:hover { background: var(--bg-glass-hover); border-color: var(--gold); color: var(--gold); }
+.btn-danger {
+  background: rgba(244,63,94,0.12);
+  border: 1px solid rgba(244,63,94,0.25);
+  color: var(--rose);
+}
+.btn-danger:hover { background: rgba(244,63,94,0.2); }
+.btn-success {
+  background: rgba(16,185,129,0.12);
+  border: 1px solid rgba(16,185,129,0.25);
+  color: var(--emerald);
+}
+.btn-success:hover { background: rgba(16,185,129,0.2); }
+.btn-sm { padding: 7px 14px; font-size: 13px; }
+.btn-lg { padding: 14px 28px; font-size: 16px; border-radius: var(--radius-lg); }
+.btn-block { width: 100%; justify-content: center; }
+
+/* ============================================================
+   BOOKING WIZARD
+   ============================================================ */
+.wizard-container {
+  max-width: 800px; margin: 0 auto;
+}
+.wizard-progress {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0; margin-bottom: 32px; position: relative;
+}
+.wizard-step {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  position: relative; flex: 1;
+}
+.wizard-step::before {
+  content: '';
+  position: absolute; top: 18px; left: 50%; right: -50%;
+  height: 2px; background: var(--border); z-index: 0;
+}
+.wizard-step:last-child::before { display: none; }
+.wizard-step.done::before { background: var(--gold); }
+.step-circle {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; color: var(--text-muted);
+  position: relative; z-index: 1;
+  transition: var(--transition);
+}
+.wizard-step.active .step-circle {
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  border-color: var(--gold); color: #0d1117;
+  box-shadow: 0 0 20px rgba(245,158,11,0.4);
+}
+.wizard-step.done .step-circle {
+  background: var(--gold); border-color: var(--gold);
+  color: #0d1117;
+}
+.step-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-align: center; white-space: nowrap; }
+.wizard-step.active .step-label { color: var(--gold); }
+.wizard-step.done .step-label { color: var(--emerald); }
+
+.wizard-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-lg);
+}
+.wizard-card-title {
+  font-size: 20px; font-weight: 800; margin-bottom: 6px;
+  display: flex; align-items: center; gap: 10px;
+}
+.wizard-card-title .step-emoji { font-size: 24px; }
+.wizard-card-subtitle { color: var(--text-secondary); font-size: 14px; margin-bottom: 28px; }
+.wizard-actions {
+  display: flex; gap: 12px; margin-top: 28px; justify-content: flex-end;
+}
+
+/* Form elements */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.full { grid-column: 1 / -1; }
+label {
+  font-size: 12px; font-weight: 800; color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+input, select, textarea {
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px; font-weight: 600;
+  padding: 12px 14px; outline: none;
+  transition: var(--transition); width: 100%;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(245,158,11,0.1);
+}
+input::placeholder, textarea::placeholder { color: var(--text-muted); font-weight: 500; }
+select option { background: var(--bg-secondary); }
+textarea { resize: vertical; min-height: 80px; }
+.input-prefix {
+  position: relative;
+}
+.input-prefix span {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  color: var(--gold); font-weight: 800; font-size: 15px;
+}
+.input-prefix input { padding-left: 28px; }
+.form-hint { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.form-row { display: flex; gap: 12px; align-items: flex-start; }
+
+/* Date picker custom */
+.date-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  gap: 6px; margin-top: 8px;
+}
+.date-picker-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.date-picker-nav {
+  background: none; border: none; color: var(--text-secondary);
+  font-size: 20px; cursor: pointer; width: 32px; height: 32px;
+  border-radius: 6px; display: flex; align-items: center; justify-content: center;
+  transition: var(--transition);
+}
+.date-picker-nav:hover { background: var(--bg-glass); color: var(--gold); }
+.date-picker-title { font-size: 15px; font-weight: 800; }
+
+.availability-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+.chip {
+  padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 700;
+  border: 1px solid; cursor: pointer; transition: var(--transition);
+}
+.chip-available {
+  background: rgba(16,185,129,0.1); color: var(--emerald);
+  border-color: rgba(16,185,129,0.25);
+}
+.chip-available:hover { background: rgba(16,185,129,0.2); }
+.chip-booked {
+  background: rgba(244,63,94,0.1); color: var(--rose);
+  border-color: rgba(244,63,94,0.25); cursor: not-allowed;
+}
+.chip-selected {
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  color: #0d1117; border-color: var(--gold);
+  box-shadow: 0 4px 12px rgba(245,158,11,0.3);
+}
+
+/* ============================================================
+   CALCULATION ENGINE DISPLAY
+   ============================================================ */
+.calc-section {
+  background: rgba(245,158,11,0.04);
+  border: 1px solid rgba(245,158,11,0.15);
+  border-radius: var(--radius-lg);
+  padding: 20px; margin: 20px 0;
+}
+.calc-section-title {
+  font-size: 13px; font-weight: 800; color: var(--gold);
+  text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.calc-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.calc-row:last-child { border-bottom: none; }
+.calc-label { font-size: 13px; color: var(--text-secondary); font-weight: 600; }
+.calc-value { font-size: 14px; font-weight: 800; color: var(--text-primary); }
+.calc-value.gold { color: var(--gold); }
+.calc-value.green { color: var(--emerald); }
+.calc-value.red { color: var(--rose); }
+
+.calc-total-bar {
+  background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.05));
+  border: 1px solid rgba(245,158,11,0.3);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 16px;
+}
+.calc-total-label { font-size: 15px; font-weight: 800; color: var(--text-primary); }
+.calc-total-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px; font-weight: 700; color: var(--gold);
+}
+
+/* Worker display */
+.worker-display {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(56,189,248,0.06);
+  border: 1px solid rgba(56,189,248,0.15);
+  border-radius: var(--radius-md);
+  padding: 14px 18px; margin: 12px 0;
+}
+.worker-icon { font-size: 28px; }
+.worker-info .count { font-size: 20px; font-weight: 900; color: var(--sky); }
+.worker-info .label { font-size: 12px; color: var(--text-secondary); font-weight: 600; }
+
+/* Service items */
+.services-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.service-item {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  transition: var(--transition);
+}
+.service-item:hover { border-color: var(--border-gold); }
+.service-toggle {
+  width: 20px; height: 20px; border-radius: 4px;
+  border: 2px solid var(--border);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: var(--transition);
+}
+.service-toggle.checked {
+  background: var(--gold); border-color: var(--gold); color: #0d1117; font-size: 12px;
+}
+.service-name { flex: 1; font-size: 14px; font-weight: 700; }
+.service-cost { color: var(--gold); font-weight: 800; font-size: 14px; min-width: 90px; text-align: right; }
+.service-cost input {
+  background: transparent; border: none; border-bottom: 1px solid var(--border);
+  color: var(--gold); font-weight: 800; font-size: 14px;
+  text-align: right; width: 90px; padding: 2px 4px;
+  border-radius: 0;
+}
+.service-cost input:focus { border-color: var(--gold); box-shadow: none; }
+.service-remove {
+  background: none; border: none; color: var(--text-muted);
+  cursor: pointer; font-size: 16px; transition: var(--transition);
+  padding: 2px 6px; border-radius: 4px;
+}
+.service-remove:hover { color: var(--rose); background: rgba(244,63,94,0.1); }
+
+.add-service-row {
+  display: flex; gap: 10px; align-items: flex-start;
+}
+
+/* ============================================================
+   BOOKINGS LIST
+   ============================================================ */
+.search-filter-bar {
+  display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.search-input-wrap {
+  position: relative; flex: 1; min-width: 200px;
+}
+.search-input-wrap span {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  font-size: 16px; color: var(--text-muted); pointer-events: none;
+}
+.search-input-wrap input { padding-left: 40px; }
+
+.filter-tabs {
+  display: flex; gap: 6px;
+}
+.filter-tab {
+  padding: 9px 16px; border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--bg-glass); color: var(--text-secondary);
+  transition: var(--transition);
+}
+.filter-tab.active {
+  background: rgba(245,158,11,0.12);
+  border-color: rgba(245,158,11,0.3);
+  color: var(--gold);
+}
+.filter-tab:hover:not(.active) { color: var(--text-primary); background: var(--bg-glass-hover); }
+
+.bookings-table-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+.bookings-table {
+  width: 100%; border-collapse: collapse;
+}
+.bookings-table th {
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  font-size: 11px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.7px; color: var(--text-muted);
+  text-align: left; white-space: nowrap;
+}
+.bookings-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  font-size: 14px;
+  vertical-align: middle;
+}
+.bookings-table tr:last-child td { border-bottom: none; }
+.bookings-table tr:hover td { background: rgba(255,255,255,0.015); }
+.bookings-table tr { transition: var(--transition); cursor: pointer; }
+
+.booking-id { font-family: 'Playfair Display', serif; color: var(--gold); font-weight: 700; font-size: 13px; }
+.customer-cell .name { font-weight: 700; color: var(--text-primary); }
+.customer-cell .phone { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.event-badge {
+  display: inline-block;
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 12px; font-weight: 700;
+  background: rgba(139,92,246,0.12); color: var(--violet);
+  border: 1px solid rgba(139,92,246,0.2);
+}
+.amount-cell { font-weight: 800; color: var(--text-primary); }
+.amount-cell .balance { font-size: 12px; color: var(--rose); margin-top: 2px; }
+.status-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 12px; font-weight: 700; white-space: nowrap;
+}
+.status-confirmed { background: rgba(56,189,248,0.1); color: var(--sky); border: 1px solid rgba(56,189,248,0.2); }
+.status-completed { background: rgba(16,185,129,0.1); color: var(--emerald); border: 1px solid rgba(16,185,129,0.2); }
+.status-cancelled { background: rgba(244,63,94,0.1); color: var(--rose); border: 1px solid rgba(244,63,94,0.2); }
+.status-pending { background: rgba(245,158,11,0.1); color: var(--gold); border: 1px solid rgba(245,158,11,0.2); }
+
+.table-actions { display: flex; gap: 6px; }
+.action-btn {
+  background: none; border: 1px solid var(--border);
+  border-radius: 6px; padding: 5px 10px; cursor: pointer;
+  font-size: 14px; transition: var(--transition); color: var(--text-secondary);
+}
+.action-btn:hover { border-color: var(--gold); color: var(--gold); background: rgba(245,158,11,0.05); }
+.action-btn.danger:hover { border-color: var(--rose); color: var(--rose); background: rgba(244,63,94,0.05); }
+
+.empty-state {
+  text-align: center; padding: 60px 20px;
+}
+.empty-state .empty-icon { font-size: 56px; margin-bottom: 16px; opacity: 0.5; }
+.empty-state h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; color: var(--text-secondary); }
+.empty-state p { color: var(--text-muted); font-size: 14px; }
+
+/* ============================================================
+   BOOKING DETAIL / INVOICE VIEW
+   ============================================================ */
+.detail-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 16px; margin-bottom: 24px; flex-wrap: wrap;
+}
+.detail-title-group h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; font-weight: 700; color: var(--gold);
+}
+.detail-title-group p { color: var(--text-secondary); font-size: 14px; margin-top: 4px; }
+
+.invoice-paper {
+  background: #ffffff; color: #1a1a1a;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  max-width: 750px; margin: 0 auto;
+}
+.invoice-header-band {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  color: white; padding: 30px 36px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.invoice-brand h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; color: #f59e0b; font-weight: 700;
+}
+.invoice-brand p { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+.invoice-meta { text-align: right; }
+.invoice-meta .inv-number {
+  font-size: 24px; font-weight: 900; color: #f59e0b;
+  font-family: 'Playfair Display', serif;
+}
+.invoice-meta .inv-date { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+
+.invoice-body { padding: 30px 36px; }
+.invoice-parties {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 20px; margin-bottom: 24px;
+}
+.party-block h4 {
+  font-size: 11px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 1px; color: #999; margin-bottom: 8px;
+}
+.party-block p { font-size: 14px; font-weight: 600; color: #1a1a1a; line-height: 1.7; }
+.party-block strong { font-size: 16px; font-weight: 800; color: #0d1117; }
+
+.invoice-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+.invoice-table th {
+  background: #f8f8f8; padding: 10px 14px;
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+  color: #666; font-weight: 800; text-align: left;
+}
+.invoice-table td {
+  padding: 11px 14px; border-bottom: 1px solid #f0f0f0;
+  font-size: 14px; font-weight: 600; color: #333;
+}
+.invoice-table tr:last-child td { border-bottom: none; }
+.invoice-totals {
+  border-top: 2px solid #eee; padding-top: 16px;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+}
+.total-row { display: flex; gap: 40px; justify-content: flex-end; }
+.total-row .tot-label { font-size: 13px; color: #666; font-weight: 600; min-width: 120px; text-align: right; }
+.total-row .tot-val { font-size: 14px; font-weight: 800; color: #1a1a1a; min-width: 100px; text-align: right; }
+.total-row.grand .tot-label { font-size: 16px; color: #0d1117; font-weight: 800; }
+.total-row.grand .tot-val {
+  font-size: 20px; font-weight: 900; color: #f59e0b;
+  font-family: 'Playfair Display', serif;
+}
+.total-row.balance .tot-val { color: #f43f5e; }
+
+.invoice-footer-band {
+  background: #f8f8f8; border-top: 1px solid #eee;
+  padding: 20px 36px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.invoice-sig-area { text-align: center; }
+.invoice-sig-area canvas {
+  border: 1px solid #ddd; border-radius: 6px;
+  background: white; display: block; margin: 0 auto 8px;
+}
+.invoice-sig-area p { font-size: 11px; color: #999; }
+.invoice-terms { font-size: 12px; color: #888; max-width: 250px; }
+.invoice-developer {
+  text-align: center; padding: 12px;
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  font-size: 12px; color: rgba(255,255,255,0.5);
+}
+.invoice-developer a { color: #f59e0b; text-decoration: none; font-weight: 700; }
+
+/* Signature pad */
+.sig-pad-container {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  position: relative;
+}
+.sig-pad-container canvas {
+  display: block; width: 100%; touch-action: none;
+}
+.sig-clear-btn {
+  position: absolute; top: 8px; right: 8px;
+  background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.25);
+  color: var(--rose); border-radius: 6px; padding: 4px 10px;
+  font-size: 12px; font-weight: 700; cursor: pointer;
+  transition: var(--transition);
+}
+.sig-clear-btn:hover { background: rgba(244,63,94,0.2); }
+
+/* ============================================================
+   SETTINGS PANEL
+   ============================================================ */
+.settings-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.settings-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  backdrop-filter: blur(10px);
+}
+.settings-card.full { grid-column: 1 / -1; }
+.settings-card-title {
+  font-size: 15px; font-weight: 800;
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 20px; padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.settings-card-title .icon { font-size: 20px; }
+
+/* Range input */
+input[type="range"] {
+  -webkit-appearance: none; height: 6px;
+  background: var(--bg-glass); border-radius: 3px; padding: 0;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 18px; height: 18px;
+  background: var(--gold); border-radius: 50%;
+  cursor: pointer; box-shadow: 0 2px 8px rgba(245,158,11,0.4);
+}
+.range-display {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 4px;
+}
+.range-value { font-size: 18px; font-weight: 900; color: var(--gold); }
+.range-label { font-size: 12px; color: var(--text-secondary); }
+
+/* Halls management */
+.halls-list { display: flex; flex-direction: column; gap: 10px; }
+.hall-item {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--bg-glass); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 14px 16px;
+  transition: var(--transition);
+}
+.hall-item:hover { border-color: var(--border-gold); }
+.hall-item-icon {
+  width: 40px; height: 40px; border-radius: 8px;
+  background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(245,158,11,0.05));
+  border: 1px solid rgba(245,158,11,0.2);
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+  flex-shrink: 0;
+}
+.hall-item-info { flex: 1; }
+.hall-item-name { font-size: 14px; font-weight: 700; }
+.hall-item-meta { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.hall-active-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--emerald);
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-box {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 28px;
+  max-width: 480px; width: 100%;
+  box-shadow: var(--shadow-lg);
+  transform: scale(0.95); transition: transform 0.2s;
+}
+.modal-overlay.open .modal-box { transform: scale(1); }
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px;
+}
+.modal-title { font-size: 17px; font-weight: 800; }
+.modal-close {
+  background: none; border: none; color: var(--text-muted);
+  font-size: 22px; cursor: pointer; border-radius: 6px;
+  padding: 2px 6px; transition: var(--transition);
+}
+.modal-close:hover { color: var(--rose); background: rgba(244,63,94,0.1); }
+
+/* ============================================================
+   WHATSAPP BUTTON
+   ============================================================ */
+.wa-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 18px; background: #25d366;
+  border-radius: var(--radius-md); color: white;
+  font-weight: 700; font-size: 14px; cursor: pointer;
+  border: none; transition: var(--transition);
+  box-shadow: 0 4px 12px rgba(37,211,102,0.3);
+}
+.wa-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(37,211,102,0.4); }
+
+/* ============================================================
+   NOTIFICATION TOAST
+   ============================================================ */
+.toast-container {
+  position: fixed; top: 20px; right: 20px;
+  z-index: 9999; display: flex; flex-direction: column; gap: 10px;
+  pointer-events: none;
+}
+.toast {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  display: flex; align-items: center; gap: 12px;
+  font-size: 14px; font-weight: 600;
+  min-width: 280px; max-width: 380px;
+  box-shadow: var(--shadow-lg);
+  pointer-events: all;
+  animation: slideInRight 0.3s ease;
+}
+.toast.success { border-color: rgba(16,185,129,0.3); }
+.toast.error { border-color: rgba(244,63,94,0.3); }
+.toast.info { border-color: rgba(56,189,248,0.3); }
+.toast-icon { font-size: 20px; flex-shrink: 0; }
+
+/* ============================================================
+   ANALYTICS PAGE
+   ============================================================ */
+.analytics-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.big-chart { grid-column: 1 / -1; }
+.mini-stat-row {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 12px; margin-bottom: 20px;
+}
+.mini-stat {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+.mini-stat .val { font-size: 22px; font-weight: 900; color: var(--text-primary); }
+.mini-stat .lbl { font-size: 12px; color: var(--text-secondary); margin-top: 4px; font-weight: 600; }
+
+/* ============================================================
+   RESPONSIVE / MOBILE
+   ============================================================ */
+@media (max-width: 900px) {
+  :root { --nav-width: 0px; }
+  .sidebar {
+    transform: translateX(-260px);
+    width: 260px;
+    box-shadow: var(--shadow-lg);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .hamburger { display: flex; }
+  .main-content { margin-left: 0; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .dashboard-grid { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .settings-grid { grid-template-columns: 1fr; }
+  .invoice-parties { grid-template-columns: 1fr; }
+  .analytics-grid { grid-template-columns: 1fr; }
+  .mini-stat-row { grid-template-columns: repeat(2, 1fr); }
+  .bookings-table th:nth-child(4),
+  .bookings-table td:nth-child(4) { display: none; }
+}
+@media (max-width: 600px) {
+  .view { padding: 16px; }
+  .topbar { padding: 12px 16px; }
+  .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .wizard-card { padding: 20px; }
+  .stat-value { font-size: 20px; }
+  .filter-tabs { flex-wrap: wrap; }
+  .bookings-table th:nth-child(5),
+  .bookings-table td:nth-child(5) { display: none; }
+  .search-filter-bar { gap: 8px; }
+  .mini-stat-row { grid-template-columns: 1fr; }
+  .topbar-right .status-dot span { display: none; }
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* Overlay on mobile when sidebar open */
+.sidebar-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 99;
+  background: rgba(0,0,0,0.5);
+}
+.sidebar-overlay.visible { display: block; }
+
+/* Quick booking FAB */
+.fab {
+  position: fixed; bottom: 28px; right: 28px; z-index: 200;
+  width: 58px; height: 58px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  color: #0d1117; font-size: 26px; border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; box-shadow: 0 6px 25px rgba(245,158,11,0.5);
+  transition: var(--transition);
+}
+.fab:hover { transform: scale(1.1) rotate(15deg); }
+
+/* Loading skeleton */
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-glass) 25%, rgba(255,255,255,0.06) 50%, var(--bg-glass) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+
+/* Divider */
+.divider {
+  border: none; border-top: 1px solid var(--border);
+  margin: 20px 0;
+}
+
+/* Payment status mini cards */
+.payment-summary {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 12px; margin-top: 20px;
+}
+.payment-card {
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  text-align: center;
+}
+.payment-card .p-val { font-size: 18px; font-weight: 900; margin-bottom: 4px; }
+.payment-card .p-lbl { font-size: 11px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; }
+
+/* Step navigation back-track indicator */
+.step-tracker {
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 24px; flex-wrap: wrap;
+}
+.step-crumb { font-size: 12px; color: var(--text-muted); }
+.step-crumb.active { color: var(--gold); font-weight: 700; }
+.step-crumb-sep { color: var(--text-muted); font-size: 12px; }
+
+/* ============================================================
+   DARK OVERLAY SPINNER
+   ============================================================ */
+.spinner-overlay {
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center;
+  flex-direction: column; gap: 16px;
+}
+.spinner-overlay.active { display: flex; }
+.spinner {
+  width: 48px; height: 48px;
+  border: 4px solid rgba(245,158,11,0.2);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner-text { color: var(--text-secondary); font-size: 14px; font-weight: 600; }
+
+/* Info inline  */
+.info-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 20px;
+  background: rgba(56,189,248,0.1); color: var(--sky);
+  border: 1px solid rgba(56,189,248,0.2);
+  font-size: 12px; font-weight: 700;
+}
+
+/* Section separator label */
+.section-sep {
+  display: flex; align-items: center; gap: 12px; margin: 24px 0 16px;
+}
+.section-sep span { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); white-space: nowrap; }
+.section-sep::before, .section-sep::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* Event type chips */
+.event-type-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+.event-type-chip {
+  padding: 10px 8px; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); text-align: center;
+  cursor: pointer; transition: var(--transition);
+  font-size: 13px; font-weight: 700; color: var(--text-secondary);
+  background: var(--bg-glass);
+}
+.event-type-chip:hover { border-color: var(--border-gold); color: var(--gold); }
+.event-type-chip.selected {
+  background: rgba(245,158,11,0.12); color: var(--gold);
+  border-color: rgba(245,158,11,0.4);
+}
+.event-type-chip .etype-icon { font-size: 22px; display: block; margin-bottom: 5px; }
+
+/* Reminder indicator */
+.reminder-dot {
+  display: inline-block; width: 8px; height: 8px;
+  border-radius: 50%; background: var(--gold);
+  animation: pulse 2s infinite; margin-right: 4px;
+}
+</style>
+</head>
+<body>
+
+<!-- SPINNER OVERLAY -->
+<div class="spinner-overlay" id="spinnerOverlay">
+  <div class="spinner"></div>
+  <p class="spinner-text">Processing...</p>
+</div>
+
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box" id="modalBox">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">Confirm Action</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modalBody"></div>
+    <div id="modalFooter" style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;"></div>
+  </div>
+</div>
+
+<!-- APP LAYOUT -->
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">
+        <div class="brand-icon">🏛️</div>
+        <div class="brand-text">
+          <h1>HallMaster</h1>
+          <span>Pro Booking System</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hall Selector -->
+    <div class="hall-selector">
+      <span>🏢</span>
+      <select id="activeHallSelect" onchange="switchHall(this.value)">
+        <option value="">Loading halls...</option>
+      </select>
+    </div>
+
+    <div class="nav-items">
+      <div class="nav-section-label">Main</div>
+      <div class="nav-item active" onclick="navigateTo('dashboard')" data-view="dashboard">
+        <span class="nav-icon">📊</span> Dashboard
+      </div>
+      <div class="nav-item" onclick="navigateTo('new-booking')" data-view="new-booking">
+        <span class="nav-icon">➕</span> New Booking
+      </div>
+      <div class="nav-item" onclick="navigateTo('bookings')" data-view="bookings">
+        <span class="nav-icon">📋</span> All Bookings
+        <span class="nav-badge" id="navBadgeBookings">0</span>
+      </div>
+      <div class="nav-section-label">Manage</div>
+      <div class="nav-item" onclick="navigateTo('calendar')" data-view="calendar">
+        <span class="nav-icon">📅</span> Calendar
+      </div>
+      <div class="nav-item" onclick="navigateTo('analytics')" data-view="analytics">
+        <span class="nav-icon">📈</span> Analytics
+      </div>
+      <div class="nav-item" onclick="navigateTo('settings')" data-view="settings">
+        <span class="nav-icon">⚙️</span> Settings
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div style="margin-bottom:6px;">Made with ❤️ for Hall Owners</div>
+      Developed By <a href="https://a-santhosh-hub.github.io/in/" target="_blank">Santhosh A</a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger" onclick="toggleSidebar()">☰</button>
+        <div>
+          <div class="page-title" id="pageTitle">Dashboard</div>
+          <div class="page-subtitle" id="pageSubtitle">Welcome back! Here's your hall overview.</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="status-dot"><span>All Systems Online</span></div>
+        <div class="btn-icon" onclick="showNotifications()" title="Reminders">🔔</div>
+        <div class="btn-icon" onclick="navigateTo('settings')" title="Settings">⚙️</div>
+      </div>
+    </header>
+
+    <!-- ================================================
+         VIEW: DASHBOARD
+         ================================================ -->
+    <div class="view active" id="view-dashboard">
+      <div class="dashboard-greeting">
+        <div class="greeting-text" id="greetingText">Good Morning! 🌅</div>
+        <div class="greeting-sub" id="todayInfo">Loading today's summary...</div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card" style="--accent-color: var(--gold);">
+          <div class="stat-icon">💰</div>
+          <div class="stat-value" id="statRevenue">₹0</div>
+          <div class="stat-label">Monthly Revenue</div>
+          <div class="stat-change up" id="statRevenueChange">↑ This month</div>
+        </div>
+        <div class="stat-card" style="--accent-color: var(--sky);">
+          <div class="stat-icon">📅</div>
+          <div class="stat-value" id="statBookings">0</div>
+          <div class="stat-label">Total Bookings</div>
+          <div class="stat-change up" id="statBookingsChange">↑ Active</div>
+        </div>
+        <div class="stat-card" style="--accent-color: var(--emerald);">
+          <div class="stat-icon">✅</div>
+          <div class="stat-value" id="statCompleted">0</div>
+          <div class="stat-label">Completed Events</div>
+          <div class="stat-change up">This month</div>
+        </div>
+        <div class="stat-card" style="--accent-color: var(--rose);">
+          <div class="stat-icon">⏳</div>
+          <div class="stat-value" id="statPending">₹0</div>
+          <div class="stat-label">Pending Balance</div>
+          <div class="stat-change down">Outstanding</div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="chart-card">
+          <div class="card-header">
+            <span class="card-title">Revenue — Last 6 Months</span>
+            <span class="card-badge">Monthly</span>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="revenueChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="card-header">
+            <span class="card-title">Upcoming Events</span>
+            <button class="btn btn-sm btn-primary" onclick="navigateTo('new-booking')">+ Book</button>
+          </div>
+          <div class="upcoming-list" id="upcomingList">
+            <div class="empty-state" style="padding:30px 0;">
+              <div class="empty-icon">📅</div>
+              <p>No upcoming events</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="chart-card">
+          <div class="card-header">
+            <span class="card-title">Event Type Breakdown</span>
+            <span class="card-badge">All time</span>
+          </div>
+          <div class="chart-wrapper" style="height:180px;">
+            <canvas id="eventTypeChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="card-header">
+            <span class="card-title" id="calMonthTitle">March 2026</span>
+            <div style="display:flex;gap:4px;">
+              <button class="date-picker-nav" onclick="calPrevMonth()">‹</button>
+              <button class="date-picker-nav" onclick="calNextMonth()">›</button>
+            </div>
+          </div>
+          <div class="cal-grid" id="calGrid">
+            <div class="cal-header">Su</div><div class="cal-header">Mo</div>
+            <div class="cal-header">Tu</div><div class="cal-header">We</div>
+            <div class="cal-header">Th</div><div class="cal-header">Fr</div>
+            <div class="cal-header">Sa</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================
+         VIEW: NEW BOOKING (WIZARD)
+         ================================================ -->
+    <div class="view" id="view-new-booking">
+      <div class="wizard-container">
+        <!-- Progress -->
+        <div class="wizard-progress" id="wizardProgress">
+          <div class="wizard-step active" data-step="1">
+            <div class="step-circle">1</div>
+            <div class="step-label">Availability</div>
+          </div>
+          <div class="wizard-step" data-step="2">
+            <div class="step-circle">2</div>
+            <div class="step-label">Customer</div>
+          </div>
+          <div class="wizard-step" data-step="3">
+            <div class="step-circle">3</div>
+            <div class="step-label">Pricing</div>
+          </div>
+          <div class="wizard-step" data-step="4">
+            <div class="step-circle">4</div>
+            <div class="step-label">Services</div>
+          </div>
+          <div class="wizard-step" data-step="5">
+            <div class="step-circle">5</div>
+            <div class="step-label">Billing</div>
+          </div>
+          <div class="wizard-step" data-step="6">
+            <div class="step-circle">6</div>
+            <div class="step-label">Confirm</div>
+          </div>
+        </div>
+
+        <!-- STEP 1: AVAILABILITY -->
+        <div class="wizard-card" id="wizard-step-1">
+          <div class="wizard-card-title"><span class="step-emoji">📅</span> Check Availability</div>
+          <div class="wizard-card-subtitle">Select your event dates and we'll show availability instantly</div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Start Date *</label>
+              <input type="date" id="bookingStartDate" onchange="onDateChange()" min="">
+            </div>
+            <div class="form-group">
+              <label>End Date *</label>
+              <input type="date" id="bookingEndDate" onchange="onDateChange()" min="">
+            </div>
+          </div>
+
+          <div id="availabilityResult" style="margin-top:20px;"></div>
+
+          <div id="suggestedDates" style="margin-top:16px;"></div>
+
+          <div class="wizard-actions">
+            <button class="btn btn-primary" onclick="wizardNext(1)">Check & Continue →</button>
+          </div>
+        </div>
+
+        <!-- STEP 2: CUSTOMER DETAILS -->
+        <div class="wizard-card" id="wizard-step-2" style="display:none;">
+          <div class="wizard-card-title"><span class="step-emoji">👤</span> Customer Details</div>
+          <div class="wizard-card-subtitle">Enter the booking customer's information</div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Customer Name *</label>
+              <input type="text" id="custName" placeholder="e.g. Rajesh Kumar" oninput="updateBookingDraft()">
+            </div>
+            <div class="form-group">
+              <label>Phone Number *</label>
+              <input type="tel" id="custPhone" placeholder="e.g. 9876543210" maxlength="10" oninput="updateBookingDraft()">
+            </div>
+            <div class="form-group">
+              <label>Alternate Phone</label>
+              <input type="tel" id="custPhone2" placeholder="Optional" maxlength="10">
+            </div>
+            <div class="form-group">
+              <label>Number of Attendees *</label>
+              <input type="number" id="attendees" placeholder="e.g. 300" min="1" oninput="updateWorkerCalc()">
+            </div>
+            <div class="form-group full">
+              <label>Event Type *</label>
+              <div class="event-type-grid" id="eventTypeGrid">
+                <div class="event-type-chip" onclick="selectEventType('Wedding')"><span class="etype-icon">💍</span>Wedding</div>
+                <div class="event-type-chip" onclick="selectEventType('Reception')"><span class="etype-icon">🎉</span>Reception</div>
+                <div class="event-type-chip" onclick="selectEventType('Birthday')"><span class="etype-icon">🎂</span>Birthday</div>
+                <div class="event-type-chip" onclick="selectEventType('Conference')"><span class="etype-icon">💼</span>Conference</div>
+                <div class="event-type-chip" onclick="selectEventType('Engagement')"><span class="etype-icon">💑</span>Engagement</div>
+                <div class="event-type-chip" onclick="selectEventType('Other')"><span class="etype-icon">🎊</span>Other</div>
+              </div>
+              <input type="text" id="eventType" placeholder="Event type" style="margin-top:10px;" oninput="updateBookingDraft()">
+            </div>
+            <div class="form-group full">
+              <label>Special Notes</label>
+              <textarea id="bookingNotes" placeholder="Any special requirements or notes..."></textarea>
+            </div>
+          </div>
+
+          <div class="wizard-actions">
+            <button class="btn btn-secondary" onclick="wizardPrev(2)">← Back</button>
+            <button class="btn btn-primary" onclick="wizardNext(2)">Continue →</button>
+          </div>
+        </div>
+
+        <!-- STEP 3: SMART PRICING ENGINE -->
+        <div class="wizard-card" id="wizard-step-3" style="display:none;">
+          <div class="wizard-card-title"><span class="step-emoji">⚡</span> Smart Pricing Engine</div>
+          <div class="wizard-card-subtitle">Auto-calculated based on your settings — edit anything you need</div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Base Hall Rent (₹)</label>
+              <div class="input-prefix">
+                <span>₹</span>
+                <input type="number" id="calcBaseRent" placeholder="0" oninput="recalculate()">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Number of Days</label>
+              <input type="number" id="calcDays" value="1" min="1" oninput="recalculate()" readonly style="background:rgba(245,158,11,0.05);color:var(--gold);">
+            </div>
+          </div>
+
+          <!-- Worker auto-calc display -->
+          <div class="worker-display" id="workerDisplay">
+            <div class="worker-icon">👷</div>
+            <div class="worker-info">
+              <div class="count" id="workerCount">0 Workers</div>
+              <div class="label" id="workerLabel">Calculating based on attendees...</div>
+            </div>
+            <div style="margin-left:auto;text-align:right;">
+              <div style="font-size:18px;font-weight:900;color:var(--sky)" id="workerCostDisplay">₹0</div>
+              <div style="font-size:12px;color:var(--text-secondary);">Worker Cost</div>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Override Worker Count</label>
+              <input type="number" id="overrideWorkers" placeholder="Auto-calculated" min="0" oninput="recalculate()">
+            </div>
+            <div class="form-group">
+              <label>Cost per Worker (₹)</label>
+              <div class="input-prefix">
+                <span>₹</span>
+                <input type="number" id="costPerWorker" placeholder="0" oninput="recalculate()">
+              </div>
+            </div>
+          </div>
+
+          <div class="calc-section">
+            <div class="calc-section-title">💡 Live Price Breakdown</div>
+            <div class="calc-row">
+              <span class="calc-label">Hall Rent (<span id="cbDays">1</span> day×)</span>
+              <span class="calc-value" id="cbRent">₹0</span>
+            </div>
+            <div class="calc-row">
+              <span class="calc-label">Workers (<span id="cbWorkers">0</span> × ₹<span id="cbCostPW">0</span>)</span>
+              <span class="calc-value" id="cbWorkerTotal">₹0</span>
+            </div>
+          </div>
+
+          <div class="wizard-actions">
+            <button class="btn btn-secondary" onclick="wizardPrev(3)">← Back</button>
+            <button class="btn btn-primary" onclick="wizardNext(3)">Add Services →</button>
+          </div>
+        </div>
+
+        <!-- STEP 4: SERVICES -->
+        <div class="wizard-card" id="wizard-step-4" style="display:none;">
+          <div class="wizard-card-title"><span class="step-emoji">🔧</span> Services & Add-ons</div>
+          <div class="wizard-card-subtitle">Toggle default services and add custom ones</div>
+
+          <div class="services-list" id="defaultServicesList"></div>
+
+          <div class="section-sep"><span>Custom Services</span></div>
+
+          <div class="services-list" id="customServicesList"></div>
+
+          <div class="add-service-row">
+            <div class="form-group" style="flex:1">
+              <input type="text" id="newServiceName" placeholder="Service name (e.g. Catering)">
+            </div>
+            <div class="form-group" style="width:140px">
+              <div class="input-prefix">
+                <span>₹</span>
+                <input type="number" id="newServiceCost" placeholder="Cost">
+              </div>
+            </div>
+            <button class="btn btn-secondary" onclick="addCustomService()" style="align-self:flex-end;white-space:nowrap;">+ Add</button>
+          </div>
+
+          <div class="calc-section" style="margin-top:20px;">
+            <div class="calc-section-title">📊 Services Sub-Total</div>
+            <div id="servicesBreakdown"></div>
+            <div class="calc-row" style="border-top:1px solid rgba(255,255,255,0.08);margin-top:8px;padding-top:8px;">
+              <span class="calc-label" style="font-weight:800;">Services Total</span>
+              <span class="calc-value gold" id="servicesTotalDisplay">₹0</span>
+            </div>
+          </div>
+
+          <div class="wizard-actions">
+            <button class="btn btn-secondary" onclick="wizardPrev(4)">← Back</button>
+            <button class="btn btn-primary" onclick="wizardNext(4)">Billing →</button>
+          </div>
+        </div>
+
+        <!-- STEP 5: BILLING -->
+        <div class="wizard-card" id="wizard-step-5" style="display:none;">
+          <div class="wizard-card-title"><span class="step-emoji">🧾</span> Billing & Payment</div>
+          <div class="wizard-card-subtitle">Review totals, apply GST, and record advance payment</div>
+
+          <div class="calc-section">
+            <div class="calc-section-title">💼 Full Cost Breakdown</div>
+            <div id="fullBreakdown"></div>
+          </div>
+
+          <div class="form-grid" style="margin-top:16px;">
+            <div class="form-group">
+              <label>GST Rate (%)</label>
+              <input type="number" id="gstRate" value="18" min="0" max="100" oninput="recalculate()">
+              <div class="form-hint">Default: 18% GST</div>
+            </div>
+            <div class="form-group">
+              <label>Advance Payment (₹)</label>
+              <div class="input-prefix">
+                <span>₹</span>
+                <input type="number" id="advancePayment" placeholder="0" min="0" oninput="recalculate()">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Payment Method</label>
+              <select id="paymentMethod">
+                <option>Cash</option>
+                <option>UPI / GPay / PhonePe</option>
+                <option>Bank Transfer</option>
+                <option>Cheque</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>GST Applicable</label>
+              <select id="gstApplicable" onchange="recalculate()">
+                <option value="yes">Yes — Include GST</option>
+                <option value="no">No — GST Exempt</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="calc-total-bar">
+            <div>
+              <div class="calc-total-label">Grand Total</div>
+              <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">Including all charges + GST</div>
+            </div>
+            <div class="calc-total-value" id="grandTotalDisplay">₹0</div>
+          </div>
+
+          <div class="payment-summary">
+            <div class="payment-card">
+              <div class="p-val" style="color:var(--emerald);" id="advPaidDisplay">₹0</div>
+              <div class="p-lbl">Advance Paid</div>
+            </div>
+            <div class="payment-card">
+              <div class="p-val" style="color:var(--rose);" id="balanceDueDisplay">₹0</div>
+              <div class="p-lbl">Balance Due</div>
+            </div>
+            <div class="payment-card">
+              <div class="p-val" style="color:var(--gold);" id="gstAmtDisplay">₹0</div>
+              <div class="p-lbl">GST Amount</div>
+            </div>
+          </div>
+
+          <div class="wizard-actions">
+            <button class="btn btn-secondary" onclick="wizardPrev(5)">← Back</button>
+            <button class="btn btn-primary" onclick="wizardNext(5)">Review & Confirm →</button>
+          </div>
+        </div>
+
+        <!-- STEP 6: CONFIRM -->
+        <div class="wizard-card" id="wizard-step-6" style="display:none;">
+          <div class="wizard-card-title"><span class="step-emoji">✅</span> Confirm Booking</div>
+          <div class="wizard-card-subtitle">Review all details before confirming. This will block the dates and create the booking.</div>
+
+          <div id="bookingConfirmSummary"></div>
+
+          <div class="section-sep"><span>Signature</span></div>
+          <div style="margin-bottom:16px;">
+            <label style="margin-bottom:8px;display:block;">Customer / Owner Signature</label>
+            <div class="sig-pad-container" style="height:130px;">
+              <canvas id="sigCanvas" height="130"></canvas>
+              <button class="sig-clear-btn" onclick="clearSignature()">Clear</button>
+            </div>
+            <div class="form-hint" style="margin-top:6px;">Draw signature above using mouse or touch</div>
+          </div>
+
+          <div class="wizard-actions">
+            <button class="btn btn-secondary" onclick="wizardPrev(6)">← Back</button>
+            <button class="btn btn-primary btn-lg" onclick="confirmBooking()">
+              🎉 Confirm Booking
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================
+         VIEW: BOOKINGS LIST
+         ================================================ -->
+    <div class="view" id="view-bookings">
+      <div class="search-filter-bar">
+        <div class="search-input-wrap" style="flex:1;min-width:200px;">
+          <span>🔍</span>
+          <input type="text" id="searchInput" placeholder="Search by name, phone, event..." oninput="filterBookings()">
+        </div>
+        <div class="filter-tabs">
+          <div class="filter-tab active" onclick="setFilter('all', this)">All</div>
+          <div class="filter-tab" onclick="setFilter('confirmed', this)">Upcoming</div>
+          <div class="filter-tab" onclick="setFilter('completed', this)">Completed</div>
+          <div class="filter-tab" onclick="setFilter('cancelled', this)">Cancelled</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="navigateTo('new-booking')">+ New</button>
+      </div>
+
+      <div class="bookings-table-wrap">
+        <table class="bookings-table">
+          <thead>
+            <tr>
+              <th>Booking ID</th>
+              <th>Customer</th>
+              <th>Event</th>
+              <th>Date</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="bookingsTableBody">
+            <tr>
+              <td colspan="7">
+                <div class="empty-state">
+                  <div class="empty-icon">📋</div>
+                  <h3>No bookings yet</h3>
+                  <p>Create your first booking using the wizard</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ================================================
+         VIEW: BOOKING DETAIL + INVOICE
+         ================================================ -->
+    <div class="view" id="view-booking-detail">
+      <div class="detail-header">
+        <div class="detail-title-group">
+          <h2 id="detailBookingId">BK-2026-001</h2>
+          <p id="detailBookingMeta">Created on —</p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-secondary" onclick="navigateTo('bookings')">← All Bookings</button>
+          <button class="wa-btn" id="waShareBtn" onclick="shareOnWhatsApp()">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            WhatsApp
+          </button>
+          <button class="btn btn-primary" onclick="downloadInvoicePDF()">⬇ Download PDF</button>
+          <button class="btn btn-success btn-sm" id="btnMarkComplete" onclick="markBookingComplete()">✓ Mark Complete</button>
+          <button class="btn btn-danger btn-sm" id="btnCancelBooking" onclick="cancelBooking()">✕ Cancel</button>
+        </div>
+      </div>
+
+      <div id="invoicePrintArea">
+        <div class="invoice-paper" id="invoicePaper">
+          <div class="invoice-header-band">
+            <div class="invoice-brand">
+              <h2 id="invHallName">HallMaster</h2>
+              <p id="invHallAddr">Your Hall Address</p>
+              <p id="invHallPhone" style="margin-top:4px;color:rgba(255,255,255,0.5);font-size:12px;"></p>
+            </div>
+            <div class="invoice-meta">
+              <div class="inv-number" id="invNumber">INV-001</div>
+              <div class="inv-date" id="invDate">Date: —</div>
+              <div style="margin-top:8px;">
+                <span id="invStatusBadge" style="background:rgba(56,189,248,0.2);color:#38bdf8;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;">CONFIRMED</span>
+              </div>
+            </div>
+          </div>
+          <div class="invoice-body">
+            <div class="invoice-parties">
+              <div class="party-block">
+                <h4>Billed To</h4>
+                <p><strong id="invCustName">—</strong><br>
+                <span id="invPhone">—</span><br>
+                <span id="invEventType">—</span></p>
+              </div>
+              <div class="party-block">
+                <h4>Event Details</h4>
+                <p><strong>📅 </strong><span id="invDates">—</span><br>
+                <strong>👥 </strong><span id="invAttendees">—</span> Attendees<br>
+                <strong>💳 </strong><span id="invPayMethod">—</span></p>
+              </div>
+            </div>
+
+            <table class="invoice-table" id="invItemTable">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Item / Service</th>
+                  <th style="text-align:right;">Qty</th>
+                  <th style="text-align:right;">Rate</th>
+                  <th style="text-align:right;">Amount</th>
+                </tr>
+              </thead>
+              <tbody id="invItemBody"></tbody>
+            </table>
+
+            <div class="invoice-totals">
+              <div class="total-row">
+                <span class="tot-label">Subtotal</span>
+                <span class="tot-val" id="invSubtotal">₹0</span>
+              </div>
+              <div class="total-row" id="invGstRow">
+                <span class="tot-label" id="invGstLabel">GST (18%)</span>
+                <span class="tot-val" id="invGstAmt">₹0</span>
+              </div>
+              <div class="total-row grand">
+                <span class="tot-label">TOTAL</span>
+                <span class="tot-val" id="invTotal">₹0</span>
+              </div>
+              <div class="total-row" style="margin-top:8px;padding-top:8px;border-top:1px solid #eee;">
+                <span class="tot-label">Advance Paid</span>
+                <span class="tot-val" style="color:#10b981;" id="invAdvance">₹0</span>
+              </div>
+              <div class="total-row balance">
+                <span class="tot-label">Balance Due</span>
+                <span class="tot-val" id="invBalance">₹0</span>
+              </div>
+            </div>
+
+            <div id="invNotes" style="margin-top:16px;padding:12px;background:#f9f9f9;border-radius:6px;font-size:13px;color:#555;display:none;"></div>
+          </div>
+          <div class="invoice-footer-band">
+            <div class="invoice-sig-area">
+              <canvas id="invSigCanvas" width="160" height="70"></canvas>
+              <p>Customer Signature</p>
+            </div>
+            <div class="invoice-terms">
+              <strong style="color:#333;">Terms & Conditions</strong><br>
+              1. Advance is non-refundable.<br>
+              2. Balance due before event day.<br>
+              3. Hall must be vacated on time.<br>
+              4. Damages are chargeable.
+            </div>
+            <div class="invoice-sig-area">
+              <div style="height:70px;width:160px;border:1px solid #ddd;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:12px;">Authorised Signature</div>
+              <p>Hall Owner</p>
+            </div>
+          </div>
+          <div class="invoice-developer">
+            Developed By <a href="https://a-santhosh-hub.github.io/in/" target="_blank">Santhosh A</a> — HallMaster Pro
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================
+         VIEW: CALENDAR
+         ================================================ -->
+    <div class="view" id="view-calendar">
+      <div class="chart-card" style="max-width:100%;">
+        <div class="card-header">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <button class="date-picker-nav" onclick="fullCalPrev()">‹</button>
+            <span class="card-title" id="fullCalTitle" style="font-size:20px;">March 2026</span>
+            <button class="date-picker-nav" onclick="fullCalNext()">›</button>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <span class="chip chip-available" style="cursor:default;">🟢 Available</span>
+            <span class="chip chip-booked" style="cursor:default;">🔴 Booked</span>
+            <span class="chip chip-selected" style="cursor:default;">🟡 Today</span>
+          </div>
+        </div>
+        <div class="cal-grid" id="fullCalHeaderRow" style="gap:6px;margin-bottom:8px;">
+          <div class="cal-header" style="font-size:13px;padding:10px;">Sun</div>
+          <div class="cal-header" style="font-size:13px;padding:10px;">Mon</div>
+          <div class="cal-header" style="font-size:13px;padding:10px;">Tue</div>
+          <div class="cal-header" style="font-size:13px;padding:10px;">Wed</div>
+          <div class="cal-header" style="font-size:13px;padding:10px;">Thu</div>
+          <div class="cal-header" style="font-size:13px;padding:10px;">Fri</div>
+          <div class="cal-header" style="font-size:13px;padding:10px;">Sat</div>
+        </div>
+        <div class="cal-grid" id="fullCalGrid" style="gap:6px;"></div>
+      </div>
+
+      <div class="chart-card" style="margin-top:20px;" id="calDayDetail">
+        <div class="card-header">
+          <span class="card-title" id="calDayTitle">Select a date to see bookings</span>
+        </div>
+        <div id="calDayBookings"></div>
+      </div>
+    </div>
+
+    <!-- ================================================
+         VIEW: ANALYTICS
+         ================================================ -->
+    <div class="view" id="view-analytics">
+      <div class="mini-stat-row">
+        <div class="mini-stat">
+          <div class="val" id="anaTotal">₹0</div>
+          <div class="lbl">Total Revenue</div>
+        </div>
+        <div class="mini-stat">
+          <div class="val" id="anaEvents">0</div>
+          <div class="lbl">Total Events</div>
+        </div>
+        <div class="mini-stat">
+          <div class="val" id="anaAvgRev">₹0</div>
+          <div class="lbl">Avg per Event</div>
+        </div>
+      </div>
+
+      <div class="analytics-grid">
+        <div class="chart-card big-chart">
+          <div class="card-header">
+            <span class="card-title">Monthly Revenue Trend</span>
+            <span class="card-badge">12 Months</span>
+          </div>
+          <div class="chart-wrapper" style="height:280px;">
+            <canvas id="anaRevenueChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="card-header">
+            <span class="card-title">Event Types</span>
+          </div>
+          <div class="chart-wrapper" style="height:220px;">
+            <canvas id="anaEventChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="card-header">
+            <span class="card-title">Payment Status</span>
+          </div>
+          <div class="chart-wrapper" style="height:220px;">
+            <canvas id="anaPayChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-card" style="margin-top:20px;">
+        <div class="card-header">
+          <span class="card-title">Top Bookings by Revenue</span>
+        </div>
+        <div id="topBookingsList"></div>
+      </div>
+    </div>
+
+    <!-- ================================================
+         VIEW: SETTINGS
+         ================================================ -->
+    <div class="view" id="view-settings">
+      <div class="settings-grid">
+        <!-- Hall Settings -->
+        <div class="settings-card full">
+          <div class="settings-card-title"><span class="icon">🏛️</span> Hall Management</div>
+          <div class="halls-list" id="hallsList"></div>
+          <div style="margin-top:16px;">
+            <button class="btn btn-secondary" onclick="openAddHallModal()">+ Add New Hall</button>
+          </div>
+        </div>
+
+        <!-- Pricing -->
+        <div class="settings-card">
+          <div class="settings-card-title"><span class="icon">💰</span> Base Pricing</div>
+          <div class="form-group" style="margin-bottom:16px;">
+            <label>Base Hall Rent (₹ per day)</label>
+            <div class="input-prefix">
+              <span>₹</span>
+              <input type="number" id="settBaseRent" oninput="saveSettings()" placeholder="e.g. 15000">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>GST Rate (%)</label>
+            <input type="number" id="settGstRate" oninput="saveSettings()" min="0" max="100" placeholder="18">
+          </div>
+        </div>
+
+        <!-- Worker Rules -->
+        <div class="settings-card">
+          <div class="settings-card-title"><span class="icon">👷</span> Worker Rules</div>
+          <div class="form-group" style="margin-bottom:16px;">
+            <label>Attendees per Worker</label>
+            <input type="number" id="settWorkersPerPeople" oninput="saveSettings()" placeholder="e.g. 60">
+            <div class="form-hint">1 worker per N attendees</div>
+          </div>
+          <div class="form-group">
+            <label>Cost per Worker (₹)</label>
+            <div class="input-prefix">
+              <span>₹</span>
+              <input type="number" id="settWorkerCost" oninput="saveSettings()" placeholder="e.g. 800">
+            </div>
+          </div>
+        </div>
+
+        <!-- Default Services -->
+        <div class="settings-card full">
+          <div class="settings-card-title"><span class="icon">🔧</span> Default Services</div>
+          <div id="settServicesList"></div>
+          <div style="margin-top:16px;display:flex;gap:10px;">
+            <input type="text" id="settNewSvcName" placeholder="Service name" style="flex:1;">
+            <div class="input-prefix" style="width:140px;">
+              <span>₹</span>
+              <input type="number" id="settNewSvcCost" placeholder="Cost">
+            </div>
+            <button class="btn btn-secondary" onclick="addDefaultService()">+ Add</button>
+          </div>
+        </div>
+
+        <!-- Hall Contact -->
+        <div class="settings-card full">
+          <div class="settings-card-title"><span class="icon">📞</span> Hall Contact Info</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Hall Owner Name</label>
+              <input type="text" id="settOwnerName" oninput="saveSettings()" placeholder="Owner name">
+            </div>
+            <div class="form-group">
+              <label>Contact Phone</label>
+              <input type="tel" id="settPhone" oninput="saveSettings()" placeholder="Phone">
+            </div>
+            <div class="form-group full">
+              <label>Hall Address</label>
+              <textarea id="settAddress" oninput="saveSettings()" placeholder="Full address..." rows="2"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Export / Import -->
+        <div class="settings-card">
+          <div class="settings-card-title"><span class="icon">📦</span> Data Management</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <button class="btn btn-secondary btn-block" onclick="exportData()">⬇ Export All Data (JSON)</button>
+            <label class="btn btn-secondary btn-block" style="cursor:pointer;text-align:center;">
+              ⬆ Import Data (JSON)
+              <input type="file" accept=".json" style="display:none;" onchange="importData(event)">
+            </label>
+            <button class="btn btn-danger btn-block" onclick="clearAllData()">🗑 Clear All Data</button>
+          </div>
+        </div>
+
+        <!-- Notifications / App info -->
+        <div class="settings-card">
+          <div class="settings-card-title"><span class="icon">ℹ️</span> App Info</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div class="calc-row"><span class="calc-label">Version</span><span class="calc-value gold">v2.0.0</span></div>
+            <div class="calc-row"><span class="calc-label">Data Storage</span><span class="calc-value">Local (Offline)</span></div>
+            <div class="calc-row"><span class="calc-label">Total Bookings</span><span class="calc-value" id="infoTotalBookings">0</span></div>
+            <div class="calc-row"><span class="calc-label">Total Revenue</span><span class="calc-value gold" id="infoTotalRevenue">₹0</span></div>
+          </div>
+          <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);text-align:center;font-size:13px;color:var(--text-muted);">
+            Developed By <a href="https://a-santhosh-hub.github.io/in/" target="_blank" style="color:var(--gold);font-weight:700;">Santhosh A</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- FAB -->
+<button class="fab" onclick="navigateTo('new-booking')" title="New Booking">+</button>
+
+<script>
+/* ============================================================
+   HALLMASTER PRO — FULL JS ENGINE
+   ============================================================ */
+
+// ── STATE ──────────────────────────────────────────────────
+const APP_KEY = 'hallmaster_pro_v2';
+let state = {
+  settings: {
+    baseRent: 15000,
+    workersPerPeople: 60,
+    workerCostPerWorker: 800,
+    gstRate: 18,
+    ownerName: 'Hall Owner',
+    phone: '',
+    address: 'Hall Address, City',
+    defaultServices: [
+      { id: 's1', name: 'Electricity', cost: 2000, enabled: true },
+      { id: 's2', name: 'Cleaning', cost: 1500, enabled: true },
+      { id: 's3', name: 'Audio System', cost: 3000, enabled: true },
+      { id: 's4', name: 'Generator Backup', cost: 2500, enabled: false },
+    ]
+  },
+  halls: [
+    { id: 'hall-1', name: 'Main Hall', capacity: 500, address: 'Ground Floor' }
+  ],
+  activeHallId: 'hall-1',
+  bookings: [],
+  currentBooking: null,  // draft during wizard
+  activeFilter: 'all',
+  searchQuery: '',
+};
+
+// ── WIZARD DRAFT ───────────────────────────────────────────
+let draft = {
+  startDate: '', endDate: '', days: 1,
+  custName: '', custPhone: '', custPhone2: '',
+  attendees: 0, eventType: '',
+  notes: '',
+  baseRent: 0, workers: 0, workerCost: 0,
+  overrideWorkers: null,
+  services: [],   // {id, name, cost, type:'default'|'custom'}
+  subtotal: 0, gstRate: 18, gstAmt: 0, total: 0,
+  advance: 0, balance: 0,
+  paymentMethod: 'Cash',
+  gstApplicable: 'yes',
+  signature: '',
+  hallId: '',
+};
+
+// ── LOAD / SAVE ────────────────────────────────────────────
+function loadState() {
+  try {
+    const saved = localStorage.getItem(APP_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      state = Object.assign({}, state, parsed);
+      // merge nested settings
+      state.settings = Object.assign({}, {
+        baseRent:15000, workersPerPeople:60, workerCostPerWorker:800,
+        gstRate:18, ownerName:'Hall Owner', phone:'', address:'Hall Address',
+        defaultServices:[
+          {id:'s1',name:'Electricity',cost:2000,enabled:true},
+          {id:'s2',name:'Cleaning',cost:1500,enabled:true},
+          {id:'s3',name:'Audio System',cost:3000,enabled:true},
+          {id:'s4',name:'Generator Backup',cost:2500,enabled:false},
+        ]
+      }, state.settings);
+    }
+  } catch(e) { console.warn('Load state error:', e); }
+}
+
+function saveState() {
+  try { localStorage.setItem(APP_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+// ── NAVIGATION ─────────────────────────────────────────────
+const PAGE_META = {
+  'dashboard':       { title:'Dashboard', sub:'Your hall performance at a glance' },
+  'new-booking':     { title:'New Booking', sub:'Step-by-step smart booking wizard' },
+  'bookings':        { title:'All Bookings', sub:'Manage and track all bookings' },
+  'booking-detail':  { title:'Booking Details', sub:'Invoice and booking management' },
+  'calendar':        { title:'Calendar View', sub:'Visualize bookings on calendar' },
+  'analytics':       { title:'Analytics', sub:'Revenue, trends and insights' },
+  'settings':        { title:'Settings', sub:'Configure hall, pricing and rules' },
+};
+
+function navigateTo(view, bookingId) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  const target = document.getElementById('view-' + view);
+  if (target) target.classList.add('active');
+
+  const navItem = document.querySelector(`.nav-item[data-view="${view}"]`);
+  if (navItem) navItem.classList.add('active');
+
+  const meta = PAGE_META[view] || { title: view, sub: '' };
+  document.getElementById('pageTitle').textContent = meta.title;
+  document.getElementById('pageSubtitle').textContent = meta.sub;
+
+  closeSidebar();
+
+  // View-specific init
+  if (view === 'dashboard') { initDashboard(); }
+  else if (view === 'new-booking') { initWizard(); }
+  else if (view === 'bookings') { renderBookingsTable(); }
+  else if (view === 'booking-detail' && bookingId) { renderBookingDetail(bookingId); }
+  else if (view === 'calendar') { renderFullCalendar(); }
+  else if (view === 'analytics') { initAnalytics(); }
+  else if (view === 'settings') { renderSettings(); }
+}
+
+// ── SIDEBAR ────────────────────────────────────────────────
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sidebarOverlay');
+  sb.classList.toggle('open');
+  ov.classList.toggle('visible');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('visible');
+}
+
+// ── TOAST ──────────────────────────────────────────────────
+function toast(msg, type = 'success') {
+  const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+  const tc = document.getElementById('toastContainer');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span class="toast-icon">${icons[type]||'ℹ️'}</span><span>${msg}</span>`;
+  tc.appendChild(el);
+  setTimeout(() => { el.style.opacity='0'; el.style.transform='translateX(30px)'; el.style.transition='all 0.3s'; }, 3500);
+  setTimeout(() => el.remove(), 3800);
+}
+
+// ── MODAL ──────────────────────────────────────────────────
+function openModal(title, body, footerHTML) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').innerHTML = body;
+  document.getElementById('modalFooter').innerHTML = footerHTML || '';
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+
+// ── CURRENCY ───────────────────────────────────────────────
+function fmt(n) {
+  if (isNaN(n)) n = 0;
+  return '₹' + Number(n).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+// ── DATE HELPERS ────────────────────────────────────────────
+function today() { return new Date().toISOString().split('T')[0]; }
+function fmtDate(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+function daysBetween(s, e) {
+  const a = new Date(s + 'T00:00:00');
+  const b = new Date(e + 'T00:00:00');
+  return Math.max(1, Math.round((b - a) / 86400000) + 1);
+}
+function addDays(dateStr, n) {
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + n);
+  return d.toISOString().split('T')[0];
+}
+
+// ── BOOKING ID GENERATOR ───────────────────────────────────
+function genBookingId() {
+  const yr = new Date().getFullYear();
+  const cnt = (state.bookings.length + 1).toString().padStart(3, '0');
+  const rand = Math.floor(Math.random()*900+100);
+  return `BK-${yr}-${cnt}${rand}`;
+}
+
+// ── BOOKED DATES CHECK ─────────────────────────────────────
+function getBookedDateRanges(exceptId = null) {
+  return state.bookings
+    .filter(b => b.status !== 'cancelled' && b.id !== exceptId)
+    .map(b => ({ start: b.startDate, end: b.endDate, id: b.id }));
+}
+
+function isDateRangeBooked(start, end, exceptId = null) {
+  const ranges = getBookedDateRanges(exceptId);
+  const s = new Date(start + 'T00:00:00');
+  const e = new Date(end + 'T00:00:00');
+  for (const r of ranges) {
+    const rs = new Date(r.start + 'T00:00:00');
+    const re = new Date(r.end + 'T00:00:00');
+    if (s <= re && e >= rs) return true;
+  }
+  return false;
+}
+
+function getNextAvailableDates(count = 3) {
+  const suggestions = [];
+  let cur = today();
+  let tries = 0;
+  while (suggestions.length < count && tries < 365) {
+    if (!isDateRangeBooked(cur, cur)) suggestions.push(cur);
+    cur = addDays(cur, 1);
+    tries++;
+  }
+  return suggestions;
+}
+
+// ── DASHBOARD ──────────────────────────────────────────────
+let revenueChart = null, eventTypeChart = null;
+let dashCalDate = new Date();
+
+function initDashboard() {
+  const now = new Date();
+  const hr = now.getHours();
+  const greet = hr < 12 ? 'Good Morning! 🌅' : hr < 17 ? 'Good Afternoon! ☀️' : 'Good Evening! 🌙';
+  document.getElementById('greetingText').textContent = greet;
+
+  // Stats
+  const thisMonth = now.getMonth();
+  const thisYear = now.getFullYear();
+  const monthlyBookings = state.bookings.filter(b => {
+    const d = new Date(b.startDate + 'T00:00:00');
+    return d.getMonth() === thisMonth && d.getFullYear() === thisYear && b.status !== 'cancelled';
+  });
+  const monthRevenue = monthlyBookings.reduce((s, b) => s + (b.total || 0), 0);
+  const activeBookings = state.bookings.filter(b => b.status === 'confirmed').length;
+  const completedThis = state.bookings.filter(b => {
+    const d = new Date(b.startDate + 'T00:00:00');
+    return d.getMonth() === thisMonth && d.getFullYear() === thisYear && b.status === 'completed';
+  }).length;
+  const pendingBal = state.bookings.filter(b => b.status !== 'cancelled').reduce((s, b) => s + (b.balance || 0), 0);
+
+  document.getElementById('statRevenue').textContent = fmt(monthRevenue);
+  document.getElementById('statBookings').textContent = activeBookings;
+  document.getElementById('statCompleted').textContent = completedThis;
+  document.getElementById('statPending').textContent = fmt(pendingBal);
+
+  const todayStr = today();
+  const todayEvents = state.bookings.filter(b =>
+    b.startDate <= todayStr && b.endDate >= todayStr && b.status !== 'cancelled'
+  );
+  document.getElementById('todayInfo').textContent =
+    todayEvents.length
+      ? `Today: ${todayEvents.length} event(s) at ${state.halls.find(h=>h.id===state.activeHallId)?.name || 'Hall'}`
+      : `${new Date().toLocaleDateString('en-IN', {weekday:'long',year:'numeric',month:'long',day:'numeric'})} — No events today`;
+
+  // Nav badge
+  document.getElementById('navBadgeBookings').textContent = activeBookings;
+
+  // Upcoming list
+  const upcoming = state.bookings
+    .filter(b => b.startDate >= todayStr && b.status === 'confirmed')
+    .sort((a, b) => a.startDate.localeCompare(b.startDate))
+    .slice(0, 5);
+
+  const ul = document.getElementById('upcomingList');
+  if (upcoming.length === 0) {
+    ul.innerHTML = `<div class="empty-state" style="padding:30px 0;"><div class="empty-icon">📅</div><p>No upcoming events</p></div>`;
+  } else {
+    ul.innerHTML = upcoming.map(b => {
+      const d = new Date(b.startDate + 'T00:00:00');
+      return `<div class="upcoming-item" onclick="navigateTo('booking-detail','${b.id}')">
+        <div class="upcoming-date-box">
+          <div class="day">${d.getDate()}</div>
+          <div class="mon">${d.toLocaleDateString('en-IN',{month:'short'})}</div>
+        </div>
+        <div class="upcoming-info">
+          <div class="upcoming-name">${b.custName}</div>
+          <div class="upcoming-event">${b.eventType} · ${b.attendees} guests</div>
+        </div>
+        <div class="upcoming-amount">${fmt(b.total)}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Revenue chart
+  const months = [];
+  const revenues = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push(d.toLocaleDateString('en-IN', { month: 'short' }));
+    const rev = state.bookings
+      .filter(b => {
+        const bd = new Date(b.startDate + 'T00:00:00');
+        return bd.getMonth() === d.getMonth() && bd.getFullYear() === d.getFullYear() && b.status !== 'cancelled';
+      })
+      .reduce((s, b) => s + (b.total || 0), 0);
+    revenues.push(rev);
+  }
+
+  const rctx = document.getElementById('revenueChart').getContext('2d');
+  if (revenueChart) revenueChart.destroy();
+  revenueChart = new Chart(rctx, {
+    type: 'bar',
+    data: {
+      labels: months,
+      datasets: [{
+        label: 'Revenue (₹)',
+        data: revenues,
+        backgroundColor: 'rgba(245,158,11,0.25)',
+        borderColor: '#f59e0b',
+        borderWidth: 2,
+        borderRadius: 6,
+        borderSkipped: false,
+        hoverBackgroundColor: 'rgba(245,158,11,0.45)',
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: ctx => fmt(ctx.parsed.y) },
+          backgroundColor: '#1a1a2e', titleColor: '#f59e0b', bodyColor: '#ccc',
+          borderColor: '#333', borderWidth: 1,
+        }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } },
+        y: {
+          grid: { color: 'rgba(255,255,255,0.05)' }, ticks: {
+            color: '#888',
+            callback: v => '₹' + (v >= 1000 ? (v/1000).toFixed(0)+'K' : v)
+          }
+        }
+      }
+    }
+  });
+
+  // Event type pie
+  const eventCounts = {};
+  state.bookings.filter(b => b.status !== 'cancelled').forEach(b => {
+    eventCounts[b.eventType] = (eventCounts[b.eventType] || 0) + 1;
+  });
+  const etLabels = Object.keys(eventCounts);
+  const etData = Object.values(eventCounts);
+  const etColors = ['#f59e0b','#10b981','#38bdf8','#8b5cf6','#f43f5e','#fb923c'];
+
+  const ectx = document.getElementById('eventTypeChart').getContext('2d');
+  if (eventTypeChart) eventTypeChart.destroy();
+  if (etLabels.length > 0) {
+    eventTypeChart = new Chart(ectx, {
+      type: 'doughnut',
+      data: {
+        labels: etLabels,
+        datasets: [{
+          data: etData,
+          backgroundColor: etColors.slice(0, etLabels.length),
+          borderColor: '#0d1117',
+          borderWidth: 3,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        cutout: '65%',
+        plugins: {
+          legend: { position: 'right', labels: { color: '#888', padding: 12, font: { size: 12 } } },
+          tooltip: { backgroundColor: '#1a1a2e', titleColor: '#f59e0b', bodyColor: '#ccc' }
+        }
+      }
+    });
+  } else {
+    ectx.clearRect(0, 0, 400, 200);
+    ectx.fillStyle = '#444';
+    ectx.font = '14px Nunito';
+    ectx.textAlign = 'center';
+    ectx.fillText('No data yet', 200, 100);
+  }
+
+  // Mini calendar
+  renderMiniCalendar();
+}
+
+function renderMiniCalendar() {
+  const d = dashCalDate;
+  document.getElementById('calMonthTitle').textContent =
+    d.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+
+  const firstDay = new Date(d.getFullYear(), d.getMonth(), 1).getDay();
+  const daysInMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  const todayStr = today();
+  const bookedDates = new Set();
+
+  state.bookings.filter(b => b.status !== 'cancelled').forEach(b => {
+    let cur = b.startDate;
+    while (cur <= b.endDate) {
+      bookedDates.add(cur);
+      cur = addDays(cur, 1);
+    }
+  });
+
+  const grid = document.getElementById('calGrid');
+  // Remove previous day cells (keep headers)
+  const existing = grid.querySelectorAll('.cal-day');
+  existing.forEach(e => e.remove());
+
+  // Blank cells
+  for (let i = 0; i < firstDay; i++) {
+    const blank = document.createElement('div');
+    blank.className = 'cal-day other-month';
+    grid.appendChild(blank);
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const el = document.createElement('div');
+    el.className = 'cal-day';
+    el.textContent = day;
+    if (dateStr === todayStr) el.classList.add('today');
+    else if (bookedDates.has(dateStr)) el.classList.add('booked');
+    else if (dateStr >= todayStr) el.classList.add('available');
+    el.onclick = () => {
+      navigateTo('calendar');
+      setTimeout(() => selectCalendarDay(dateStr), 100);
+    };
+    grid.appendChild(el);
+  }
+}
+
+function calPrevMonth() { dashCalDate.setMonth(dashCalDate.getMonth()-1); renderMiniCalendar(); }
+function calNextMonth() { dashCalDate.setMonth(dashCalDate.getMonth()+1); renderMiniCalendar(); }
+
+// ── WIZARD ──────────────────────────────────────────────────
+let currentWizardStep = 1;
+
+function initWizard() {
+  currentWizardStep = 1;
+  draft = {
+    startDate:'', endDate:'', days:1,
+    custName:'', custPhone:'', custPhone2:'',
+    attendees:0, eventType:'', notes:'',
+    baseRent: state.settings.baseRent,
+    workers:0, workerCost:0, overrideWorkers:null,
+    services:[],
+    subtotal:0, gstRate:state.settings.gstRate,
+    gstAmt:0, total:0, advance:0, balance:0,
+    paymentMethod:'Cash', gstApplicable:'yes',
+    signature:'',
+    hallId: state.activeHallId,
+  };
+
+  // Reset all steps
+  for (let i = 1; i <= 6; i++) {
+    const el = document.getElementById('wizard-step-' + i);
+    if (el) el.style.display = i === 1 ? 'block' : 'none';
+  }
+
+  // Set date min
+  const td = today();
+  document.getElementById('bookingStartDate').min = td;
+  document.getElementById('bookingEndDate').min = td;
+  document.getElementById('bookingStartDate').value = '';
+  document.getElementById('bookingEndDate').value = '';
+  document.getElementById('availabilityResult').innerHTML = '';
+  document.getElementById('suggestedDates').innerHTML = '';
+
+  // Reset fields
+  ['custName','custPhone','custPhone2','attendees','bookingNotes'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('eventType').value = '';
+  document.querySelectorAll('.event-type-chip').forEach(c => c.classList.remove('selected'));
+
+  // Pricing defaults
+  document.getElementById('calcBaseRent').value = state.settings.baseRent;
+  document.getElementById('costPerWorker').value = state.settings.workerCostPerWorker;
+  document.getElementById('overrideWorkers').value = '';
+  document.getElementById('gstRate').value = state.settings.gstRate;
+  document.getElementById('advancePayment').value = '';
+  document.getElementById('gstApplicable').value = 'yes';
+
+  updateWizardProgress(1);
+  initSignaturePad();
+}
+
+function updateWizardProgress(step) {
+  document.querySelectorAll('.wizard-step').forEach((el, i) => {
+    el.classList.remove('active', 'done');
+    if (i + 1 < step) el.classList.add('done');
+    else if (i + 1 === step) el.classList.add('active');
+  });
+}
+
+function showWizardStep(step) {
+  for (let i = 1; i <= 6; i++) {
+    const el = document.getElementById('wizard-step-' + i);
+    if (el) el.style.display = i === step ? 'block' : 'none';
+  }
+  updateWizardProgress(step);
+  currentWizardStep = step;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function wizardNext(fromStep) {
+  if (fromStep === 1) {
+    const s = document.getElementById('bookingStartDate').value;
+    const e = document.getElementById('bookingEndDate').value;
+    if (!s || !e) { toast('Please select start and end dates', 'error'); return; }
+    if (s > e) { toast('End date must be after start date', 'error'); return; }
+    if (isDateRangeBooked(s, e)) {
+      toast('These dates are already booked! Please choose different dates.', 'error'); return;
+    }
+    draft.startDate = s; draft.endDate = e;
+    draft.days = daysBetween(s, e);
+    document.getElementById('calcDays').value = draft.days;
+    showWizardStep(2);
+  }
+  else if (fromStep === 2) {
+    const name = document.getElementById('custName').value.trim();
+    const phone = document.getElementById('custPhone').value.trim();
+    const etype = document.getElementById('eventType').value.trim();
+    const att = parseInt(document.getElementById('attendees').value) || 0;
+    if (!name) { toast('Please enter customer name', 'error'); return; }
+    if (!phone || phone.length < 10) { toast('Please enter a valid 10-digit phone number', 'error'); return; }
+    if (!etype) { toast('Please select an event type', 'error'); return; }
+    if (!att || att < 1) { toast('Please enter number of attendees', 'error'); return; }
+    draft.custName = name;
+    draft.custPhone = phone;
+    draft.custPhone2 = document.getElementById('custPhone2').value.trim();
+    draft.attendees = att;
+    draft.eventType = etype;
+    draft.notes = document.getElementById('bookingNotes').value.trim();
+    updateWorkerCalc();
+    showWizardStep(3);
+  }
+  else if (fromStep === 3) {
+    recalculate();
+    buildDefaultServices();
+    showWizardStep(4);
+  }
+  else if (fromStep === 4) {
+    recalculate();
+    renderFullBreakdown();
+    showWizardStep(5);
+  }
+  else if (fromStep === 5) {
+    recalculate();
+    renderConfirmSummary();
+    showWizardStep(6);
+  }
+}
+
+function wizardPrev(fromStep) { showWizardStep(fromStep - 1); }
+
+// ── DATE AVAILABILITY ──────────────────────────────────────
+function onDateChange() {
+  const s = document.getElementById('bookingStartDate').value;
+  const e = document.getElementById('bookingEndDate').value;
+  if (!s) return;
+
+  // Auto-set end date if not set
+  if (!e) document.getElementById('bookingEndDate').value = s;
+
+  const end = document.getElementById('bookingEndDate').value;
+  const booked = isDateRangeBooked(s, end);
+  const days = daysBetween(s, end);
+
+  const resEl = document.getElementById('availabilityResult');
+  if (booked) {
+    resEl.innerHTML = `
+      <div class="chip chip-booked" style="cursor:default;font-size:14px;padding:12px 20px;">
+        ⛔ Dates Not Available — Already Booked
+      </div>`;
+  } else {
+    resEl.innerHTML = `
+      <div class="chip chip-selected" style="cursor:default;font-size:14px;padding:12px 20px;">
+        ✅ Available! ${days} day${days>1?'s':''} selected
+      </div>`;
+  }
+
+  // Suggested dates
+  const sugg = getNextAvailableDates(3);
+  const suggEl = document.getElementById('suggestedDates');
+  if (sugg.length) {
+    suggEl.innerHTML = `
+      <div style="font-size:12px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">💡 Next Available Dates</div>
+      <div class="availability-chips">
+        ${sugg.map(d => `<div class="chip chip-available" onclick="selectSuggestedDate('${d}')">${fmtDate(d)}</div>`).join('')}
+      </div>`;
+  }
+}
+
+function selectSuggestedDate(dateStr) {
+  document.getElementById('bookingStartDate').value = dateStr;
+  document.getElementById('bookingEndDate').value = dateStr;
+  onDateChange();
+}
+
+function selectEventType(type) {
+  document.querySelectorAll('.event-type-chip').forEach(c => c.classList.remove('selected'));
+  event.target.closest('.event-type-chip').classList.add('selected');
+  document.getElementById('eventType').value = type;
+}
+
+// ── WORKER CALCULATION ─────────────────────────────────────
+function updateWorkerCalc() {
+  const att = parseInt(document.getElementById('attendees')?.value) || draft.attendees || 0;
+  draft.attendees = att;
+  const overr = parseInt(document.getElementById('overrideWorkers')?.value);
+  const workers = isNaN(overr) ? Math.ceil(att / state.settings.workersPerPeople) : overr;
+  const cpw = parseFloat(document.getElementById('costPerWorker')?.value) || state.settings.workerCostPerWorker;
+  draft.workers = workers;
+  draft.workerCost = workers * cpw;
+
+  const wc = document.getElementById('workerCount');
+  const wl = document.getElementById('workerLabel');
+  const wcd = document.getElementById('workerCostDisplay');
+  if (wc) wc.textContent = `${workers} Worker${workers !== 1 ? 's' : ''} Required`;
+  if (wl) wl.textContent = `${att} guests ÷ ${state.settings.workersPerPeople} per worker`;
+  if (wcd) wcd.textContent = fmt(draft.workerCost);
+
+  recalculate();
+}
+
+function recalculate() {
+  const baseRent = parseFloat(document.getElementById('calcBaseRent')?.value) || 0;
+  const days = parseInt(document.getElementById('calcDays')?.value) || 1;
+  const overrideW = parseInt(document.getElementById('overrideWorkers')?.value);
+  const att = draft.attendees || parseInt(document.getElementById('attendees')?.value) || 0;
+  const cpw = parseFloat(document.getElementById('costPerWorker')?.value) || state.settings.workerCostPerWorker;
+  const workers = isNaN(overrideW) ? Math.ceil(att / state.settings.workersPerPeople) : overrideW;
+  const workerTotal = workers * cpw;
+  const gstRate = parseFloat(document.getElementById('gstRate')?.value) || 0;
+  const advance = parseFloat(document.getElementById('advancePayment')?.value) || 0;
+  const gstApplicable = document.getElementById('gstApplicable')?.value || 'yes';
+
+  draft.baseRent = baseRent;
+  draft.days = days;
+  draft.workers = workers;
+  draft.workerCost = workerTotal;
+  draft.gstRate = gstRate;
+  draft.advance = advance;
+  draft.gstApplicable = gstApplicable;
+
+  // Collect service costs
+  let servicesCost = 0;
+  draft.services.forEach(s => {
+    if (s.enabled !== false) servicesCost += parseFloat(s.cost) || 0;
+  });
+
+  const rentTotal = baseRent * days;
+  const subtotal = rentTotal + workerTotal + servicesCost;
+  const gstAmt = gstApplicable === 'yes' ? subtotal * (gstRate / 100) : 0;
+  const total = subtotal + gstAmt;
+  const balance = Math.max(0, total - advance);
+
+  draft.subtotal = subtotal;
+  draft.gstAmt = gstAmt;
+  draft.total = total;
+  draft.balance = balance;
+
+  // Update step 3 displays
+  const cbRent = document.getElementById('cbRent');
+  const cbDays = document.getElementById('cbDays');
+  const cbWorkers = document.getElementById('cbWorkers');
+  const cbCostPW = document.getElementById('cbCostPW');
+  const cbWorkerTotal = document.getElementById('cbWorkerTotal');
+  if (cbRent) cbRent.textContent = fmt(rentTotal);
+  if (cbDays) cbDays.textContent = days;
+  if (cbWorkers) cbWorkers.textContent = workers;
+  if (cbCostPW) cbCostPW.textContent = cpw;
+  if (cbWorkerTotal) cbWorkerTotal.textContent = fmt(workerTotal);
+
+  // Update step 5 displays
+  const gtd = document.getElementById('grandTotalDisplay');
+  const apd = document.getElementById('advPaidDisplay');
+  const bdd = document.getElementById('balanceDueDisplay');
+  const gad = document.getElementById('gstAmtDisplay');
+  if (gtd) gtd.textContent = fmt(total);
+  if (apd) apd.textContent = fmt(advance);
+  if (bdd) bdd.textContent = fmt(balance);
+  if (gad) gad.textContent = fmt(gstAmt);
+
+  // Worker display
+  const wcd = document.getElementById('workerCostDisplay');
+  const wc = document.getElementById('workerCount');
+  const wl = document.getElementById('workerLabel');
+  if (wcd) wcd.textContent = fmt(workerTotal);
+  if (wc) wc.textContent = `${workers} Worker${workers !== 1 ? 's' : ''} Required`;
+  if (wl) wl.textContent = `${att} guests ÷ ${state.settings.workersPerPeople} per worker = ${workers}`;
+
+  // Services breakdown
+  renderServicesBreakdown();
+  renderFullBreakdown();
+}
+
+// ── DEFAULT SERVICES BUILD ─────────────────────────────────
+function buildDefaultServices() {
+  draft.services = state.settings.defaultServices.map(s => ({
+    id: s.id, name: s.name, cost: s.cost,
+    type: 'default', enabled: s.enabled
+  }));
+  renderDefaultServicesList();
+}
+
+function renderDefaultServicesList() {
+  const el = document.getElementById('defaultServicesList');
+  if (!el) return;
+  el.innerHTML = draft.services.filter(s => s.type === 'default').map((s, i) => `
+    <div class="service-item">
+      <div class="service-toggle ${s.enabled ? 'checked' : ''}" onclick="toggleService('${s.id}')">
+        ${s.enabled ? '✓' : ''}
+      </div>
+      <div class="service-name">${s.name}</div>
+      <div class="service-cost">
+        <div style="display:flex;align-items:center;gap:4px;">
+          <span style="color:var(--gold);font-weight:800;">₹</span>
+          <input type="number" value="${s.cost}" onchange="updateServiceCost('${s.id}', this.value)" style="width:80px;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--gold);font-weight:800;font-size:14px;text-align:right;padding:2px 4px;border-radius:0;outline:none;">
+        </div>
+      </div>
+    </div>
+  `).join('');
+  renderServicesBreakdown();
+}
+
+function toggleService(id) {
+  const s = draft.services.find(s => s.id === id);
+  if (s) { s.enabled = !s.enabled; renderDefaultServicesList(); recalculate(); }
+}
+
+function updateServiceCost(id, val) {
+  const s = draft.services.find(s => s.id === id);
+  if (s) { s.cost = parseFloat(val) || 0; recalculate(); }
+}
+
+function addCustomService() {
+  const name = document.getElementById('newServiceName').value.trim();
+  const cost = parseFloat(document.getElementById('newServiceCost').value) || 0;
+  if (!name) { toast('Enter service name', 'error'); return; }
+  const id = 'cs_' + Date.now();
+  draft.services.push({ id, name, cost, type: 'custom', enabled: true });
+  document.getElementById('newServiceName').value = '';
+  document.getElementById('newServiceCost').value = '';
+  renderCustomServicesList();
+  recalculate();
+  toast(`Added: ${name}`, 'success');
+}
+
+function renderCustomServicesList() {
+  const el = document.getElementById('customServicesList');
+  if (!el) return;
+  const custom = draft.services.filter(s => s.type === 'custom');
+  if (custom.length === 0) {
+    el.innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:8px 0;">No custom services added yet.</div>';
+    return;
+  }
+  el.innerHTML = custom.map(s => `
+    <div class="service-item">
+      <div class="service-name">✨ ${s.name}</div>
+      <div class="service-cost"><span style="color:var(--gold);font-weight:800;">${fmt(s.cost)}</span></div>
+      <button class="service-remove" onclick="removeCustomService('${s.id}')">✕</button>
+    </div>
+  `).join('');
+}
+
+function removeCustomService(id) {
+  draft.services = draft.services.filter(s => s.id !== id);
+  renderCustomServicesList();
+  recalculate();
+}
+
+function renderServicesBreakdown() {
+  const el = document.getElementById('servicesBreakdown');
+  const totEl = document.getElementById('servicesTotalDisplay');
+  if (!el) return;
+
+  const enabled = draft.services.filter(s => s.enabled !== false);
+  let total = 0;
+  el.innerHTML = enabled.map(s => {
+    total += parseFloat(s.cost) || 0;
+    return `<div class="calc-row"><span class="calc-label">${s.name}</span><span class="calc-value">${fmt(s.cost)}</span></div>`;
+  }).join('');
+  if (totEl) totEl.textContent = fmt(total);
+}
+
+function renderFullBreakdown() {
+  const el = document.getElementById('fullBreakdown');
+  if (!el) return;
+
+  const rentTotal = draft.baseRent * draft.days;
+  let html = `
+    <div class="calc-row"><span class="calc-label">Hall Rent (${draft.days} day×${fmt(draft.baseRent)})</span><span class="calc-value">${fmt(rentTotal)}</span></div>
+    <div class="calc-row"><span class="calc-label">Workers (${draft.workers}×₹${state.settings.workerCostPerWorker})</span><span class="calc-value">${fmt(draft.workerCost)}</span></div>`;
+
+  draft.services.filter(s => s.enabled !== false).forEach(s => {
+    html += `<div class="calc-row"><span class="calc-label">${s.name}</span><span class="calc-value">${fmt(s.cost)}</span></div>`;
+  });
+
+  html += `
+    <div class="calc-row" style="border-top:1px solid rgba(255,255,255,0.1);margin-top:8px;padding-top:8px;">
+      <span class="calc-label" style="font-weight:800;">Subtotal</span>
+      <span class="calc-value gold">${fmt(draft.subtotal)}</span>
+    </div>
+    <div class="calc-row"><span class="calc-label">GST (${draft.gstApplicable==='yes'?draft.gstRate:0}%)</span><span class="calc-value">${fmt(draft.gstAmt)}</span></div>`;
+
+  el.innerHTML = html;
+}
+
+// ── BOOKING CONFIRM SUMMARY ────────────────────────────────
+function renderConfirmSummary() {
+  const el = document.getElementById('bookingConfirmSummary');
+  if (!el) return;
+  el.innerHTML = `
+    <div class="calc-section">
+      <div class="calc-section-title">👤 Customer</div>
+      <div class="calc-row"><span class="calc-label">Name</span><span class="calc-value">${draft.custName}</span></div>
+      <div class="calc-row"><span class="calc-label">Phone</span><span class="calc-value">${draft.custPhone}</span></div>
+      <div class="calc-row"><span class="calc-label">Event</span><span class="calc-value">${draft.eventType}</span></div>
+      <div class="calc-row"><span class="calc-label">Attendees</span><span class="calc-value">${draft.attendees}</span></div>
+    </div>
+    <div class="calc-section">
+      <div class="calc-section-title">📅 Dates</div>
+      <div class="calc-row"><span class="calc-label">Start</span><span class="calc-value">${fmtDate(draft.startDate)}</span></div>
+      <div class="calc-row"><span class="calc-label">End</span><span class="calc-value">${fmtDate(draft.endDate)}</span></div>
+      <div class="calc-row"><span class="calc-label">Duration</span><span class="calc-value">${draft.days} day${draft.days>1?'s':''}</span></div>
+    </div>
+    <div class="calc-section">
+      <div class="calc-section-title">💰 Payment</div>
+      <div class="calc-row"><span class="calc-label">Total</span><span class="calc-value gold" style="font-size:18px;font-weight:900;">${fmt(draft.total)}</span></div>
+      <div class="calc-row"><span class="calc-label">Advance</span><span class="calc-value green">${fmt(draft.advance)}</span></div>
+      <div class="calc-row"><span class="calc-label">Balance Due</span><span class="calc-value red">${fmt(draft.balance)}</span></div>
+    </div>`;
+}
+
+// ── SIGNATURE PAD ──────────────────────────────────────────
+let sigPad = { canvas: null, ctx: null, drawing: false, lastX: 0, lastY: 0 };
+
+function initSignaturePad() {
+  const canvas = document.getElementById('sigCanvas');
+  if (!canvas) return;
+  sigPad.canvas = canvas;
+  canvas.width = canvas.offsetWidth || 700;
+  sigPad.ctx = canvas.getContext('2d');
+  sigPad.ctx.strokeStyle = '#f59e0b';
+  sigPad.ctx.lineWidth = 2.5;
+  sigPad.ctx.lineCap = 'round';
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    if (e.touches) {
+      return { x: (e.touches[0].clientX - rect.left) * scaleX, y: (e.touches[0].clientY - rect.top) * scaleY };
+    }
+    return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
+  }
+
+  function start(e) {
+    e.preventDefault();
+    sigPad.drawing = true;
+    const p = getPos(e);
+    sigPad.lastX = p.x; sigPad.lastY = p.y;
+    sigPad.ctx.beginPath();
+    sigPad.ctx.moveTo(p.x, p.y);
+  }
+  function draw(e) {
+    if (!sigPad.drawing) return;
+    e.preventDefault();
+    const p = getPos(e);
+    sigPad.ctx.lineTo(p.x, p.y);
+    sigPad.ctx.stroke();
+    sigPad.lastX = p.x; sigPad.lastY = p.y;
+  }
+  function stop() { sigPad.drawing = false; }
+
+  canvas.addEventListener('mousedown', start);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stop);
+  canvas.addEventListener('touchstart', start, { passive: false });
+  canvas.addEventListener('touchmove', draw, { passive: false });
+  canvas.addEventListener('touchend', stop);
+}
+
+function clearSignature() {
+  if (sigPad.ctx && sigPad.canvas) {
+    sigPad.ctx.clearRect(0, 0, sigPad.canvas.width, sigPad.canvas.height);
+  }
+}
+
+function getSignatureData() {
+  return sigPad.canvas ? sigPad.canvas.toDataURL() : '';
+}
+
+// ── CONFIRM BOOKING ────────────────────────────────────────
+function confirmBooking() {
+  const method = document.getElementById('paymentMethod')?.value || 'Cash';
+  draft.paymentMethod = method;
+  draft.signature = getSignatureData();
+
+  const booking = {
+    id: genBookingId(),
+    hallId: draft.hallId || state.activeHallId,
+    custName: draft.custName,
+    custPhone: draft.custPhone,
+    custPhone2: draft.custPhone2,
+    attendees: draft.attendees,
+    eventType: draft.eventType,
+    notes: draft.notes,
+    startDate: draft.startDate,
+    endDate: draft.endDate,
+    days: draft.days,
+    baseRent: draft.baseRent,
+    workers: draft.workers,
+    workerCost: draft.workerCost,
+    services: [...draft.services],
+    subtotal: draft.subtotal,
+    gstRate: draft.gstRate,
+    gstApplicable: draft.gstApplicable,
+    gstAmt: draft.gstAmt,
+    total: draft.total,
+    advance: draft.advance,
+    balance: draft.balance,
+    paymentMethod: draft.paymentMethod,
+    signature: draft.signature,
+    status: 'confirmed',
+    createdAt: new Date().toISOString(),
+  };
+
+  state.bookings.push(booking);
+  saveState();
+
+  toast(`🎉 Booking ${booking.id} confirmed!`, 'success');
+  showSpinner('Saving booking...');
+  setTimeout(() => {
+    hideSpinner();
+    navigateTo('booking-detail', booking.id);
+  }, 1000);
+}
+
+// ── BOOKINGS TABLE ─────────────────────────────────────────
+let currentFilter = 'all';
+
+function setFilter(filter, el) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderBookingsTable();
+}
+
+function filterBookings() {
+  renderBookingsTable();
+}
+
+function renderBookingsTable() {
+  const query = (document.getElementById('searchInput')?.value || '').toLowerCase();
+  let bookings = [...state.bookings].sort((a, b) => b.createdAt?.localeCompare(a.createdAt));
+
+  if (currentFilter !== 'all') bookings = bookings.filter(b => b.status === currentFilter);
+  if (query) {
+    bookings = bookings.filter(b =>
+      b.custName?.toLowerCase().includes(query) ||
+      b.custPhone?.includes(query) ||
+      b.eventType?.toLowerCase().includes(query) ||
+      b.id?.toLowerCase().includes(query)
+    );
+  }
+
+  const tbody = document.getElementById('bookingsTableBody');
+  if (bookings.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📋</div><h3>No bookings found</h3><p>${query ? 'Try a different search' : 'Create your first booking!'}</p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = bookings.map(b => `
+    <tr onclick="navigateTo('booking-detail','${b.id}')">
+      <td><span class="booking-id">${b.id}</span></td>
+      <td>
+        <div class="customer-cell">
+          <div class="name">${b.custName}</div>
+          <div class="phone">📞 ${b.custPhone}</div>
+        </div>
+      </td>
+      <td><span class="event-badge">${b.eventType}</span></td>
+      <td>${fmtDate(b.startDate)}${b.startDate !== b.endDate ? ' → ' + fmtDate(b.endDate) : ''}</td>
+      <td>
+        <div class="amount-cell">
+          ${fmt(b.total)}
+          ${b.balance > 0 ? `<div class="balance">Due: ${fmt(b.balance)}</div>` : ''}
+        </div>
+      </td>
+      <td><span class="status-badge status-${b.status}">${getStatusIcon(b.status)} ${capitalize(b.status)}</span></td>
+      <td onclick="event.stopPropagation()">
+        <div class="table-actions">
+          <button class="action-btn" onclick="navigateTo('booking-detail','${b.id}')" title="View">👁️</button>
+          <button class="action-btn danger" onclick="deleteBooking('${b.id}')" title="Delete">🗑️</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function getStatusIcon(status) {
+  return { confirmed:'🔵', completed:'✅', cancelled:'❌', pending:'🟡' }[status] || '⚪';
+}
+function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+
+function deleteBooking(id) {
+  openModal('Delete Booking', '<p style="color:var(--text-secondary);">Are you sure you want to permanently delete this booking? This cannot be undone.</p>',
+    `<button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-danger" onclick="confirmDelete('${id}')">Delete</button>`);
+}
+
+function confirmDelete(id) {
+  state.bookings = state.bookings.filter(b => b.id !== id);
+  saveState(); closeModal(); renderBookingsTable();
+  toast('Booking deleted', 'info');
+}
+
+// ── BOOKING DETAIL ─────────────────────────────────────────
+let currentDetailId = null;
+
+function renderBookingDetail(id) {
+  const b = state.bookings.find(b => b.id === id);
+  if (!b) { toast('Booking not found', 'error'); return; }
+  currentDetailId = id;
+
+  document.getElementById('detailBookingId').textContent = b.id;
+  document.getElementById('detailBookingMeta').textContent =
+    `Created: ${new Date(b.createdAt).toLocaleDateString('en-IN', { dateStyle: 'long' })} · ${b.custName}`;
+
+  // Show/hide action buttons
+  document.getElementById('btnMarkComplete').style.display = b.status === 'confirmed' ? '' : 'none';
+  document.getElementById('btnCancelBooking').style.display = b.status !== 'cancelled' ? '' : 'none';
+
+  // Populate invoice
+  const hall = state.halls.find(h => h.id === b.hallId) || state.halls[0];
+  document.getElementById('invHallName').textContent = hall?.name || 'HallMaster';
+  document.getElementById('invHallAddr').textContent = state.settings.address || hall?.address || '';
+  document.getElementById('invHallPhone').textContent = state.settings.phone ? '📞 ' + state.settings.phone : '';
+  document.getElementById('invNumber').textContent = b.id;
+  document.getElementById('invDate').textContent = 'Date: ' + fmtDate(b.startDate);
+
+  const statusBadge = document.getElementById('invStatusBadge');
+  statusBadge.textContent = b.status.toUpperCase();
+  statusBadge.style.background = b.status === 'confirmed' ? 'rgba(56,189,248,0.2)' : b.status === 'completed' ? 'rgba(16,185,129,0.2)' : 'rgba(244,63,94,0.2)';
+  statusBadge.style.color = b.status === 'confirmed' ? '#38bdf8' : b.status === 'completed' ? '#10b981' : '#f43f5e';
+
+  document.getElementById('invCustName').textContent = b.custName;
+  document.getElementById('invPhone').textContent = '📞 ' + b.custPhone + (b.custPhone2 ? ', ' + b.custPhone2 : '');
+  document.getElementById('invEventType').textContent = '🎊 ' + b.eventType;
+  document.getElementById('invDates').textContent = fmtDate(b.startDate) + (b.startDate !== b.endDate ? ' to ' + fmtDate(b.endDate) : '');
+  document.getElementById('invAttendees').textContent = b.attendees;
+  document.getElementById('invPayMethod').textContent = b.paymentMethod || 'Cash';
+
+  // Items table
+  const items = [];
+  items.push({ desc: `Hall Rent (${b.days || 1} day×${fmt(b.baseRent)})`, qty: b.days||1, rate: b.baseRent, amt: b.baseRent * (b.days||1) });
+  items.push({ desc: `Workers (${b.workers} workers)`, qty: b.workers, rate: Math.round(b.workerCost/(b.workers||1)), amt: b.workerCost });
+  (b.services || []).filter(s => s.enabled !== false).forEach(s => {
+    items.push({ desc: s.name, qty: 1, rate: s.cost, amt: s.cost });
+  });
+
+  document.getElementById('invItemBody').innerHTML = items.map((item, i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td>${item.desc}</td>
+      <td style="text-align:right;">${item.qty}</td>
+      <td style="text-align:right;">${fmt(item.rate)}</td>
+      <td style="text-align:right;font-weight:800;">${fmt(item.amt)}</td>
+    </tr>
+  `).join('');
+
+  document.getElementById('invSubtotal').textContent = fmt(b.subtotal);
+  const gstRow = document.getElementById('invGstRow');
+  if (b.gstApplicable === 'no' || !b.gstAmt) {
+    gstRow.style.display = 'none';
+  } else {
+    gstRow.style.display = '';
+    document.getElementById('invGstLabel').textContent = `GST (${b.gstRate}%)`;
+    document.getElementById('invGstAmt').textContent = fmt(b.gstAmt);
+  }
+  document.getElementById('invTotal').textContent = fmt(b.total);
+  document.getElementById('invAdvance').textContent = fmt(b.advance);
+  document.getElementById('invBalance').textContent = fmt(b.balance);
+
+  // Notes
+  const notesEl = document.getElementById('invNotes');
+  if (b.notes) {
+    notesEl.style.display = 'block';
+    notesEl.innerHTML = '<strong>Notes:</strong> ' + b.notes;
+  } else {
+    notesEl.style.display = 'none';
+  }
+
+  // Signature
+  if (b.signature) {
+    const sigCanvas = document.getElementById('invSigCanvas');
+    const img = new Image();
+    img.onload = () => {
+      const ctx = sigCanvas.getContext('2d');
+      ctx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+      ctx.drawImage(img, 0, 0, sigCanvas.width, sigCanvas.height);
+    };
+    img.src = b.signature;
+  }
+}
+
+function markBookingComplete() {
+  const b = state.bookings.find(b => b.id === currentDetailId);
+  if (b) {
+    b.status = 'completed';
+    saveState();
+    renderBookingDetail(currentDetailId);
+    toast('Booking marked as completed ✅', 'success');
+  }
+}
+
+function cancelBooking() {
+  openModal('Cancel Booking', '<p style="color:var(--text-secondary);">Are you sure you want to cancel this booking? The dates will be freed.</p>',
+    `<button class="btn btn-secondary" onclick="closeModal()">Keep Booking</button>
+     <button class="btn btn-danger" onclick="confirmCancel()">Cancel Booking</button>`);
+}
+
+function confirmCancel() {
+  const b = state.bookings.find(b => b.id === currentDetailId);
+  if (b) { b.status = 'cancelled'; saveState(); }
+  closeModal();
+  renderBookingDetail(currentDetailId);
+  toast('Booking cancelled', 'info');
+}
+
+// ── PDF DOWNLOAD ───────────────────────────────────────────
+async function downloadInvoicePDF() {
+  const b = state.bookings.find(b => b.id === currentDetailId);
+  if (!b) return;
+  showSpinner('Generating PDF...');
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+    // Header band
+    doc.setFillColor(26, 26, 46);
+    doc.rect(0, 0, 210, 45, 'F');
+
+    doc.setTextColor(245, 158, 11);
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    const hall = state.halls.find(h => h.id === b.hallId) || state.halls[0];
+    doc.text(hall?.name || 'HallMaster Pro', 15, 18);
+
+    doc.setFontSize(9);
+    doc.setTextColor(180, 180, 180);
+    doc.text(state.settings.address || '', 15, 26);
+    doc.text(state.settings.phone ? '📞 ' + state.settings.phone : '', 15, 33);
+
+    // Invoice number
+    doc.setFontSize(18);
+    doc.setTextColor(245, 158, 11);
+    doc.text(b.id, 195, 18, { align: 'right' });
+    doc.setFontSize(9);
+    doc.setTextColor(180, 180, 180);
+    doc.text('Date: ' + fmtDate(b.startDate), 195, 26, { align: 'right' });
+    doc.text(b.status.toUpperCase(), 195, 33, { align: 'right' });
+
+    // Customer & event details
+    let y = 55;
+    doc.setTextColor(50, 50, 50);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(150, 150, 150);
+    doc.text('BILLED TO', 15, y);
+    doc.text('EVENT DETAILS', 110, y);
+    y += 6;
+
+    doc.setTextColor(30, 30, 30);
+    doc.setFontSize(12);
+    doc.text(b.custName, 15, y);
+    doc.setFontSize(9);
+    y += 6;
+    doc.text('📞 ' + b.custPhone, 15, y);
+    doc.text('📅 ' + fmtDate(b.startDate) + (b.startDate !== b.endDate ? ' to ' + fmtDate(b.endDate) : ''), 110, y - 6);
+    doc.text('👥 ' + b.attendees + ' Attendees', 110, y);
+    y += 6;
+    doc.text('🎊 ' + b.eventType, 15, y);
+    doc.text('💳 ' + (b.paymentMethod || 'Cash'), 110, y);
+
+    y += 14;
+
+    // Items table
+    const items = [
+      [`Hall Rent (${b.days||1} day)`, b.days||1, fmt(b.baseRent), fmt(b.baseRent*(b.days||1))],
+      [`Workers (${b.workers})`, b.workers, fmt(Math.round(b.workerCost/(b.workers||1))), fmt(b.workerCost)],
+    ];
+    (b.services||[]).filter(s=>s.enabled!==false).forEach(s => {
+      items.push([s.name, 1, fmt(s.cost), fmt(s.cost)]);
+    });
+
+    doc.autoTable({
+      startY: y,
+      head: [['Item / Service', 'Qty', 'Rate', 'Amount']],
+      body: items,
+      styles: { fontSize: 10, cellPadding: 4 },
+      headStyles: { fillColor: [26, 26, 46], textColor: [245, 158, 11], fontStyle: 'bold' },
+      columnStyles: {
+        2: { halign: 'right' },
+        3: { halign: 'right', fontStyle: 'bold' }
+      },
+      theme: 'grid',
+    });
+
+    y = doc.lastAutoTable.finalY + 8;
+
+    // Totals
+    const totals = [
+      ['Subtotal', fmt(b.subtotal)],
+    ];
+    if (b.gstApplicable !== 'no' && b.gstAmt) totals.push([`GST (${b.gstRate}%)`, fmt(b.gstAmt)]);
+    totals.push(['TOTAL', fmt(b.total)]);
+    totals.push(['Advance Paid', fmt(b.advance)]);
+    totals.push(['Balance Due', fmt(b.balance)]);
+
+    totals.forEach((row, i) => {
+      const isLast2 = i >= totals.length - 2;
+      const isGrand = row[0] === 'TOTAL';
+      doc.setFontSize(isGrand ? 13 : 10);
+      doc.setFont('helvetica', isGrand || isLast2 ? 'bold' : 'normal');
+      doc.setTextColor(isGrand ? 200 : isLast2 && row[0]==='Balance Due' ? 200 : 50, isGrand ? 120 : 50, isGrand ? 0 : 50);
+      doc.text(row[0], 130, y);
+      doc.text(row[1], 195, y, { align: 'right' });
+      y += 7;
+    });
+
+    // Footer
+    y = 275;
+    doc.setFillColor(26, 26, 46);
+    doc.rect(0, y, 210, 22, 'F');
+    doc.setTextColor(180, 180, 180);
+    doc.setFontSize(9);
+    doc.text('Developed By Santhosh A — https://a-santhosh-hub.github.io/in/', 105, y + 10, { align: 'center' });
+    doc.text('HallMaster Pro — Smart Hall Booking System', 105, y + 16, { align: 'center' });
+
+    doc.save(`Invoice-${b.id}.pdf`);
+    toast('PDF downloaded!', 'success');
+  } catch(e) {
+    toast('PDF generation failed: ' + e.message, 'error');
+  }
+  hideSpinner();
+}
+
+// ── WHATSAPP ───────────────────────────────────────────────
+function shareOnWhatsApp() {
+  const b = state.bookings.find(b => b.id === currentDetailId);
+  if (!b) return;
+  const msg = encodeURIComponent(
+    `🏛️ *HallMaster Pro — Booking Confirmation*\n\n` +
+    `*Booking ID:* ${b.id}\n` +
+    `*Customer:* ${b.custName}\n` +
+    `*Event:* ${b.eventType}\n` +
+    `*Date:* ${fmtDate(b.startDate)}${b.startDate !== b.endDate ? ' to ' + fmtDate(b.endDate) : ''}\n` +
+    `*Attendees:* ${b.attendees}\n\n` +
+    `💰 *Payment Summary*\n` +
+    `Total: ${fmt(b.total)}\n` +
+    `Advance Paid: ${fmt(b.advance)}\n` +
+    `Balance Due: ${fmt(b.balance)}\n\n` +
+    `Thank you for choosing us! 🙏`
+  );
+  window.open(`https://wa.me/${b.custPhone}?text=${msg}`, '_blank');
+}
+
+// ── FULL CALENDAR ──────────────────────────────────────────
+let fullCalDate = new Date();
+
+function renderFullCalendar() {
+  const d = fullCalDate;
+  document.getElementById('fullCalTitle').textContent =
+    d.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+
+  const firstDay = new Date(d.getFullYear(), d.getMonth(), 1).getDay();
+  const daysInMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  const todayStr = today();
+
+  const bookedMap = {};
+  state.bookings.filter(b => b.status !== 'cancelled').forEach(b => {
+    let cur = b.startDate;
+    while (cur <= b.endDate) {
+      if (!bookedMap[cur]) bookedMap[cur] = [];
+      bookedMap[cur].push(b);
+      cur = addDays(cur, 1);
+    }
+  });
+
+  const grid = document.getElementById('fullCalGrid');
+  grid.innerHTML = '';
+
+  for (let i = 0; i < firstDay; i++) {
+    const blank = document.createElement('div');
+    blank.style.cssText = 'aspect-ratio:1;';
+    grid.appendChild(blank);
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const el = document.createElement('div');
+    el.style.cssText = `
+      aspect-ratio:1; display:flex; flex-direction:column; align-items:center;
+      justify-content:center; border-radius:8px; cursor:pointer;
+      transition:all 0.2s; font-size:14px; font-weight:700; position:relative;
+      border:1px solid rgba(255,255,255,0.04);
+    `;
+
+    const booked = bookedMap[dateStr];
+    if (dateStr === todayStr) {
+      el.style.background = 'rgba(245,158,11,0.15)';
+      el.style.borderColor = 'rgba(245,158,11,0.4)';
+      el.style.color = '#f59e0b';
+    } else if (booked && booked.length > 0) {
+      el.style.background = 'rgba(244,63,94,0.12)';
+      el.style.borderColor = 'rgba(244,63,94,0.25)';
+      el.style.color = '#f43f5e';
+    } else if (dateStr >= todayStr) {
+      el.style.color = '#10b981';
+    } else {
+      el.style.color = '#484f58';
+    }
+
+    el.innerHTML = `${day}${booked && booked.length ? `<span style="width:5px;height:5px;background:#f43f5e;border-radius:50%;position:absolute;bottom:4px;"></span>` : ''}`;
+    el.addEventListener('click', () => selectCalendarDay(dateStr));
+    el.addEventListener('mouseenter', () => { el.style.transform = 'scale(1.08)'; });
+    el.addEventListener('mouseleave', () => { el.style.transform = 'scale(1)'; });
+    grid.appendChild(el);
+  }
+}
+
+function selectCalendarDay(dateStr) {
+  const dayTitle = document.getElementById('calDayTitle');
+  const dayContent = document.getElementById('calDayBookings');
+
+  dayTitle.textContent = '📅 ' + fmtDate(dateStr);
+
+  const dayBookings = state.bookings.filter(b =>
+    b.startDate <= dateStr && b.endDate >= dateStr && b.status !== 'cancelled'
+  );
+
+  if (dayBookings.length === 0) {
+    dayContent.innerHTML = `
+      <div class="empty-state" style="padding:30px;">
+        <div class="empty-icon">✅</div>
+        <h3 style="color:var(--emerald);">Available!</h3>
+        <p>No bookings on this date.</p>
+        <button class="btn btn-primary" style="margin-top:14px;" onclick="navigateTo('new-booking')">+ Book This Date</button>
+      </div>`;
+  } else {
+    dayContent.innerHTML = dayBookings.map(b => `
+      <div class="upcoming-item" onclick="navigateTo('booking-detail','${b.id}')">
+        <div class="upcoming-date-box">
+          <div class="day" style="font-size:14px;">${b.attendees}</div>
+          <div class="mon">guests</div>
+        </div>
+        <div class="upcoming-info">
+          <div class="upcoming-name">${b.custName} · <span class="event-badge" style="font-size:11px;">${b.eventType}</span></div>
+          <div class="upcoming-event">📞 ${b.custPhone} · ${fmt(b.total)}</div>
+        </div>
+        <span class="status-badge status-${b.status}">${capitalize(b.status)}</span>
+      </div>
+    `).join('');
+  }
+}
+
+function fullCalPrev() { fullCalDate.setMonth(fullCalDate.getMonth()-1); renderFullCalendar(); }
+function fullCalNext() { fullCalDate.setMonth(fullCalDate.getMonth()+1); renderFullCalendar(); }
+
+// ── ANALYTICS ─────────────────────────────────────────────
+let anaRevChart = null, anaEventChart2 = null, anaPayChart2 = null;
+
+function initAnalytics() {
+  const totalRevenue = state.bookings.filter(b=>b.status!=='cancelled').reduce((s,b)=>s+(b.total||0),0);
+  const totalEvents = state.bookings.filter(b=>b.status!=='cancelled').length;
+  const avgRev = totalEvents ? Math.round(totalRevenue / totalEvents) : 0;
+
+  document.getElementById('anaTotal').textContent = fmt(totalRevenue);
+  document.getElementById('anaEvents').textContent = totalEvents;
+  document.getElementById('anaAvgRev').textContent = fmt(avgRev);
+
+  // 12-month revenue
+  const now = new Date();
+  const months = [];
+  const revenues = [];
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    months.push(d.toLocaleDateString('en-IN',{month:'short',year:'2-digit'}));
+    const rev = state.bookings.filter(b => {
+      const bd = new Date(b.startDate+'T00:00:00');
+      return bd.getMonth()===d.getMonth() && bd.getFullYear()===d.getFullYear() && b.status!=='cancelled';
+    }).reduce((s,b)=>s+(b.total||0),0);
+    revenues.push(rev);
+  }
+
+  const rctx = document.getElementById('anaRevenueChart').getContext('2d');
+  if (anaRevChart) anaRevChart.destroy();
+  anaRevChart = new Chart(rctx, {
+    type: 'line',
+    data: {
+      labels: months,
+      datasets: [{
+        label: 'Revenue',
+        data: revenues,
+        borderColor: '#f59e0b',
+        backgroundColor: 'rgba(245,158,11,0.08)',
+        borderWidth: 2.5,
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: '#f59e0b',
+        pointRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: ctx => fmt(ctx.parsed.y) },
+          backgroundColor: '#1a1a2e', titleColor: '#f59e0b', bodyColor: '#ccc',
+        }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#888', font: { size: 10 } } },
+        y: {
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: '#888', callback: v => '₹'+(v>=1000?(v/1000).toFixed(0)+'K':v) }
+        }
+      }
+    }
+  });
+
+  // Event type
+  const ec = {};
+  state.bookings.filter(b=>b.status!=='cancelled').forEach(b => { ec[b.eventType]=(ec[b.eventType]||0)+1; });
+  const ec2ctx = document.getElementById('anaEventChart').getContext('2d');
+  if (anaEventChart2) anaEventChart2.destroy();
+  if (Object.keys(ec).length) {
+    anaEventChart2 = new Chart(ec2ctx, {
+      type: 'pie',
+      data: {
+        labels: Object.keys(ec),
+        datasets: [{ data: Object.values(ec), backgroundColor: ['#f59e0b','#10b981','#38bdf8','#8b5cf6','#f43f5e','#fb923c'], borderColor: '#0d1117', borderWidth: 3 }]
+      },
+      options: { responsive:true, maintainAspectRatio:false, plugins: { legend: { position:'bottom', labels: { color:'#888', font:{size:11} } } } }
+    });
+  }
+
+  // Payment status
+  const confirmed = state.bookings.filter(b=>b.status==='confirmed').length;
+  const completed = state.bookings.filter(b=>b.status==='completed').length;
+  const cancelled = state.bookings.filter(b=>b.status==='cancelled').length;
+  const pc2ctx = document.getElementById('anaPayChart').getContext('2d');
+  if (anaPayChart2) anaPayChart2.destroy();
+  anaPayChart2 = new Chart(pc2ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Confirmed','Completed','Cancelled'],
+      datasets: [{ data: [confirmed,completed,cancelled], backgroundColor:['#38bdf8','#10b981','#f43f5e'], borderColor:'#0d1117', borderWidth:3 }]
+    },
+    options: { responsive:true, maintainAspectRatio:false, cutout:'65%', plugins: { legend: { position:'bottom', labels:{color:'#888',font:{size:11}} } } }
+  });
+
+  // Top bookings
+  const top = [...state.bookings].filter(b=>b.status!=='cancelled').sort((a,b)=>b.total-a.total).slice(0,5);
+  document.getElementById('topBookingsList').innerHTML = top.length ? top.map((b,i) => `
+    <div class="upcoming-item" onclick="navigateTo('booking-detail','${b.id}')">
+      <div style="width:28px;height:28px;border-radius:50%;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:var(--gold);">${i+1}</div>
+      <div class="upcoming-info">
+        <div class="upcoming-name">${b.custName} · ${b.eventType}</div>
+        <div class="upcoming-event">${fmtDate(b.startDate)} · ${b.attendees} guests</div>
+      </div>
+      <div class="upcoming-amount">${fmt(b.total)}</div>
+    </div>
+  `).join('') : '<div class="empty-state" style="padding:30px;"><div class="empty-icon">📊</div><p>No data yet</p></div>';
+}
+
+// ── SETTINGS ───────────────────────────────────────────────
+function renderSettings() {
+  const s = state.settings;
+  document.getElementById('settBaseRent').value = s.baseRent || '';
+  document.getElementById('settGstRate').value = s.gstRate || '';
+  document.getElementById('settWorkersPerPeople').value = s.workersPerPeople || '';
+  document.getElementById('settWorkerCost').value = s.workerCostPerWorker || '';
+  document.getElementById('settOwnerName').value = s.ownerName || '';
+  document.getElementById('settPhone').value = s.phone || '';
+  document.getElementById('settAddress').value = s.address || '';
+  renderSettingsServices();
+  renderHallsList();
+
+  const totBk = state.bookings.length;
+  const totRev = state.bookings.filter(b=>b.status!=='cancelled').reduce((s,b)=>s+(b.total||0),0);
+  document.getElementById('infoTotalBookings').textContent = totBk;
+  document.getElementById('infoTotalRevenue').textContent = fmt(totRev);
+}
+
+function saveSettings() {
+  state.settings.baseRent = parseFloat(document.getElementById('settBaseRent').value) || 0;
+  state.settings.gstRate = parseFloat(document.getElementById('settGstRate').value) || 18;
+  state.settings.workersPerPeople = parseInt(document.getElementById('settWorkersPerPeople').value) || 60;
+  state.settings.workerCostPerWorker = parseFloat(document.getElementById('settWorkerCost').value) || 800;
+  state.settings.ownerName = document.getElementById('settOwnerName').value || '';
+  state.settings.phone = document.getElementById('settPhone').value || '';
+  state.settings.address = document.getElementById('settAddress').value || '';
+  saveState();
+}
+
+function renderSettingsServices() {
+  const el = document.getElementById('settServicesList');
+  if (!el) return;
+  el.innerHTML = (state.settings.defaultServices || []).map((s, i) => `
+    <div class="service-item">
+      <div class="service-name">${s.name}</div>
+      <div class="service-cost" style="display:flex;align-items:center;gap:4px;">
+        <span style="color:var(--gold);">₹</span>
+        <input type="number" value="${s.cost}" onchange="updateDefaultServiceCost(${i},this.value)"
+          style="width:80px;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--gold);font-weight:800;font-size:14px;text-align:right;padding:2px 4px;border-radius:0;outline:none;">
+      </div>
+      <div class="service-toggle ${s.enabled?'checked':''}" onclick="toggleDefaultService(${i})">${s.enabled?'✓':''}</div>
+      <button class="service-remove" onclick="removeDefaultService(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function updateDefaultServiceCost(i, val) {
+  state.settings.defaultServices[i].cost = parseFloat(val) || 0;
+  saveState();
+}
+
+function toggleDefaultService(i) {
+  state.settings.defaultServices[i].enabled = !state.settings.defaultServices[i].enabled;
+  saveState(); renderSettingsServices();
+}
+
+function removeDefaultService(i) {
+  state.settings.defaultServices.splice(i, 1);
+  saveState(); renderSettingsServices();
+}
+
+function addDefaultService() {
+  const name = document.getElementById('settNewSvcName').value.trim();
+  const cost = parseFloat(document.getElementById('settNewSvcCost').value) || 0;
+  if (!name) { toast('Enter service name', 'error'); return; }
+  state.settings.defaultServices.push({ id: 'ds_' + Date.now(), name, cost, enabled: true });
+  saveState(); renderSettingsServices();
+  document.getElementById('settNewSvcName').value = '';
+  document.getElementById('settNewSvcCost').value = '';
+  toast('Service added', 'success');
+}
+
+// ── HALL MANAGEMENT ────────────────────────────────────────
+function renderHallsList() {
+  const el = document.getElementById('hallsList');
+  if (!el) return;
+  el.innerHTML = (state.halls || []).map(h => `
+    <div class="hall-item">
+      <div class="hall-item-icon">🏛️</div>
+      <div class="hall-item-info">
+        <div class="hall-item-name">${h.name}</div>
+        <div class="hall-item-meta">Capacity: ${h.capacity || '—'} · ${h.address || ''}</div>
+      </div>
+      ${h.id === state.activeHallId ? '<div class="hall-active-dot"></div>' : ''}
+      <button class="action-btn danger" onclick="deleteHall('${h.id}')">🗑️</button>
+    </div>
+  `).join('') || '<div style="color:var(--text-muted);font-size:13px;">No halls added</div>';
+
+  // Update hall selector
+  const sel = document.getElementById('activeHallSelect');
+  sel.innerHTML = state.halls.map(h => `<option value="${h.id}" ${h.id===state.activeHallId?'selected':''}>${h.name}</option>`).join('');
+}
+
+function switchHall(id) {
+  state.activeHallId = id;
+  saveState();
+  toast('Switched to ' + (state.halls.find(h=>h.id===id)?.name || 'Hall'), 'info');
+}
+
+function openAddHallModal() {
+  openModal('Add New Hall',
+    `<div class="form-group" style="margin-bottom:12px;"><label>Hall Name *</label><input type="text" id="newHallName" placeholder="e.g. Main Hall"></div>
+     <div class="form-group" style="margin-bottom:12px;"><label>Capacity</label><input type="number" id="newHallCap" placeholder="e.g. 500"></div>
+     <div class="form-group"><label>Address / Description</label><input type="text" id="newHallAddr" placeholder="e.g. Ground Floor, North Block"></div>`,
+    `<button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-primary" onclick="addHall()">Add Hall</button>`
+  );
+}
+
+function addHall() {
+  const name = document.getElementById('newHallName').value.trim();
+  const cap = parseInt(document.getElementById('newHallCap').value) || 0;
+  const addr = document.getElementById('newHallAddr').value.trim();
+  if (!name) { toast('Enter hall name', 'error'); return; }
+  const id = 'hall-' + Date.now();
+  state.halls.push({ id, name, capacity: cap, address: addr });
+  saveState();
+  closeModal();
+  renderHallsList();
+  toast('Hall added: ' + name, 'success');
+}
+
+function deleteHall(id) {
+  if (state.halls.length <= 1) { toast('Cannot delete the only hall', 'error'); return; }
+  state.halls = state.halls.filter(h => h.id !== id);
+  if (state.activeHallId === id) state.activeHallId = state.halls[0].id;
+  saveState();
+  renderHallsList();
+  toast('Hall deleted', 'info');
+}
+
+// ── EXPORT / IMPORT ────────────────────────────────────────
+function exportData() {
+  const data = JSON.stringify(state, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = `HallMaster_Backup_${today()}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  toast('Data exported successfully!', 'success');
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (imported.bookings && imported.settings) {
+        state = Object.assign(state, imported);
+        saveState(); renderSettings();
+        toast('Data imported successfully!', 'success');
+      } else {
+        toast('Invalid backup file format', 'error');
+      }
+    } catch { toast('Failed to parse JSON file', 'error'); }
+  };
+  reader.readAsText(file);
+}
+
+function clearAllData() {
+  openModal('⚠️ Clear All Data',
+    '<p style="color:var(--rose);">This will permanently delete ALL bookings, settings, and halls. This cannot be undone!</p>',
+    `<button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-danger" onclick="doClearAll()">Yes, Delete Everything</button>`
+  );
+}
+
+function doClearAll() {
+  localStorage.removeItem(APP_KEY);
+  location.reload();
+}
+
+// ── NOTIFICATIONS ──────────────────────────────────────────
+function showNotifications() {
+  const todayStr = today();
+  const tomorrow = addDays(todayStr, 1);
+  const upcoming = state.bookings.filter(b =>
+    (b.startDate === todayStr || b.startDate === tomorrow) && b.status === 'confirmed'
+  );
+
+  if (upcoming.length === 0) {
+    openModal('🔔 Reminders', '<p style="color:var(--text-secondary);text-align:center;padding:20px 0;">No events today or tomorrow. All clear!</p>',
+      `<button class="btn btn-primary" onclick="closeModal()">OK</button>`);
+  } else {
+    const html = upcoming.map(b => `
+      <div class="upcoming-item" style="cursor:default;">
+        <div class="upcoming-date-box">
+          <div class="day">${new Date(b.startDate+'T00:00:00').getDate()}</div>
+          <div class="mon">${new Date(b.startDate+'T00:00:00').toLocaleDateString('en-IN',{month:'short'})}</div>
+        </div>
+        <div class="upcoming-info">
+          <div class="upcoming-name">${b.custName}</div>
+          <div class="upcoming-event">${b.eventType} · ${b.startDate === todayStr ? '🔴 TODAY' : '🟡 TOMORROW'}</div>
+        </div>
+        <div class="upcoming-amount">${fmt(b.total)}</div>
+      </div>
+    `).join('');
+    openModal('🔔 Upcoming Reminders', `<div class="upcoming-list">${html}</div>`,
+      `<button class="btn btn-primary" onclick="closeModal()">OK</button>`);
+  }
+}
+
+// ── SPINNER ────────────────────────────────────────────────
+function showSpinner(msg) {
+  document.querySelector('.spinner-text').textContent = msg || 'Processing...';
+  document.getElementById('spinnerOverlay').classList.add('active');
+}
+function hideSpinner() { document.getElementById('spinnerOverlay').classList.remove('active'); }
+
+// ── INIT ───────────────────────────────────────────────────
+function init() {
+  loadState();
+  renderHallsList();
+
+  // Set min date for booking inputs
+  const td = today();
+  const sDate = document.getElementById('bookingStartDate');
+  const eDate = document.getElementById('bookingEndDate');
+  if (sDate) sDate.min = td;
+  if (eDate) eDate.min = td;
+
+  navigateTo('dashboard');
+
+  // Auto-reminders on load
+  const todayStr = today();
+  const todayEvents = state.bookings.filter(b =>
+    b.startDate === todayStr && b.status === 'confirmed'
+  );
+  if (todayEvents.length > 0) {
+    setTimeout(() => {
+      toast(`📅 ${todayEvents.length} event(s) scheduled for today!`, 'info');
+    }, 1500);
+  }
+}
+
+// ── KEYBOARD SHORTCUTS ─────────────────────────────────────
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey || e.metaKey) {
+    if (e.key === 'n') { e.preventDefault(); navigateTo('new-booking'); }
+    if (e.key === 'b') { e.preventDefault(); navigateTo('bookings'); }
+    if (e.key === 'd') { e.preventDefault(); navigateTo('dashboard'); }
+  }
+  if (e.key === 'Escape') { closeModal(); closeSidebar(); }
+});
+
+// Run on load
+window.addEventListener('load', init);
+
+// Service worker registration for PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    // Minimal inline service worker for offline caching
+    const swCode = `
+      const CACHE='hallmaster-v1';
+      self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE)));
+      self.addEventListener('fetch',e=>e.respondWith(
+        caches.match(e.request).then(r=>r||fetch(e.request))
+      ));
+    `;
+    const blob = new Blob([swCode], {type:'application/javascript'});
+    const swUrl = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swUrl).catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
