@@ -4,26 +4,11 @@
 
 **Live Demo:**    
 🔗 https://santhosh2025.neocities.org/New%20Project/Main
-  
 ### 📌 Overview
-
 **The Enchanted Archives** is a simple admin interface page that appears to be a memory/archive portal.  
 The interface includes headings like *Admin Portal* and *Summon New Memory*, plus navigation-like text such as *Prev Download Crystal Next*, suggesting navigation between archived items.
-
-### 📄 What You See
-
-- 🏷️ **Title:** The Enchanted Archives  
-- 👤 **Admin Portal Area**  
-- 🪄 **Summon New Memory** — possibly an action/button (UI text shown)  
-- 🔗 Footer links: Contact, Privacy, Help  
-- 📜 Navigation text (Prev / Next)
-
-*(This page is currently minimal in content and likely intended as an interface placeholder or prototype.)*
-
 ### 📌 Built With
-
 - Static HTML (hosted on Neocities)
-- Simple navigation text/placeholder elements
 
 
 # Project 02   https://santhosh2025.neocities.org/Skill/Skills  --- SKILLS
