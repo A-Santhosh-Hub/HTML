@@ -69,35 +69,12 @@ The interface includes headings like *Admin Portal* and *Summon New Memory*, plu
 
 **Live Demo:**  
 🔗 https://santhosh2024.neocities.org/SanStudio%20Player/stock
-
 ### 📌 Overview
-
 SiteManager is an online **stock/materials management system** built with HTML/CSS/JavaScript.  
 It helps track inventory, record incoming and outgoing materials, and generate reports.
-
-### 🌟 Features
-
-- 📊 **Dashboard** – View current stock and recent activity
-- 📜 **Transaction History** – See all IN/OUT records
-- 📥 **Stock Entry (IN)** – Add incoming stock
-- 📤 **Issue Material (OUT)** – Record stock being used or issued
-- 📦 **Materials Master** – Define and manage material types
-- 📄 **Reports** – Generate daily/monthly summaries (Excel/PDF)
-
 ### 💡 Usage
-
 Use this tool to manage inventory for construction sites, warehouses, supply rooms, or small business materials tracking.  
 It includes editing, history, and export features to make stock control easier.
-
----
-
-### 🛠️ Built With
-
-- HTML, CSS
-- JavaScript
-- Static hosting on Neocities
-
-
 =============================================================================================
 
 ## Project 30 🚀 SourceViewer - Mobile Web Inspector
