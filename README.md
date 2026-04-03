@@ -2,15 +2,6 @@
   
 ### Project 01  📚 The Enchanted Archives — Admin Portal
 
-**Live Demo:**    
-🔗 https://santhosh2025.neocities.org/New%20Project/Main
-### 📌 Overview
-**The Enchanted Archives** is a simple admin interface page that appears to be a memory/archive portal.  
-The interface includes headings like *Admin Portal* and *Summon New Memory*, plus navigation-like text such as *Prev Download Crystal Next*, suggesting navigation between archived items.
-### 📌 Built With
-- Static HTML (hosted on Neocities)
-
-
 # Project 02   https://santhosh2025.neocities.org/Skill/Skills  --- SKILLS
 
 # Project 03    https://santhosh2025.neocities.org/POST/News   ---  POST
@@ -67,37 +58,8 @@ The interface includes headings like *Admin Portal* and *Summon New Memory*, plu
 
 ## Project 29  📦 SiteManager — Stock Control Web App
 
-**Live Demo:**  
-🔗 https://santhosh2024.neocities.org/SanStudio%20Player/stock
-### 📌 Overview
-SiteManager is an online **stock/materials management system** built with HTML/CSS/JavaScript.  
-It helps track inventory, record incoming and outgoing materials, and generate reports.
-### 💡 Usage
-Use this tool to manage inventory for construction sites, warehouses, supply rooms, or small business materials tracking.  
-It includes editing, history, and export features to make stock control easier.
-=============================================================================================
 
 ## Project 30 🚀 SourceViewer - Mobile Web Inspector
-
-[![Live Demo](https://img.shields.io/badge/Live_Demo-Online-blue)](https://sanstudio.neocities.org/SimpleWebSourceViewer)
-
-**View, copy, and download any website's HTML source code directly in your browser.** 
-Fast, free, mobile-optimized with CORS bypass. Built by SanStudio.
-
-## ✨ Features
-- ✅ Real-time HTML source inspection
-- ✅ Syntax highlighting & line numbers  
-- ✅ Proxy mode (bypasses CORS)
-- ✅ Search within source
-- ✅ Copy/Download buttons
-- ✅ Recent URLs history
-
-## 📱 Mobile-First
-- Tailwind CSS + Glassmorphism design
-- Touch-optimized controls
-- PWA-ready responsive layout
-
-**Try it now:** https://sanstudio.neocities.org/SimpleWebSourceViewer
 
 
 ## Project 31   Smart Portfolio Builder  ( https://santhosh2025.neocities.org/Smart%20Portfolio%20Builder/in )
