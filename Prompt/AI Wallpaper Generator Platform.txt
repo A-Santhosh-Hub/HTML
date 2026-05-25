@@ -1,0 +1,385 @@
+You are a senior AI architect, elite full-stack developer, senior UI/UX engineer, cloud GPU systems architect, DevOps engineer, and modern SaaS platform engineer.
+
+Your task is to build a FULLY FUNCTIONAL PRODUCTION-READY AI WALLPAPER GENERATOR PLATFORM for the company “SanStudio”.
+
+====================================================
+CORE PROJECT CONCEPT
+====================================================
+
+The platform architecture works like this:
+
+Frontend Website (HTML/CSS/JavaScript)
+        ↓
+Prompt sent to AI API
+        ↓
+Google Colab GPU / Cloud GPU generates image
+        ↓
+Stable Diffusion model processes image
+        ↓
+Generated image returned
+        ↓
+Website displays downloadable wallpaper
+
+The heavy AI rendering MUST happen in cloud GPUs.
+
+This project is NOT a demo.
+This MUST be developed as a REAL scalable SaaS-style AI platform.
+
+====================================================
+PROJECT NAME IDEAS
+====================================================
+
+Generate futuristic names like:
+- SanStudio AI
+- WallForge AI
+- DreamPixel AI
+- VisionCanvas
+- InfinityWall AI
+- PromptScape
+- NeoWall AI
+
+====================================================
+UI/UX REQUIREMENTS
+====================================================
+
+Build EXTREMELY MODERN 2026 UI/UX.
+
+Design inspiration:
+- Apple
+- Midjourney
+- Framer
+- Linear
+- Arc Browser
+- Discord
+- Vercel
+- Civitai
+- Netflix cinematic effects
+
+Use:
+- Glassmorphism
+- Aurora gradients
+- Animated particles
+- Mouse reactive effects
+- 3D hover cards
+- GPU accelerated animations
+- Smooth transitions
+- Parallax sections
+- AI futuristic interface
+- Floating glowing elements
+- Liquid blur backgrounds
+- Neon cinematic lighting
+- Dynamic shadows
+- AI loading animations
+- Motion-based interactions
+
+The platform must feel:
+- Premium
+- Futuristic
+- Cinematic
+- Interactive
+- Highly immersive
+
+====================================================
+TECH STACK
+====================================================
+
+Frontend:
+- HTML5
+- Tailwind CSS
+- Vanilla JavaScript
+- Three.js
+- GSAP animations
+- Framer-motion-like effects
+- WebGL effects
+- Lottie animations
+
+Backend:
+- Python
+- FastAPI
+- Gradio
+- WebSocket support
+- Async architecture
+
+AI:
+- Stable Diffusion XL
+- JuggernautXL
+- DreamShaper
+- RealVisXL
+- Anything V5
+- LoRA support
+- Textual inversion support
+
+GPU Infrastructure:
+- Google Colab GPU support
+- RunPod integration
+- Modal support
+- HuggingFace Spaces support
+- Cloud fallback system
+- Automatic GPU reconnection logic
+
+Database:
+- Supabase
+- Firebase
+- PostgreSQL
+
+Authentication:
+- Google login
+- GitHub login
+- Email OTP login
+
+Storage:
+- Cloudinary
+- Supabase Storage
+- Firebase Storage
+
+Deployment:
+- GitHub Pages (frontend)
+- Vercel
+- Netlify
+- Railway
+- Render
+- Docker support
+
+====================================================
+CORE FEATURES
+====================================================
+
+1. AI WALLPAPER GENERATOR
+- Text-to-image generation
+- HD generation
+- 4K generation
+- Ultra-wide wallpapers
+- Mobile wallpapers
+- Anime generation
+- Realistic generation
+- Fantasy generation
+- Cyberpunk generation
+- Tamil cultural wallpapers
+- Gaming wallpapers
+- Temple wallpapers
+- Festival posters
+
+2. LIVE AI GENERATION
+- Real-time generation status
+- GPU usage status
+- Queue system
+- Live rendering animation
+- Progress percentage
+
+3. ADVANCED PROMPT ENGINE
+- Prompt enhancer AI
+- Negative prompts
+- Style presets
+- AI prompt suggestions
+- Trending prompts
+- Smart prompt auto-completion
+
+4. AI IMAGE TOOLS
+- Upscaler
+- Background remover
+- Face enhancement
+- Image variation generator
+- AI inpainting
+- AI outpainting
+- AI image editing
+
+5. USER DASHBOARD
+- Saved generations
+- Favorites
+- Download history
+- Prompt history
+- Collections
+- AI credits system
+
+6. SOCIAL FEATURES
+- Public gallery
+- Like system
+- Follow creators
+- Community feed
+- Share prompts
+- Remix feature
+
+7. MONETIZATION SYSTEM
+- Free credits
+- Premium plans
+- Stripe integration
+- Razorpay integration
+- Subscription system
+- Daily limits
+
+8. ADMIN PANEL
+- User management
+- GPU monitoring
+- Prompt moderation
+- Analytics dashboard
+- Generation statistics
+- Server monitoring
+
+====================================================
+COLAB GPU ARCHITECTURE
+====================================================
+
+Implement a REAL cloud GPU architecture.
+
+The system must:
+- Connect to Google Colab GPU
+- Launch Stable Diffusion automatically
+- Start FastAPI API
+- Expose public API endpoint
+- Return generated images
+- Auto reconnect if runtime disconnects
+- Detect GPU type dynamically
+- Optimize VRAM usage
+
+Implement:
+- xFormers optimization
+- CUDA acceleration
+- VRAM management
+- Async image queue
+- Batch processing
+- Image caching
+
+====================================================
+ADVANCED ENGINEERING
+====================================================
+
+Implement:
+- Modular architecture
+- Reusable components
+- Clean folder structure
+- MVC-style architecture
+- API abstraction layer
+- Environment variable system
+- Secure token system
+- Rate limiting
+- Request validation
+- Error handling
+- Retry system
+- Logging system
+
+====================================================
+PERFORMANCE OPTIMIZATION
+====================================================
+
+Implement:
+- Lazy loading
+- Image optimization
+- CDN support
+- Compression
+- WebP conversion
+- GPU acceleration
+- Dynamic imports
+- Service workers
+- Offline support
+- Progressive Web App
+
+====================================================
+SECURITY
+====================================================
+
+Implement:
+- API key protection
+- Anti-spam system
+- Prompt filtering
+- User authentication
+- Secure uploads
+- Cloudflare compatibility
+- DDOS protection structure
+
+====================================================
+MOBILE EXPERIENCE
+====================================================
+
+Create:
+- Fully responsive design
+- Mobile-first UI
+- Native-app-like animations
+- Touch gestures
+- Smooth scrolling
+- PWA installation support
+
+====================================================
+SPECIAL SANSTUDIO FEATURES
+====================================================
+
+Create dedicated sections for:
+- Tamil AI wallpapers
+- Chennai cyberpunk themes
+- Indian festival AI art
+- AI temple wallpaper generation
+- YouTube thumbnail AI tools
+- AI poster generation
+- AI branding studio
+
+====================================================
+BRANDING
+====================================================
+
+Footer MUST contain:
+
+Developed By SanStudio
+
+When clicked:
+https://sanstudio-hub.github.io/in/
+
+Create premium animated branding.
+
+====================================================
+EXTRA FEATURES TO ADD
+====================================================
+
+Add futuristic advanced features like:
+- AI voice prompt input
+- AI wallpaper video generator
+- AI animated wallpapers
+- AI desktop wallpaper sync
+- AI wallpaper scheduler
+- AI-generated metadata
+- AI wallpaper search engine
+- Multi-language support
+- Tamil language support
+- Dark/light mode
+- Keyboard shortcuts
+- AI assistant chatbot
+- GPU health dashboard
+
+====================================================
+OUTPUT REQUIREMENTS
+====================================================
+
+Generate:
+- Full production-ready code
+- Folder structure
+- Frontend files
+- Backend files
+- API system
+- Database schema
+- Deployment instructions
+- Colab notebook setup
+- Environment configuration
+- Security setup
+- README.md
+- Docker support
+- Installation guide
+
+====================================================
+IMPORTANT
+====================================================
+
+This project is NOT a demo.
+Do NOT generate placeholder-only UI.
+Do NOT generate incomplete code.
+
+Everything must be:
+- Production-ready
+- Scalable
+- Beautiful
+- Optimized
+- Functional
+- Professional
+- Modern
+- Advanced
+
+Think like a Silicon Valley startup engineering team combined with elite cinematic UI/UX designers.
+
+Build this as a next-generation AI SaaS platform.
