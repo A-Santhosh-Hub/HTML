@@ -1,0 +1,1130 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SANTHOSH - Portfolio</title>
+  
+  <!-- Importing Fonts similar to the GTA VI website style -->
+  <link rel="icon" type="image/png" href="ico.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  
+  <style>
+    /* GTA VI Inspired Variables */
+    :root {
+      --bg-color: #f3f4f6; /* Light mode fallback */
+      --text-color: #111;
+      --header-bg: #ffffff;
+      --pill-bg: #000000;
+      --pill-text: #ffffff;
+      
+      /* Dark/GTA Mode Default Variables */
+      --gta-bg-dark: #07070a;
+      --gta-bg-radial: radial-gradient(circle at 50% 0%, #1c1c28 0%, #07070a 100%);
+      --gta-text-main: #ffffff;
+      --gta-text-muted: #888899;
+      --gta-pink: #f26f8d; /* "Jason Duval" Pink */
+      --gta-yellow: #f1db7d; /* "Port Gellhorn" Yellow */
+      --gta-gradient: linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #f59e0b 100%); /* Vice Sunset */
+    }
+
+    /* Global Styles */
+    body {
+      margin: 0;
+      /* Default to GTA Dark Mode */
+      font-family: 'Inter', sans-serif;
+      background: var(--gta-bg-dark);
+      background-image: var(--gta-bg-radial);
+      background-attachment: fixed;
+      color: var(--gta-text-main);
+      transition: background 0.3s, color 0.3s;
+      padding-bottom: 100px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    body.light-mode {
+      background: var(--bg-color);
+      color: var(--text-color);
+    }
+
+    /* Header styling - Massive gradient text */
+    header {
+      text-align: center;
+      padding: 5rem 1rem 2rem;
+    }
+
+    header h1 {
+      font-family: 'Oswald', sans-serif;
+      margin: 0 0 10px 0;
+      font-size: 5rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      /* GTA 6 Gradient Effect */
+      background: var(--gta-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-fill-color: transparent;
+      filter: drop-shadow(0px 4px 10px rgba(236, 72, 153, 0.2));
+    }
+
+    header p {
+      margin: 0;
+      font-size: 1.1rem;
+      color: var(--gta-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    section {
+      margin-bottom: 5rem;
+    }
+
+    h2 {
+      font-family: 'Oswald', sans-serif;
+      font-size: 2.5rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 2rem;
+      color: var(--gta-text-main);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 0.5rem;
+    }
+    
+    body.light-mode h2 {
+      color: var(--text-color);
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+
+    /* Project Grid - Styled like the Character/Location lists */
+    #projects {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    #projects > h2 {
+      width: 100%;
+    }
+
+    .project {
+      width: calc(33.333% - 1rem);
+      box-sizing: border-box;
+      padding: 1rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      transition: transform 0.2s;
+    }
+
+    @media (max-width: 900px) {
+      .project { width: calc(50% - 0.5rem); }
+    }
+
+    @media (max-width: 600px) {
+      .project { width: 100%; text-align: center; }
+    }
+
+    .project h3 {
+      margin: 0 0 0.25rem 0;
+      font-size: 0.8rem;
+      color: var(--gta-text-muted);
+      text-transform: uppercase;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .project a {
+      font-family: 'Oswald', sans-serif;
+      color: var(--gta-text-main);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1.6rem;
+      text-transform: uppercase;
+      display: block;
+      transition: color 0.2s, transform 0.2s;
+      line-height: 1.1;
+    }
+
+    body.light-mode .project a {
+      color: var(--text-color);
+    }
+
+    /* GTA Menu Hover Effects */
+    .project:nth-child(odd) a:hover {
+      color: var(--gta-pink);
+      transform: translateX(5px);
+    }
+    
+    .project:nth-child(even) a:hover {
+      color: var(--gta-yellow);
+      transform: translateX(5px);
+    }
+
+    @media (max-width: 600px) {
+      .project a:hover { transform: translateY(-2px); }
+    }
+
+    /* Skills - Styled as subtle pills */
+    #skills ul {
+      list-style-type: none;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    #skills ul li {
+      background-color: transparent;
+      padding: 0.5rem 1.5rem;
+      border-radius: 50px;
+      border: 1px solid var(--gta-text-muted);
+      font-weight: 600;
+      color: var(--gta-text-main);
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+    }
+    
+    body.light-mode #skills ul li {
+      color: var(--text-color);
+      border-color: #ccc;
+    }
+
+    /* Contact */
+    #contact p {
+      font-size: 1.1rem;
+      color: var(--gta-text-muted);
+    }
+    
+    #contact a {
+      color: var(--gta-pink);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    #contact a:hover {
+      color: var(--gta-yellow);
+    }
+
+    /* Bottom Nav - Styled like the top menu pills in GTA VI UI */
+    .bottom-nav {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      border-radius: 50px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      z-index: 1000;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    body.light-mode .bottom-nav {
+      background-color: rgba(255, 255, 255, 0.8);
+      border: 1px solid #ccc;
+    }
+
+    .bottom-nav a {
+      color: var(--gta-text-main);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 0.5rem 1.5rem;
+      border-radius: 50px;
+      transition: all 0.3s;
+    }
+
+    body.light-mode .bottom-nav a {
+      color: var(--text-color);
+    }
+
+    .bottom-nav a:hover, .bottom-nav a.active {
+      background-color: var(--gta-text-main);
+      color: #000;
+    }
+    
+    body.light-mode .bottom-nav a:hover {
+      background-color: var(--text-color);
+      color: #fff;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--gta-text-muted);
+      font-size: 0.9rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Floating Buttons */
+    #scrollTopBtn, #darkModeToggle {
+      position: fixed;
+      z-index: 1001;
+      border: none;
+      border-radius: 50px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      transition: all 0.3s;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+    }
+
+    #scrollTopBtn {
+      bottom: 90px;
+      right: 20px;
+      background: var(--gta-gradient);
+      color: white;
+      display: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 1.2rem;
+    }
+
+    #darkModeToggle {
+      top: 20px;
+      right: 20px;
+      background-color: transparent;
+      color: var(--gta-text-main);
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 0.5rem 1rem;
+    }
+
+    body.light-mode #darkModeToggle {
+      color: var(--text-color);
+      border-color: #ccc;
+    }
+
+    #scrollTopBtn:hover { transform: scale(1.1); }
+    #darkModeToggle:hover { 
+      background-color: var(--gta-text-main); 
+      color: #000; 
+    }
+    body.light-mode #darkModeToggle:hover {
+      background-color: #000;
+      color: #fff;
+    }
+    
+    /* Small accent for paragraphs */
+    #about p {
+      font-size: 1.2rem;
+      max-width: 800px;
+      color: #d1d5db;
+    }
+    body.light-mode #about p { color: #374151; }
+
+    /* GTA Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      z-index: 2000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    .modal-container {
+      width: 95%;
+      max-width: 1400px;
+      height: 90vh;
+      background: var(--gta-bg-dark);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+      transform: translateY(20px) scale(0.98);
+      transition: transform 0.3s ease;
+      overflow: hidden;
+    }
+    
+    .modal-overlay.active .modal-container {
+      transform: translateY(0) scale(1);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .modal-header h3 {
+      font-family: 'Oswald', sans-serif;
+      margin: 0;
+      font-size: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--gta-text-main);
+    }
+    
+    .modal-controls {
+      display: flex;
+      gap: 0.8rem;
+    }
+    
+    .modal-controls button {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--gta-text-main);
+      cursor: pointer;
+      font-size: 1.3rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.2s ease;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .modal-controls button:hover {
+      background: var(--gta-pink);
+      color: white;
+      transform: scale(1.1);
+      border-color: var(--gta-pink);
+    }
+    
+    .modal-body {
+      flex: 1;
+      position: relative;
+      background: #000;
+    }
+    
+    .modal-iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    
+    .modal-loader {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Oswald', sans-serif;
+      font-size: 2.5rem;
+      color: var(--gta-pink);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      pointer-events: none;
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+
+    /* --- EXPANDED HOVER CARD (Xbox/GTA Style) --- */
+    #gta-hover-card {
+      position: absolute;
+      width: 340px;
+      background: #1c1d25;
+      border-radius: 12px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255,255,255,0.05);
+      z-index: 1500;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.9);
+      transform-origin: center center;
+      transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      overflow: hidden;
+    }
+
+    body.light-mode #gta-hover-card {
+      background: #ffffff;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0,0,0,0.1);
+    }
+
+    #gta-hover-card.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1.05);
+    }
+
+    .hc-banner {
+      height: 180px;
+      background: var(--gta-gradient);
+      position: relative;
+    }
+
+    /* Diagonal pattern overlay for banner */
+    .hc-banner::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.1) 10px, rgba(0,0,0,0.1) 20px);
+    }
+
+    .hc-tag {
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: var(--gta-pink);
+      color: white;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border-bottom-right-radius: 10px;
+      text-transform: uppercase;
+      font-family: 'Inter', sans-serif;
+      z-index: 2;
+      box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .hc-info {
+      padding: 1.2rem;
+      background: rgba(30, 32, 40, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    body.light-mode .hc-info {
+      background: rgba(255, 255, 255, 0.95);
+    }
+
+    .hc-title {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.5rem;
+      color: white;
+      margin: 0 0 0.3rem 0;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    body.light-mode .hc-title { color: #111; }
+
+    .hc-meta {
+      font-size: 0.85rem;
+      color: #a0a0ab;
+      margin-bottom: 0.8rem;
+      display: flex;
+      gap: 0.5rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .hc-meta span:first-child { color: white; }
+    body.light-mode .hc-meta span:first-child { color: #111; }
+
+    .hc-desc {
+      font-size: 0.9rem;
+      color: #d1d5db;
+      line-height: 1.5;
+      margin-bottom: 1.2rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    body.light-mode .hc-desc { color: #4b5563; }
+
+    .hc-footer {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .hc-btn {
+      background: #3f414d;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    body.light-mode .hc-btn { background: #e5e7eb; color: #111; }
+    
+    .hc-btn:hover {
+      background: var(--gta-pink);
+      color: white;
+      transform: scale(1.05);
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- Scroll to Top Button -->
+<button id="scrollTopBtn" title="Go to top">⬆</button>
+
+<!-- Theme Toggle -->
+<button id="darkModeToggle">☀️ Light Mode</button>
+
+  <header>
+    <h1>SANTHOSH</h1>
+    <p>Web Developer | Designer | Coder | 3D Designer | Gamer</p>
+  </header>
+
+  <main>
+    <section id="about">
+      <h2>About Me</h2>
+      <p>Hi, I'm Santhosh, a passionate web developer currently learning HTML, CSS, and JavaScript. I love building clean and responsive websites.</p>
+    </section>
+
+    <section id="projects">
+      <h2>Projects Directory</h2>
+      
+      <div class="project">
+        <h3>Project 0</h3>
+        <a href="https://a-santhosh-hub.github.io/My-Blender-3D-Models/" target="_blank">My Blender 3D Models</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 1</h3>
+        <a href="https://santhosh2025.neocities.org/New%20Project/Main#" target="_blank">Photo Album Web Page</a>
+      </div>
+
+      <div class="project">
+        <h3>Project 2</h3>
+        <a href="https://santhosh2025.neocities.org/Blender%203D/" target="_blank">Blender 3D Models Site</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 3</h3>
+        <a href="https://santhosh2025.neocities.org/POST/News" target="_blank">Pexels Style Images</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 4</h3>
+        <a href="https://santhosh2025.neocities.org/Best%20PC%20&%20Android%20Games%20Updates/Best%20Games" target="_blank">Best Games Update</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 5</h3>
+        <a href="https://santhosh2025.neocities.org/ATM/ATM" target="_blank">ATM Simulator</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 6</h3>
+        <a href="https://santhosh2025.neocities.org/Gamer's%20Repacks/Index" target="_blank">Games Store Page</a>
+      </div>
+
+       <div class="project">
+        <h3>Project 7</h3>
+        <a href="https://santhosh2025.neocities.org/Typing%20Speed%20Test/TypingSpeedTest" target="_blank">Typing Speed Test</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 8</h3>
+        <a href="https://santhosh2024.neocities.org/Design_3D/Blender_3D" target="_blank">3D Design Universe</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 9</h3>
+        <a href="https://santhosh2025.neocities.org/Project%2001/Game%20WebSite" target="_blank">Games Related Site</a>
+      </div>
+      
+       <div class="project">
+        <h3>Project 10</h3>
+        <a href="https://santhosh2025.neocities.org/GAMES/GAME_PROJECT_001/Memory%20Match%20Game" target="_blank">Memory Match Game</a>
+      </div>
+      
+       <div class="project">
+        <h3>Project 11</h3>
+        <a href="https://santhosh2025.neocities.org/student/indext" target="_blank">Student Management</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 12</h3>
+        <a href="https://santhosh2025.neocities.org/Project%2002/GAME%20TO%20CODE" target="_blank">Search Related Page</a>
+      </div>
+      
+       <div class="project">
+        <h3>Project 13</h3>
+        <a href="https://santhosh2025.neocities.org/To/To-DoList" target="_blank">To-Do List</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 14</h3>
+        <a href="https://santhosh2025.neocities.org/Library%20Management/Books" target="_blank">Library Management</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 15</h3>
+        <a href="https://santhosh2025.neocities.org/Expense%20Tracker/" target="_blank">Expense Tracker</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 16</h3>
+        <a href="https://santhosh2025.neocities.org/ZIP%20Utility%20Tool/" target="_blank">ZIP Utility Tool</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 17</h3>
+        <a href="https://santhosh2025.neocities.org/Movie%20Ticket%20Booking/Movie" target="_blank">Movie Ticket Booking</a>
+      </div>
+
+      <div class="project">
+        <h3>Project 18</h3>
+        <a href="https://santhosh2025.neocities.org/Online%20Examination%20Portal/" target="_blank">Online Exam Portal</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 19</h3>
+        <a href=" https://santhosh2025.neocities.org/Inventory%20Management%20System/Index" target="_blank">Inventory System</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 20</h3>
+        <a href="https://santhosh2025.neocities.org/Currency%20Converter/" target="_blank">Currency Converter</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 21</h3>
+        <a href="https://santhosh2025.neocities.org/Number%20Guessing%20Game/" target="_blank">Number Guessing</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 22</h3>
+        <a href="https://santhosh2025.neocities.org/Online%20Resume%20Builder/" target="_blank">Online Resume Builder</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 23</h3>
+        <a href="https://santhosh2025.neocities.org/Web%20Screenshot%20Suite/" target="_blank">Web Screenshot Suite</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 24</h3>
+        <a href="https://santhosh2025.neocities.org/Hotel%20Booking%20System/" target="_blank">Hotel Booking System</a>
+      </div>
+      
+       <div class="project">
+        <h3>Project 25</h3>
+        <a href="https://santhosh2025.neocities.org/EMI/" target="_blank">Loan EMI Calculator</a>
+      </div>
+      
+       <div class="project">
+        <h3>Project 26</h3>
+        <a href="https://santhosh2025.neocities.org/K/" target="_blank">Fencing Calculator</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 27</h3>
+        <a href="https://santhosh2025.neocities.org/Firecracker/in" target="_blank">Firecracker 2025</a>
+      </div>
+      
+       <div class="project">
+        <h3>Project 28</h3>
+        <a href="https://santhosh2025.neocities.org/Flowers_2025/in" target="_blank">Online Flower Shop</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 29</h3>
+        <a href="https://santhosh2025.neocities.org/Gaming%20Hub/in" target="_blank">Gaming Hub</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 30</h3>
+        <a href="https://santhosh2024.neocities.org/Fashion_2025/in" target="_blank">2025 Fashion Brand</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 31</h3>
+        <a href=" https://santhosh2024.neocities.org/Project's/GameTech/in" target="_blank">Futuristic IT Services</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 32</h3>
+        <a href="https://santhosh2024.neocities.org/Project's/%20Food%20Restaurant/in" target="_blank">Food Restaurant</a>
+      </div>
+      
+       <div class="project">
+        <h3>Project 33</h3>
+        <a href="https://santhosh2025.neocities.org/idle/qr" target="_blank">Quantum QR Generator</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 34</h3>
+        <a href="https://santhosh2024.neocities.org/Project's/Stone/in" target="_blank">Stone Calculator</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 35</h3>
+        <a href="https://santhosh2024.neocities.org/HTML/in" target="_blank">TextWriter ❮/❯ HTML</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 36</h3>
+        <a href="https://santhosh2025.neocities.org/Typing%20Speed%20Test/in" target="_blank">COSMIC TYPER</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 37</h3>
+        <a href="https://santhosh2024.neocities.org/Project's/1" target="_blank">GAMER's Laptop Sales</a>
+      </div>
+      
+       <div class="project">
+        <h3>Project 38</h3>
+        <a href=" https://santhosh2024.neocities.org/Project's/2" target="_blank">Advanced PC Build</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 39</h3>
+        <a href="https://santhosh2024.neocities.org/Project's/3" target="_blank">ஆரோக்கிய தாவரங்கள்</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 40</h3>
+        <a href="https://santhosh2025.neocities.org/Online%20Vegetable%20&%20Fruit%20Store/in" target="_blank">Fresh Veggies & Fruits</a>
+      </div>
+      
+       <div class="project">
+        <h3>Project 41</h3>
+        <a href="https://santhosh2025.neocities.org/Online%20Medical%20Shop/in" target="_blank">2025 Medical Shop</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 42</h3>
+        <a href="https://santhosh2025.neocities.org/EMI%20Tool/in" target="_blank">EMI & Interest Planner</a>
+      </div>
+      
+       <div class="project">
+        <h3>Project 43</h3>
+        <a href="https://santhosh2024.neocities.org/Project's/Fitness%20Planner" target="_blank">AI Fitness Planner</a>
+      </div>
+      
+       <div class="project">
+        <h3>Project 44</h3>
+        <a href="https://santhosh2024.neocities.org/Project's/WanderWise%20AI#how-it-works" target="_blank">WanderWise AI</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 45</h3>
+        <a href="https://santhosh2024.neocities.org/Project's/Vegetables" target="_blank">Online Vegetables</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 46</h3>
+        <a href="https://santhosh2024.neocities.org/Project's/Converter" target="_blank">Media Converter</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 47</h3>
+        <a href="https://santhosh2024.neocities.org/Project's/Fencing" target="_blank">Fencing Material Calc</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 48</h3>
+        <a href="https://santhosh2024.neocities.org/Project's/Image%20Converter" target="_blank">Advanced Image Converter</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 49</h3>
+        <a href="https://santhosh2024.neocities.org/FireCracker%20&%20Fresh%20Store/" target="_blank">Fresh Products Store</a>
+      </div>
+      
+       <div class="project">
+        <h3>Project 50</h3>
+        <a href="https://santhosh2024.neocities.org/Project's/Text" target="_blank">Text Tool Utility</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 51</h3>
+        <a href="https://santhosh2024.neocities.org/OS/" target="_blank">Browser OS Desktop</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 52</h3>
+        <a href="https://santhosh2024.neocities.org/Learning%20Schedule%20Generator/in" target="_blank">Schedule Generator</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 53</h3>
+        <a href="https://santhosh2024.neocities.org/Project's/Fruit%20Ninja" target="_blank">Fruit Ninja</a>
+      </div>
+      
+      <div class="project">
+        <h3>SKILL_2025</h3>
+        <a href="https://santhosh2024.neocities.org/skill/in" target="_blank">SKILL_2025 (SANTHOSH_A)</a>
+      </div>
+      
+       <div class="project">
+        <h3>Project 54</h3>
+        <a href="https://santhosh2024.neocities.org/Blender/3D" target="_blank">Blender 3D</a>
+      </div>
+      
+      <div class="project">
+        <h3>Project 55</h3>
+        <a href=" https://santhosh2025.neocities.org/Reptile/" target="_blank">Reptile Interactive Cursor</a>
+      </div>
+      
+    </section>
+
+    <section id="skills">
+      <h2>Skills</h2>
+      <ul>
+        <li>HTML5</li>
+        <li>CSS3</li>
+        <li>JavaScript (basic)</li>
+        <li>Responsive Design</li>
+      </ul>
+    </section>
+
+    <section id="contact">
+      <h2>Contact</h2>
+      <p>Email: <a href="mailto:arussanthosh@gmail.com">arussanthosh@gmail.com</a></p>
+      <p>GitHub: <a href="https://github.com/A-Santhosh-Hub" target="_blank">A-Santhosh-Hub</a></p>
+    </section>
+  </main>
+
+  <!-- GTA Style Modal -->
+  <div id="gtaModal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 id="modalTitle">Project Title</h3>
+        <div class="modal-controls">
+          <button id="modalExternalBtn" title="Open in New Tab">↗</button>
+          <button id="modalCloseBtn" title="Close">×</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="modal-loader" id="modalLoader">LOADING...</div>
+        <iframe class="modal-iframe" id="modalIframe" src=""></iframe>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="https://a-santhosh-hub.github.io/in/">About</a>
+    <a href="#projects">Places</a> <!-- Re-named slightly to fit GTA theme -->
+    <a href="#skills">Skills</a>
+    <a href="https://a-santhosh-hub.github.io/in/">Contact</a>
+  </nav>
+
+  <footer>
+    <p>&copy; 2026 SANTHOSH - A . All rights reserved.</p>
+  </footer>
+
+  <script>
+    // --- GTA Dark Mode / Light Mode Logic ---
+    const darkModeBtn = document.getElementById('darkModeToggle');
+    const body = document.body;
+
+    // The default is now GTA Dark theme. Toggle switches to Light mode.
+    if (localStorage.getItem('theme') === 'light') {
+      body.classList.add('light-mode');
+      darkModeBtn.innerText = '🌙 Dark Mode';
+    }
+
+    darkModeBtn.addEventListener('click', () => {
+      body.classList.toggle('light-mode');
+      
+      if (body.classList.contains('light-mode')) {
+        localStorage.setItem('theme', 'light');
+        darkModeBtn.innerText = '🌙 Dark Mode';
+      } else {
+        localStorage.setItem('theme', 'dark');
+        darkModeBtn.innerText = '☀️ Light Mode';
+      }
+    });
+
+    // --- Scroll to Top Logic ---
+    const scrollTopBtn = document.getElementById('scrollTopBtn');
+
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 400) {
+        scrollTopBtn.style.display = 'block';
+      } else {
+        scrollTopBtn.style.display = 'none';
+      }
+    });
+
+    scrollTopBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // --- GTA Modal Logic ---
+    const modal = document.getElementById('gtaModal');
+    const iframe = document.getElementById('modalIframe');
+    const closeBtn = document.getElementById('modalCloseBtn');
+    const extBtn = document.getElementById('modalExternalBtn');
+    const modalTitle = document.getElementById('modalTitle');
+    const loader = document.getElementById('modalLoader');
+
+    // Target all project links
+    document.querySelectorAll('.project a').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault(); // Stop normal navigation
+        const url = link.href;
+        const title = link.innerText;
+        
+        modalTitle.innerText = title;
+        loader.style.display = 'flex'; // Show loader
+        iframe.src = url; // Load URL
+        
+        // Setup External Launch Button
+        extBtn.onclick = () => {
+          window.open(url, '_blank');
+          closeModal();
+        };
+        
+        // Show Modal
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Prevent main page scrolling
+      });
+    });
+
+    const closeModal = () => {
+      modal.classList.remove('active');
+      setTimeout(() => { iframe.src = ''; }, 300); // Clear iframe after transition
+      document.body.style.overflow = ''; // Restore scrolling
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    
+    // Click outside of container to close
+    modal.addEventListener('click', (e) => {
+      if(e.target === modal) closeModal();
+    });
+
+    // Hide loader when iframe finishes loading
+    iframe.onload = () => {
+      loader.style.display = 'none';
+    };
+
+    // --- GAME PASS EXPAND HOVER CARD LOGIC ---
+    // 1. Build the global hover card element
+    const expandCard = document.createElement('div');
+    expandCard.id = 'gta-hover-card';
+    expandCard.innerHTML = `
+      <div class="hc-banner">
+        <div class="hc-tag" id="hc-tag">Project</div>
+      </div>
+      <div class="hc-info">
+        <h4 class="hc-title" id="hc-title">Title</h4>
+        <div class="hc-meta"><span id="hc-pub">Santhosh Hub</span> | <span id="hc-cat">Web Experience</span></div>
+        <p class="hc-desc">Dive into this custom web project. Experience modern layouts, interactive features, and seamless responsive design.</p>
+        <div class="hc-footer">
+          <button class="hc-btn" id="hc-btn">More info</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(expandCard);
+
+    let hoverTimer;
+    let isHoveringCard = false;
+    let hoverUrl = '';
+    let hoverTitle = '';
+
+    const hideExpandCard = () => {
+      expandCard.classList.remove('active');
+    };
+
+    document.querySelectorAll('.project').forEach(proj => {
+      proj.addEventListener('mouseenter', (e) => {
+        clearTimeout(hoverTimer);
+        
+        const link = proj.querySelector('a');
+        hoverUrl = link.href;
+        hoverTitle = link.innerText;
+        const tagText = proj.querySelector('h3').innerText;
+
+        // 2 Seconds Delay as requested
+        hoverTimer = setTimeout(() => {
+          // Calculate Center Position
+          const rect = proj.getBoundingClientRect();
+          const scrollY = window.scrollY;
+          const scrollX = window.scrollX;
+
+          const centerX = rect.left + rect.width / 2 + scrollX;
+          const centerY = rect.top + rect.height / 2 + scrollY;
+
+          const cardWidth = 340;
+          const cardHeight = 350; // Approx rendered height
+
+          // Clamp to screen edges to prevent off-screen rendering
+          let leftPos = centerX - cardWidth / 2;
+          if (leftPos < 20) leftPos = 20;
+          if (leftPos + cardWidth > document.documentElement.clientWidth - 20) {
+            leftPos = document.documentElement.clientWidth - cardWidth - 20;
+          }
+
+          expandCard.style.left = `${leftPos}px`;
+          expandCard.style.top = `${centerY - cardHeight / 2}px`;
+
+          // Inject content
+          document.getElementById('hc-title').innerText = hoverTitle;
+          document.getElementById('hc-tag').innerText = tagText;
+
+          // Reveal Card
+          expandCard.classList.add('active');
+        }, 2000); 
+      });
+
+      proj.addEventListener('mouseleave', () => {
+        clearTimeout(hoverTimer);
+        setTimeout(() => {
+          if (!isHoveringCard) hideExpandCard();
+        }, 150); // slight buffer to allow mouse travel to card
+      });
+    });
+
+    expandCard.addEventListener('mouseenter', () => isHoveringCard = true);
+    expandCard.addEventListener('mouseleave', () => {
+      isHoveringCard = false;
+      hideExpandCard();
+    });
+
+    // Trigger GTA Modal from the Hover Card's "More Info" button
+    document.getElementById('hc-btn').addEventListener('click', () => {
+      hideExpandCard();
+      
+      modalTitle.innerText = hoverTitle;
+      loader.style.display = 'flex';
+      iframe.src = hoverUrl;
+      
+      extBtn.onclick = () => {
+        window.open(hoverUrl, '_blank');
+        closeModal();
+      };
+      
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    });
+
+  </script>
+</body>
+</html>
