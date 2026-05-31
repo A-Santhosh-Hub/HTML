@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Iframe Viewer</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    overflow:hidden;
+    background:#000;
+}
+
+iframe{
+    width:100vw;
+    height:100vh;
+    border:none;
+}
+
+.refresh-btn{
+    position:fixed;
+    top:10px;
+    right:10px;
+    padding:8px 12px;
+    border:none;
+    border-radius:8px;
+    background:#ffffffcc;
+    color:#000;
+    font-size:14px;
+    cursor:pointer;
+    z-index:9999;
+    backdrop-filter:blur(5px);
+}
+
+.refresh-btn:hover{
+    background:#fff;
+}
+</style>
+</head>
+<body>
+
+<button class="refresh-btn" onclick="refreshIframe()">↻</button>
+
+<iframe id="myFrame"
+src="https://a-santhosh-hub.github.io/in/">
+</iframe>
+
+<script>
+function refreshIframe() {
+    document.getElementById("myFrame").src =
+    document.getElementById("myFrame").src;
+}
+</script>
+
+</body>
+</html>
