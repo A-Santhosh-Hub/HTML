@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Abilispath CRM</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Config Tailwind Theme -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            200: '#fde68a',
+                            300: '#fcd34d',
+                            400: '#fbbf24',
+                            500: '#f59e0b',  
+                            600: '#d97706',
+                            700: '#b45309',
+                            800: '#92400e',
+                            900: '#78350f',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Phosphor Icons for modern iconography -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- SheetJS for Excel Import -->
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        /* Smooth transitions */
+        .transition-all-fast { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        /* Fade & Slide in animation */
+        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Glassmorphism */
+        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+
+        /* Kanban Column Minimum Height for Dropping */
+        .kanban-col { min-height: 60vh; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Hide element utility */
+        .hidden-view { display: none !important; }
+
+        /* Sticky Table Columns for Mobile UX */
+        .sticky-col-1 { position: sticky; left: 0; z-index: 20; }
+        .sticky-col-2 { position: sticky; left: 40px; z-index: 20; } /* 40px is width of checkbox col */
+        .sticky-shadow { box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1); }
+        
+        thead .sticky-col-1, thead .sticky-col-2 { z-index: 30; } /* Header needs to be above rows */
+        
+        /* Modal Mobile Snapping */
+        @media (max-width: 640px) {
+            .mobile-modal-content {
+                border-bottom-left-radius: 0;
+                border-bottom-right-radius: 0;
+                margin-top: auto;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            .mobile-modal-container { align-items: flex-end; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 h-screen flex overflow-hidden selection:bg-brand-200 selection:text-brand-900">
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-layout" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
+        <div class="absolute inset-0 bg-gradient-to-b from-slate-900/80 to-slate-900"></div>
+        <div class="relative w-full max-w-md p-6 sm:p-8 m-4 bg-white rounded-3xl shadow-2xl fade-in">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-brand-50 text-brand-500 mb-4 shadow-inner">
+                    <i class="ph-fill ph-student text-3xl"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Abilispath CRM</h1>
+                <p class="text-gray-500 mt-2 text-sm">Sign in to manage admissions</p>
+            </div>
+            
+            <form onsubmit="handleLogin(event)" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5 ml-1">Email Address</label>
+                    <div class="relative">
+                        <i class="ph ph-envelope absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
+                        <input type="email" id="login-email" required value="admin@cer.com" class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-base sm:text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5 ml-1">Password</label>
+                    <div class="relative">
+                        <i class="ph ph-lock-key absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
+                        <input type="password" id="login-password" required value="admin123" class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-base sm:text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-3.5 px-4 mt-2 bg-slate-900 hover:bg-black text-brand-400 font-semibold rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98] flex items-center justify-center group">
+                    Sign In
+                    <i class="ph ph-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                </button>
+            </form>
+            <div class="mt-6 text-center">
+                <p class="text-xs text-gray-400">Default Admin: admin@cer.com / admin123</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- APP LAYOUT (Hidden until logged in) -->
+    <div id="app-layout" class="hidden w-full h-full">
+        
+        <!-- Mobile Sidebar Overlay -->
+        <div id="mobile-sidebar-overlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 hidden transition-opacity lg:hidden" onclick="toggleMobileSidebar()"></div>
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="bg-slate-900 text-white w-72 flex-shrink-0 fixed inset-y-0 left-0 transform -translate-x-full lg:relative lg:translate-x-0 z-50 transition-transform duration-300 ease-in-out flex flex-col shadow-2xl lg:shadow-none">
+            <!-- Logo -->
+            <div class="h-20 flex items-center px-6 border-b border-slate-800/50">
+                <i class="ph-fill ph-student text-brand-500 text-3xl mr-3 filter drop-shadow-md"></i>
+                <div class="flex flex-col">
+                    <span class="text-xl font-bold tracking-wide text-white">ABILISPATH</span>
+                    <span class="text-[9px] text-brand-400 uppercase tracking-widest font-semibold">Education Partner</span>
+                </div>
+                <button class="lg:hidden ml-auto text-gray-400 hover:text-white bg-slate-800 p-2 rounded-lg" onclick="toggleMobileSidebar()">
+                    <i class="ph ph-x text-xl"></i>
+                </button>
+            </div>
+
+            <!-- User Mini Profile -->
+            <div class="p-6 border-b border-slate-800/50">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white font-bold text-lg shadow-lg" id="sidebar-avatar">
+                        A
+                    </div>
+                    <div class="ml-4 overflow-hidden">
+                        <p class="text-sm font-semibold text-white truncate" id="sidebar-name">Admin User</p>
+                        <p class="text-xs text-brand-300 mt-0.5 truncate" id="sidebar-role">Administrator</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+                <p class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Main Menu</p>
+                <button onclick="switchView('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center px-4 py-3.5 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition-all">
+                    <i class="ph ph-squares-four text-xl mr-3 text-slate-400 nav-icon"></i> Dashboard
+                </button>
+                <button onclick="switchView('roster')" id="nav-roster" class="nav-btn w-full flex items-center px-4 py-3.5 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition-all">
+                    <i class="ph ph-users-three text-xl mr-3 text-slate-400 nav-icon"></i> Student Roster
+                </button>
+                <button onclick="switchView('pipeline')" id="nav-pipeline" class="nav-btn w-full flex items-center px-4 py-3.5 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition-all">
+                    <i class="ph ph-kanban text-xl mr-3 text-slate-400 nav-icon"></i> Admissions Pipeline
+                </button>
+
+                <!-- Admin Only Sections -->
+                <div id="nav-team" class="mt-8 hidden">
+                    <p class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 mt-6">Administration</p>
+                    <button onclick="switchView('users')" id="nav-users" class="nav-btn w-full flex items-center px-4 py-3.5 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition-all">
+                        <i class="ph ph-shield-star text-xl mr-3 text-slate-400 nav-icon"></i> Team Management
+                    </button>
+                </div>
+                
+                <div id="nav-reset-section" class="mt-2 hidden">
+                    <button onclick="openModal('reset-modal')" class="w-full flex items-center px-4 py-3.5 text-sm font-medium rounded-xl text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all">
+                        <i class="ph ph-warning-circle text-xl mr-3"></i> Factory Reset
+                    </button>
+                </div>
+            </nav>
+            
+            <div class="p-4">
+                <button onclick="logout()" class="w-full flex items-center justify-center px-4 py-3 text-sm font-medium rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-all">
+                    <i class="ph ph-sign-out text-lg mr-2"></i> Sign Out
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-hidden relative w-full bg-gray-50">
+            
+            <!-- Header -->
+            <header class="h-16 sm:h-20 glass border-b border-gray-200 flex items-center justify-between px-4 sm:px-8 z-10 sticky top-0">
+                <div class="flex items-center">
+                    <!-- Mobile Menu Button -->
+                    <button class="text-gray-500 hover:text-brand-600 focus:outline-none lg:hidden mr-4 p-2 bg-gray-100 rounded-lg active:scale-95 transition-transform" onclick="toggleMobileSidebar()">
+                        <i class="ph ph-list text-2xl"></i>
+                    </button>
+                    <h1 id="page-title" class="text-xl sm:text-2xl font-bold text-gray-800 tracking-tight">Dashboard</h1>
+                </div>
+                
+                <div class="flex items-center space-x-3 sm:space-x-5">
+                    <button class="relative p-2.5 text-gray-500 hover:text-brand-600 bg-gray-100 hover:bg-brand-50 rounded-full transition-all active:scale-95">
+                        <i class="ph ph-bell text-xl"></i>
+                        <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 pb-20 sm:pb-8">
+                
+                <!-- VIEW: DASHBOARD -->
+                <div id="view-dashboard" class="view-section fade-in">
+                    <!-- Stats Row -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center transition-all hover:shadow-md hover:-translate-y-1 group">
+                            <div class="p-3.5 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 group-hover:scale-110 transition-transform">
+                                <i class="ph-fill ph-users text-2xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-gray-500 text-xs sm:text-sm font-medium uppercase tracking-wider">Total Leads</h3>
+                                <p class="text-2xl sm:text-3xl font-bold text-gray-800 mt-0.5" id="dash-total-contacts">0</p>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center transition-all hover:shadow-md hover:-translate-y-1 group">
+                            <div class="p-3.5 rounded-xl bg-gradient-to-br from-brand-50 to-brand-100 text-brand-600 group-hover:scale-110 transition-transform">
+                                <i class="ph-fill ph-target text-2xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-gray-500 text-xs sm:text-sm font-medium uppercase tracking-wider">Interested</h3>
+                                <p class="text-2xl sm:text-3xl font-bold text-gray-800 mt-0.5" id="dash-interested">0</p>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center transition-all hover:shadow-md hover:-translate-y-1 group">
+                            <div class="p-3.5 rounded-xl bg-gradient-to-br from-green-50 to-green-100 text-green-600 group-hover:scale-110 transition-transform">
+                                <i class="ph-fill ph-graduation-cap text-2xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-gray-500 text-xs sm:text-sm font-medium uppercase tracking-wider">Admissions</h3>
+                                <p class="text-2xl sm:text-3xl font-bold text-gray-800 mt-0.5" id="dash-confirmed">0</p>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center transition-all hover:shadow-md hover:-translate-y-1 group">
+                            <div class="p-3.5 rounded-xl bg-gradient-to-br from-red-50 to-red-100 text-red-600 group-hover:scale-110 transition-transform">
+                                <i class="ph-fill ph-wallet text-2xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-gray-500 text-xs sm:text-sm font-medium uppercase tracking-wider">Pending Dues</h3>
+                                <p class="text-xl sm:text-2xl font-bold text-gray-800 mt-0.5 truncate" id="dash-balance">₹0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+                            <div class="px-6 py-5 border-b border-gray-50 flex justify-between items-center bg-white">
+                                <h2 class="text-base sm:text-lg font-bold text-gray-800 flex items-center">
+                                    <i class="ph ph-clock-counter-clockwise text-brand-500 mr-2 text-xl"></i> Recent Inquiries
+                                </h2>
+                                <button onclick="switchView('roster')" class="text-sm text-brand-600 font-semibold hover:text-brand-800 bg-brand-50 px-3 py-1.5 rounded-lg active:scale-95 transition-all">View All</button>
+                            </div>
+                            <div class="divide-y divide-gray-50 flex-1 p-2" id="dash-recent-contacts">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+                            <div class="px-6 py-5 border-b border-gray-50 flex justify-between items-center bg-white">
+                                <h2 class="text-base sm:text-lg font-bold text-gray-800 flex items-center">
+                                    <i class="ph ph-chart-bar text-brand-500 mr-2 text-xl"></i> Pipeline Overview
+                                </h2>
+                            </div>
+                            <div class="p-6 flex-1 flex flex-col justify-center space-y-6">
+                                <!-- Progress Bars -->
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1.5 font-medium">
+                                        <span class="text-blue-600">New Leads</span>
+                                        <span class="text-gray-600" id="bar-new-val">0</span>
+                                    </div>
+                                    <div class="w-full bg-gray-100 rounded-full h-2.5">
+                                        <div class="bg-blue-500 h-2.5 rounded-full transition-all duration-1000" id="bar-new" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1.5 font-medium">
+                                        <span class="text-amber-500">Interested</span>
+                                        <span class="text-gray-600" id="bar-int-val">0</span>
+                                    </div>
+                                    <div class="w-full bg-gray-100 rounded-full h-2.5">
+                                        <div class="bg-amber-400 h-2.5 rounded-full transition-all duration-1000" id="bar-int" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1.5 font-medium">
+                                        <span class="text-green-600">Admissions Confirmed</span>
+                                        <span class="text-gray-600" id="bar-conf-val">0</span>
+                                    </div>
+                                    <div class="w-full bg-gray-100 rounded-full h-2.5">
+                                        <div class="bg-green-500 h-2.5 rounded-full transition-all duration-1000" id="bar-conf" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW: ROSTER -->
+                <div id="view-roster" class="view-section hidden-view fade-in">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col h-full overflow-hidden">
+                        
+                        <!-- Toolbar -->
+                        <div class="p-4 sm:p-5 border-b border-gray-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-gray-50/50">
+                            <!-- Search -->
+                            <div class="relative w-full lg:w-96">
+                                <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
+                                <input type="text" id="student-search" placeholder="Search name, mobile, status..." onkeyup="filterStudents()" class="pl-10 pr-4 py-2.5 w-full border border-gray-300 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all bg-white shadow-sm">
+                            </div>
+                            
+                            <!-- Actions -->
+                            <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 w-full lg:w-auto">
+                                
+                                <!-- Bulk Action -->
+                                <div id="bulk-action-container" class="hidden flex items-center bg-slate-900 rounded-xl p-1 shadow-lg w-full sm:w-auto animate-fade-in-up">
+                                    <span class="text-xs text-white font-semibold mx-3 whitespace-nowrap" id="selected-count">0 selected</span>
+                                    <select id="bulk-assign-user" class="border-0 bg-slate-800 text-white rounded-lg text-sm px-3 py-2 outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer w-full sm:w-36">
+                                        <!-- populated dynamically -->
+                                    </select>
+                                    <button onclick="applyBulkAssign()" class="ml-1 bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-lg text-sm font-bold transition-all active:scale-95 shadow-sm whitespace-nowrap">
+                                        Assign
+                                    </button>
+                                </div>
+
+                                <!-- Import -->
+                                <div class="relative w-full sm:w-auto" id="import-btn-container">
+                                    <input type="file" id="excel-upload" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleExcelUpload(event)">
+                                    <button onclick="document.getElementById('excel-upload').click()" class="w-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2.5 rounded-xl font-medium text-sm flex items-center justify-center transition-all active:scale-95 shadow-sm">
+                                        <i class="ph ph-file-xls text-green-600 text-lg mr-2"></i> Import Excel
+                                    </button>
+                                </div>
+                                <!-- Add Single -->
+                                <button onclick="openStudentModal()" class="w-full sm:w-auto bg-brand-500 hover:bg-brand-600 text-white px-4 py-2.5 rounded-xl font-semibold text-sm flex items-center justify-center transition-all active:scale-95 shadow-sm">
+                                    <i class="ph ph-plus-bold text-lg mr-2"></i> Add Student
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Table Wrapper -->
+                        <div class="overflow-x-auto flex-1 bg-white custom-scrollbar relative">
+                            <table class="w-full text-left border-collapse min-w-[1400px]">
+                                <thead>
+                                    <tr class="bg-gray-100 text-gray-600 text-[11px] font-bold uppercase tracking-wider">
+                                        <th class="px-4 py-3.5 w-12 text-center sticky-col-1 bg-gray-100 sticky-shadow" id="th-checkbox">
+                                            <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)" class="rounded border-gray-400 cursor-pointer accent-brand-500 w-4 h-4 align-middle">
+                                        </th>
+                                        <th class="px-4 py-3.5 sticky-col-2 bg-gray-100 sticky-shadow">Student Name</th>
+                                        <th class="px-4 py-3.5">Assigned To</th>
+                                        <th class="px-4 py-3.5">Mobile No</th>
+                                        <th class="px-4 py-3.5">Status</th>
+                                        <th class="px-4 py-3.5">Enquiry Date</th>
+                                        <th class="px-4 py-3.5">Referred By</th>
+                                        <th class="px-4 py-3.5">Total Fee</th>
+                                        <th class="px-4 py-3.5">Advance</th>
+                                        <th class="px-4 py-3.5">Balance</th>
+                                        <th class="px-4 py-3.5 text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="students-table-body" class="divide-y divide-gray-100 text-sm">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW: PIPELINE (KANBAN) -->
+                <div id="view-pipeline" class="view-section hidden-view fade-in h-[calc(100vh-160px)] flex flex-col">
+                    <div class="flex justify-between items-center mb-4 sm:mb-6">
+                        <p class="text-gray-500 text-sm hidden sm:block">Drag and drop student cards to update stages.</p>
+                        <p class="text-gray-500 text-sm sm:hidden"><i class="ph ph-arrows-out-line-horizontal mr-1"></i> Swipe horizontally</p>
+                    </div>
+                    
+                    <div class="flex-1 overflow-x-auto custom-scrollbar pb-4 snap-x snap-mandatory">
+                        <div class="flex space-x-4 sm:space-x-6 min-w-max h-full px-1">
+                            
+                            <!-- Stage: New -->
+                            <div class="w-80 sm:w-80 flex flex-col bg-gray-100/70 rounded-2xl border border-gray-200 p-3 sm:p-4 snap-center shrink-0">
+                                <div class="flex justify-between items-center mb-4 px-1">
+                                    <h3 class="font-bold text-gray-800 flex items-center text-sm uppercase tracking-wide">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-blue-500 mr-2 shadow-sm"></span> New Leads
+                                    </h3>
+                                    <span class="bg-white text-gray-700 text-xs font-bold px-2.5 py-1 rounded-full shadow-sm border border-gray-100" id="count-new">0</span>
+                                </div>
+                                <div class="kanban-col space-y-3 overflow-y-auto custom-scrollbar pr-1" id="stage-new" ondragover="allowDrop(event)" ondrop="drop(event)">
+                                </div>
+                            </div>
+
+                            <!-- Stage: Interested -->
+                            <div class="w-80 sm:w-80 flex flex-col bg-gray-100/70 rounded-2xl border border-gray-200 p-3 sm:p-4 snap-center shrink-0">
+                                <div class="flex justify-between items-center mb-4 px-1">
+                                    <h3 class="font-bold text-gray-800 flex items-center text-sm uppercase tracking-wide">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-amber-400 mr-2 shadow-sm"></span> Interested
+                                    </h3>
+                                    <span class="bg-white text-gray-700 text-xs font-bold px-2.5 py-1 rounded-full shadow-sm border border-gray-100" id="count-interested">0</span>
+                                </div>
+                                <div class="kanban-col space-y-3 overflow-y-auto custom-scrollbar pr-1" id="stage-interested" ondragover="allowDrop(event)" ondrop="drop(event)">
+                                </div>
+                            </div>
+
+                            <!-- Stage: Admission Confirmed -->
+                            <div class="w-80 sm:w-80 flex flex-col bg-gray-100/70 rounded-2xl border border-gray-200 p-3 sm:p-4 snap-center shrink-0">
+                                <div class="flex justify-between items-center mb-4 px-1">
+                                    <h3 class="font-bold text-gray-800 flex items-center text-sm uppercase tracking-wide">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-green-500 mr-2 shadow-sm"></span> Confirmed
+                                    </h3>
+                                    <span class="bg-white text-gray-700 text-xs font-bold px-2.5 py-1 rounded-full shadow-sm border border-gray-100" id="count-confirmed">0</span>
+                                </div>
+                                <div class="kanban-col space-y-3 overflow-y-auto custom-scrollbar pr-1" id="stage-confirmed" ondragover="allowDrop(event)" ondrop="drop(event)">
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW: USERS (Admin) -->
+                <div id="view-users" class="view-section hidden-view fade-in">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col">
+                        <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                            <h2 class="text-lg font-bold text-gray-800">Staff Members</h2>
+                            <button onclick="openUserModal()" class="bg-slate-900 hover:bg-black text-white px-4 py-2.5 rounded-xl font-medium text-sm transition-all shadow-sm active:scale-95 flex items-center justify-center">
+                                <i class="ph ph-user-plus mr-1 text-lg"></i> Add Staff
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-white text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
+                                        <th class="px-6 py-4 font-semibold">Name</th>
+                                        <th class="px-6 py-4 font-semibold">Role</th>
+                                        <th class="px-6 py-4 font-semibold">Email (Login)</th>
+                                        <th class="px-6 py-4 font-semibold">Mobile</th>
+                                        <th class="px-6 py-4 font-semibold text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-table-body" class="divide-y divide-gray-100 text-sm">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODALS -->
+
+    <!-- Student Form Modal -->
+    <div id="student-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] hidden mobile-modal-container flex sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden transform scale-95 transition-all duration-300 relative flex flex-col mobile-modal-content">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-10">
+                <h2 id="student-modal-title" class="text-xl font-bold text-gray-900">Student Profile</h2>
+                <button type="button" onclick="closeModal('student-modal')" class="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors">
+                    <i class="ph ph-x text-xl"></i>
+                </button>
+            </div>
+            <form id="student-form" onsubmit="handleStudentSubmit(event)" class="p-6 overflow-y-auto custom-scrollbar">
+                <input type="hidden" id="stu-id">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                    <!-- Basic Info -->
+                    <div class="space-y-4">
+                        <h3 class="text-xs font-bold text-brand-600 uppercase tracking-widest border-b border-gray-100 pb-2">Information</h3>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1 ml-1">Student Name</label>
+                            <input type="text" id="stu-name" required class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-base sm:text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none transition-all">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1 ml-1">Mobile No</label>
+                                <input type="tel" id="stu-mobile" required class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-base sm:text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1 ml-1">Enquiry Date</label>
+                                <input type="date" id="stu-date" required class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-base sm:text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none transition-all">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1 ml-1">Assigned To</label>
+                                <select id="stu-assigned" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-base sm:text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none transition-all">
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1 ml-1">Status</label>
+                                <select id="stu-status" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-base sm:text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none transition-all font-medium">
+                                    <option value="New" class="text-blue-600">New</option>
+                                    <option value="Interested" class="text-amber-600">Interested</option>
+                                    <option value="Admission Confirmed" class="text-green-600">Admission Confirmed</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1 ml-1">Remarks (Tele Caller Notes)</label>
+                            <textarea id="stu-remarks" rows="2" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-base sm:text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none transition-all resize-none"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Financial Info -->
+                    <div class="space-y-4">
+                        <h3 class="text-xs font-bold text-brand-600 uppercase tracking-widest border-b border-gray-100 pb-2">Financials</h3>
+                        <div class="grid grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1 ml-1">Total Fee (₹)</label>
+                                <input type="number" id="stu-fee" oninput="calculateFinancials()" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-base sm:text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1 ml-1">Advance (₹)</label>
+                                <input type="number" id="stu-adv" oninput="calculateFinancials()" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-base sm:text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1 ml-1">Balance (₹)</label>
+                                <input type="number" id="stu-bal" readonly class="w-full px-3 py-2.5 bg-gray-100 border border-gray-200 rounded-xl text-base sm:text-sm font-bold text-gray-700 outline-none">
+                            </div>
+                        </div>
+
+                        <h3 class="text-xs font-bold text-brand-600 uppercase tracking-widest border-b border-gray-100 pb-2 pt-2">Referral & Commission</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1 ml-1">Referrer Name</label>
+                                <input type="text" id="stu-ref-name" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-base sm:text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1 ml-1">Referrer Type</label>
+                                <select id="stu-ref-type" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-base sm:text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none transition-all">
+                                    <option value="Agent">Agent</option>
+                                    <option value="External">External</option>
+                                    <option value="Staff">Staff</option>
+                                    <option value="Direct">Direct (None)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-[10px] sm:text-xs font-semibold text-gray-700 mb-1 ml-1">Comm. %</label>
+                                <input type="number" id="stu-comm-pct" oninput="calculateFinancials()" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-base sm:text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] sm:text-xs font-semibold text-gray-700 mb-1 ml-1">Comm. Amt</label>
+                                <input type="number" id="stu-comm-amt" readonly class="w-full px-3 py-2.5 bg-gray-100 border border-gray-200 rounded-xl text-base sm:text-sm font-semibold text-gray-600 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] sm:text-xs font-semibold text-gray-700 mb-1 ml-1">Settled Amt</label>
+                                <input type="number" id="stu-settled" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-base sm:text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none transition-all">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sticky footer for mobile -->
+                <div class="mt-8 pt-4 border-t border-gray-100 flex justify-end space-x-3 bg-white sticky bottom-0 z-10 py-4 pb-8 sm:pb-4">
+                    <button type="button" onclick="closeModal('student-modal')" class="px-6 py-3 text-sm font-semibold text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all active:scale-95">Cancel</button>
+                    <button type="submit" class="px-8 py-3 text-sm font-bold text-white bg-brand-500 rounded-xl hover:bg-brand-600 shadow-md transition-all active:scale-95">Save Profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- User Modal -->
+    <div id="user-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] hidden mobile-modal-container flex sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-95 transition-all duration-300 relative mobile-modal-content">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                <h2 class="text-lg font-bold text-gray-900">Add Staff Member</h2>
+                <button type="button" onclick="closeModal('user-modal')" class="text-gray-400 hover:text-gray-700"><i class="ph ph-x text-xl"></i></button>
+            </div>
+            <form onsubmit="handleUserSubmit(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Full Name</label>
+                    <input type="text" id="user-name" required class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-base sm:text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Role</label>
+                    <select id="user-role" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-base sm:text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none transition-all font-medium">
+                        <!-- Populated Dynamically -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Email Address (Login ID)</label>
+                    <input type="email" id="user-email" required class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-base sm:text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Mobile No</label>
+                    <input type="tel" id="user-mobile" required class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-base sm:text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Password</label>
+                    <input type="text" id="user-password" required class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-base sm:text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none transition-all">
+                </div>
+                <div class="mt-6 pt-4 flex justify-end space-x-3 pb-8 sm:pb-0">
+                    <button type="button" onclick="closeModal('user-modal')" class="px-5 py-2.5 text-sm font-semibold text-gray-600 bg-gray-100 rounded-xl active:scale-95">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 text-sm font-bold text-white bg-slate-900 rounded-xl active:scale-95 shadow-md">Create User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="confirm-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-xs overflow-hidden p-6 text-center transform scale-95 transition-all duration-300">
+            <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500 shadow-inner">
+                <i class="ph-fill ph-warning-circle text-4xl"></i>
+            </div>
+            <h3 id="confirm-title" class="text-xl font-bold text-gray-900 mb-2">Confirm Action</h3>
+            <p id="confirm-msg" class="text-gray-500 text-sm mb-6">Are you sure you want to proceed?</p>
+            <div class="flex justify-center space-x-3">
+                <button onclick="closeModal('confirm-modal')" class="px-5 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 rounded-xl active:scale-95 flex-1">Cancel</button>
+                <button id="confirm-btn" class="px-5 py-2.5 text-sm font-bold text-white bg-red-500 rounded-xl active:scale-95 shadow-md flex-1">Confirm</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Factory Reset Modal -->
+    <div id="reset-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden p-6 transform scale-95 transition-all duration-300">
+            <div class="flex flex-col items-center text-center mb-6">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4 text-red-600 animate-pulse">
+                    <i class="ph-fill ph-skull text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">Factory Reset</h3>
+                <p class="text-red-500 text-sm mt-2 font-medium">Warning: This will delete ALL students and leads. Staff accounts will remain.</p>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-1">Admin Password Required</label>
+                <input type="password" id="reset-password" placeholder="Enter password to confirm" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-base sm:text-sm focus:bg-white focus:ring-2 focus:ring-red-500 outline-none transition-all text-center">
+            </div>
+            <div class="flex justify-center space-x-3 mt-6">
+                <button onclick="closeModal('reset-modal'); document.getElementById('reset-password').value='';" class="px-5 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 rounded-xl active:scale-95 flex-1">Cancel</button>
+                <button onclick="executeFactoryReset()" class="px-5 py-2.5 text-sm font-bold text-white bg-red-600 rounded-xl active:scale-95 shadow-md flex-1">RESET CRM</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="fixed top-5 right-5 z-[80] flex flex-col space-y-3 pointer-events-none sm:bottom-5 sm:top-auto"></div>
+
+    <script>
+        let currentUser = null; 
+        
+        let users = [
+            { id: 1, name: 'System Admin', email: 'admin@cer.com', password: 'admin123', mobile: '9999900000', role: 'Admin' },
+            { id: 2, name: 'Regional Head', email: 'subadmin@cer.com', password: 'admin123', mobile: '9999900001', role: 'Sub Admin' },
+            { id: 3, name: 'Team Lead North', email: 'tl@cer.com', password: 'admin123', mobile: '9999900002', role: 'Team Leader' },
+            { id: 4, name: 'Caller Amit', email: 'caller@cer.com', password: 'admin123', mobile: '9999900003', role: 'Tele Caller' }
+        ];
+
+        let students = [
+            {
+                id: 1, name: 'Student Inquirer 17', mobile: '9840123417', date: '2026-05-26', status: 'Interested', 
+                subAdminId: 2, teamLeaderId: 3, teleCallerId: 4, // Full hierarchy assigned
+                referrerName: 'External Referral', referrerType: 'External', totalFee: 60000, advancePaid: 0, balance: 60000, 
+                commPercent: 10, commAmt: 6000, settledAmt: 0, remarks: 'Runtime validation needed'
+            },
+            {
+                id: 2, name: 'Student Inquirer 16', mobile: '9840123416', date: '2026-05-26', status: 'Admission Confirmed', 
+                subAdminId: 2, teamLeaderId: 3, teleCallerId: null, // Sitting with Team Leader
+                referrerName: 'Mani', referrerType: 'Agent', totalFee: 60000, advancePaid: 10000, balance: 50000, 
+                commPercent: 10, commAmt: 6000, settledAmt: 0, remarks: ''
+            },
+            {
+                id: 3, name: 'Student Inquirer 18', mobile: '9840123418', date: '2026-05-26', status: 'New', 
+                subAdminId: null, teamLeaderId: null, teleCallerId: null, // Unassigned
+                referrerName: 'Mani', referrerType: 'Agent', totalFee: 60000, advancePaid: 60000, balance: 0, 
+                commPercent: 10, commAmt: 6000, settledAmt: 6000, remarks: ''
+            }
+        ];
+
+        window.formatMoney = (amount) => {
+            return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount || 0);
+        };
+
+        // --- AUTH & ROLE UI LOGIC ---
+        function handleLogin(e) {
+            e.preventDefault();
+            const em = document.getElementById('login-email').value;
+            const pw = document.getElementById('login-password').value;
+            
+            const user = users.find(u => u.email === em && u.password === pw);
+            if (user) {
+                currentUser = user;
+                
+                document.getElementById('sidebar-name').innerText = user.name;
+                document.getElementById('sidebar-role').innerText = user.role;
+                document.getElementById('sidebar-avatar').innerText = user.name.charAt(0);
+                
+                document.getElementById('login-layout').classList.add('hidden');
+                document.getElementById('login-layout').classList.remove('flex');
+                document.getElementById('app-layout').classList.remove('hidden');
+                
+                // Add flex explicitly for laptop layouts to prevent vertical stacking
+                document.getElementById('app-layout').style.display = 'flex';
+                
+                setupRoleUI();
+                populateAssignDropdowns();
+                switchView('dashboard');
+                showToast(`Welcome back, ${user.name.split(' ')[0]}!`, 'success');
+            } else {
+                showToast('Invalid email or password.', 'error');
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('app-layout').classList.add('hidden');
+            document.getElementById('app-layout').style.display = '';
+            document.getElementById('login-layout').classList.remove('hidden');
+            document.getElementById('login-layout').classList.add('flex');
+            document.getElementById('login-password').value = '';
+        }
+
+        function setupRoleUI() {
+            const role = currentUser.role;
+            const canManageTeam = (role === 'Admin' || role === 'Sub Admin' || role === 'Team Leader');
+            const canImport = (role === 'Admin'); 
+            const canAssign = (role !== 'Tele Caller');
+
+            document.getElementById('nav-team').classList.toggle('hidden', !canManageTeam);
+            document.getElementById('nav-reset-section').classList.toggle('hidden', role !== 'Admin');
+            
+            const importBtn = document.getElementById('import-btn-container');
+            const thCheckbox = document.getElementById('th-checkbox');
+            
+            if(importBtn) importBtn.classList.toggle('hidden', !canImport);
+            if(thCheckbox) thCheckbox.classList.toggle('hidden', !canAssign);
+        }
+
+        function getVisibleStudents() {
+            if (!currentUser) return [];
+            if (currentUser.role === 'Admin') return students;
+            if (currentUser.role === 'Sub Admin') return students.filter(s => s.subAdminId === currentUser.id);
+            if (currentUser.role === 'Team Leader') return students.filter(s => s.teamLeaderId === currentUser.id);
+            if (currentUser.role === 'Tele Caller') return students.filter(s => s.teleCallerId === currentUser.id);
+            return [];
+        }
+        
+        function getTargetAssignRole() {
+            if(currentUser.role === 'Admin') return 'Sub Admin';
+            if(currentUser.role === 'Sub Admin') return 'Team Leader';
+            if(currentUser.role === 'Team Leader') return 'Tele Caller';
+            return null; // Tele Callers cannot assign
+        }
+
+        function getCurrentAssigneeHtml(s) {
+            let u = null;
+            // Get the lowest level assignee to show current status
+            if (s.teleCallerId) u = users.find(x => x.id === s.teleCallerId);
+            else if (s.teamLeaderId) u = users.find(x => x.id === s.teamLeaderId);
+            else if (s.subAdminId) u = users.find(x => x.id === s.subAdminId);
+            
+            if (u) {
+                return `<div class="flex items-center whitespace-nowrap" title="${u.name} (${u.role})">
+                            <div class="w-6 h-6 rounded-full bg-slate-900 text-brand-400 text-[10px] flex items-center justify-center font-bold mr-2 shadow-sm">${u.name.charAt(0)}</div>
+                            <div class="flex flex-col">
+                                <span class="text-xs font-semibold text-gray-700">${u.name.split(' ')[0]}</span>
+                                <span class="text-[9px] text-gray-400 uppercase tracking-wide font-bold">${u.role.split(' ')[0]}</span>
+                            </div>
+                        </div>`;
+            }
+            return `<span class="text-gray-400 italic text-xs">Unassigned</span>`;
+        }
+
+        // --- NAVIGATION ---
+        function switchView(viewName) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden-view'));
+            document.getElementById(`view-${viewName}`).classList.remove('hidden-view');
+            
+            const titles = { 'dashboard': 'Dashboard', 'roster': 'Student Roster', 'pipeline': 'Admissions Pipeline', 'users': 'Team Management' };
+            document.getElementById('page-title').innerText = titles[viewName];
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-brand-500', 'text-white');
+                btn.classList.add('text-slate-300');
+                const icon = btn.querySelector('.nav-icon');
+                if(icon) icon.classList.remove('text-white', 'text-slate-400');
+                if(icon) icon.classList.add('text-slate-400');
+            });
+            const activeBtn = document.getElementById(`nav-${viewName}`);
+            activeBtn.classList.add('bg-brand-500', 'text-white');
+            activeBtn.classList.remove('text-slate-300', 'hover:bg-slate-800');
+            const activeIcon = activeBtn.querySelector('.nav-icon');
+            if(activeIcon) {
+                activeIcon.classList.remove('text-slate-400');
+                activeIcon.classList.add('text-white');
+            }
+
+            if(window.innerWidth < 1024) toggleMobileSidebar(true);
+
+            if (viewName === 'dashboard') renderDashboard();
+            if (viewName === 'roster') { renderStudents(); document.getElementById('selectAll').checked = false; updateBulkActionUI(); }
+            if (viewName === 'pipeline') renderPipeline();
+            if (viewName === 'users') renderUsers();
+        }
+
+        function toggleMobileSidebar(forceClose = false) {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-sidebar-overlay');
+            if (forceClose || !sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            } else {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            }
+        }
+
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                const content = modal.querySelector('.transform');
+                content.classList.remove('scale-95', 'translate-y-10');
+                content.classList.add('scale-100', 'translate-y-0');
+            }, 10);
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            const content = modal.querySelector('.transform');
+            content.classList.remove('scale-100', 'translate-y-0');
+            content.classList.add('scale-95', 'translate-y-10');
+            setTimeout(() => modal.classList.add('hidden'), 200);
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            const colors = { success: 'bg-gray-900 border-l-4 border-green-500', error: 'bg-red-600', info: 'bg-brand-600' };
+            const icons = { success: 'ph-check-circle text-green-400', error: 'ph-warning-circle text-white', info: 'ph-info text-white' };
+
+            t.className = `flex items-center px-4 py-3 rounded-xl shadow-2xl text-white ${colors[type]} fade-in z-[100]`;
+            t.innerHTML = `<i class="ph-fill ${icons[type]} text-xl mr-3"></i><p class="font-medium text-sm">${message}</p>`;
+            
+            container.appendChild(t);
+            setTimeout(() => {
+                t.style.opacity = '0';
+                t.style.transform = window.innerWidth < 640 ? 'translateY(20px)' : 'translateX(20px)';
+                t.style.transition = 'all 0.3s ease';
+                setTimeout(() => t.remove(), 300);
+            }, 3000);
+        }
+
+        let confirmAction = null;
+        function triggerConfirm(title, msg, callback) {
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-msg').innerText = msg;
+            confirmAction = callback;
+            openModal('confirm-modal');
+        }
+        document.getElementById('confirm-btn').addEventListener('click', () => {
+            if(confirmAction) confirmAction();
+            closeModal('confirm-modal');
+        });
+
+        function renderDashboard() {
+            const data = getVisibleStudents();
+
+            document.getElementById('dash-total-contacts').innerText = data.length;
+            
+            const interested = data.filter(s => s.status === 'Interested');
+            document.getElementById('dash-interested').innerText = interested.length;
+            
+            const confirmed = data.filter(s => s.status === 'Admission Confirmed');
+            document.getElementById('dash-confirmed').innerText = confirmed.length;
+            
+            const totalBalance = data.reduce((sum, s) => sum + (s.balance || 0), 0);
+            document.getElementById('dash-balance').innerText = window.formatMoney(totalBalance);
+
+            // Pipeline Bars
+            const newCount = data.filter(s => s.status === 'New').length;
+            const total = data.length || 1; 
+            
+            document.getElementById('bar-new-val').innerText = newCount;
+            document.getElementById('bar-int-val').innerText = interested.length;
+            document.getElementById('bar-conf-val').innerText = confirmed.length;
+            
+            setTimeout(() => {
+                document.getElementById('bar-new').style.width = `${(newCount/total)*100}%`;
+                document.getElementById('bar-int').style.width = `${(interested.length/total)*100}%`;
+                document.getElementById('bar-conf').style.width = `${(confirmed.length/total)*100}%`;
+            }, 100);
+
+            // Recent
+            const recentHtml = data.slice(-4).reverse().map(c => {
+                const color = c.status === 'Admission Confirmed' ? 'text-green-600 bg-green-50' : (c.status === 'Interested' ? 'text-amber-600 bg-amber-50' : 'text-blue-600 bg-blue-50');
+                return `
+                <div class="px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 rounded-full bg-slate-900 text-brand-400 flex items-center justify-center font-bold text-sm shadow-sm shrink-0">
+                            ${c.name.charAt(0)}
+                        </div>
+                        <div class="ml-3 overflow-hidden">
+                            <p class="text-sm font-bold text-gray-800 truncate">${c.name}</p>
+                            <p class="text-xs text-gray-500 truncate">${c.mobile}</p>
+                        </div>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${color} border border-current whitespace-nowrap ml-2 hidden sm:inline-block">
+                        ${c.status}
+                    </span>
+                    <div class="w-3 h-3 rounded-full sm:hidden ${color.replace('text-', 'bg-').split(' ')[0]} border border-current ml-2 shrink-0"></div>
+                </div>
+            `}).join('');
+            document.getElementById('dash-recent-contacts').innerHTML = recentHtml || '<p class="p-6 text-sm text-gray-500 text-center">No leads available.</p>';
+        }
+
+        function populateAssignDropdowns() {
+            const targetRole = getTargetAssignRole();
+            const bulkContainer = document.getElementById('bulk-action-container');
+            const singleSelectWrapper = document.getElementById('stu-assigned').parentElement;
+
+            if(!targetRole) {
+                // Hide assignment UI for roles that cannot assign down (Tele Callers)
+                if(bulkContainer) bulkContainer.classList.add('hidden');
+                if(singleSelectWrapper) singleSelectWrapper.classList.add('hidden');
+                return;
+            } else {
+                if(singleSelectWrapper) singleSelectWrapper.classList.remove('hidden');
+            }
+
+            const options = `<option value="">Unassigned</option>` + 
+                users.filter(u => u.role === targetRole).map(u => `<option value="${u.id}">${u.name}</option>`).join('');
+            
+            const bulkSelect = document.getElementById('bulk-assign-user');
+            const singleSelect = document.getElementById('stu-assigned');
+            
+            if (bulkSelect) bulkSelect.innerHTML = options;
+            if (singleSelect) {
+                singleSelect.innerHTML = options;
+                singleSelect.previousElementSibling.innerText = `Assign to ${targetRole}`;
+            }
+        }
+
+        function toggleSelectAll(el) {
+            const checkboxes = document.querySelectorAll('.stu-checkbox');
+            checkboxes.forEach(cb => cb.checked = el.checked);
+            updateBulkActionUI();
+        }
+
+        function handleStudentSelect() {
+            const allCheckboxes = document.querySelectorAll('.stu-checkbox');
+            const checkedBoxes = document.querySelectorAll('.stu-checkbox:checked');
+            document.getElementById('selectAll').checked = (allCheckboxes.length > 0 && allCheckboxes.length === checkedBoxes.length);
+            updateBulkActionUI();
+        }
+
+        function updateBulkActionUI() {
+            if(!getTargetAssignRole()) return; // Prevent bulk action if user can't assign
+
+            const checked = document.querySelectorAll('.stu-checkbox:checked');
+            const container = document.getElementById('bulk-action-container');
+            if (checked.length > 0) {
+                container.classList.remove('hidden');
+                document.getElementById('selected-count').innerText = `${checked.length} selected`;
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        function applyBulkAssign() {
+            const userId = document.getElementById('bulk-assign-user').value;
+            if (!userId) { showToast('Please select a user', 'error'); return; }
+
+            const checked = document.querySelectorAll('.stu-checkbox:checked');
+            const targetId = parseInt(userId);
+
+            checked.forEach(cb => {
+                const s = students.find(x => x.id === parseInt(cb.value));
+                if(s) {
+                    if(currentUser.role === 'Admin') { s.subAdminId = targetId; s.teamLeaderId = null; s.teleCallerId = null; }
+                    if(currentUser.role === 'Sub Admin') { s.teamLeaderId = targetId; s.teleCallerId = null; }
+                    if(currentUser.role === 'Team Leader') { s.teleCallerId = targetId; }
+                }
+            });
+
+            document.getElementById('selectAll').checked = false;
+            updateBulkActionUI();
+            renderStudents();
+            showToast(`Assigned ${checked.length} leads successfully.`, 'success');
+        }
+
+        function renderStudents(dataToRender = null) {
+            const tbody = document.getElementById('students-table-body');
+            const data = dataToRender || getVisibleStudents();
+            const canAssign = getTargetAssignRole() !== null;
+
+            tbody.innerHTML = data.map(s => {
+                const isConf = s.status === 'Admission Confirmed';
+                const statusHtml = `<span class="px-2 py-1 rounded text-xs font-bold whitespace-nowrap ${isConf ? 'text-green-700 bg-green-100' : (s.status === 'Interested' ? 'text-amber-700 bg-amber-100' : 'text-blue-700 bg-blue-100')}">${s.status}</span>`;
+                
+                return `
+                <tr class="hover:bg-brand-50/50 transition-colors group">
+                    ${canAssign ? `<td class="px-4 py-3 text-center sticky-col-1 bg-white group-hover:bg-brand-50/50 sticky-shadow"><input type="checkbox" class="stu-checkbox rounded border-gray-400 cursor-pointer accent-brand-500 w-4 h-4" value="${s.id}" onchange="handleStudentSelect()"></td>` : `<td class="hidden"></td>`}
+                    <td class="px-4 py-3 whitespace-nowrap font-bold text-gray-800 sticky-col-2 bg-white group-hover:bg-brand-50/50 sticky-shadow">${s.name}</td>
+                    <td class="px-4 py-3">${getCurrentAssigneeHtml(s)}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-gray-600 font-medium">${s.mobile}</td>
+                    <td class="px-4 py-3">${statusHtml}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-gray-500 text-xs">${s.date}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-gray-600 text-xs">${s.referrerName || '-'}</td>
+                    <td class="px-4 py-3 whitespace-nowrap font-medium text-gray-700">${window.formatMoney(s.totalFee)}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-gray-600">${window.formatMoney(s.advancePaid)}</td>
+                    <td class="px-4 py-3 whitespace-nowrap font-bold ${s.balance > 0 ? 'text-red-500' : 'text-green-600'}">${window.formatMoney(s.balance)}</td>
+                    <td class="px-4 py-3 text-center whitespace-nowrap">
+                        <button onclick="editStudent(${s.id})" class="text-brand-600 hover:text-brand-800 p-1.5 bg-brand-50 hover:bg-brand-100 rounded-lg transition-colors mr-2 inline-flex items-center justify-center" title="Edit Profile">
+                            <i class="ph-bold ph-pencil-simple text-base"></i>
+                        </button>
+                        ${currentUser.role === 'Admin' ? `
+                        <button onclick="triggerConfirm('Delete Student', 'Remove ${s.name} from roster?', () => { students = students.filter(x => x.id !== ${s.id}); renderStudents(); filterStudents(); })" class="text-red-500 hover:text-red-700 p-1.5 bg-red-50 hover:bg-red-100 rounded-lg transition-colors inline-flex items-center justify-center" title="Delete">
+                            <i class="ph-bold ph-trash text-base"></i>
+                        </button>` : ''}
+                    </td>
+                </tr>`;
+            }).join('');
+            
+            if(data.length === 0) tbody.innerHTML = `<tr><td colspan="11" class="px-6 py-12 text-center text-gray-400 font-medium"><i class="ph ph-folder-open text-4xl mb-2"></i><br>No records found.</td></tr>`;
+        }
+
+        function filterStudents() {
+            const q = document.getElementById('student-search').value.toLowerCase();
+            const data = getVisibleStudents();
+            const filtered = data.filter(s => s.name.toLowerCase().includes(q) || s.mobile.includes(q) || s.status.toLowerCase().includes(q));
+            document.getElementById('selectAll').checked = false;
+            renderStudents(filtered);
+            updateBulkActionUI();
+        }
+
+        function calculateFinancials() {
+            const fee = parseFloat(document.getElementById('stu-fee').value) || 0;
+            const adv = parseFloat(document.getElementById('stu-adv').value) || 0;
+            const pct = parseFloat(document.getElementById('stu-comm-pct').value) || 0;
+            
+            document.getElementById('stu-bal').value = Math.max(0, fee - adv);
+            document.getElementById('stu-comm-amt').value = (fee * (pct / 100)).toFixed(0);
+        }
+
+        function openStudentModal() {
+            document.getElementById('student-form').reset();
+            document.getElementById('stu-id').value = '';
+            document.getElementById('stu-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('student-modal-title').innerText = 'Add New Student';
+            openModal('student-modal');
+        }
+
+        function editStudent(id) {
+            const s = students.find(x => x.id === id);
+            if(!s) return;
+            
+            document.getElementById('stu-id').value = s.id;
+            document.getElementById('stu-name').value = s.name;
+            document.getElementById('stu-mobile').value = s.mobile;
+            document.getElementById('stu-date').value = s.date;
+            document.getElementById('stu-status').value = s.status;
+            document.getElementById('stu-remarks').value = s.remarks || '';
+            
+            // Set the correct ID in the assignment dropdown based on role
+            let targetId = '';
+            if(currentUser.role === 'Admin') targetId = s.subAdminId;
+            if(currentUser.role === 'Sub Admin') targetId = s.teamLeaderId;
+            if(currentUser.role === 'Team Leader') targetId = s.teleCallerId;
+            
+            document.getElementById('stu-assigned').value = targetId || '';
+            
+            document.getElementById('stu-ref-name').value = s.referrerName || '';
+            document.getElementById('stu-ref-type').value = s.referrerType || 'Direct';
+            
+            document.getElementById('stu-fee').value = s.totalFee || 0;
+            document.getElementById('stu-adv').value = s.advancePaid || 0;
+            document.getElementById('stu-comm-pct').value = s.commPercent || 0;
+            document.getElementById('stu-settled').value = s.settledAmt || 0;
+            
+            calculateFinancials();
+            document.getElementById('student-modal-title').innerText = 'Edit Profile';
+            openModal('student-modal');
+        }
+
+        function handleStudentSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('stu-id').value;
+            const assignedVal = document.getElementById('stu-assigned').value;
+            const targetId = assignedVal ? parseInt(assignedVal) : null;
+            
+            // Preserve existing IDs, modify only the level the current user has access to
+            let subId = null, tlId = null, callId = null;
+            if(id) {
+                const existing = students.find(s=>s.id == id);
+                subId = existing.subAdminId; tlId = existing.teamLeaderId; callId = existing.teleCallerId;
+            }
+
+            if(currentUser.role === 'Admin') { subId = targetId; tlId = null; callId = null; }
+            if(currentUser.role === 'Sub Admin') { tlId = targetId; callId = null; }
+            if(currentUser.role === 'Team Leader') { callId = targetId; }
+
+            const data = {
+                name: document.getElementById('stu-name').value,
+                mobile: document.getElementById('stu-mobile').value,
+                date: document.getElementById('stu-date').value,
+                status: document.getElementById('stu-status').value,
+                remarks: document.getElementById('stu-remarks').value,
+                subAdminId: subId,
+                teamLeaderId: tlId,
+                teleCallerId: callId,
+                referrerName: document.getElementById('stu-ref-name').value,
+                referrerType: document.getElementById('stu-ref-type').value,
+                totalFee: parseFloat(document.getElementById('stu-fee').value) || 0,
+                advancePaid: parseFloat(document.getElementById('stu-adv').value) || 0,
+                balance: parseFloat(document.getElementById('stu-bal').value) || 0,
+                commPercent: parseFloat(document.getElementById('stu-comm-pct').value) || 0,
+                commAmt: parseFloat(document.getElementById('stu-comm-amt').value) || 0,
+                settledAmt: parseFloat(document.getElementById('stu-settled').value) || 0
+            };
+
+            if(id) {
+                const idx = students.findIndex(x => x.id == id);
+                students[idx] = { ...students[idx], ...data };
+                showToast('Profile updated!');
+            } else {
+                students.push({ id: Date.now(), ...data });
+                showToast('Student added successfully!');
+            }
+            
+            closeModal('student-modal');
+            renderStudents();
+            filterStudents();
+        }
+
+        function renderPipeline() {
+            const stages = ['New', 'Interested', 'Admission Confirmed'];
+            const data = getVisibleStudents();
+            
+            stages.forEach(stage => {
+                const stageStudents = data.filter(s => s.status === stage);
+                const stageId = stage === 'Admission Confirmed' ? 'confirmed' : stage.toLowerCase();
+                
+                const countEl = document.getElementById(`count-${stageId}`);
+                if (countEl) countEl.innerText = stageStudents.length;
+                
+                const container = document.getElementById(`stage-${stageId}`);
+                if (container) {
+                    const borderColor = stage === 'New' ? 'border-l-blue-500' : (stage === 'Interested' ? 'border-l-amber-400' : 'border-l-green-500');
+                    
+                    container.innerHTML = stageStudents.map(s => {
+                        const balClass = s.balance > 0 ? 'text-red-500' : 'text-green-600';
+                        return `
+                        <div class="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-gray-100 cursor-grab hover:shadow-md transition-shadow active:cursor-grabbing border-l-4 ${borderColor}" 
+                             draggable="true" ondragstart="drag(event)" id="pipe-${s.id}" data-id="${s.id}">
+                            <div class="flex justify-between items-start mb-1.5">
+                                <h4 class="font-bold text-gray-800 text-sm truncate pr-2">${s.name}</h4>
+                                <button onclick="editStudent(${s.id})" class="text-gray-300 hover:text-brand-500 transition-colors shrink-0">
+                                    <i class="ph-bold ph-pencil-simple"></i>
+                                </button>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-2 font-medium"><i class="ph-fill ph-phone mr-1"></i>${s.mobile}</p>
+                            ${s.remarks ? `<p class="text-[10px] text-gray-500 italic truncate bg-gray-50 p-1.5 rounded-md border border-gray-100">"${s.remarks}"</p>` : ''}
+                            <div class="mt-3 flex justify-between items-center border-t border-gray-50 pt-2">
+                                <span class="text-xs font-semibold text-gray-500">Bal: <span class="${balClass}">${window.formatMoney(s.balance)}</span></span>
+                                ${getCurrentAssigneeHtml(s)}
+                            </div>
+                        </div>`;
+                    }).join('');
+                }
+            });
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.dataset.id);
+            ev.target.classList.add('opacity-40');
+        }
+        function allowDrop(ev) { ev.preventDefault(); }
+        function drop(ev) {
+            ev.preventDefault();
+            const sId = parseInt(ev.dataTransfer.getData("text"));
+            const el = document.getElementById(`pipe-${sId}`);
+            if(el) el.classList.remove('opacity-40');
+
+            const target = ev.target.closest('.kanban-col');
+            if (!target) return;
+            
+            const mapping = { 'stage-new': 'New', 'stage-interested': 'Interested', 'stage-confirmed': 'Admission Confirmed' };
+            const newStage = mapping[target.id];
+            
+            const s = students.find(x => x.id === sId);
+            if (s && s.status !== newStage) {
+                s.status = newStage;
+                renderPipeline();
+                if(!document.getElementById('view-roster').classList.contains('hidden-view')) renderStudents();
+                showToast(`Status updated to ${newStage}`);
+            }
+        }
+        document.addEventListener('dragend', (ev) => {
+             if(ev.target.classList.contains('opacity-40')) ev.target.classList.remove('opacity-40');
+        });
+
+        function renderUsers() {
+            // Determine which users the logged-in user is allowed to manage/see
+            let visibleUsers = [];
+            if (currentUser.role === 'Admin') visibleUsers = users;
+            else if (currentUser.role === 'Sub Admin') visibleUsers = users.filter(u => u.role === 'Team Leader' || u.role === 'Tele Caller');
+            else if (currentUser.role === 'Team Leader') visibleUsers = users.filter(u => u.role === 'Tele Caller');
+
+            document.getElementById('users-table-body').innerHTML = visibleUsers.map(u => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 font-bold text-gray-800">${u.name}</td>
+                    <td class="px-6 py-4"><span class="px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded font-bold uppercase">${u.role}</span></td>
+                    <td class="px-6 py-4 text-gray-600">${u.email}</td>
+                    <td class="px-6 py-4 text-gray-600">${u.mobile}</td>
+                    <td class="px-6 py-4 text-right">
+                        ${u.role !== 'Admin' && currentUser.role === 'Admin' ? `<button onclick="triggerConfirm('Remove Staff', 'Delete this user?', () => { users = users.filter(x => x.id !== ${u.id}); renderUsers(); populateAssignDropdowns(); })" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg"><i class="ph-bold ph-trash text-lg"></i></button>` : '-'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        function openUserModal() {
+            document.getElementById('user-name').value = '';
+            document.getElementById('user-email').value = '';
+            document.getElementById('user-mobile').value = '';
+            document.getElementById('user-password').value = '';
+            
+            const roleSelect = document.getElementById('user-role');
+            let options = '';
+            
+            // Sub Admins can only create Team Leaders and Callers. Team Leaders only Callers.
+            if(currentUser.role === 'Admin') {
+                options = `<option value="Sub Admin">Sub Admin</option><option value="Team Leader">Team Leader</option><option value="Tele Caller">Tele Caller</option>`;
+            } else if(currentUser.role === 'Sub Admin') {
+                options = `<option value="Team Leader">Team Leader</option><option value="Tele Caller">Tele Caller</option>`;
+            } else if(currentUser.role === 'Team Leader') {
+                options = `<option value="Tele Caller">Tele Caller</option>`;
+            }
+            
+            roleSelect.innerHTML = options;
+            openModal('user-modal');
+        }
+
+        function handleUserSubmit(e) {
+            e.preventDefault();
+            const em = document.getElementById('user-email').value;
+            if(users.some(u => u.email === em)) { showToast('Email already exists', 'error'); return; }
+            users.push({
+                id: Date.now(), 
+                name: document.getElementById('user-name').value, 
+                role: document.getElementById('user-role').value, 
+                email: em, 
+                mobile: document.getElementById('user-mobile').value,
+                password: document.getElementById('user-password').value
+            });
+            closeModal('user-modal'); 
+            renderUsers(); 
+            populateAssignDropdowns(); 
+            showToast('Staff member added.');
+        }
+
+        function executeFactoryReset() {
+            const pw = document.getElementById('reset-password').value;
+            if (pw === currentUser.password) {
+                students = [];
+                closeModal('reset-modal');
+                document.getElementById('reset-password').value = '';
+                switchView('dashboard');
+                showToast('Factory Reset Complete. All data cleared.', 'info');
+            } else {
+                showToast('Incorrect Admin Password', 'error');
+            }
+        }
+
+        // --- EXCEL IMPORT (Admin Only) ---
+        function handleExcelUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const data = evt.target.result;
+                    const workbook = XLSX.read(data, { type: 'binary' });
+                    const sheetName = workbook.SheetNames[0];
+                    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { raw: false });
+
+                    let importedCount = 0;
+                    rows.forEach(row => {
+                        if (row['Student Name'] || row['Name']) {
+                            students.push({
+                                id: Date.now() + Math.random(),
+                                name: row['Student Name'] || row['Name'] || 'Unknown',
+                                mobile: row['Mobile No'] || row['Mobile'] || '',
+                                date: row['Enquiry Date'] || new Date().toISOString().split('T')[0],
+                                status: row['Status'] || 'New',
+                                subAdminId: null, // Imports reset hierarchy
+                                teamLeaderId: null,
+                                teleCallerId: null,
+                                referrerName: row['Referred By (Name)'] || row['Referred By'] || '',
+                                referrerType: row['Referrer Type'] || 'Direct',
+                                totalFee: parseFloat(row['Total Fee (₹)'] || row['Total Fee']) || 0,
+                                advancePaid: parseFloat(row['Advance Paid (₹)'] || row['Advance Paid']) || 0,
+                                balance: parseFloat(row['Balance (₹)'] || row['Balance']) || 0,
+                                commPercent: parseFloat(row['Comm % Agreed']) || 0,
+                                commAmt: parseFloat(row['Commission Amt (₹)']) || 0,
+                                settledAmt: parseFloat(row['Settled Amt (₹)']) || 0,
+                                remarks: row['Remarks'] || ''
+                            });
+                            importedCount++;
+                        }
+                    });
+
+                    document.getElementById('excel-upload').value = '';
+                    renderStudents();
+                    showToast(`Successfully imported ${importedCount} students!`, 'success');
+
+                } catch (error) {
+                    console.error(error);
+                    showToast('Failed to parse Excel file. Check format.', 'error');
+                }
+            };
+            reader.readAsBinaryString(file);
+        }
+    </script>
+</body>
+</html>
