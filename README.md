@@ -94,7 +94,7 @@
 
 
 
-<<----------- More Soon ----------->
+<<----------- More Soon -------------->
 
 
 # My Main Portfolio   https://santhosh2025.neocities.org/profile/
