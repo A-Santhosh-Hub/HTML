@@ -52,9 +52,7 @@
 
 # Project 26  https://a-santhosh-hub.github.io/in/Project/AI/Km.html -- KM speed testing Ad Free)
 
-# Project 27  https://sanstudio.neocities.org/TexttoAllText -- ( Text to All Text )
-
-# Project 28  -- ( Social Media Scheduler )
+# Project 27  https://sanstudio.neocities.org/TexttoAllText -- ( Text httFruitss All TextProjectroject 28  -- ( Social Media Scheduler )
 
 # Project 29  📦 SiteManager — Stock Control Web App
 
@@ -94,7 +92,4 @@
 
 
 
-<<----------- More Soon -------------->
-
-
-# My Main Portfolio   https://santhosh2025.neocities.org/profile/
+<<-------------- More Soon -------------->More My Main Portfolio   https://santhosh2025.neocities.org/profile/
