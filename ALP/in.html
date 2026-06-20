@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALP Astrology — Complete Business Audit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            900: '#4c1d95',
+                            950: '#2e1065',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-brand-500 selection:text-white flex flex-col md:flex-row min-h-screen">
+
+    <!-- Mobile Header -->
+    <header class="md:hidden bg-brand-950 text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-md">
+        <div class="font-serif font-bold text-lg truncate">ALP Astrology Audit</div>
+        <button id="mobile-menu-btn" class="p-2 focus:outline-none">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="w-full md:w-72 bg-brand-950 text-slate-300 flex-shrink-0 md:h-screen md:sticky top-0 overflow-y-auto hidden md:flex flex-col z-40 transition-transform duration-300 shadow-xl">
+        <div class="p-6 border-b border-brand-900/50 hidden md:block">
+            <h1 class="font-serif text-2xl text-white font-bold tracking-tight">ALP Astrology</h1>
+            <p class="text-brand-100 text-sm mt-1 opacity-80">Comprehensive UX & Business Audit</p>
+        </div>
+        <nav class="flex-1 p-4 space-y-1 text-sm font-medium">
+            <a href="#header" class="nav-link block px-3 py-2.5 rounded-lg text-white bg-brand-900 hover:bg-brand-900 transition-colors">Executive Summary</a>
+            <a href="#methodology" class="nav-link block px-3 py-2.5 rounded-lg hover:bg-brand-900/50 hover:text-white transition-colors">Methodology & Scope</a>
+            <a href="#snapshot" class="nav-link block px-3 py-2.5 rounded-lg hover:bg-brand-900/50 hover:text-white transition-colors">Brand & Business Snapshot</a>
+            <div class="pt-4 pb-2 px-3 text-xs font-semibold text-brand-500 uppercase tracking-wider">Phases</div>
+            <a href="#phase-1" class="nav-link block px-3 py-2 rounded-lg hover:bg-brand-900/50 hover:text-white transition-colors">1. Website Analysis</a>
+            <a href="#phase-2" class="nav-link block px-3 py-2 rounded-lg hover:bg-brand-900/50 hover:text-white transition-colors">2. Business Growth</a>
+            <a href="#phase-3" class="nav-link block px-3 py-2 rounded-lg hover:bg-brand-900/50 hover:text-white transition-colors">3. Student Community</a>
+            <a href="#phase-4" class="nav-link block px-3 py-2 rounded-lg hover:bg-brand-900/50 hover:text-white transition-colors">4. Content Strategy</a>
+            <a href="#phase-5" class="nav-link block px-3 py-2 rounded-lg hover:bg-brand-900/50 hover:text-white transition-colors">5. SEO Analysis</a>
+            <a href="#phase-6" class="nav-link block px-3 py-2 rounded-lg hover:bg-brand-900/50 hover:text-white transition-colors">6. Trust & Authority</a>
+            <a href="#phase-7" class="nav-link block px-3 py-2 rounded-lg hover:bg-brand-900/50 hover:text-white transition-colors">7. Conversion Optimization</a>
+            <a href="#phase-8" class="nav-link block px-3 py-2 rounded-lg hover:bg-brand-900/50 hover:text-white transition-colors">8. Feature Roadmap</a>
+            <a href="#phase-9" class="nav-link block px-3 py-2 rounded-lg hover:bg-brand-900/50 hover:text-white transition-colors">9. Competitor Analysis</a>
+            <a href="#phase-10" class="nav-link block px-3 py-2 rounded-lg hover:bg-brand-900/50 hover:text-white transition-colors">10. Final Report & Top 50</a>
+            
+            <div class="pt-6 pb-2 px-3 text-xs font-semibold text-brand-400 uppercase tracking-wider">Growth Strategy</div>
+            <a href="#growth-intro" class="nav-link block px-3 py-2 rounded-lg hover:bg-brand-900/50 hover:text-white transition-colors">Strategy & Positioning</a>
+            <a href="#growth-part-3-7" class="nav-link block px-3 py-2 rounded-lg hover:bg-brand-900/50 hover:text-white transition-colors">Ecosystem & Funnel</a>
+            <a href="#growth-part-8" class="nav-link block px-3 py-2 rounded-lg hover:bg-brand-900/50 hover:text-white transition-colors">100 Feature Ideas</a>
+            <a href="#growth-part-9-10" class="nav-link block px-3 py-2 rounded-lg hover:bg-brand-900/50 hover:text-white transition-colors">Vision & CEO Recs</a>
+        </nav>
+        <div class="p-4 border-t border-brand-900/50 text-xs text-center opacity-60">
+            Generated June 20, 2026
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 w-full max-w-5xl mx-auto p-4 md:p-8 lg:p-12 overflow-hidden">
+        
+        <!-- Header Section -->
+        <section id="header" class="mb-12 pt-4">
+            <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-200/60 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-brand-50 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
+                <span class="inline-block py-1 px-3 rounded-full bg-brand-100 text-brand-600 text-xs font-bold tracking-wide uppercase mb-4 relative z-10">Confidential Audit Report</span>
+                <h1 class="text-3xl md:text-5xl font-serif font-bold text-slate-900 mb-6 leading-tight relative z-10">ALP Astrology — Complete Business, UX, SEO & Community Audit</h1>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-slate-100 relative z-10">
+                    <div>
+                        <div class="text-xs text-slate-500 uppercase font-semibold mb-1">Prepared For</div>
+                        <div class="font-medium text-slate-900">ALP Astrology</div>
+                        <a href="https://alpastrology.com" target="_blank" class="text-sm text-brand-600 hover:underline">alpastrology.com</a>
+                    </div>
+                    <div>
+                        <div class="text-xs text-slate-500 uppercase font-semibold mb-1">Date</div>
+                        <div class="font-medium text-slate-900">June 20, 2026</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-slate-500 uppercase font-semibold mb-1">Prepared By</div>
+                        <div class="font-medium text-slate-900 text-sm">Cross-functional review (Product, UI/UX, Web Architecture, SEO, Marketing, Community & Strategy)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        
+        <!-- Methodology & Scope -->
+        <section id="methodology" class="mb-12 scroll-mt-24">
+            <h2 class="text-2xl font-serif font-bold text-slate-900 mb-6 border-b border-slate-200 pb-4">Methodology & Scope</h2>
+            <div class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200/60 text-slate-700 leading-relaxed space-y-4">
+                <p>This audit is based on a direct, live review of <strong class="text-slate-900">12 pages</strong>: Home, About, Courses, Consultation, Services, Contact, Articles, Videos, Events, Testimonials, Software, and Books — cross-checked against the screenshots supplied — plus external verification of the brand's Google Play listing and the competitive landscape of Vedic astrology education platforms in India.</p>
+                <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg mt-6">
+                    <p class="text-sm text-amber-900"><strong class="font-bold">Honest limitations</strong>, stated upfront so nothing here is overstated: no mobile screenshots were available (mobile findings are flagged as recommendations for direct QA, not measured claims); no PageSpeed/Lighthouse, Google Search Console, or analytics access was available (performance findings are structural risk factors, not measured scores); the live contact/enquiry form was not submitted (so backend delivery wasn't tested); and JavaScript-rendered widgets (review carousel, stat counters) were inspected via their static HTML, which is also exactly what a slow connection or strict crawler would see.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Brand & Business Snapshot -->
+        <section id="snapshot" class="mb-12 scroll-mt-24">
+            <h2 class="text-2xl font-serif font-bold text-slate-900 mb-6 border-b border-slate-200 pb-4">Brand & Business Snapshot</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/60">
+                    <h3 class="font-bold text-brand-700 mb-2">What ALP is:</h3>
+                    <p class="text-sm text-slate-700 leading-relaxed mb-4">Akshaya Lagna Paddhati (ALP) — also called Age Lagna Paddhati — is a predictive astrology method invented by <strong class="text-slate-900">Dr. S. Pothuvudaimoorthy, Ph.D.</strong>, a fourth-generation astrologer. Where traditional Vedic astrology times events using Dasha/Bhukti (Moon-based), ALP progresses the <strong class="text-slate-900">Lagna (Ascendant)</strong> instead, across a 120-year span at a rate of one Nakshatra Pada per 1 year, 1 month, 10 days — giving (per the brand's claim) more consistent, reproducible timing across astrologers who use the method.</p>
+                    
+                    <ul class="space-y-3 text-sm text-slate-700">
+                        <li><strong class="text-slate-900">Founder:</strong> Dr. S. Pothuvudaimoorthy — also trained in Pranic Healing, Reiki, and Past Life Regression; featured on Vijay TV, Zee Tamil, Jaya Plus, Vendhar TV, and Pudu Yugam TV.</li>
+                        <li><strong class="text-slate-900">Co-founder:</strong> Smt. Arularasi Pothuvudaimoorthy — D.T.Ed., M.Sc., B.Ed.; runs ALP's administrative and publishing operations.</li>
+                    </ul>
+                </div>
+                
+                <div class="space-y-6">
+                    <div class="bg-brand-50 rounded-2xl p-6 shadow-sm border border-brand-100">
+                        <h3 class="font-bold text-brand-900 mb-3 text-sm uppercase tracking-wider">Metrics & Proof</h3>
+                        <ul class="space-y-2 text-sm text-brand-800">
+                            <li><strong class="text-brand-900">Claimed stats:</strong> 50,000+ clients, 300+ star reviews, 25+ years experience, 20+ services.</li>
+                            <li><strong class="text-brand-900">Verified external proof:</strong> ALP's Google Play app has 100,000+ downloads and a 4.13/5 rating from 792 reviews — genuinely strong, independently-verifiable social proof that the website currently does nothing with.</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/60">
+                        <h3 class="font-bold text-slate-900 mb-3">Actual revenue lines identified (4, not 2):</h3>
+                        <ol class="list-decimal pl-5 space-y-1 text-sm text-slate-700 mb-3">
+                            <li>1-to-1 Consultations</li>
+                            <li>Courses — Basic / Advanced / Master (3 levels)</li>
+                            <li>Software — ALP Basic / Advanced / TP Professional (Windows) + Android/iOS app</li>
+                            <li>Books — 6 volumes by the founder, ₹450–₹750 each</li>
+                        </ol>
+                        <p class="text-xs font-medium text-red-600 bg-red-50 p-2 rounded inline-block">Only 2 of these 4 (Consultation, Courses) appear in the main navigation.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Phase 1 -->
+        <section id="phase-1" class="mb-12 scroll-mt-24">
+            <div class="bg-slate-900 text-white p-4 rounded-t-2xl flex items-center justify-between">
+                <h2 class="text-xl font-serif font-bold m-0">Phase 1 — Website Analysis (Page by Page)</h2>
+                <span class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Audit</span>
+            </div>
+            <div class="bg-white rounded-b-2xl shadow-sm border border-slate-200/60 border-t-0 p-6 md:p-8 space-y-8">
+                
+                <!-- Page item -->
+                <div class="border-b border-slate-100 pb-6">
+                    <h3 class="text-lg font-bold text-brand-600 mb-3 flex items-center"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg> Home</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div><strong class="text-green-600 block mb-1">Strengths:</strong> <span class="text-slate-600">Strong hero (clear positioning line, dual CTA, credibility trio: "ALP Method / 3 Levels / 1-to-1"), logical section flow (Who We Are → Courses → Consultation → Services → Stats → Contact → Testimonials), confident dark starfield hero against warm cream body sections.</span></div>
+                        <div><strong class="text-red-600 block mb-1">Weak/Missing:</strong> <span class="text-slate-600">The stat counters render as <strong>"0 +"</strong> in static HTML. Testimonials carousel is <strong>completely empty</strong> in static HTML. Software and Books are absent from the page's core value proposition. No media/press bar despite five real TV features.</span></div>
+                    </div>
+                </div>
+
+                <!-- Page item -->
+                <div class="border-b border-slate-100 pb-6">
+                    <h3 class="text-lg font-bold text-brand-600 mb-3 flex items-center"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> About</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div><strong class="text-green-600 block mb-1">Strengths:</strong> <span class="text-slate-600">Genuinely good founder story — the "banyan tree" origin narrative is distinctive and human. Clear Vision/Mission split. Co-founder is named and credentialed, which most competitor sites skip entirely.</span></div>
+                        <div><strong class="text-red-600 block mb-1">Weak/Missing:</strong> <span class="text-slate-600">Zero supporting proof for the credentials and TV features (no logos, clips, or certificate scans). Pranic Healing / Reiki / Past Life Regression are mentioned but never become an actual service — a dangling content thread.</span></div>
+                    </div>
+                </div>
+
+                <!-- Page item -->
+                <div class="border-b border-slate-100 pb-6">
+                    <h3 class="text-lg font-bold text-brand-600 mb-3 flex items-center"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg> Courses</h3>
+                    <div class="grid grid-cols-1 gap-4 text-sm">
+                        <div><strong class="text-green-600 inline">Strengths:</strong> <span class="text-slate-600">Clean 3-level structure (Basic → Advanced → Master) with topic bullets per level, "Popular" badge on Level 1.</span></div>
+                        <div class="bg-red-50 p-3 rounded-lg"><strong class="text-red-700 block mb-1">Critical gaps:</strong> <span class="text-red-900/80"><strong>Zero pricing</strong> anywhere. Zero duration, zero start/batch dates, zero certificate visual, zero instructor info, zero downloadable syllabus, zero per-course testimonials. "Enroll Now" on all three levels scrolls to one generic enquiry form — there is no way to signal <em>which</em> level you're interested in.</span></div>
+                    </div>
+                </div>
+
+                <!-- Page item -->
+                <div class="border-b border-slate-100 pb-6">
+                    <h3 class="text-lg font-bold text-brand-600 mb-3 flex items-center"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg> Consultation</h3>
+                    <div class="grid grid-cols-1 gap-4 text-sm">
+                        <div><strong class="text-green-600 inline">Strengths:</strong> <span class="text-slate-600">Genuinely good "How it Works" 3-step flow. Clear guidance categories.</span></div>
+                        <div class="bg-red-50 p-3 rounded-lg"><strong class="text-red-700 block mb-1">Critical gaps:</strong> <span class="text-red-900/80">The booking form asks for <strong>Name, Phone, City, Message — not Date, Time, or Place of Birth.</strong> Every single lead requires manual back-and-forth. Also: icon images load from a third-party prototyping domain (`creative-code-truth.lovable.app`) — a real reliability risk.</span></div>
+                    </div>
+                </div>
+
+                <!-- Page item -->
+                <div class="border-b border-slate-100 pb-6">
+                    <h3 class="text-lg font-bold text-brand-600 mb-3 flex items-center"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"></path></svg> Infrastructure Issues</h3>
+                    <ul class="space-y-4 text-sm text-slate-700">
+                        <li><strong class="text-slate-900">Services:</strong> This page is a <strong>verbatim duplicate</strong> of the homepage's Services section. Adds no unique content.</li>
+                        <li><strong class="text-slate-900">Contact:</strong> Phone link correctly uses `tel:`. But no embedded Google Map. No business hours. The footer's phone/email point to `#`.</li>
+                        <li><strong class="text-slate-900">Resource Hub:</strong> 
+                            <ul class="list-disc pl-5 mt-2 space-y-1 text-slate-600">
+                                <li><strong>Articles:</strong> All 6 posts dated identically (June 12, 2026), no internal links forward.</li>
+                                <li><strong>Videos:</strong> Mislabeled. Contains <strong>zero embedded videos</strong>, just text articles.</li>
+                                <li><strong>Events:</strong> Promises "upcoming events," delivers recap-style blog posts with no dates/calendar.</li>
+                                <li><strong>Testimonials:</strong> Dedicated page has <strong>no testimonials</strong> in static HTML.</li>
+                            </ul>
+                        </li>
+                        <li class="bg-amber-50 p-3 rounded-lg border border-amber-100"><strong class="text-amber-900">Footer (site-wide defect):</strong> Every page's "Quick Links" use relative hrefs without a leading slash. On `/courses/`, the footer "Home" links to `/courses/index.html` (404). All social icons are placeholder `#` links across the entire site.</li>
+                    </ul>
+                </div>
+
+                <!-- Hidden pages & Mobile -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm">
+                    <div>
+                        <h4 class="font-bold text-slate-900 mb-2">Hidden, unlinked pages:</h4>
+                        <ul class="space-y-3 text-slate-700">
+                            <li><strong class="block text-brand-600">/software/</strong> 3 paid Windows tiers + app. The "Get on Play Store" buttons are dead `#` links. Every "Download" button sends the <strong>identical</strong> WhatsApp message referencing "ALP Advanced".</li>
+                            <li><strong class="block text-brand-600">/books/</strong> 6 titles with real pricing. The most commerce-complete page on site, yet not in main nav. Every "Buy Now" button sends the <strong>identical</strong> message for "Book 1".</li>
+                            <li><strong class="block text-brand-600">/faq/</strong> Referenced only in broken footer links. Functionally invisible.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-900 mb-2">Device Rendering:</h4>
+                        <p class="text-slate-700 mb-3"><strong class="text-amber-600">Mobile:</strong> Priority QA needed for hamburger menu, WhatsApp bubble overlap, hero wrapping, and iOS Safari auto-zoom on forms.</p>
+                        <p class="text-slate-700"><strong class="text-green-600">Desktop:</strong> Site's clearest strength. The visual identity (dark starfield, warm cream, amber CTA) is genuinely more polished and intentional than most competitor sites. The design foundation is good; problems are entirely structural.</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- Phase 2 & 3 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <!-- Phase 2 -->
+            <section id="phase-2" class="scroll-mt-24 h-full">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-6 md:p-8 h-full">
+                    <h2 class="text-xl font-serif font-bold text-slate-900 mb-4 border-b border-slate-100 pb-2">Phase 2 — Business Growth</h2>
+                    <div class="mb-4 text-sm text-slate-700">
+                        <strong class="text-slate-900 block mb-1">Conversion funnel today:</strong>
+                        Visitor → (no lead magnet) → generic enquiry form/WhatsApp → manual human follow-up. No instrumented funnel.
+                    </div>
+                    <div class="mb-4 bg-red-50 p-3 rounded-lg text-sm text-red-900/80 border border-red-100">
+                        <strong class="block text-red-800 mb-1">Revenue reality check:</strong>
+                        4 real product lines exist, but 0 have functioning online checkout. Everything routes through manual WhatsApp (which currently sends the wrong prefilled context half the time).
+                    </div>
+                    <h4 class="font-bold text-slate-900 text-sm mb-2">Growth Ideas:</h4>
+                    <ul class="list-disc pl-5 space-y-1 text-sm text-slate-700">
+                        <li>Free "Lagna Pada Calculator" lead magnet.</li>
+                        <li>Visible pricing to pre-qualify WhatsApp leads.</li>
+                        <li>Online payment starting with Books.</li>
+                        <li>Abandoned-enquiry follow-up sequences.</li>
+                        <li>Bundle app + book + course into a single funnel.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Phase 3 -->
+            <section id="phase-3" class="scroll-mt-24 h-full">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-6 md:p-8 h-full">
+                    <h2 class="text-xl font-serif font-bold text-slate-900 mb-4 border-b border-slate-100 pb-2">Phase 3 — Student Community</h2>
+                    <h4 class="font-bold text-brand-600 text-sm mb-3">Student Dashboard — recommended scope</h4>
+                    <div class="overflow-x-auto mb-5">
+                        <table class="w-full text-left text-xs border border-slate-200 rounded-lg overflow-hidden">
+                            <thead class="bg-slate-50 text-slate-600"><tr><th class="p-2 border-b">Feature</th><th class="p-2 border-b">Why it matters</th></tr></thead>
+                            <tbody class="divide-y divide-slate-100 text-slate-700">
+                                <tr><td class="p-2 font-medium">Student login</td><td class="p-2">Enables progress tracking</td></tr>
+                                <tr><td class="p-2 font-medium">Course progress</td><td class="p-2">Reduces drop-off</td></tr>
+                                <tr><td class="p-2 font-medium">Certificates</td><td class="p-2">Shareable on LinkedIn = free marketing</td></tr>
+                                <tr><td class="p-2 font-medium">Event calendar</td><td class="p-2">Removes "next batch" support burden</td></tr>
+                                <tr><td class="p-2 font-medium">Recorded library</td><td class="p-2">Supports diaspora timezones</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <h4 class="font-bold text-slate-900 text-sm mb-2">Community Features:</h4>
+                    <p class="text-sm text-slate-700 mb-2">Student forum, Success stories, Regional groups, WhatsApp community, Challenge loops.</p>
+                    <p class="text-sm text-slate-700 bg-amber-50 p-2 rounded border border-amber-100"><strong class="text-amber-900">High leverage:</strong> Formalize the Alumni Network. Research surfaced an ALP-trained astrologer already operating in Canada.</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- Phase 4 & 5 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <!-- Phase 4 -->
+            <section id="phase-4" class="scroll-mt-24 h-full">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-6 md:p-8 h-full">
+                    <h2 class="text-xl font-serif font-bold text-slate-900 mb-4 border-b border-slate-100 pb-2">Phase 4 — Content Strategy</h2>
+                    <h4 class="font-bold text-slate-900 text-sm mb-2">Blog Categories (Anchor to differentiators):</h4>
+                    <p class="text-sm text-slate-700 leading-relaxed mb-4">ALP vs. Traditional Dasha-Bukthi, Lagna Progression & Pada Timing, Pranic Healing crossover (currently orphaned), Festival Astrology, Celebrity Horoscopes, "ALP in the Media".</p>
+                    
+                    <h4 class="font-bold text-slate-900 text-sm mb-2">Video Categories:</h4>
+                    <p class="text-sm text-slate-700 bg-brand-50 p-3 rounded-lg border border-brand-100">Because a 100K-download audience exists on Play Store, <strong>the single highest-leverage move is properly embedding existing YouTube content</strong> on the Videos page. One Play Store review explicitly references "fixing the YouTube display issue."</p>
+                </div>
+            </section>
+
+            <!-- Phase 5 -->
+            <section id="phase-5" class="scroll-mt-24 h-full">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-6 md:p-8 h-full">
+                    <h2 class="text-xl font-serif font-bold text-slate-900 mb-4 border-b border-slate-100 pb-2">Phase 5 — SEO Analysis</h2>
+                    <p class="text-sm text-green-700 mb-4 font-medium"><svg class="w-4 h-4 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Strengths: Good meta titles/descriptions. Clean heading structures.</p>
+                    
+                    <h4 class="font-bold text-red-600 text-sm mb-2">High-Priority Fixes:</h4>
+                    <ul class="list-disc pl-5 space-y-1 text-sm text-slate-700 mb-4">
+                        <li>Sitewide broken footer links.</li>
+                        <li><strong>NAP Inconsistency:</strong> Website and Play Store list different support phones/emails.</li>
+                        <li><strong>No structured data</strong> (Organization, Course, Review, FAQ).</li>
+                        <li>Zero internal links from content to commerce.</li>
+                        <li>Duplicate domain risk (`alpastrology.co.in`).</li>
+                    </ul>
+                    <p class="text-sm text-slate-700"><strong class="text-slate-900">Long-term:</strong> Tamil-language content track is a realistic, defensible SEO moat given the bilingual app audience.</p>
+                </div>
+            </section>
+        </div>
+
+
+        <!-- Phase 6 -->
+        <section id="phase-6" class="mb-12 scroll-mt-24">
+            <h2 class="text-2xl font-serif font-bold text-slate-900 mb-6 border-b border-slate-200 pb-4">Phase 6 — Trust & Authority</h2>
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden">
+                <div class="p-6 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                    <div>
+                        <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Assessment</span>
+                        <h3 class="text-xl font-bold text-slate-900">Trust Score: 64/100</h3>
+                    </div>
+                    <div class="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-bold text-xl border-4 border-white shadow-sm">64</div>
+                </div>
+                <div class="p-0 overflow-x-auto">
+                    <table class="w-full text-left text-sm whitespace-nowrap md:whitespace-normal">
+                        <tbody class="divide-y divide-slate-100 text-slate-700">
+                            <tr><td class="p-4 font-bold text-slate-900 w-1/4">Founder credibility</td><td class="p-4"><strong>Strong raw material</strong>, weakly presented — no certificate scans, no media-logo bar, no embedded TV clips.</td></tr>
+                            <tr><td class="p-4 font-bold text-slate-900 w-1/4">Student trust</td><td class="p-4">Reviews widget exists but isn't crawlable without JS; no curated written case studies.</td></tr>
+                            <tr><td class="p-4 font-bold text-slate-900 w-1/4">Course credibility</td><td class="p-4 text-red-600">Undermined by missing pricing/syllabus/instructor info.</td></tr>
+                            <tr><td class="p-4 font-bold text-slate-900 w-1/4">Scientific framing</td><td class="p-4 text-green-700">Honest, non-overclaiming language used — a genuine trust asset versus hyperbolic competitors.</td></tr>
+                            <tr><td class="p-4 font-bold text-slate-900 w-1/4">Testimonials & Media</td><td class="p-4">Real (790+ on Play Store) & 5 TV features — completely unused on-site.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Phase 7 & 9 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <!-- Phase 7 -->
+            <section id="phase-7" class="scroll-mt-24 h-full">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-6 md:p-8 h-full">
+                    <h2 class="text-xl font-serif font-bold text-slate-900 mb-4 border-b border-slate-100 pb-2">Phase 7 — Conversion Optimization</h2>
+                    <p class="text-sm text-slate-700 mb-4"><strong>CTA audit:</strong> Language is good, colors are appropriate. <span class="text-red-600">The problem is everything the CTA leads to.</span> Forms miss crucial inputs (DOB), WhatsApp links prefill wrong text, no success states.</p>
+                    
+                    <h4 class="font-bold text-brand-600 text-sm mb-3">Visitor-to-student optimization plan:</h4>
+                    <ol class="list-decimal pl-5 space-y-2 text-sm text-slate-700 font-medium">
+                        <li>Home → free Lagna/Pada calculator (email capture).</li>
+                        <li>Article → contextual CTA → Course page.</li>
+                        <li>Course page → real pricing + downloadable syllabus.</li>
+                        <li>"Enroll" → correctly prefilled WhatsApp message per level.</li>
+                        <li>Human follow-up, starting from a warm, informed lead.</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- Phase 9 -->
+            <section id="phase-9" class="scroll-mt-24 h-full">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-6 md:p-8 h-full">
+                    <h2 class="text-xl font-serif font-bold text-slate-900 mb-4 border-b border-slate-100 pb-2">Phase 9 — Competitor Analysis</h2>
+                    <p class="text-sm text-slate-500 mb-4 italic">Compared vs Academy of Vedic Vidya, VedicGrace Institute, CosmoGuru.</p>
+                    
+                    <h4 class="font-bold text-slate-900 text-sm mb-2">What competitors consistently do that ALP doesn't:</h4>
+                    <ul class="list-disc pl-5 space-y-1 text-xs md:text-sm text-slate-700 mb-4">
+                        <li>Prominent government-recognized certification logos.</li>
+                        <li>Free bundled tools (panchang, calculator) as lead magnets.</li>
+                        <li>Advertise small batch sizes.</li>
+                        <li>Founder + co-founder credentials on homepage.</li>
+                        <li>Multilingual course delivery (Hindi/Gujarati) as differentiator.</li>
+                    </ul>
+                    <div class="bg-green-50 p-3 rounded-lg text-sm text-green-900 border border-green-100">
+                        <strong>ALP's genuine edge:</strong> Proprietary branded method, 100K-download app, TV media features, forming international network. <span class="block mt-1 italic">Competitors don't have these — ALP just isn't using them.</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Phase 8 -->
+        <section id="phase-8" class="mb-12 scroll-mt-24">
+            <h2 class="text-2xl font-serif font-bold text-slate-900 mb-6 border-b border-slate-200 pb-4">Phase 8 — Feature Roadmap</h2>
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm whitespace-nowrap md:whitespace-normal">
+                        <thead class="bg-slate-50 border-b border-slate-200 text-slate-700">
+                            <tr>
+                                <th class="p-4 font-semibold">Timeframe</th>
+                                <th class="p-4 font-semibold w-1/2">Key items</th>
+                                <th class="p-4 font-semibold text-center">Difficulty</th>
+                                <th class="p-4 font-semibold">Priority</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-slate-600">
+                            <tr class="hover:bg-slate-50/50">
+                                <td class="p-4 font-bold text-red-600 whitespace-nowrap">0–30 Days</td>
+                                <td class="p-4">Fix sitewide footer links; fix `tel:`/`mailto:`; fix WhatsApp prefill bugs; add DOB/TOB/POB fields; link Play app. Add Software/Books to nav.</td>
+                                <td class="p-4 text-center"><span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">Low</span></td>
+                                <td class="p-4 text-amber-500 tracking-widest text-lg">★★★★★</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50">
+                                <td class="p-4 font-bold text-amber-600 whitespace-nowrap">1–3 Months</td>
+                                <td class="p-4">Add pricing/duration/syllabus to Courses; embed map; static fallback for JS elements; Schema markup; fix NAP.</td>
+                                <td class="p-4 text-center"><span class="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs">Medium</span></td>
+                                <td class="p-4 text-amber-500 tracking-widest text-lg">★★★★<span class="text-slate-300">☆</span></td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50">
+                                <td class="p-4 font-bold text-brand-600 whitespace-nowrap">3–6 Months</td>
+                                <td class="p-4">Build Student Dashboard; embed real videos; Events calendar; online payment (Books); internal linking.</td>
+                                <td class="p-4 text-center"><span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs">High</span></td>
+                                <td class="p-4 text-amber-500 tracking-widest text-lg">★★★★<span class="text-slate-300">☆</span></td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50">
+                                <td class="p-4 font-bold text-slate-700 whitespace-nowrap">6–12 Months</td>
+                                <td class="p-4">Launch community forum + alumni network; Tamil content track; press page; Lagna calculator tool.</td>
+                                <td class="p-4 text-center"><span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs">High</span></td>
+                                <td class="p-4 text-amber-500 tracking-widest text-lg">★★★<span class="text-slate-300">☆☆</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Phase 10 -->
+        <section id="phase-10" class="mb-12 scroll-mt-24">
+            <h2 class="text-2xl font-serif font-bold text-slate-900 mb-6 border-b border-slate-200 pb-4">Phase 10 — Final Executive Report</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex justify-between items-center"><span class="font-medium text-slate-600">Website Score</span><span class="font-bold text-xl text-amber-600">58</span></div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex justify-between items-center"><span class="font-medium text-slate-600">UI/UX Score</span><span class="font-bold text-xl text-green-600">72</span></div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex justify-between items-center"><span class="font-medium text-slate-600">SEO Score</span><span class="font-bold text-xl text-red-600">48</span></div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex justify-between items-center"><span class="font-medium text-slate-600">Trust Score</span><span class="font-bold text-xl text-amber-600">64</span></div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex justify-between items-center"><span class="font-medium text-slate-600">Community Score</span><span class="font-bold text-xl text-red-600">22</span></div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex justify-between items-center"><span class="font-medium text-slate-600">Business Growth Score</span><span class="font-bold text-xl text-amber-600">50</span></div>
+            </div>
+
+            <h3 class="text-xl font-bold text-slate-900 mb-6">"If I were the CEO of ALP Astrology" — Top 50 Improvements</h3>
+            
+            <div class="space-y-6">
+                <!-- Tier 1 -->
+                <div class="bg-white rounded-xl shadow-sm border border-red-200 overflow-hidden">
+                    <div class="bg-red-50 p-4 border-b border-red-100"><h4 class="font-bold text-red-800 m-0">Tier 1 — Critical Fixes (Week 1, before anything else)</h4></div>
+                    <div class="p-5">
+                        <ol class="list-decimal pl-5 space-y-2 text-sm text-slate-700">
+                            <li><strong class="text-slate-900">Fix sitewide footer links</strong> — replace relative paths with absolute (`/about/` not `about.html`).</li>
+                            <li><strong class="text-slate-900">Fix footer phone/email links</strong> — convert to real `tel:`/`mailto:` hrefs.</li>
+                            <li><strong class="text-slate-900">Fix footer social icons</strong> — point WhatsApp/FB/IG/YT to real profiles.</li>
+                            <li><strong class="text-slate-900">Fix the Software-page WhatsApp prefill bug</strong> — each tier must send matching message.</li>
+                            <li><strong class="text-slate-900">Fix the Books-page WhatsApp prefill bug</strong> — each volume must reference its own title.</li>
+                            <li><strong class="text-slate-900">Link the Google Play app correctly</strong> on `/software/` — free distribution thrown away.</li>
+                            <li><strong class="text-slate-900">Fix the dead App Store/Play Store buttons.</strong></li>
+                            <li><strong class="text-slate-900">Add DOB/TOB/POB fields</strong> to Consultation and Course forms.</li>
+                            <li><strong class="text-slate-900">Move icon assets off `lovable.app` domain</strong> into own media library.</li>
+                            <li><strong class="text-slate-900">Add a static fallback</strong> for counters and testimonial carousel (no-JS support).</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- Tier 2 -->
+                <div class="bg-white rounded-xl shadow-sm border border-amber-200 overflow-hidden">
+                    <div class="bg-amber-50 p-4 border-b border-amber-100"><h4 class="font-bold text-amber-800 m-0">Tier 2 — Conversion & Revenue (Weeks 2–6)</h4></div>
+                    <div class="p-5">
+                        <ol start="11" class="list-decimal pl-5 space-y-2 text-sm text-slate-700">
+                            <li>Add Software and Books to main navigation.</li>
+                            <li>Publish real pricing for all course levels.</li>
+                            <li>Publish downloadable syllabus PDF per course level.</li>
+                            <li>Add batch start dates / next intake to Courses.</li>
+                            <li>Add certificate preview image to Master's course.</li>
+                            <li>Add online payment (Razorpay/UPI) for Books first.</li>
+                            <li>Add post-submit confirmation message to every form.</li>
+                            <li>Merge or remove duplicate Services page.</li>
+                            <li>Link FAQ properly in main navigation or footer.</li>
+                            <li>Add "bundle discount" price for full 6-book set.</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Tier 3 -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-slate-50 p-4 border-b border-slate-100"><h4 class="font-bold text-slate-800 m-0">Tier 3 — SEO & Content (Mos 2–4)</h4></div>
+                        <div class="p-5">
+                            <ol start="21" class="list-decimal pl-5 space-y-2 text-sm text-slate-700">
+                                <li>Implement Organization/LocalBusiness schema.</li>
+                                <li>Implement Person schema for founder.</li>
+                                <li>Implement Course schema.</li>
+                                <li>Implement Review schema (once fixed).</li>
+                                <li>Resolve duplicate-domain (`alpastrology.co.in`).</li>
+                                <li>Fix NAP inconsistency with Play Store.</li>
+                                <li>Add author byline, date, tags to blog.</li>
+                                <li>Add internal links from articles to revenue pages.</li>
+                                <li>Differentiate image alt text and filenames.</li>
+                                <li>Build staggered content calendar.</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <!-- Tier 4 -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-slate-50 p-4 border-b border-slate-100"><h4 class="font-bold text-slate-800 m-0">Tier 4 — Trust & Community (Mos 3–6)</h4></div>
+                        <div class="p-5">
+                            <ol start="31" class="list-decimal pl-5 space-y-2 text-sm text-slate-700">
+                                <li>Build Press/Media page (5 TV features).</li>
+                                <li>Add media-mentions bar to homepage.</li>
+                                <li>Replace JS widget with static case studies.</li>
+                                <li>Add video testimonials.</li>
+                                <li>Launch student forum / Q&A.</li>
+                                <li>Launch Success Stories showcase.</li>
+                                <li>Formalize Alumni Network (track Canada rep).</li>
+                                <li>Add regional/language groups (Tamil/Diaspora).</li>
+                                <li>Launch monthly chart-reading challenge.</li>
+                                <li>Add working WhatsApp community links.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tier 5 -->
+                <div class="bg-white rounded-xl shadow-sm border border-brand-200 overflow-hidden">
+                    <div class="bg-brand-50 p-4 border-b border-brand-100"><h4 class="font-bold text-brand-800 m-0">Tier 5 — Platform Experience (Mos 6–12)</h4></div>
+                    <div class="p-5">
+                        <ol start="41" class="list-decimal pl-5 space-y-2 text-sm text-slate-700">
+                            <li>Build Student Dashboard (progress, certificates).</li>
+                            <li>Add recorded class library.</li>
+                            <li>Add assignment submission for Master's.</li>
+                            <li>Build real Events calendar with registration.</li>
+                            <li>Embed real videos on Videos page.</li>
+                            <li>Build free Lagna/Pada calculator lead-magnet.</li>
+                            <li>Add SSO between mobile app and web dashboard.</li>
+                            <li>Launch Tamil-language content/course track.</li>
+                            <li>Add member rankings / gamified profiles.</li>
+                            <li>Establish quarterly content review cadence.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="text-xs text-slate-500 italic mt-6">*This report focuses on what's verifiable and fixable. Pricing, fee structures, batch sizes, and the choice of payment gateway are business decisions for the ALP team — the recommendations above are scoped to the website, content, and platform layer.</p>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- GLOBAL GROWTH & TRANSFORMATION STRATEGY -->
+        <!-- ========================================== -->
+
+        <section id="growth-intro" class="mb-12 mt-24 pt-16 border-t-[4px] border-brand-500 border-dashed scroll-mt-24 relative">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-brand-100 rounded-full blur-3xl -mr-48 -mt-48 pointer-events-none opacity-50"></div>
+            
+            <div class="bg-brand-950 rounded-2xl p-8 md:p-10 shadow-xl text-white mb-12 relative overflow-hidden">
+                <div class="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
+                <div class="relative z-10">
+                    <span class="inline-block py-1 px-3 rounded-full bg-brand-800 text-brand-200 text-xs font-bold tracking-wide uppercase mb-4 border border-brand-700">Part II: Strategic Roadmap</span>
+                    <h1 class="text-3xl md:text-5xl font-serif font-bold mb-6 leading-tight">ALP Astrology — Global Growth & Website Transformation Strategy</h1>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 text-sm">
+                        <div class="bg-brand-900/50 p-4 rounded-xl border border-brand-800/50">
+                            <span class="text-brand-400 font-semibold block mb-1">Role</span>
+                            Chief Growth Officer briefing
+                        </div>
+                        <div class="bg-brand-900/50 p-4 rounded-xl border border-brand-800/50">
+                            <span class="text-brand-400 font-semibold block mb-1">Companion document to</span>
+                            ALP Astrology Complete Business, UX, SEO & Community Audit
+                        </div>
+                    </div>
+                    
+                    <blockquote class="border-l-4 border-brand-500 pl-5 py-2 text-brand-100 italic text-lg leading-relaxed">
+                        "This document picks up where the audit left off. The audit found and prioritized what's broken... This document is about what to build to take ALP from a well-run local consultancy + course provider into the world's most trusted astrology learning and research community."
+                    </blockquote>
+                </div>
+            </div>
+
+            <!-- Part 1 & 2: Understanding & Positioning -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+                <!-- Part 1 -->
+                <div>
+                    <h2 class="text-2xl font-serif font-bold text-slate-900 mb-6 border-b border-slate-200 pb-4">Part 1 — Deep Website Understanding</h2>
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/60 h-full">
+                        <div class="mb-6">
+                            <h3 class="font-bold text-brand-600 mb-2">What makes ALP unique:</h3>
+                            <p class="text-sm text-slate-700 leading-relaxed">A genuinely proprietary, named, ownable methodology. A real, distinctive founder origin story. Real, independently-verifiable digital proof (100K+ app). Real published IP (6 books). A real software product. Almost no competitor has all four at once.</p>
+                        </div>
+                        <div class="mb-6">
+                            <h3 class="font-bold text-red-600 mb-2">What visitors do NOT understand (First 30s):</h3>
+                            <ul class="list-disc pl-5 space-y-2 text-sm text-slate-700">
+                                <li>How ALP mechanically differs from regular astrology.</li>
+                                <li>That an established app with 100,000+ downloads exists.</li>
+                                <li>That published books and software exist.</li>
+                                <li>Any pricing, for anything.</li>
+                                <li>Who conducts consultations (founder vs. trained team).</li>
+                                <li>That there is an international student base.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Part 2 -->
+                <div>
+                    <h2 class="text-2xl font-serif font-bold text-slate-900 mb-6 border-b border-slate-200 pb-4">Part 2 — Global Brand Positioning</h2>
+                    <div class="bg-brand-50 rounded-2xl p-6 shadow-sm border border-brand-100 h-full relative">
+                        <div class="absolute top-4 right-4 text-brand-200">
+                            <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18zm0-2a7 7 0 1 0 0-14 7 7 0 0 0 0 14zm-1-7V7h2v5h3v2h-5z"/></svg>
+                        </div>
+                        <h3 class="font-bold text-slate-900 mb-2 uppercase tracking-wide text-xs">Recommended Angle</h3>
+                        <p class="text-xl font-serif font-bold text-brand-900 mb-6">"The Methodology, Not the Mystic."</p>
+                        
+                        <div class="space-y-4 text-sm text-slate-700">
+                            <div class="bg-white p-4 rounded-xl border border-brand-100 shadow-sm">
+                                <span class="block text-xs font-bold text-brand-600 uppercase mb-1">New Headline & Subhead</span>
+                                <p class="font-bold text-slate-900 text-base">"Most astrology tells you what. ALP teaches you when."</p>
+                                <p class="mt-1 text-slate-600">A structured, learnable predictive method, trained the same way to every student — so the guidance you get is consistent, not just intuitive.</p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-bold text-slate-900 mb-1">Distilled Global Story:</h4>
+                                <p class="italic bg-white/50 p-3 rounded-lg text-slate-600">Twenty-five years ago, on a pilgrimage in the Himalayas, Dr. S. Pothuvudaimoorthy sat beneath a banyan tree and asked a simple question: traditional astrology tracks the Moon to time life's events — so why not the Ascendant, too? That question became ALP: a method designed to give consistent, repeatable timing no matter which trained astrologer applies it...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="growth-part-3-7" class="mb-12 scroll-mt-24">
+            
+            <!-- Part 3: Community -->
+            <h2 class="text-2xl font-serif font-bold text-slate-900 mb-6 border-b border-slate-200 pb-4">Part 3 — Community Growth Strategy</h2>
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden mb-12">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm whitespace-nowrap md:whitespace-normal">
+                        <thead class="bg-slate-50 border-b border-slate-200">
+                            <tr>
+                                <th class="p-4 font-semibold text-slate-900">Feature</th>
+                                <th class="p-4 font-semibold text-slate-900">Why it matters</th>
+                                <th class="p-4 font-semibold text-slate-900">Business / Community Impact</th>
+                                <th class="p-4 font-semibold text-slate-900">Priority</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-slate-700">
+                            <tr class="hover:bg-slate-50"><td class="p-4 font-bold text-slate-900">Student Community Hub</td><td class="p-4">Central home for everything</td><td class="p-4">Increases retention / belonging</td><td class="p-4"><span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-bold">High</span></td></tr>
+                            <tr class="hover:bg-slate-50"><td class="p-4 font-bold text-slate-900">Student Success Stories</td><td class="p-4">Structured, searchable proof</td><td class="p-4">Strong CRO asset, inspires students</td><td class="p-4"><span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-bold">High</span></td></tr>
+                            <tr class="hover:bg-slate-50"><td class="p-4 font-bold text-slate-900">Alumni Network</td><td class="p-4">Organic abroad; needs formalizing</td><td class="p-4">Referral channel, licensing potential</td><td class="p-4"><span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-bold">High</span></td></tr>
+                            <tr class="hover:bg-slate-50"><td class="p-4 font-bold text-slate-900">Discussion Forums</td><td class="p-4">User-generated SEO content</td><td class="p-4">Reduces 1-on-1 support load</td><td class="p-4"><span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-bold">High</span></td></tr>
+                            <tr class="hover:bg-slate-50"><td class="p-4 font-bold text-slate-900">Student Directory / Map</td><td class="p-4">Visualizes global reach instantly</td><td class="p-4">Builds trust at scale</td><td class="p-4"><span class="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs font-bold">Medium</span></td></tr>
+                            <tr class="hover:bg-slate-50"><td class="p-4 font-bold text-slate-900">Regional Chapters</td><td class="p-4">Localizes a global brand</td><td class="p-4">Region-specific pricing/events</td><td class="p-4"><span class="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs font-bold">Medium</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Parts 4 & 5: Content & Trust -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                <div>
+                    <h2 class="text-xl font-serif font-bold text-slate-900 mb-4 border-b border-slate-200 pb-2">Part 4 — Content Ecosystem</h2>
+                    <ul class="space-y-4 text-sm">
+                        <li class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                            <strong class="block text-brand-600 mb-1">YouTube Auto-Integration</strong>
+                            Auto-pull via YouTube Data API v3 (hourly cron). Map playlists 1:1 to site categories. Server-rendered for SEO.
+                        </li>
+                        <li class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                            <strong class="block text-brand-600 mb-1">Blog Automation</strong>
+                            WP REST API push from CMS. Add Tag-based Related Articles & GA4-powered Trending Topics widget.
+                        </li>
+                        <li class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                            <strong class="block text-brand-600 mb-1">Social Media Auth</strong>
+                            Convert Instagram to Business profile for Graph API access. Use single WhatsApp Community CTA instead of feed.
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h2 class="text-xl font-serif font-bold text-slate-900 mb-4 border-b border-slate-200 pb-2">Part 5 — Trust Building</h2>
+                    <div class="bg-amber-50 p-6 rounded-xl border border-amber-200 h-full">
+                        <h3 class="font-bold text-amber-900 mb-3 text-sm uppercase">Homepage Requirements:</h3>
+                        <ol class="list-decimal pl-5 space-y-2 text-sm text-amber-900/80 font-medium">
+                            <li>Media-mentions bar directly under hero (5 TV logos).</li>
+                            <li>Verified Play Store review badge linking to external stats.</li>
+                            <li>Founder photo + credential strip high up on the page.</li>
+                            <li>Server-rendered case-study teasers (not JS dependent).</li>
+                            <li>"100,000+ on Google Play, 4.1★" standalone badge.</li>
+                            <li>Certification/award visuals with linked sources.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Part 6 & 7: Dashboard & Funnel -->
+            <div class="mb-12">
+                <h2 class="text-2xl font-serif font-bold text-slate-900 mb-6 border-b border-slate-200 pb-4">Parts 6 & 7 — Dashboard Experience & Conversion Funnel</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Dashboard -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
+                        <h3 class="font-bold text-brand-900 mb-4 flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                            Dashboard Retention Mechanics
+                        </h3>
+                        <ul class="space-y-3 text-sm text-slate-700">
+                            <li class="flex justify-between border-b border-slate-100 pb-2"><span class="font-semibold">Progress Tracking</span> <span class="text-slate-500">Biggest lever against drop-off</span></li>
+                            <li class="flex justify-between border-b border-slate-100 pb-2"><span class="font-semibold">Recorded Classes</span> <span class="text-slate-500">Solves timezone friction</span></li>
+                            <li class="flex justify-between border-b border-slate-100 pb-2"><span class="font-semibold">Certificates</span> <span class="text-slate-500">LinkedIn shareable = free marketing</span></li>
+                            <li class="flex justify-between border-b border-slate-100 pb-2"><span class="font-semibold">Downloads (Notes)</span> <span class="text-slate-500">Increases switching cost positively</span></li>
+                            <li class="flex justify-between pb-1"><span class="font-semibold">Assignments/Exams</span> <span class="text-slate-500">Protects brand credibility</span></li>
+                        </ul>
+                    </div>
+
+                    <!-- Funnel -->
+                    <div class="bg-brand-950 p-6 rounded-2xl shadow-sm text-white">
+                        <h3 class="font-bold text-brand-300 mb-4 flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                            Complete Conversion Funnel
+                        </h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="bg-brand-900/50 px-4 py-2 rounded border border-brand-800"><span class="font-bold text-brand-400 w-24 inline-block">Awareness</span> YouTube, Instagram, Media, SEO</div>
+                            <div class="bg-brand-900/50 px-4 py-2 rounded border border-brand-800"><span class="font-bold text-brand-400 w-24 inline-block">Interest</span> Free AI Reading Tool (Email capture)</div>
+                            <div class="bg-brand-900/50 px-4 py-2 rounded border border-brand-800"><span class="font-bold text-brand-400 w-24 inline-block">Consideration</span> Course Pages (Real Pricing + Syllabus)</div>
+                            <div class="bg-brand-900/50 px-4 py-2 rounded border border-brand-800"><span class="font-bold text-green-400 w-24 inline-block">Conversion</span> Correctly-prefilled WhatsApp / Online Pay</div>
+                            <div class="bg-brand-900/50 px-4 py-2 rounded border border-brand-800"><span class="font-bold text-brand-400 w-24 inline-block">Retention</span> Dashboard, Live Classes, Community</div>
+                            <div class="bg-brand-900/50 px-4 py-2 rounded border border-brand-800"><span class="font-bold text-brand-400 w-24 inline-block">Advocacy</span> Certificate Sharing, Referral Program</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="growth-part-8" class="mb-12 scroll-mt-24">
+            <h2 class="text-2xl font-serif font-bold text-slate-900 mb-2 border-b border-slate-200 pb-4">Part 8 — 100 Feature Ideas</h2>
+            <p class="text-sm text-slate-600 mb-8">Grouped by category. Difficulty represents relative build effort (Low/Medium/High).</p>
+
+            <div class="space-y-3">
+                <!-- Group 1: Business Growth -->
+                <details class="group bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
+                    <summary class="flex justify-between items-center font-medium cursor-pointer list-none p-4 hover:bg-slate-50 transition-colors">
+                        <span class="text-base font-bold text-slate-900 flex items-center"><span class="bg-brand-100 text-brand-700 px-2 py-1 rounded text-xs mr-3">1–12</span> Business Growth</span>
+                        <span class="transition group-open:rotate-180 text-slate-400"><svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg></span>
+                    </summary>
+                    <div class="p-0 border-t border-slate-100 text-slate-600 overflow-x-auto">
+                        <table class="w-full text-left text-sm whitespace-nowrap md:whitespace-normal"><thead class="bg-slate-50"><tr><th class="p-3 w-12 text-center">#</th><th class="p-3">Feature</th><th class="p-3">Business Benefit</th><th class="p-3 w-24">Difficulty</th></tr></thead>
+                        <tbody class="divide-y divide-slate-100 text-xs md:text-sm">
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">1</td><td class="p-3 font-medium text-slate-800">Visible tiered pricing + EMI option</td><td class="p-3">Pre-qualifies leads</td><td class="p-3 text-green-600">Low</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">2</td><td class="p-3 font-medium text-slate-800">Online payment checkout (Razorpay/UPI)</td><td class="p-3">Scales past manual WhatsApp</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">3</td><td class="p-3 font-medium text-slate-800">Monthly "Insight Subscription"</td><td class="p-3">Predictable MRR</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">4</td><td class="p-3 font-medium text-slate-800">Student referral/affiliate program</td><td class="p-3">Low-CAC growth</td><td class="p-3 text-green-600">Low</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">5</td><td class="p-3 font-medium text-slate-800">Corporate/B2B workshop packages</td><td class="p-3">Higher ticket size</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">6</td><td class="p-3 font-medium text-slate-800">Software licensing for certified astrologers</td><td class="p-3">Recurring B2B revenue</td><td class="p-3 text-red-600">High</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">7</td><td class="p-3 font-medium text-slate-800">Premium membership tier</td><td class="p-3">Increases LTV</td><td class="p-3 text-green-600">Low</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">8</td><td class="p-3 font-medium text-slate-800">Family/group consultation packages</td><td class="p-3">Larger single transaction</td><td class="p-3 text-green-600">Low</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">9</td><td class="p-3 font-medium text-slate-800">International multi-currency pricing</td><td class="p-3">Unlocks diaspora market</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">10</td><td class="p-3 font-medium text-slate-800">Annual flagship ticketed summit</td><td class="p-3">High-margin event revenue + PR</td><td class="p-3 text-red-600">High</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">11</td><td class="p-3 font-medium text-slate-800">Scholarship/sponsorship program</td><td class="p-3">PR value, mission alignment</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">12</td><td class="p-3 font-medium text-slate-800">Gemstone/remedy product store</td><td class="p-3">New product-margin revenue</td><td class="p-3 text-amber-600">Medium</td></tr>
+                        </tbody></table>
+                    </div>
+                </details>
+
+                <!-- Group 2: Student Engagement -->
+                <details class="group bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
+                    <summary class="flex justify-between items-center font-medium cursor-pointer list-none p-4 hover:bg-slate-50 transition-colors">
+                        <span class="text-base font-bold text-slate-900 flex items-center"><span class="bg-brand-100 text-brand-700 px-2 py-1 rounded text-xs mr-3">13–23</span> Student Engagement</span>
+                        <span class="transition group-open:rotate-180 text-slate-400"><svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg></span>
+                    </summary>
+                    <div class="p-0 border-t border-slate-100 text-slate-600 overflow-x-auto">
+                        <table class="w-full text-left text-sm whitespace-nowrap md:whitespace-normal"><thead class="bg-slate-50"><tr><th class="p-3 w-12 text-center">#</th><th class="p-3">Feature</th><th class="p-3">Business Benefit</th><th class="p-3 w-24">Difficulty</th></tr></thead>
+                        <tbody class="divide-y divide-slate-100 text-xs md:text-sm">
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">13</td><td class="p-3 font-medium text-slate-800">Gamified learning paths + badges</td><td class="p-3">Lower refund/drop-off rate</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">14</td><td class="p-3 font-medium text-slate-800">Daily micro-lesson push notification</td><td class="p-3">Daily app open rate</td><td class="p-3 text-green-600">Low</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">15</td><td class="p-3 font-medium text-slate-800">Peer study groups per cohort</td><td class="p-3">Retention</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">16</td><td class="p-3 font-medium text-slate-800">Live weekly founder Q&A</td><td class="p-3">Strong retention/upsell moment</td><td class="p-3 text-green-600">Low</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">17</td><td class="p-3 font-medium text-slate-800">Practice-chart library + model answers</td><td class="p-3">Differentiator vs. theory-only</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">18</td><td class="p-3 font-medium text-slate-800">Personalized learning path assessment</td><td class="p-3">Higher completion rates</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">19</td><td class="p-3 font-medium text-slate-800">Course-completion leaderboard</td><td class="p-3">Engagement loop</td><td class="p-3 text-green-600">Low</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">20</td><td class="p-3 font-medium text-slate-800">Spaced-repetition flashcards</td><td class="p-3">Stronger word-of-mouth</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">21</td><td class="p-3 font-medium text-slate-800">Capstone real-case-study project</td><td class="p-3">Protects certificate credibility</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">22</td><td class="p-3 font-medium text-slate-800">Alumni mentor-matching for new students</td><td class="p-3">Increases alumni engagement</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">23</td><td class="p-3 font-medium text-slate-800">Progress streaks/habit tracker</td><td class="p-3">Reduces churn</td><td class="p-3 text-green-600">Low</td></tr>
+                        </tbody></table>
+                    </div>
+                </details>
+
+                <!-- Group 3: Community Building -->
+                <details class="group bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
+                    <summary class="flex justify-between items-center font-medium cursor-pointer list-none p-4 hover:bg-slate-50 transition-colors">
+                        <span class="text-base font-bold text-slate-900 flex items-center"><span class="bg-brand-100 text-brand-700 px-2 py-1 rounded text-xs mr-3">24–34</span> Community Building</span>
+                        <span class="transition group-open:rotate-180 text-slate-400"><svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg></span>
+                    </summary>
+                    <div class="p-0 border-t border-slate-100 text-slate-600 overflow-x-auto">
+                        <table class="w-full text-left text-sm whitespace-nowrap md:whitespace-normal"><thead class="bg-slate-50"><tr><th class="p-3 w-12 text-center">#</th><th class="p-3">Feature</th><th class="p-3">Business Benefit</th><th class="p-3 w-24">Difficulty</th></tr></thead>
+                        <tbody class="divide-y divide-slate-100 text-xs md:text-sm">
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">24</td><td class="p-3 font-medium text-slate-800">Regional chapter pages</td><td class="p-3">Region-specific marketing/events</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">25</td><td class="p-3 font-medium text-slate-800">World community map (opt-in)</td><td class="p-3">Powerful homepage trust visual</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">26</td><td class="p-3 font-medium text-slate-800">Category-threaded discussion forum</td><td class="p-3">UGC = free SEO content</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">27</td><td class="p-3 font-medium text-slate-800">Annual community awards</td><td class="p-3">Generates PR-worthy stories</td><td class="p-3 text-green-600">Low</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">28</td><td class="p-3 font-medium text-slate-800">Volunteer/ambassador program</td><td class="p-3">Lower moderation/event cost</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">29</td><td class="p-3 font-medium text-slate-800">Community case-study repository</td><td class="p-3">Content engine for SEO + trust</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">30</td><td class="p-3 font-medium text-slate-800">Opt-in public member directory</td><td class="p-3">Social proof for new visitors</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">31</td><td class="p-3 font-medium text-slate-800">Local meetup coordination tool</td><td class="p-3">Deepens loyalty, hard to replicate</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">32</td><td class="p-3 font-medium text-slate-800">Monthly chart-reading challenge</td><td class="p-3">Regular re-engagement trigger</td><td class="p-3 text-green-600">Low</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">33</td><td class="p-3 font-medium text-slate-800">Rotating "Ask an ALP Student" public Q&A</td><td class="p-3">Authentic, low-cost content</td><td class="p-3 text-green-600">Low</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">34</td><td class="p-3 font-medium text-slate-800">Community newsletter</td><td class="p-3">Re-engagement + announcement</td><td class="p-3 text-green-600">Low</td></tr>
+                        </tbody></table>
+                    </div>
+                </details>
+
+                <!-- Group 4: Research -->
+                <details class="group bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
+                    <summary class="flex justify-between items-center font-medium cursor-pointer list-none p-4 hover:bg-slate-50 transition-colors">
+                        <span class="text-base font-bold text-slate-900 flex items-center"><span class="bg-brand-100 text-brand-700 px-2 py-1 rounded text-xs mr-3">35–45</span> Research & Publications</span>
+                        <span class="transition group-open:rotate-180 text-slate-400"><svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg></span>
+                    </summary>
+                    <div class="p-0 border-t border-slate-100 text-slate-600 overflow-x-auto">
+                        <table class="w-full text-left text-sm whitespace-nowrap md:whitespace-normal"><thead class="bg-slate-50"><tr><th class="p-3 w-12 text-center">#</th><th class="p-3">Feature</th><th class="p-3">Business Benefit</th><th class="p-3 w-24">Difficulty</th></tr></thead>
+                        <tbody class="divide-y divide-slate-100 text-xs md:text-sm">
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">35</td><td class="p-3 font-medium text-slate-800">Research portal for case-study submissions</td><td class="p-3">Differentiator no competitor has</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">36</td><td class="p-3 font-medium text-slate-800">Opt-in prediction-outcome tracking log</td><td class="p-3">Long-term credibility asset</td><td class="p-3 text-red-600">High</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">37</td><td class="p-3 font-medium text-slate-800">Annual published "State of ALP" report</td><td class="p-3">Major PR/media-pitch asset</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">38</td><td class="p-3 font-medium text-slate-800">Peer-review process for case studies</td><td class="p-3">Protects brand credibility</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">39</td><td class="p-3 font-medium text-slate-800">Research fellowships for advanced students</td><td class="p-3">Retains top talent in ecosystem</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">40</td><td class="p-3 font-medium text-slate-800">University/cultural-institution outreach</td><td class="p-3">Long-term authority building</td><td class="p-3 text-red-600">High</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">41</td><td class="p-3 font-medium text-slate-800">Searchable case-study database</td><td class="p-3">SEO + retention asset</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">42</td><td class="p-3 font-medium text-slate-800">Public ALP methodology white paper</td><td class="p-3">Trust + backlink magnet</td><td class="p-3 text-green-600">Low</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">43</td><td class="p-3 font-medium text-slate-800">Citation system linking articles to cases</td><td class="p-3">Differentiates from competitor copy</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">44</td><td class="p-3 font-medium text-slate-800">Founder's ongoing research journal/blog</td><td class="p-3">Founder personal-brand asset</td><td class="p-3 text-green-600">Low</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">45</td><td class="p-3 font-medium text-slate-800">Annual research symposium</td><td class="p-3">High-margin event + PR</td><td class="p-3 text-red-600">High</td></tr>
+                        </tbody></table>
+                    </div>
+                </details>
+
+                <!-- Groups 5-9: Condensed for brevity in identical structure -->
+                <details class="group bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
+                    <summary class="flex justify-between items-center font-medium cursor-pointer list-none p-4 hover:bg-slate-50 transition-colors">
+                        <span class="text-base font-bold text-slate-900 flex items-center"><span class="bg-brand-100 text-brand-700 px-2 py-1 rounded text-xs mr-3">46–56</span> SEO Enhancements</span>
+                        <span class="transition group-open:rotate-180 text-slate-400"><svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg></span>
+                    </summary>
+                    <div class="p-4 border-t border-slate-100 text-slate-600 text-sm">
+                        Includes: Programmatic city/location pages, FAQ schema, Terminology glossary, Tamil/Hindi translated pages with hreflang, Celebrity horoscope content series, Automated internal linking, Video transcript publishing, Google Business Profile optimization, Core Web Vitals optimization, and automated Search Console monitoring.
+                    </div>
+                </details>
+
+                <details class="group bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
+                    <summary class="flex justify-between items-center font-medium cursor-pointer list-none p-4 hover:bg-slate-50 transition-colors">
+                        <span class="text-base font-bold text-slate-900 flex items-center"><span class="bg-brand-100 text-brand-700 px-2 py-1 rounded text-xs mr-3">57–67</span> Marketing & Campaigns</span>
+                        <span class="transition group-open:rotate-180 text-slate-400"><svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg></span>
+                    </summary>
+                    <div class="p-4 border-t border-slate-100 text-slate-600 text-sm">
+                        Includes: Lifecycle email automation, WhatsApp broadcast lists, Referral incentives, Founder podcast/interview circuit, Retargeting ads, Festival-tied seasonal calendars, #MyALPStory UGC campaigns, Wellness brand partnerships, Press kit page, and Student video-testimonial campaigns.
+                    </div>
+                </details>
+
+                <details class="group bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
+                    <summary class="flex justify-between items-center font-medium cursor-pointer list-none p-4 hover:bg-slate-50 transition-colors">
+                        <span class="text-base font-bold text-slate-900 flex items-center"><span class="bg-brand-100 text-brand-700 px-2 py-1 rounded text-xs mr-3">68–78</span> Automation Operations</span>
+                        <span class="transition group-open:rotate-180 text-slate-400"><svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg></span>
+                    </summary>
+                    <div class="p-4 border-t border-slate-100 text-slate-600 text-sm">
+                        Includes: YouTube to website auto-sync, CMS to Blog auto-publish, WhatsApp FAQ chatbot, Auto-generated birth chart on form submit, Automated drip sequences, Auto-issued completion certificates, Post-consultation review request automation, Abandoned-enquiry follow-ups, and long-video to Shorts automation.
+                    </div>
+                </details>
+
+                <details class="group bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
+                    <summary class="flex justify-between items-center font-medium cursor-pointer list-none p-4 hover:bg-slate-50 transition-colors">
+                        <span class="text-base font-bold text-slate-900 flex items-center"><span class="bg-brand-100 text-brand-700 px-2 py-1 rounded text-xs mr-3">79–89</span> AI & Future Tech</span>
+                        <span class="transition group-open:rotate-180 text-slate-400"><svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg></span>
+                    </summary>
+                    <div class="p-0 border-t border-slate-100 text-slate-600 overflow-x-auto">
+                        <table class="w-full text-left text-sm whitespace-nowrap md:whitespace-normal"><thead class="bg-slate-50"><tr><th class="p-3 w-12 text-center">#</th><th class="p-3">Feature</th><th class="p-3">Business Benefit</th><th class="p-3 w-24">Difficulty</th></tr></thead>
+                        <tbody class="divide-y divide-slate-100 text-xs md:text-sm">
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">79</td><td class="p-3 font-medium text-slate-800">AI FAQ/course-guidance chatbot</td><td class="p-3">Reduces support load</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">80</td><td class="p-3 font-medium text-slate-800">AI practice-chart feedback tool</td><td class="p-3">Differentiator vs. theory-only</td><td class="p-3 text-red-600">High</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">81</td><td class="p-3 font-medium text-slate-800">AI-personalized study plan generator</td><td class="p-3">Improves completion rates</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">84</td><td class="p-3 font-medium text-slate-800">AI-powered search across research database</td><td class="p-3">Makes research investment pay off</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">89</td><td class="p-3 font-medium text-slate-800">AI "instant simplified reading" lead magnet</td><td class="p-3">High-converting lead-capture mechanism</td><td class="p-3 text-red-600">High</td></tr>
+                        </tbody></table>
+                    </div>
+                </details>
+
+                <details class="group bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
+                    <summary class="flex justify-between items-center font-medium cursor-pointer list-none p-4 hover:bg-slate-50 transition-colors">
+                        <span class="text-base font-bold text-slate-900 flex items-center"><span class="bg-brand-100 text-brand-700 px-2 py-1 rounded text-xs mr-3">90–100</span> Mobile App Features</span>
+                        <span class="transition group-open:rotate-180 text-slate-400"><svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg></span>
+                    </summary>
+                    <div class="p-0 border-t border-slate-100 text-slate-600 overflow-x-auto">
+                        <table class="w-full text-left text-sm whitespace-nowrap md:whitespace-normal"><thead class="bg-slate-50"><tr><th class="p-3 w-12 text-center">#</th><th class="p-3">Feature</th><th class="p-3">Business Benefit</th><th class="p-3 w-24">Difficulty</th></tr></thead>
+                        <tbody class="divide-y divide-slate-100 text-xs md:text-sm">
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">92</td><td class="p-3 font-medium text-slate-800">In-app booking + payment</td><td class="p-3">Higher conversion, full attribution</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">93</td><td class="p-3 font-medium text-slate-800">In-app community/forum access</td><td class="p-3">Higher app stickiness</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">96</td><td class="p-3 font-medium text-slate-800">In-app referral/rewards program</td><td class="p-3">Turns 100K users into growth engine</td><td class="p-3 text-amber-600">Medium</td></tr>
+                            <tr class="hover:bg-slate-50/50"><td class="p-3 text-center text-slate-400">100</td><td class="p-3 font-medium text-slate-800">In-app astrologer marketplace</td><td class="p-3">Scales beyond founder's personal time</td><td class="p-3 text-red-600">High</td></tr>
+                        </tbody></table>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <section id="growth-part-9-10" class="mb-12 scroll-mt-24">
+            
+            <!-- Part 9: 5 Year Vision -->
+            <h2 class="text-2xl font-serif font-bold text-slate-900 mb-6 border-b border-slate-200 pb-4">Part 9 — Future Vision (5 Years)</h2>
+            <div class="bg-slate-900 rounded-2xl shadow-sm border border-slate-800 overflow-hidden mb-12">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm whitespace-nowrap md:whitespace-normal text-slate-300">
+                        <thead class="bg-slate-950 border-b border-slate-800 text-white">
+                            <tr>
+                                <th class="p-4 font-semibold w-1/4">Core Build</th>
+                                <th class="p-4 font-semibold w-1/4">Year 1</th>
+                                <th class="p-4 font-semibold w-1/4">Years 2–3</th>
+                                <th class="p-4 font-semibold w-1/4">Years 4–5</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800">
+                            <tr class="hover:bg-slate-800/50"><td class="p-4 font-bold text-brand-300">Mobile App</td><td class="p-4">Fix links, in-app booking</td><td class="p-4">Add community & dashboard</td><td class="p-4">Primary platform (most engagement here)</td></tr>
+                            <tr class="hover:bg-slate-800/50"><td class="p-4 font-bold text-brand-300">Research Portal</td><td class="p-4">White paper + case studies</td><td class="p-4">Peer review, fellowships</td><td class="p-4">Recognized industry reference report</td></tr>
+                            <tr class="hover:bg-slate-800/50"><td class="p-4 font-bold text-brand-300">Global Certification</td><td class="p-4">Formalize 3-level credential</td><td class="p-4">Proctored exams, public verification</td><td class="p-4">Internationally recognized standard</td></tr>
+                            <tr class="hover:bg-slate-800/50"><td class="p-4 font-bold text-brand-300">Student Marketplace</td><td class="p-4 text-slate-500">N/A</td><td class="p-4">Pilot certified booking</td><td class="p-4">Meaningful revenue scaled past founder</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Part 10: CEO Recommendations -->
+            <h2 class="text-2xl font-serif font-bold text-slate-900 mb-6 border-b border-slate-200 pb-4">Part 10 — CEO-Level Strategic Priorities</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60 lg:col-span-2">
+                    <h3 class="font-bold text-slate-900 mb-4 border-b border-slate-100 pb-2 flex items-center">
+                        <svg class="w-5 h-5 text-brand-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        Top 10 Growth Improvements (Ranked by Overall Impact)
+                    </h3>
+                    <ol class="list-decimal pl-5 space-y-2 text-sm text-slate-700">
+                        <li><strong>Add Software & Books to main navigation</strong> (2 of 4 revenue lines are currently invisible)</li>
+                        <li><strong>Publish real pricing</strong> across Courses, Consultation, and Software</li>
+                        <li><strong>Add DOB/TOB/POB fields</strong> to the Consultation/Course forms</li>
+                        <li><strong>Link the existing 100,000-download Google Play app correctly</strong> across the site</li>
+                        <li><strong>Add a media-mentions bar</strong> to the homepage</li>
+                        <li><strong>Build the Student Dashboard</strong> — single biggest retention lever available</li>
+                        <li><strong>Launch online payment</strong>, starting with Books</li>
+                        <li><strong>Add the "Most astrology tells you what, ALP teaches you when" positioning</strong> to the homepage</li>
+                        <li><strong>Embed real video content</strong> on the Videos page</li>
+                        <li><strong>Convert Events</strong> into a real calendar with dates and RSVP</li>
+                    </ol>
+                    <p class="text-xs text-slate-400 mt-4 italic">*See full master document for items 11 through 50.</p>
+                </div>
+
+                <!-- 2x2 Grid for Top 25s -->
+                <div class="bg-green-50 p-6 rounded-2xl shadow-sm border border-green-100">
+                    <h3 class="font-bold text-green-900 mb-3 text-sm uppercase tracking-wider">Top Revenue Ops</h3>
+                    <ul class="list-disc pl-4 space-y-1.5 text-sm text-green-900/80">
+                        <li>Online payment checkout (all products)</li>
+                        <li>Visible tiered pricing + EMI</li>
+                        <li>Software licensing for certified astrologers</li>
+                        <li>Monthly Insight Subscription</li>
+                        <li>Corporate/B2B workshop packages</li>
+                        <li>In-app marketplace for certified astrologers</li>
+                    </ul>
+                </div>
+
+                <div class="bg-blue-50 p-6 rounded-2xl shadow-sm border border-blue-100">
+                    <h3 class="font-bold text-blue-900 mb-3 text-sm uppercase tracking-wider">Top Community Ops</h3>
+                    <ul class="list-disc pl-4 space-y-1.5 text-sm text-blue-900/80">
+                        <li>Student Community Hub platform</li>
+                        <li>Formalized Alumni Network</li>
+                        <li>World Community Map</li>
+                        <li>Regional Chapters (start w/ Canada)</li>
+                        <li>Discussion forum w/ category threads</li>
+                        <li>Community-contributed case studies</li>
+                    </ul>
+                </div>
+
+                <div class="bg-amber-50 p-6 rounded-2xl shadow-sm border border-amber-100">
+                    <h3 class="font-bold text-amber-900 mb-3 text-sm uppercase tracking-wider">Top Trust Ops</h3>
+                    <ul class="list-disc pl-4 space-y-1.5 text-sm text-amber-900/80">
+                        <li>Media-mentions bar on homepage</li>
+                        <li>Verified Google Play review badge</li>
+                        <li>Server-rendered static testimonials</li>
+                        <li>Public ALP methodology white paper</li>
+                        <li>Annual "State of ALP" research report</li>
+                        <li>Peer-review process for research</li>
+                    </ul>
+                </div>
+
+                <div class="bg-purple-50 p-6 rounded-2xl shadow-sm border border-purple-100">
+                    <h3 class="font-bold text-purple-900 mb-3 text-sm uppercase tracking-wider">Top SEO Ops</h3>
+                    <ul class="list-disc pl-4 space-y-1.5 text-sm text-purple-900/80">
+                        <li>Fix sitewide footer link errors</li>
+                        <li>Implement LocalBusiness/Course schema</li>
+                        <li>Fix NAP consistency w/ Play Store</li>
+                        <li>Programmatic city/location pages</li>
+                        <li>Tamil/Hindi pages w/ proper hreflang</li>
+                        <li>Internal linking: content → revenue</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- North Star Plan Banner -->
+            <div class="bg-gradient-to-r from-brand-900 to-brand-700 rounded-2xl shadow-xl overflow-hidden text-white mt-16 border border-brand-600">
+                <div class="p-8 border-b border-white/10">
+                    <h2 class="text-3xl font-serif font-bold text-white flex items-center">
+                        <svg class="w-8 h-8 mr-3 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        The 12-Month North Star Plan
+                    </h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-white/10">
+                    <div class="p-6">
+                        <h4 class="text-amber-400 font-bold mb-2 uppercase tracking-wide text-xs">Q1 — Foundation</h4>
+                        <p class="text-sm text-brand-100">Fix Tier 1 audit bugs, add Software/Books to navigation, publish real pricing, link the app, add media-mentions bar.</p>
+                    </div>
+                    <div class="p-6">
+                        <h4 class="text-amber-400 font-bold mb-2 uppercase tracking-wide text-xs">Q2 — Trust & Conv</h4>
+                        <p class="text-sm text-brand-100">Schema markup, NAP consistency, static testimonial fallback, online payment for Books, fix internal linking.</p>
+                    </div>
+                    <div class="p-6">
+                        <h4 class="text-amber-400 font-bold mb-2 uppercase tracking-wide text-xs">Q3 — Platform</h4>
+                        <p class="text-sm text-brand-100">Launch Student Dashboard, embed real video content, build discussion forum, launch email automation, formalize Alumni.</p>
+                    </div>
+                    <div class="p-6 bg-white/5">
+                        <h4 class="text-amber-400 font-bold mb-2 uppercase tracking-wide text-xs">Q4 — Authority</h4>
+                        <p class="text-sm text-brand-100">Publish white paper, launch research portal, run first community challenge, plan flagship event, launch Tamil content.</p>
+                    </div>
+                </div>
+                <div class="p-6 bg-brand-950/50 text-center text-sm text-brand-200 border-t border-white/10 font-medium">
+                    By Month 12, ALP moves from "a well-designed local website" to the foundation of the world's most trusted astrology research community.
+                </div>
+            </div>
+        </section>
+
+        <footer class="mt-16 pt-8 border-t border-slate-200 text-center text-slate-500 text-sm pb-8">
+            <p>End of Audit Report &copy; 2026. This HTML format is generated specifically for cross-functional review.</p>
+        </footer>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mobile Menu Toggle
+            const mobileBtn = document.getElementById('mobile-menu-btn');
+            const sidebar = document.getElementById('sidebar');
+
+            mobileBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('hidden');
+                sidebar.classList.toggle('absolute');
+                sidebar.classList.toggle('w-full');
+                sidebar.classList.toggle('bg-brand-950');
+            });
+
+            // Smooth scroll and active link highlighting logic
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '-20% 0px -60% 0px',
+                threshold: 0
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        
+                        // Remove active class from all links
+                        navLinks.forEach(link => {
+                            link.classList.remove('bg-brand-900', 'text-white');
+                            link.classList.add('text-slate-300');
+                        });
+
+                        // Add active class to corresponding link
+                        const activeLink = document.querySelector(`.nav-link[href="#${id}"]`);
+                        if (activeLink) {
+                            activeLink.classList.add('bg-brand-900', 'text-white');
+                            activeLink.classList.remove('text-slate-300');
+                        }
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+
+            // Close mobile menu on link click
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth < 768) {
+                        sidebar.classList.add('hidden');
+                        sidebar.classList.remove('absolute', 'w-full');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
