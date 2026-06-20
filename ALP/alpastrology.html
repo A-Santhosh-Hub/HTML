@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALP Astrology | Discover the Timing of Your Life</title>
+    <meta name="description" content="Most astrology tells you what. ALP teaches you when. Discover Akshaya Lagna Paddhati, the structured, learnable predictive method.">
+    
+    <!-- Fonts: Cinzel for premium serif headings, Inter for clean body text -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Cinzel', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fdf8f3',
+                            100: '#fbece0',
+                            200: '#f6d5bb',
+                            300: '#f0b88d',
+                            400: '#e9935b',
+                            500: '#e37532', // Terracotta/Amber CTA
+                            600: '#d55d25',
+                            700: '#b14520',
+                            800: '#8d3820',
+                            900: '#71301d',
+                            950: '#3d160c',
+                        },
+                        space: {
+                            800: '#1e1b4b', // Deep indigo/navy
+                            900: '#110c2e', // Very dark starfield
+                            950: '#0a071c',
+                        }
+                    },
+                    backgroundImage: {
+                        'starfield': 'radial-gradient(ellipse at top, #1e1b4b, #0a071c)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom aesthetics for premium feel */
+        body { background-color: #fdfbf7; }
+        
+        .glass-nav {
+            background: rgba(10, 7, 28, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .star-pattern {
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.6), rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            opacity: 0.3;
+        }
+
+        .zodiac-wheel {
+            animation: spin 120s linear infinite;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        
+        /* Modal transitions */
+        .modal-enter { opacity: 0; transform: scale(0.95); }
+        .modal-enter-active { opacity: 1; transform: scale(1); transition: opacity 300ms, transform 300ms; }
+        .modal-exit { opacity: 1; transform: scale(1); }
+        .modal-exit-active { opacity: 0; transform: scale(0.95); transition: opacity 300ms, transform 300ms; }
+    </style>
+</head>
+
+<body class="text-slate-800 antialiased selection:bg-brand-500 selection:text-white flex flex-col min-h-screen">
+
+    <!-- Navigation -->
+    <header class="fixed w-full top-0 z-50 glass-nav transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer" onclick="window.scrollTo(0,0)">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white shadow-lg shadow-brand-500/30">
+                        <i class="ph ph-star-four text-2xl"></i>
+                    </div>
+                    <span class="font-serif font-bold text-2xl text-white tracking-wide">ALP Astrology</span>
+                </div>
+
+                <!-- Desktop Menu -->
+                <nav class="hidden md:flex space-x-8 items-center">
+                    <a href="#methodology" class="text-slate-200 hover:text-brand-400 font-medium text-sm transition-colors">The Method</a>
+                    <a href="#courses" class="text-slate-200 hover:text-brand-400 font-medium text-sm transition-colors">Courses</a>
+                    <a href="#community" class="text-slate-200 hover:text-brand-400 font-medium text-sm transition-colors">Community</a>
+                    <a href="#consultation" class="text-slate-200 hover:text-brand-400 font-medium text-sm transition-colors">Consultations</a>
+                    
+                    <!-- Products Dropdown (Software/Books) -->
+                    <div class="relative group">
+                        <button class="text-slate-200 hover:text-brand-400 font-medium text-sm transition-colors flex items-center gap-1">
+                            Products <i class="ph ph-caret-down"></i>
+                        </button>
+                        <div class="absolute left-0 mt-2 w-48 rounded-xl bg-white shadow-xl shadow-space-900/10 border border-slate-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-left scale-95 group-hover:scale-100 flex flex-col py-2">
+                            <a href="#app" class="px-4 py-2 text-sm text-slate-700 hover:bg-brand-50 hover:text-brand-600">Mobile App</a>
+                            <a href="#software" class="px-4 py-2 text-sm text-slate-700 hover:bg-brand-50 hover:text-brand-600">Windows Software</a>
+                            <a href="#books" class="px-4 py-2 text-sm text-slate-700 hover:bg-brand-50 hover:text-brand-600">Book Series</a>
+                        </div>
+                    </div>
+                    
+                    <button onclick="openModal('calc-modal')" class="hidden lg:flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full border border-white/20 text-sm font-medium transition-all backdrop-blur-sm">
+                        <i class="ph ph-calculator"></i> Free Lagna Calculator
+                    </button>
+                    <a href="#consultation" class="bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white px-6 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-brand-500/25 transition-all transform hover:-translate-y-0.5">
+                        Book a Reading
+                    </a>
+                </nav>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-slate-200 hover:text-white p-2">
+                        <i class="ph ph-list text-3xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Panel -->
+        <div id="mobile-menu" class="hidden md:hidden bg-space-950 border-t border-white/10 absolute w-full left-0 shadow-2xl">
+            <div class="px-4 pt-2 pb-6 space-y-1 flex flex-col">
+                <a href="#methodology" class="mobile-link text-slate-300 hover:text-brand-400 block px-3 py-3 rounded-md text-base font-medium border-b border-white/5">The Method</a>
+                <a href="#courses" class="mobile-link text-slate-300 hover:text-brand-400 block px-3 py-3 rounded-md text-base font-medium border-b border-white/5">Courses</a>
+                <a href="#consultation" class="mobile-link text-slate-300 hover:text-brand-400 block px-3 py-3 rounded-md text-base font-medium border-b border-white/5">Consultations</a>
+                <a href="#app" class="mobile-link text-slate-300 hover:text-brand-400 block px-3 py-3 rounded-md text-base font-medium border-b border-white/5">App & Software</a>
+                <a href="#books" class="mobile-link text-slate-300 hover:text-brand-400 block px-3 py-3 rounded-md text-base font-medium border-b border-white/5">Books</a>
+                <button onclick="openModal('calc-modal')" class="mt-4 w-full text-left text-white bg-white/10 px-3 py-3 rounded-md text-base font-medium flex items-center gap-2">
+                    <i class="ph ph-calculator"></i> Free Lagna Calculator
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 bg-starfield overflow-hidden">
+        <div class="absolute inset-0 star-pattern"></div>
+        
+        <!-- Abstract decorative element -->
+        <div class="absolute top-1/2 right-[-10%] transform -translate-y-1/2 opacity-20 pointer-events-none zodiac-wheel hidden lg:block">
+            <svg width="600" height="600" viewBox="0 0 100 100" class="text-brand-400 fill-current opacity-50">
+                <!-- Outer ring -->
+                <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" stroke-width="0.5" stroke-dasharray="2 1"/>
+                <!-- Inner rings -->
+                <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="0.2"/>
+                <circle cx="50" cy="50" r="30" fill="none" stroke="currentColor" stroke-width="0.2"/>
+                <!-- 12 houses segments -->
+                <line x1="50" y1="2" x2="50" y2="98" stroke="currentColor" stroke-width="0.2"/>
+                <line x1="2" y1="50" x2="98" y2="50" stroke="currentColor" stroke-width="0.2"/>
+                <line x1="16" y1="16" x2="84" y2="84" stroke="currentColor" stroke-width="0.2"/>
+                <line x1="16" y1="84" x2="84" y2="16" stroke="currentColor" stroke-width="0.2"/>
+                <line x1="25.5" y1="8.5" x2="74.5" y2="91.5" stroke="currentColor" stroke-width="0.2"/>
+                <line x1="8.5" y1="25.5" x2="91.5" y2="74.5" stroke="currentColor" stroke-width="0.2"/>
+            </svg>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="max-w-3xl text-center md:text-left">
+                
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/20 border border-brand-400/30 text-brand-300 text-xs font-bold uppercase tracking-widest mb-6 backdrop-blur-md">
+                    <span class="w-2 h-2 rounded-full bg-brand-400 animate-pulse"></span>
+                    The Methodology, Not The Mystic
+                </div>
+                
+                <h1 class="text-4xl md:text-6xl lg:text-7xl font-serif font-bold text-white leading-tight mb-6">
+                    Most astrology tells you <span class="text-transparent bg-clip-text bg-gradient-to-r from-slate-300 to-slate-500 italic font-normal">what.</span> <br>
+                    ALP teaches you <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-300 to-brand-500">when.</span>
+                </h1>
+                
+                <p class="text-lg md:text-xl text-slate-300 mb-10 leading-relaxed max-w-2xl mx-auto md:mx-0 font-light">
+                    A structured, learnable predictive method created by Dr. S. Pothuvudaimoorthy. Trained the same way to every student—so the guidance you get is consistent, not just intuitive.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                    <a href="#courses" class="bg-brand-500 hover:bg-brand-600 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-[0_0_20px_rgba(227,117,50,0.4)] transition-all flex items-center justify-center gap-2 group">
+                        Explore Courses
+                        <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                    <button onclick="openModal('calc-modal')" class="bg-white/10 hover:bg-white/20 text-white backdrop-blur-md border border-white/20 px-8 py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2">
+                        <i class="ph ph-magic-wand"></i> Free Lagna Calculator
+                    </button>
+                </div>
+
+                <div class="mt-12 flex flex-col sm:flex-row items-center gap-6 justify-center md:justify-start text-sm">
+                    <div class="flex items-center gap-2 text-slate-300 bg-space-800/50 px-4 py-2 rounded-lg border border-space-800 backdrop-blur-sm">
+                        <div class="flex -space-x-2">
+                            <img src="https://placehold.co/40x40/e37532/fff?text=R" class="w-8 h-8 rounded-full border-2 border-space-900" alt="Reviewer">
+                            <img src="https://placehold.co/40x40/1e1b4b/fff?text=S" class="w-8 h-8 rounded-full border-2 border-space-900" alt="Reviewer">
+                            <img src="https://placehold.co/40x40/4c1d95/fff?text=V" class="w-8 h-8 rounded-full border-2 border-space-900" alt="Reviewer">
+                        </div>
+                        <div>
+                            <div class="flex text-amber-400 text-xs">
+                                <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star-half"></i>
+                            </div>
+                            <span class="font-medium text-white">4.1★</span> on Google Play
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 text-slate-400">
+                        <i class="ph-fill ph-download-simple text-xl"></i>
+                        <span>Over <strong class="text-white">100,000+</strong> app downloads</span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+        <!-- Bottom curved divider -->
+        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-10">
+            <svg class="relative block w-full h-[50px] md:h-[100px]" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z" fill="#fdfbf7"></path>
+            </svg>
+        </div>
+    </section>
+
+    <!-- As Seen On (Media Bar) -->
+    <section class="py-10 bg-[#fdfbf7] border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-sm font-bold tracking-widest text-slate-400 uppercase mb-6">As Featured On</p>
+            <div class="flex flex-wrap justify-center gap-8 md:gap-16 items-center opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+                <!-- Using placeholder text since we don't have SVG logos for local TV stations -->
+                <div class="font-serif font-bold text-xl text-slate-800">Vijay TV</div>
+                <div class="font-serif font-bold text-xl text-slate-800">Zee Tamil</div>
+                <div class="font-serif font-bold text-xl text-slate-800">Jaya Plus</div>
+                <div class="font-serif font-bold text-xl text-slate-800">Vendhar TV</div>
+                <div class="font-serif font-bold text-xl text-slate-800">Pudu Yugam</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Real Verified Stats -->
+    <section class="py-12 bg-space-900 border-b border-space-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-space-800">
+                <div class="px-4">
+                    <div class="text-3xl md:text-5xl font-serif font-bold text-white mb-2">100k+</div>
+                    <div class="text-brand-400 text-sm font-bold uppercase tracking-wider">App Downloads</div>
+                    <div class="text-slate-400 text-xs mt-1">4.1★ on Google Play</div>
+                </div>
+                <div class="px-4">
+                    <div class="text-3xl md:text-5xl font-serif font-bold text-white mb-2">50k+</div>
+                    <div class="text-brand-400 text-sm font-bold uppercase tracking-wider">Clients Guided</div>
+                    <div class="text-slate-400 text-xs mt-1">Worldwide</div>
+                </div>
+                <div class="px-4">
+                    <div class="text-3xl md:text-5xl font-serif font-bold text-white mb-2">25+</div>
+                    <div class="text-brand-400 text-sm font-bold uppercase tracking-wider">Years Experience</div>
+                    <div class="text-slate-400 text-xs mt-1">4th-Gen Astrologer</div>
+                </div>
+                <div class="px-4">
+                    <div class="text-3xl md:text-5xl font-serif font-bold text-white mb-2">6</div>
+                    <div class="text-brand-400 text-sm font-bold uppercase tracking-wider">Published Books</div>
+                    <div class="text-slate-400 text-xs mt-1">Proprietary IP</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Vision & Mission -->
+    <section class="py-16 bg-white border-b border-slate-200 relative overflow-hidden">
+        <!-- Abstract decorative rings -->
+        <div class="absolute -right-32 -top-32 w-96 h-96 border-[40px] border-brand-50 rounded-full opacity-50"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid md:grid-cols-2 gap-12 lg:gap-24 items-center">
+                <div>
+                    <h3 class="text-brand-600 font-bold tracking-wider uppercase text-sm mb-3">Global Vision</h3>
+                    <p class="text-2xl lg:text-3xl font-serif font-medium text-slate-900 leading-snug mb-8">
+                        "A world where anyone, in any country, can access a clear, structured, and trustworthy way to understand the timing of their own life — taught the same way, every time."
+                    </p>
+                    <h3 class="text-brand-600 font-bold tracking-wider uppercase text-sm mb-3">Our Mission</h3>
+                    <p class="text-lg text-slate-600 leading-relaxed border-l-4 border-brand-300 pl-4">
+                        To teach, practice, and continually refine Akshaya Lagna Paddhati as a structured, learnable predictive method — with the consistency of a discipline, the accessibility of modern technology, and the integrity of an ethical practice.
+                    </p>
+                </div>
+                <div class="bg-brand-50 p-8 md:p-10 rounded-[2rem] border border-brand-100 shadow-xl shadow-brand-100/50 relative">
+                    <div class="absolute -top-6 -left-6 text-brand-200 opacity-60"><i class="ph-fill ph-quotes text-8xl"></i></div>
+                    <p class="text-slate-700 italic relative z-10 font-medium text-lg leading-relaxed mb-8">
+                        "Twenty-five years ago, on a pilgrimage in the Himalayas, I sat beneath a banyan tree and asked a simple question: traditional astrology tracks the Moon's movement to time life's events—so why not the Ascendant, too? That single question evolved into the structured ALP method we teach globally today."
+                    </p>
+                    <div class="flex items-center gap-4 border-t border-brand-200/50 pt-6">
+                        <img src="https://placehold.co/60x60/1e1b4b/e37532?text=SP" alt="Founder" class="w-14 h-14 rounded-full shadow-md border-2 border-white">
+                        <div>
+                            <h4 class="font-bold text-slate-900">Dr. S. Pothuvudaimoorthy</h4>
+                            <p class="text-xs text-brand-600 font-bold uppercase tracking-wider mt-1">Founder, ALP Astrology</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Methodology (The ALP Difference) -->
+    <section id="methodology" class="py-20 lg:py-32 bg-[#fdfbf7]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-brand-600 font-bold tracking-wider uppercase text-sm mb-2 block">Akshaya Lagna Paddhati</span>
+                <h2 class="text-3xl md:text-5xl font-serif font-bold text-slate-900 mb-6">A System, Not Just Intuition.</h2>
+                <p class="text-lg text-slate-600 leading-relaxed">
+                    Where traditional Vedic astrology times events using Dasha/Bhukti (Moon-based periods), ALP progresses the <strong>Lagna (Ascendant)</strong> instead. We advance one Nakshatra Pada every 1 year, 1 month, and 10 days to pinpoint life events with remarkable consistency.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl transition-shadow duration-300">
+                    <div class="w-14 h-14 bg-brand-50 rounded-xl flex items-center justify-center text-brand-600 mb-6">
+                        <i class="ph ph-tree-structure text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">Structured & Learnable</h3>
+                    <p class="text-slate-600">ALP is taught like a science. Because it relies on mathematical progression rather than pure intuition, anyone can learn to apply it accurately.</p>
+                </div>
+                <!-- Feature 2 -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl transition-shadow duration-300">
+                    <div class="w-14 h-14 bg-brand-50 rounded-xl flex items-center justify-center text-brand-600 mb-6">
+                        <i class="ph ph-arrows-merge text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">Consistent Results</h3>
+                    <p class="text-slate-600">Our core philosophy: The timing of your life shouldn't change depending on which astrologer you ask. ALP trained practitioners give consistent guidance.</p>
+                </div>
+                <!-- Feature 3 -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl transition-shadow duration-300">
+                    <div class="w-14 h-14 bg-brand-50 rounded-xl flex items-center justify-center text-brand-600 mb-6">
+                        <i class="ph ph-books text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">A Complete Ecosystem</h3>
+                    <p class="text-slate-600">Backed by 6 published textbooks, proprietary calculation software, and an active international alumni network of certified researchers.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Courses Section -->
+    <section id="courses" class="py-20 lg:py-32 bg-slate-50 border-t border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+                <div class="max-w-2xl">
+                    <h2 class="text-3xl md:text-5xl font-serif font-bold text-slate-900 mb-4">Master the ALP Method</h2>
+                    <p class="text-lg text-slate-600">From beginners learning to read their own chart, to professionals seeking the Master certification. Join the next batch.</p>
+                </div>
+                <button class="flex items-center gap-2 text-brand-600 font-bold hover:text-brand-700 transition-colors whitespace-nowrap">
+                    Download Full Syllabus <i class="ph ph-download-simple"></i>
+                </button>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                <!-- Basic Course -->
+                <div class="bg-white rounded-3xl p-8 border border-slate-200 flex flex-col relative overflow-hidden">
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Basic Level</h3>
+                    <p class="text-sm text-slate-500 mb-6">Perfect for beginners and personal use.</p>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold text-slate-900">₹4,999</span>
+                    </div>
+                    <ul class="space-y-4 mb-8 flex-1">
+                        <li class="flex items-start gap-3 text-slate-700"><i class="ph-fill ph-check-circle text-green-500 mt-1"></i> Introduction to Lagna Progression</li>
+                        <li class="flex items-start gap-3 text-slate-700"><i class="ph-fill ph-check-circle text-green-500 mt-1"></i> Reading your own chart</li>
+                        <li class="flex items-start gap-3 text-slate-700"><i class="ph-fill ph-check-circle text-green-500 mt-1"></i> 4 Weeks duration (Online)</li>
+                        <li class="flex items-start gap-3 text-slate-700"><i class="ph-fill ph-check-circle text-green-500 mt-1"></i> Digital Certificate of Completion</li>
+                        <li class="flex items-start gap-3 text-brand-700 font-semibold mt-4 pt-4 border-t border-slate-100"><i class="ph-fill ph-calendar-blank text-brand-500 mt-1"></i> Next Batch: July 15th</li>
+                    </ul>
+                    <a href="https://wa.me/919876543210?text=I%20want%20to%20enroll%20in%20the%20Basic%20ALP%20Astrology%20Course" target="_blank" class="block w-full py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-center rounded-xl transition-colors">Enroll in Basic</a>
+                </div>
+
+                <!-- Advanced Course (Highlighted) -->
+                <div class="bg-space-900 rounded-3xl p-8 border border-space-800 flex flex-col relative overflow-hidden transform md:-translate-y-4 shadow-2xl">
+                    <div class="absolute top-0 right-0 bg-brand-500 text-white text-xs font-bold px-4 py-1 rounded-bl-xl uppercase tracking-wider">Most Popular</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Advanced Level</h3>
+                    <p class="text-sm text-slate-400 mb-6">For aspiring practitioners and enthusiasts.</p>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold text-white">₹14,999</span>
+                        <span class="text-slate-400 text-sm block mt-1">EMI options available</span>
+                    </div>
+                    <ul class="space-y-4 mb-8 flex-1">
+                        <li class="flex items-start gap-3 text-slate-300"><i class="ph-fill ph-check-circle text-brand-400 mt-1"></i> Deep dive into Nakshatra Padas</li>
+                        <li class="flex items-start gap-3 text-slate-300"><i class="ph-fill ph-check-circle text-brand-400 mt-1"></i> Marriage & Career timing rules</li>
+                        <li class="flex items-start gap-3 text-slate-300"><i class="ph-fill ph-check-circle text-brand-400 mt-1"></i> 3 Months duration (Live classes)</li>
+                        <li class="flex items-start gap-3 text-slate-300"><i class="ph-fill ph-check-circle text-brand-400 mt-1"></i> Practice chart library access</li>
+                        <li class="flex items-start gap-3 text-brand-300 font-semibold mt-4 pt-4 border-t border-space-700"><i class="ph-fill ph-calendar-blank text-brand-400 mt-1"></i> Next Batch: August 1st</li>
+                    </ul>
+                    <a href="https://wa.me/919876543210?text=I%20want%20to%20enroll%20in%20the%20Advanced%20ALP%20Astrology%20Course" target="_blank" class="block w-full py-3 px-4 bg-brand-500 hover:bg-brand-600 text-white font-bold text-center rounded-xl transition-colors">Enroll in Advanced</a>
+                </div>
+
+                <!-- Master Course -->
+                <div class="bg-white rounded-3xl p-8 border border-slate-200 flex flex-col relative overflow-hidden">
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Master's Level</h3>
+                    <p class="text-sm text-slate-500 mb-6">Professional certification & research.</p>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold text-slate-900">₹34,999</span>
+                    </div>
+                    <ul class="space-y-4 mb-8 flex-1">
+                        <li class="flex items-start gap-3 text-slate-700"><i class="ph-fill ph-check-circle text-green-500 mt-1"></i> Complex case study analysis</li>
+                        <li class="flex items-start gap-3 text-slate-700"><i class="ph-fill ph-check-circle text-green-500 mt-1"></i> Direct mentorship with Founder</li>
+                        <li class="flex items-start gap-3 text-slate-700"><i class="ph-fill ph-check-circle text-green-500 mt-1"></i> 6 Months + Capstone Project</li>
+                        <li class="flex items-start gap-3 text-slate-700"><i class="ph-fill ph-check-circle text-green-500 mt-1"></i> Official Practitioner Certification</li>
+                        <li class="flex items-start gap-3 text-brand-700 font-semibold mt-4 pt-4 border-t border-slate-100"><i class="ph-fill ph-calendar-blank text-brand-500 mt-1"></i> Next Intake: September 2026</li>
+                    </ul>
+                    <a href="https://wa.me/919876543210?text=I%20want%20to%20apply%20for%20the%20Master%20ALP%20Astrology%20Course" target="_blank" class="block w-full py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-center rounded-xl transition-colors">Apply for Master's</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Global Community & Dashboard -->
+    <section id="community" class="py-20 lg:py-32 bg-space-900 relative overflow-hidden">
+        <div class="absolute inset-0 star-pattern"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-brand-400 font-bold tracking-wider uppercase text-sm mb-2 block">Beyond The Classroom</span>
+                <h2 class="text-3xl md:text-5xl font-serif font-bold text-white mb-6">A Global Research Ecosystem.</h2>
+                <p class="text-lg text-slate-300 leading-relaxed">
+                    When you enroll, you don't just get a syllabus. You join an international network of students, alumni, and certified practitioners sharing real case studies.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Community Hub -->
+                <div class="bg-space-800/80 backdrop-blur-md border border-space-700 p-8 rounded-[2rem] hover:border-brand-500 transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="w-14 h-14 bg-space-700 rounded-xl flex items-center justify-center text-brand-400 mb-6">
+                        <i class="ph ph-users-three text-3xl"></i>
+                    </div>
+                    <h3 class="text-white font-bold text-xl mb-3">Alumni Directory</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Connect with peers globally. Find study partners, join regional chapters, and grow your own practice.</p>
+                </div>
+                <!-- Dashboard -->
+                <div class="bg-space-800/80 backdrop-blur-md border border-space-700 p-8 rounded-[2rem] hover:border-brand-500 transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="w-14 h-14 bg-space-700 rounded-xl flex items-center justify-center text-brand-400 mb-6">
+                        <i class="ph ph-laptop text-3xl"></i>
+                    </div>
+                    <h3 class="text-white font-bold text-xl mb-3">Student Dashboard</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Log in to track your course progress, access recorded live classes, and download official certificates.</p>
+                </div>
+                <!-- Research Portal -->
+                <div class="bg-space-800/80 backdrop-blur-md border border-space-700 p-8 rounded-[2rem] hover:border-brand-500 transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="w-14 h-14 bg-space-700 rounded-xl flex items-center justify-center text-brand-400 mb-6">
+                        <i class="ph ph-flask text-3xl"></i>
+                    </div>
+                    <h3 class="text-white font-bold text-xl mb-3">Research Portal</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Submit real case studies, log prediction outcomes, and contribute to the annual "State of ALP" report.</p>
+                </div>
+                <!-- Discussion Forums -->
+                <div class="bg-space-800/80 backdrop-blur-md border border-space-700 p-8 rounded-[2rem] hover:border-brand-500 transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="w-14 h-14 bg-space-700 rounded-xl flex items-center justify-center text-brand-400 mb-6">
+                        <i class="ph ph-chats-circle text-3xl"></i>
+                    </div>
+                    <h3 class="text-white font-bold text-xl mb-3">Discussion Forums</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Got a question on a tricky natal chart? Get reliable answers from certified Master practitioners.</p>
+                </div>
+            </div>
+
+            <div class="mt-16 text-center">
+                <button onclick="alert('Proceeding to secure student login portal...')" class="bg-white/10 hover:bg-white text-white hover:text-space-900 border border-white/20 px-10 py-4 rounded-xl font-bold transition-all shadow-lg inline-flex items-center gap-3 group">
+                    <i class="ph-fill ph-sign-in"></i> Access Student Dashboard
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Consultations -->
+    <section id="consultation" class="py-20 bg-[#fdfbf7]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-brand-50 rounded-[2.5rem] p-8 md:p-16 border border-brand-100 relative overflow-hidden">
+                <!-- Background decoration -->
+                <div class="absolute -top-24 -right-24 w-96 h-96 bg-brand-200 rounded-full blur-3xl opacity-40"></div>
+                
+                <div class="grid md:grid-cols-2 gap-12 relative z-10 items-center">
+                    <div>
+                        <h2 class="text-3xl md:text-4xl font-serif font-bold text-slate-900 mb-6">Need clarity right now? Book a 1-to-1 reading.</h2>
+                        <p class="text-slate-700 mb-8 text-lg">Our certified practitioners use the ALP method to give you precise timing for marriage, career transitions, and health inquiries. No vague predictions.</p>
+                        
+                        <div class="space-y-6 mb-10">
+                            <div class="flex gap-4">
+                                <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center font-bold text-brand-600 shadow-sm shrink-0">1</div>
+                                <div>
+                                    <h4 class="font-bold text-slate-900">Provide Birth Details</h4>
+                                    <p class="text-sm text-slate-600">We require your exact Date, Time, and Place of Birth.</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-4">
+                                <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center font-bold text-brand-600 shadow-sm shrink-0">2</div>
+                                <div>
+                                    <h4 class="font-bold text-slate-900">Schedule Meeting</h4>
+                                    <p class="text-sm text-slate-600">Pick a time that works for your time zone.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Using form CTA to open modal or direct to secure booking -->
+                        <button onclick="alert('In a live environment, this would open a calendar booking widget (like Calendly) that mandates DOB, Time, and Place fields before allowing payment.')" class="bg-slate-900 hover:bg-slate-800 text-white px-8 py-4 rounded-xl font-bold transition-all shadow-lg flex items-center gap-2">
+                            Book Consultation <i class="ph-bold ph-arrow-right"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="bg-white p-8 rounded-2xl shadow-xl border border-slate-100 transform rotate-2 hover:rotate-0 transition-transform duration-500">
+                        <h3 class="font-bold text-xl mb-4 border-b pb-2">Reading Focus Areas</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-center gap-3"><div class="p-2 bg-brand-50 rounded text-brand-600"><i class="ph ph-briefcase"></i></div> <span class="font-medium">Career & Business Timing</span></li>
+                            <li class="flex items-center gap-3"><div class="p-2 bg-brand-50 rounded text-brand-600"><i class="ph ph-heart"></i></div> <span class="font-medium">Marriage & Compatibility</span></li>
+                            <li class="flex items-center gap-3"><div class="p-2 bg-brand-50 rounded text-brand-600"><i class="ph ph-house"></i></div> <span class="font-medium">Property & Wealth Accumulation</span></li>
+                            <li class="flex items-center gap-3"><div class="p-2 bg-brand-50 rounded text-brand-600"><i class="ph ph-first-aid"></i></div> <span class="font-medium">Health & Pranic Healing Remedies</span></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mt-16 bg-white p-8 md:p-12 rounded-[2.5rem] shadow-xl border border-brand-100 relative z-10">
+                    <div class="text-center mb-10">
+                        <h3 class="text-2xl md:text-3xl font-bold text-slate-900 mb-2">Request Your Reading</h3>
+                        <p class="text-slate-500">Provide accurate birth details below so our certified astrologers can prepare your progressed Lagna chart before the session.</p>
+                    </div>
+                    
+                    <form onsubmit="event.preventDefault(); alert('Form submitted successfully with exact DOB, Time, and Place. Your details have been securely logged and you are being redirected to the time-slot selection calendar.');" class="space-y-6 max-w-4xl mx-auto">
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">Full Name</label>
+                                <input type="text" placeholder="Your Name" required class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">WhatsApp Number</label>
+                                <input type="tel" placeholder="+91 XXXXX XXXXX" required class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none transition-all">
+                            </div>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-3 gap-6 p-6 bg-brand-50/50 rounded-2xl border border-brand-100/50">
+                            <div>
+                                <label class="block text-xs font-bold text-brand-900 uppercase tracking-wide mb-2"><i class="ph-fill ph-calendar-blank mr-1"></i> Date of Birth</label>
+                                <input type="date" required class="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-brand-900 uppercase tracking-wide mb-2"><i class="ph-fill ph-clock mr-1"></i> Exact Time</label>
+                                <input type="time" required class="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-brand-900 uppercase tracking-wide mb-2"><i class="ph-fill ph-map-pin mr-1"></i> City of Birth</label>
+                                <input type="text" placeholder="e.g., Chennai, TN" required class="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none transition-all">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">Primary Focus of Reading</label>
+                            <select class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none text-slate-700 transition-all cursor-pointer">
+                                <option>Career & Finance Transitions</option>
+                                <option>Marriage & Relationship Compatibility</option>
+                                <option>Health & Wellness Guidance</option>
+                                <option>General Life Reading (Full Chart Analysis)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="pt-6 text-center">
+                            <button type="submit" class="bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white px-12 py-5 rounded-xl font-bold text-lg shadow-xl shadow-brand-500/25 transition-all transform hover:-translate-y-1 inline-flex items-center gap-3">
+                                Proceed to Pick a Date <i class="ph-bold ph-calendar-plus text-xl"></i>
+                            </button>
+                            <p class="text-xs text-slate-500 mt-4 flex items-center justify-center gap-1">
+                                <i class="ph-fill ph-lock-key"></i> 100% Secure & Confidential. Your chart data is never shared.
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mobile App Promo -->
+    <section id="app" class="py-20 lg:py-32 bg-space-900 text-white overflow-hidden relative">
+        <div class="absolute inset-0 star-pattern"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="order-2 md:order-1 flex justify-center">
+                    <!-- Placeholder for App Mockup -->
+                    <div class="w-64 h-[500px] bg-space-800 rounded-[3rem] border-8 border-space-950 shadow-2xl relative overflow-hidden flex flex-col">
+                        <div class="absolute top-0 inset-x-0 h-6 bg-space-950 rounded-b-xl w-32 mx-auto"></div>
+                        <div class="flex-1 p-4 pt-10">
+                            <div class="flex items-center gap-3 mb-6">
+                                <div class="w-10 h-10 rounded-full bg-brand-500"></div>
+                                <div><div class="h-3 w-20 bg-space-700 rounded mb-1"></div><div class="h-2 w-12 bg-space-700 rounded"></div></div>
+                            </div>
+                            <div class="w-full h-48 rounded-full border border-space-700 flex items-center justify-center mb-6">
+                                <i class="ph ph-planet text-5xl text-brand-400"></i>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="h-10 w-full bg-space-700 rounded-lg"></div>
+                                <div class="h-10 w-full bg-brand-600 rounded-lg"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="order-1 md:order-2">
+                    <span class="text-brand-400 font-bold tracking-wider uppercase text-sm mb-2 block">Take ALP Everywhere</span>
+                    <h2 class="text-3xl md:text-5xl font-serif font-bold mb-6">Trusted by 100,000+ Users.</h2>
+                    <p class="text-slate-300 text-lg mb-8">Generate your charts instantly using the proprietary ALP calculation engine. Perfect for practicing students and professional astrologers alike.</p>
+                    
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <a href="#" class="bg-white text-space-900 px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-3 hover:bg-slate-100 transition-colors">
+                            <i class="ph-fill ph-google-play-logo text-2xl text-green-600"></i>
+                            <div class="text-left">
+                                <div class="text-[10px] leading-tight text-slate-500 uppercase">Get it on</div>
+                                <div class="text-sm leading-tight">Google Play</div>
+                            </div>
+                        </a>
+                        <a href="#" class="bg-white text-space-900 px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-3 hover:bg-slate-100 transition-colors">
+                            <i class="ph-fill ph-apple-logo text-2xl"></i>
+                            <div class="text-left">
+                                <div class="text-[10px] leading-tight text-slate-500 uppercase">Download on the</div>
+                                <div class="text-sm leading-tight">App Store</div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- Software Desktop Tiers -->
+                    <div id="software" class="mt-12">
+                        <h4 class="font-bold text-white mb-6 flex items-center gap-2"><i class="ph ph-desktop text-2xl text-brand-400"></i> Windows Desktop Software Tiers</h4>
+                        <div class="grid sm:grid-cols-3 gap-4">
+                            <div class="bg-space-800 p-4 rounded-xl border border-space-700 hover:border-brand-500 transition-colors">
+                                <h5 class="font-bold text-white mb-1">ALP Basic</h5>
+                                <p class="text-xs text-slate-400 mb-4">Core Lagna progression engine.</p>
+                                <a href="https://wa.me/919876543210?text=I%20want%20to%20buy%20the%20ALP%20Basic%20Desktop%20Software" target="_blank" class="block w-full py-2 bg-space-700 hover:bg-brand-600 text-white text-xs text-center font-bold rounded-lg transition-colors">Buy License</a>
+                            </div>
+                            <div class="bg-space-800 p-4 rounded-xl border border-brand-500/50 relative">
+                                <div class="absolute -top-2.5 right-4 bg-brand-500 text-white text-[10px] font-bold px-2 py-0.5 rounded">POPULAR</div>
+                                <h5 class="font-bold text-white mb-1">ALP Advanced</h5>
+                                <p class="text-xs text-slate-400 mb-4">Full Dasha/Bhukti + Lagna sync.</p>
+                                <a href="https://wa.me/919876543210?text=I%20want%20to%20buy%20the%20ALP%20Advanced%20Desktop%20Software" target="_blank" class="block w-full py-2 bg-brand-500 hover:bg-brand-600 text-white text-xs text-center font-bold rounded-lg transition-colors">Buy License</a>
+                            </div>
+                            <div class="bg-space-800 p-4 rounded-xl border border-space-700 hover:border-brand-500 transition-colors">
+                                <h5 class="font-bold text-white mb-1">TP Professional</h5>
+                                <p class="text-xs text-slate-400 mb-4">Advanced research & export tools.</p>
+                                <a href="https://wa.me/919876543210?text=I%20want%20to%20buy%20the%20ALP%20TP%20Professional%20Desktop%20Software" target="_blank" class="block w-full py-2 bg-space-700 hover:bg-brand-600 text-white text-xs text-center font-bold rounded-lg transition-colors">Buy License</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Books Section -->
+    <section id="books" class="py-20 lg:py-32 bg-slate-50 border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <span class="text-brand-600 font-bold tracking-wider uppercase text-sm mb-2 block">Official Literature</span>
+            <h2 class="text-3xl md:text-4xl font-serif font-bold text-slate-900 mb-12">The ALP Book Series</h2>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                <!-- Book Item (Generated dynamically in a real app, hardcoded for preview) -->
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 text-left group">
+                    <div class="w-full aspect-[2/3] bg-amber-900 rounded border-l-4 border-amber-950 mb-4 flex items-center justify-center text-amber-500/30 group-hover:shadow-lg transition-shadow">
+                        <i class="ph-fill ph-book-bookmark text-4xl"></i>
+                    </div>
+                    <h4 class="font-bold text-slate-900 text-sm leading-tight mb-1">Vol 1: Intro to ALP</h4>
+                    <p class="text-brand-600 font-bold text-sm mb-3">₹450</p>
+                    <button class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-xs font-bold rounded text-slate-700 transition-colors">Buy via UPI</button>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 text-left group">
+                    <div class="w-full aspect-[2/3] bg-teal-900 rounded border-l-4 border-teal-950 mb-4 flex items-center justify-center text-teal-500/30 group-hover:shadow-lg transition-shadow">
+                        <i class="ph-fill ph-book-bookmark text-4xl"></i>
+                    </div>
+                    <h4 class="font-bold text-slate-900 text-sm leading-tight mb-1">Vol 2: Lagna Timing</h4>
+                    <p class="text-brand-600 font-bold text-sm mb-3">₹550</p>
+                    <button class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-xs font-bold rounded text-slate-700 transition-colors">Buy via UPI</button>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 text-left group">
+                    <div class="w-full aspect-[2/3] bg-indigo-900 rounded border-l-4 border-indigo-950 mb-4 flex items-center justify-center text-indigo-500/30 group-hover:shadow-lg transition-shadow">
+                        <i class="ph-fill ph-book-bookmark text-4xl"></i>
+                    </div>
+                    <h4 class="font-bold text-slate-900 text-sm leading-tight mb-1">Vol 3: Marriage</h4>
+                    <p class="text-brand-600 font-bold text-sm mb-3">₹600</p>
+                    <button class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-xs font-bold rounded text-slate-700 transition-colors">Buy via UPI</button>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 text-left group">
+                    <div class="w-full aspect-[2/3] bg-rose-900 rounded border-l-4 border-rose-950 mb-4 flex items-center justify-center text-rose-500/30 group-hover:shadow-lg transition-shadow">
+                        <i class="ph-fill ph-book-bookmark text-4xl"></i>
+                    </div>
+                    <h4 class="font-bold text-slate-900 text-sm leading-tight mb-1">Vol 4: Career</h4>
+                    <p class="text-brand-600 font-bold text-sm mb-3">₹600</p>
+                    <button class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-xs font-bold rounded text-slate-700 transition-colors">Buy via UPI</button>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 text-left group hidden md:block">
+                    <div class="w-full aspect-[2/3] bg-slate-900 rounded border-l-4 border-slate-950 mb-4 flex items-center justify-center text-slate-500/30 group-hover:shadow-lg transition-shadow">
+                        <i class="ph-fill ph-book-bookmark text-4xl"></i>
+                    </div>
+                    <h4 class="font-bold text-slate-900 text-sm leading-tight mb-1">Vol 5: Medical</h4>
+                    <p class="text-brand-600 font-bold text-sm mb-3">₹750</p>
+                    <button class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-xs font-bold rounded text-slate-700 transition-colors">Buy via UPI</button>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 text-left group hidden lg:block">
+                    <div class="w-full aspect-[2/3] bg-brand-900 rounded border-l-4 border-brand-950 mb-4 flex items-center justify-center text-brand-500/30 group-hover:shadow-lg transition-shadow">
+                        <i class="ph-fill ph-book-bookmark text-4xl"></i>
+                    </div>
+                    <h4 class="font-bold text-slate-900 text-sm leading-tight mb-1">Vol 6: Advanced</h4>
+                    <p class="text-brand-600 font-bold text-sm mb-3">₹750</p>
+                    <button class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-xs font-bold rounded text-slate-700 transition-colors">Buy via UPI</button>
+                </div>
+            </div>
+            
+            <div class="mt-8">
+                <button class="text-brand-600 font-bold border-b border-brand-600 pb-0.5 hover:text-brand-700 transition-colors">Get the Complete 6-Book Bundle for ₹3,499</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Free Lagna Pada Lead Magnet Tool -->
+    <section class="py-24 bg-brand-600 text-white relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10">
+            <!-- Background grid pattern -->
+            <svg class="h-full w-full" xmlns="http://www.w3.org/2000/svg">
+                <defs><pattern id="hero-pattern" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M0 40V0H40" fill="none" stroke="currentColor" stroke-opacity="0.5"/></pattern></defs>
+                <rect width="100%" height="100%" fill="url(#hero-pattern)" />
+            </svg>
+        </div>
+        
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center mb-10">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md mb-6 shadow-xl border border-white/20">
+                    <i class="ph-fill ph-magic-wand text-3xl text-brand-100"></i>
+                </div>
+                <h2 class="text-3xl md:text-5xl font-serif font-bold mb-4">Discover Your Current Lagna Pada</h2>
+                <p class="text-brand-100 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+                    Most charts freeze at the minute you were born. Enter your details below to instantly calculate where your progressed Ascendant sits <strong>today</strong>, and receive a free simplified AI reading.
+                </p>
+            </div>
+            
+            <!-- High Conversion Inline Form -->
+            <form onsubmit="event.preventDefault(); alert('Lead Captured! In production, this calculates the Lagna Pada, provides an instant preview, and adds the email to the CRM nurture sequence.');" class="bg-white p-2 rounded-2xl md:rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex flex-col md:flex-row max-w-4xl mx-auto relative z-20">
+                
+                <div class="flex-1 flex items-center relative">
+                    <i class="ph-fill ph-calendar-blank absolute left-5 text-slate-400 text-xl"></i>
+                    <input type="date" required class="w-full pl-12 pr-4 py-4 md:py-5 bg-transparent border-none text-slate-800 font-medium focus:ring-0 outline-none" placeholder="DOB">
+                </div>
+                
+                <div class="hidden md:block w-px bg-slate-200 my-3"></div>
+                
+                <div class="flex-1 flex items-center relative border-t border-slate-100 md:border-none">
+                    <i class="ph-fill ph-clock absolute left-5 text-slate-400 text-xl"></i>
+                    <input type="time" required class="w-full pl-12 pr-4 py-4 md:py-5 bg-transparent border-none text-slate-800 font-medium focus:ring-0 outline-none" placeholder="Time">
+                </div>
+                
+                <div class="hidden md:block w-px bg-slate-200 my-3"></div>
+                
+                <div class="flex-[1.5] flex items-center relative border-t border-slate-100 md:border-none">
+                    <i class="ph-fill ph-envelope-simple absolute left-5 text-slate-400 text-xl"></i>
+                    <input type="email" required class="w-full pl-12 pr-4 py-4 md:py-5 bg-transparent border-none text-slate-800 font-medium focus:ring-0 outline-none" placeholder="Where should we send it?">
+                </div>
+                
+                <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-white px-8 py-4 md:py-0 md:h-auto rounded-xl md:rounded-full font-bold transition-all hover:shadow-lg whitespace-nowrap m-1 flex items-center justify-center gap-2">
+                    Reveal My Lagna <i class="ph-bold ph-sparkle"></i>
+                </button>
+            </form>
+            <p class="text-center text-sm text-brand-200 mt-6"><i class="ph-fill ph-shield-check"></i> We respect your privacy. No spam, ever.</p>
+        </div>
+    </section>
+
+    <!-- Content Hub / YouTube Integration -->
+    <section class="py-20 bg-[#fdfbf7] border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+                <div>
+                    <span class="text-brand-600 font-bold tracking-wider uppercase text-sm mb-2 block">Free Learning Hub</span>
+                    <h2 class="text-3xl md:text-4xl font-serif font-bold text-slate-900">Latest from our Channel</h2>
+                </div>
+                <a href="https://youtube.com" target="_blank" class="flex items-center gap-2 text-red-600 font-bold hover:text-red-700 transition-colors bg-red-50 hover:bg-red-100 px-5 py-2.5 rounded-full border border-red-100">
+                    <i class="ph-fill ph-youtube-logo text-2xl"></i> Subscribe for Updates
+                </a>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Video Item 1 -->
+                <div class="group cursor-pointer">
+                    <div class="relative w-full aspect-video bg-slate-900 rounded-[1.5rem] overflow-hidden mb-5 shadow-sm group-hover:shadow-xl transition-all duration-300">
+                        <img src="https://placehold.co/640x360/1e1b4b/e37532?text=Beginner+ALP+in+5+Mins" class="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" alt="Video Thumbnail">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="w-16 h-16 bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform duration-300">
+                                <i class="ph-fill ph-play text-3xl ml-1"></i>
+                            </div>
+                        </div>
+                        <div class="absolute bottom-3 right-3 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded backdrop-blur-sm">5:42</div>
+                    </div>
+                    <div class="flex gap-2 text-xs font-bold text-brand-600 uppercase tracking-wide mb-2"><span>Foundations</span></div>
+                    <h3 class="font-bold text-xl text-slate-900 leading-snug group-hover:text-brand-600 transition-colors">Beginner ALP in 5 Minutes: How the Ascendant Progresses</h3>
+                </div>
+                
+                <!-- Video Item 2 -->
+                <div class="group cursor-pointer">
+                    <div class="relative w-full aspect-video bg-slate-900 rounded-[1.5rem] overflow-hidden mb-5 shadow-sm group-hover:shadow-xl transition-all duration-300">
+                        <img src="https://placehold.co/640x360/1e1b4b/e37532?text=Career+Timing+Case+Study" class="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" alt="Video Thumbnail">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="w-16 h-16 bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform duration-300">
+                                <i class="ph-fill ph-play text-3xl ml-1"></i>
+                            </div>
+                        </div>
+                        <div class="absolute bottom-3 right-3 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded backdrop-blur-sm">18:15</div>
+                    </div>
+                    <div class="flex gap-2 text-xs font-bold text-brand-600 uppercase tracking-wide mb-2"><span>Case Study</span></div>
+                    <h3 class="font-bold text-xl text-slate-900 leading-snug group-hover:text-brand-600 transition-colors">Career Timing Analysis: Predicting a Major Job Transition</h3>
+                </div>
+
+                <!-- Video Item 3 -->
+                <div class="group cursor-pointer">
+                    <div class="relative w-full aspect-video bg-slate-900 rounded-[1.5rem] overflow-hidden mb-5 shadow-sm group-hover:shadow-xl transition-all duration-300">
+                        <img src="https://placehold.co/640x360/1e1b4b/e37532?text=Live+Student+Q%26A" class="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" alt="Video Thumbnail">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="w-16 h-16 bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform duration-300">
+                                <i class="ph-fill ph-play text-3xl ml-1"></i>
+                            </div>
+                        </div>
+                        <div class="absolute bottom-3 right-3 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded backdrop-blur-sm">45:00</div>
+                    </div>
+                    <div class="flex gap-2 text-xs font-bold text-brand-600 uppercase tracking-wide mb-2"><span>Founder Talks</span></div>
+                    <h3 class="font-bold text-xl text-slate-900 leading-snug group-hover:text-brand-600 transition-colors">Live Student Q&A: Advanced Nakshatra Pada Techniques</h3>
+                </div>
+            </div>
+            
+            <div class="mt-12 text-center">
+                 <button class="text-slate-600 font-bold hover:text-slate-900 border-b-2 border-slate-300 hover:border-brand-500 transition-all pb-1">View Full Video Library &rarr;</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Real Success Stories -->
+    <section class="py-20 bg-slate-50 border-t border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-brand-600 font-bold tracking-wider uppercase text-sm mb-2 block">Proof of Method</span>
+                <h2 class="text-3xl md:text-4xl font-serif font-bold text-slate-900 mb-4">Consistent Results. Real Stories.</h2>
+                <p class="text-slate-600">Join over 50,000 clients who found clarity, and hundreds of students who built a career on a reliable method.</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Story 1 -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 transition-transform hover:-translate-y-1">
+                    <div class="flex text-amber-400 text-sm mb-4">
+                        <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i>
+                    </div>
+                    <p class="text-slate-700 italic mb-6">"I visited many astrologers regarding my career transition. ALP was the only method that gave me an exact month, not just a vague year. When the Lagna shifted as calculated, the job offer came."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center font-bold text-brand-700">R</div>
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-sm">Rajesh K.</h4>
+                            <p class="text-xs text-slate-500">Consultation Client</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Story 2 -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 relative transition-transform hover:-translate-y-1">
+                    <div class="absolute top-4 right-4 text-brand-600 bg-brand-50 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wide">Verified Student</div>
+                    <div class="flex text-amber-400 text-sm mb-4">
+                        <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i>
+                    </div>
+                    <p class="text-slate-700 italic mb-6">"I practiced traditional astrology for 10 years but struggled with timing. Learning the Lagna progression in the Master's course completely changed my practice. I now use ALP for all my clients."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center font-bold text-brand-700">S</div>
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-sm">Suresh M.</h4>
+                            <p class="text-xs text-slate-500">Master Level Graduate</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Story 3 -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 transition-transform hover:-translate-y-1">
+                    <div class="flex text-amber-400 text-sm mb-4">
+                        <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star-half"></i>
+                    </div>
+                    <p class="text-slate-700 italic mb-6">"The mobile app is brilliant. The accuracy of the Nakshatra Pada calculations saves me hours of manual charting. Highly recommended for any serious researcher or practitioner."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center font-bold text-brand-700">V</div>
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-sm">Vikram T.</h4>
+                            <p class="text-xs text-slate-500">Google Play Review</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Founder Section -->
+    <section class="py-20 lg:py-32 bg-[#fdfbf7]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="order-2 md:order-1">
+                    <img src="https://placehold.co/600x800/1e1b4b/e37532?text=Founder+Photo" alt="Dr. S. Pothuvudaimoorthy" class="rounded-2xl shadow-2xl object-cover w-full max-w-md mx-auto">
+                </div>
+                <div class="order-1 md:order-2">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-xs font-bold uppercase tracking-widest mb-6">
+                        Founder & Creator
+                    </div>
+                    <h2 class="text-3xl md:text-5xl font-serif font-bold text-slate-900 mb-2">Dr. S. Pothuvudaimoorthy</h2>
+                    <p class="text-brand-600 font-medium mb-6">Ph.D. in Astrology · 4th-Generation Astrologer · 25+ Years Experience</p>
+                    
+                    <p class="text-slate-600 leading-relaxed mb-6">
+                        Twenty-five years ago, on a pilgrimage in the Himalayas, Dr. S. Pothuvudaimoorthy sat beneath a banyan tree and watched its roots slowly grow outward. He asked a simple question: traditional astrology tracks the Moon's movement to time life's events—<em>so why not the Ascendant, too?</em>
+                    </p>
+                    <p class="text-slate-600 leading-relaxed mb-8">
+                        That question became Akshaya Lagna Paddhati (ALP). What started as one researcher's question is now a structured training system, a 6-book series, and a methodology trusted by a network of practitioners worldwide.
+                    </p>
+                    
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <h4 class="font-bold text-slate-900 mb-3 text-sm uppercase tracking-wide">Additional Expertise</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-slate-100 rounded-full text-xs font-medium text-slate-600">Pranic Healing</span>
+                            <span class="px-3 py-1 bg-slate-100 rounded-full text-xs font-medium text-slate-600">Reiki Master</span>
+                            <span class="px-3 py-1 bg-slate-100 rounded-full text-xs font-medium text-slate-600">Past Life Regression</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-space-950 text-slate-400 pt-20 pb-10 border-t border-space-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+                <!-- Brand -->
+                <div>
+                    <div class="flex items-center gap-2 mb-6">
+                        <div class="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center text-white">
+                            <i class="ph ph-star-four"></i>
+                        </div>
+                        <span class="font-serif font-bold text-xl text-white">ALP Astrology</span>
+                    </div>
+                    <p class="text-sm mb-6 leading-relaxed">A structured, learnable predictive astrology method taught and practiced consistently worldwide.</p>
+                    <div class="flex space-x-4">
+                        <a href="https://youtube.com" target="_blank" class="text-slate-400 hover:text-brand-400 transition-colors"><i class="ph-fill ph-youtube-logo text-2xl"></i></a>
+                        <a href="https://instagram.com" target="_blank" class="text-slate-400 hover:text-brand-400 transition-colors"><i class="ph-fill ph-instagram-logo text-2xl"></i></a>
+                        <a href="https://facebook.com" target="_blank" class="text-slate-400 hover:text-brand-400 transition-colors"><i class="ph-fill ph-facebook-logo text-2xl"></i></a>
+                        <a href="https://wa.me/919876543210" target="_blank" class="text-slate-400 hover:text-brand-400 transition-colors"><i class="ph-fill ph-whatsapp-logo text-2xl"></i></a>
+                    </div>
+                </div>
+
+                <!-- Quick Links (Fixed relative paths) -->
+                <div>
+                    <h4 class="text-white font-bold mb-6">Platform</h4>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="/courses" class="hover:text-brand-400 transition-colors">Training Courses</a></li>
+                        <li><a href="/consultations" class="hover:text-brand-400 transition-colors">Book a Consultation</a></li>
+                        <li><a href="/software" class="hover:text-brand-400 transition-colors">Desktop Software</a></li>
+                        <li><a href="/books" class="hover:text-brand-400 transition-colors">ALP Book Series</a></li>
+                        <li><a href="/app" class="hover:text-brand-400 transition-colors">Mobile App</a></li>
+                    </ul>
+                </div>
+
+                <!-- Community & Learning -->
+                <div>
+                    <h4 class="text-white font-bold mb-6">Resources</h4>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="/articles" class="hover:text-brand-400 transition-colors">Article Library</a></li>
+                        <li><a href="/videos" class="hover:text-brand-400 transition-colors">Video Lessons</a></li>
+                        <li><a href="/events" class="hover:text-brand-400 transition-colors">Event Calendar</a></li>
+                        <li><a href="/research" class="hover:text-brand-400 transition-colors">Research & Case Studies</a></li>
+                        <li><a href="/faq" class="hover:text-brand-400 transition-colors">FAQ</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact -->
+                <div>
+                    <h4 class="text-white font-bold mb-6">Contact Us</h4>
+                    <ul class="space-y-4 text-sm">
+                        <li class="flex items-start gap-3">
+                            <i class="ph ph-map-pin text-brand-400 text-lg mt-0.5"></i>
+                            <span>123 Astrology Street,<br>Chennai, Tamil Nadu,<br>India 600001</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="ph ph-phone text-brand-400 text-lg"></i>
+                            <a href="tel:+919876543210" class="hover:text-brand-400 transition-colors">+91 98765 43210</a>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="ph ph-envelope text-brand-400 text-lg"></i>
+                            <a href="mailto:support@alpastrology.com" class="hover:text-brand-400 transition-colors">support@alpastrology.com</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="pt-8 border-t border-space-800 flex flex-col md:flex-row justify-between items-center text-xs">
+                <p>&copy; 2026 ALP Astrology. All rights reserved.</p>
+                <div class="flex space-x-6 mt-4 md:mt-0">
+                    <a href="/privacy" class="hover:text-white transition-colors">Privacy Policy</a>
+                    <a href="/terms" class="hover:text-white transition-colors">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Lead Magnet Modal (Free Lagna Calculator) -->
+    <div id="calc-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-space-950/80 backdrop-blur-sm transition-opacity" onclick="closeModal('calc-modal')"></div>
+        
+        <!-- Modal Content -->
+        <div class="bg-white rounded-3xl w-full max-w-md relative z-10 overflow-hidden shadow-2xl modal-exit" id="calc-modal-content">
+            <div class="bg-space-900 p-6 text-white text-center relative">
+                <button onclick="closeModal('calc-modal')" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                    <i class="ph ph-x text-xl"></i>
+                </button>
+                <i class="ph-fill ph-magic-wand text-3xl text-brand-400 mb-2"></i>
+                <h3 class="text-xl font-serif font-bold">Free Lagna Calculation</h3>
+                <p class="text-sm text-slate-400 mt-1">Get an instant simplified ALP reading.</p>
+            </div>
+            <div class="p-6">
+                <form onsubmit="event.preventDefault(); alert('This would calculate the Lagna Pada and capture the lead for the email sequence.'); closeModal('calc-modal');" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">Date of Birth</label>
+                        <input type="date" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">Time</label>
+                            <input type="time" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">City</label>
+                            <input type="text" placeholder="e.g. Chennai" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">Where to send results?</label>
+                        <input type="email" placeholder="Email Address" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
+                    </div>
+                    <button type="submit" class="w-full py-4 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-xl shadow-lg transition-all mt-2">
+                        Calculate My Lagna Now
+                    </button>
+                    <p class="text-center text-xs text-slate-500 mt-3">We respect your privacy. No spam.</p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Navbar scroll effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 20) {
+                navbar.classList.add('shadow-lg');
+                navbar.classList.replace('bg-transparent', 'glass-nav');
+            } else {
+                navbar.classList.remove('shadow-lg');
+            }
+        });
+
+        // Mobile menu toggle
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+        const icon = btn.querySelector('i');
+
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+            if(menu.classList.contains('hidden')) {
+                icon.classList.replace('ph-x', 'ph-list');
+            } else {
+                icon.classList.replace('ph-list', 'ph-x');
+            }
+        });
+
+        // Close mobile menu on link click
+        document.querySelectorAll('.mobile-link').forEach(link => {
+            link.addEventListener('click', () => {
+                menu.classList.add('hidden');
+                icon.classList.replace('ph-x', 'ph-list');
+            });
+        });
+
+        // Modal logic
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            const content = document.getElementById(id + '-content');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // Trigger animation frame for transition
+            requestAnimationFrame(() => {
+                content.classList.remove('modal-exit');
+                content.classList.add('modal-enter-active');
+            });
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            const content = document.getElementById(id + '-content');
+            
+            content.classList.remove('modal-enter-active');
+            content.classList.add('modal-exit-active');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                content.classList.remove('modal-exit-active');
+                content.classList.add('modal-exit');
+            }, 300); // match transition duration
+        }
+    </script>
+</body>
+</html>
