@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALP Media Team Schedule</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <!-- Lucide Icons (Strict UMD Version) -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Data mapped directly from the uploaded Posting_TimeTable image
+        const scheduleData = {
+            Sunday: {
+                Ranjith: {
+                    SastiTV: { YT: "PothuvudaiMoorthy", FB: "Arularasi", IG: "Sathyanarayanan" },
+                    SiddharBhoomi: { YT: "Sathyanarayanan", FB: "Shanthidevi", IG: "UmaVenkat" }
+                },
+                Santhosh: {
+                    SastiTV: { YT: "Arularasi", FB: "Sathyanarayanan", IG: "Shanthidevi" },
+                    SiddharBhoomi: { YT: "Shanthidevi", FB: "UmaVenkat", IG: "Neeraja" }
+                }
+            },
+            Monday: {
+                Ranjith: {
+                    SastiTV: { YT: "Shanthidevi", FB: "UmaVenkat", IG: "Neeraja" },
+                    SiddharBhoomi: { YT: "Neeraja", FB: "Volunteer 1", IG: "Volunteer 2" }
+                },
+                Santhosh: {
+                    SastiTV: { YT: "UmaVenkat", FB: "Neeraja", IG: "Volunteer 1" },
+                    SiddharBhoomi: { YT: "Volunteer 1", FB: "Volunteer 2", IG: "PothuvudaiMoorthy" }
+                }
+            },
+            Tuesday: {
+                Ranjith: {
+                    SastiTV: { YT: "Volunteer 1", FB: "Volunteer 2", IG: "PothuvudaiMoorthy" },
+                    SiddharBhoomi: { YT: "PothuvudaiMoorthy", FB: "Arularasi", IG: "Sathyanarayanan" }
+                },
+                Santhosh: {
+                    SastiTV: { YT: "Volunteer 2", FB: "PothuvudaiMoorthy", IG: "Arularasi" },
+                    SiddharBhoomi: { YT: "Arularasi", FB: "Sathyanarayanan", IG: "Shanthidevi" }
+                }
+            },
+            Wednesday: {
+                Ranjith: {
+                    SastiTV: { YT: "Arularasi", FB: "Sathyanarayanan", IG: "Shanthidevi" },
+                    SiddharBhoomi: { YT: "Shanthidevi", FB: "UmaVenkat", IG: "Neeraja" }
+                },
+                Santhosh: {
+                    SastiTV: { YT: "Sathyanarayanan", FB: "Shanthidevi", IG: "UmaVenkat" },
+                    SiddharBhoomi: { YT: "UmaVenkat", FB: "Neeraja", IG: "Volunteer 1" }
+                }
+            },
+            Thursday: {
+                Ranjith: {
+                    SastiTV: { YT: "UmaVenkat", FB: "Neeraja", IG: "Volunteer 1" },
+                    SiddharBhoomi: { YT: "Volunteer 1", FB: "Volunteer 2", IG: "PothuvudaiMoorthy" }
+                },
+                Santhosh: {
+                    SastiTV: { YT: "Neeraja", FB: "Volunteer 1", IG: "Volunteer 2" },
+                    SiddharBhoomi: { YT: "Volunteer 2", FB: "PothuvudaiMoorthy", IG: "Arularasi" }
+                }
+            },
+            Friday: {
+                Ranjith: {
+                    SastiTV: { YT: "Volunteer 2", FB: "PothuvudaiMoorthy", IG: "Arularasi" },
+                    SiddharBhoomi: { YT: "Arularasi", FB: "Sathyanarayanan", IG: "Shanthidevi" }
+                },
+                Santhosh: {
+                    SastiTV: { YT: "PothuvudaiMoorthy", FB: "Arularasi", IG: "Sathyanarayanan" },
+                    SiddharBhoomi: { YT: "Sathyanarayanan", FB: "Shanthidevi", IG: "UmaVenkat" }
+                }
+            },
+            Saturday: {
+                Ranjith: {
+                    SastiTV: { YT: "Sathyanarayanan", FB: "Shanthidevi", IG: "UmaVenkat" },
+                    SiddharBhoomi: { YT: "UmaVenkat", FB: "Neeraja", IG: "Volunteer 1" }
+                },
+                Santhosh: {
+                    SastiTV: { YT: "Shanthidevi", FB: "UmaVenkat", IG: "Neeraja" },
+                    SiddharBhoomi: { YT: "Neeraja", FB: "Volunteer 1", IG: "Volunteer 2" }
+                }
+            }
+        };
+
+        // Data mapped from the Channel Assignment Matrix
+        const teamChannels = {
+            Ranjith: {
+                YT: ["ALP ASTROLOGY REVIEW"],
+                FB: [
+                    "FB-கலைமகள் ஜோதிட பயிற்சி...",
+                    "FB-ALP Astrologer",
+                    "FB-ALP Astrology (அட்சய லக்ன பத்ததி)",
+                    "FB-ALP Astrology Research Institute",
+                    "FB-தமிழ்நாடு ஜோதிடர்கள் சங்கம்",
+                    "FB-அட்சய லக்ன பத்ததி Alp astrology method",
+                    "FB-திருமண தகவல் மையம்-Matrimonymatch"
+                ],
+                IG: [
+                    "Alp astrology consultation",
+                    "pothuvudaimoorthy_alp",
+                    "IG-alp_astrology_consultation"
+                ]
+            },
+            Santhosh: {
+                YT: ["Kandathum Kettathum"],
+                FB: [
+                    "FB-வாக்கு யோகி",
+                    "FB-ALP SASTI TV",
+                    "FB-அட்சய லக்ன பத்ததி ஜோதிடம்",
+                    "FB-நம் ஜோதிடம்",
+                    "FB-ALP Astrology",
+                    "FB-Vakkuyogi"
+                ],
+                IG: [
+                    "alp astrology official",
+                    "ALP Sasti tv",
+                    "IG - pm_vlogs.offical"
+                ],
+                Other: [
+                    "Telegram", "Blogger", "ShareChat", "Threads"
+                ]
+            }
+        };
+
+        const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+        const getISTDate = () => {
+            const d = new Date();
+            const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+            return new Date(utc + (3600000 * 5.5)); // IST is +5:30 from UTC
+        };
+
+        const parseToDecimal = (str) => {
+            if(!str) return 0;
+            const [time, modifier] = str.split(' ');
+            let [hours, minutes] = time.split(':');
+            hours = parseInt(hours, 10);
+            if (hours === 12 && modifier === 'AM') hours = 0;
+            if (hours < 12 && modifier === 'PM') hours += 12;
+            return hours + (parseInt(minutes, 10) / 60);
+        };
+
+        const getSlotStatus = (timeRangeStr, currentISTTime, selectedDay) => {
+            const todayIndex = currentISTTime.getDay();
+            const selectedIndex = days.indexOf(selectedDay);
+
+            // Compare days for past/future week logic
+            if (selectedIndex < todayIndex) return 'past';
+            if (selectedIndex > todayIndex) return 'future';
+
+            // Same day logic: check the specific time bounds
+            const [startStr, endStr] = timeRangeStr.split(' - ');
+            const startH = parseToDecimal(startStr);
+            const endH = parseToDecimal(endStr);
+            const currentH = currentISTTime.getHours() + (currentISTTime.getMinutes() / 60);
+
+            if (currentH >= startH && currentH < endH) return 'current';
+            if (currentH >= endH) return 'past';
+            return 'future';
+        };
+
+        const App = () => {
+            // Auto-select current day in India
+            const [currentTime, setCurrentTime] = useState(getISTDate());
+            const [activeDay, setActiveDay] = useState(() => days[getISTDate().getDay()]);
+            const [recordingTeam, setRecordingTeam] = useState("None");
+            
+            // NEW: Phone directory state, custom artists, and local storage sync
+            const [lookaheadDays, setLookaheadDays] = useState(4);
+            
+            // Load saved data from browser or use defaults
+            const [phoneNumbers, setPhoneNumbers] = useState(() => {
+                const saved = localStorage.getItem('alp_phones');
+                return saved ? JSON.parse(saved) : {
+                    "PothuvudaiMoorthy": "+91 98765 43210",
+                    "Arularasi": "+91 87654 32109",
+                    "Sathyanarayanan": "+91 76543 21098",
+                    "Shanthidevi": "+91 65432 10987",
+                    "UmaVenkat": "+91 54321 09876",
+                    "Neeraja": "+91 43210 98765"
+                };
+            });
+
+            // Track custom added artists per day
+            const [customArtists, setCustomArtists] = useState(() => {
+                const saved = localStorage.getItem('alp_custom_artists');
+                return saved ? JSON.parse(saved) : { Sunday:[], Monday:[], Tuesday:[], Wednesday:[], Thursday:[], Friday:[], Saturday:[] };
+            });
+
+            // Track if video is ready for a specific artist on a specific day
+            const [videoReady, setVideoReady] = useState(() => {
+                const saved = localStorage.getItem('alp_video_ready');
+                return saved ? JSON.parse(saved) : {};
+            });
+
+            // Form states for adding new artist
+            const [newArtistName, setNewArtistName] = useState("");
+            const [newArtistPhone, setNewArtistPhone] = useState("");
+
+            const activeData = scheduleData[activeDay];
+
+            // NEW: Calculate target day for shoot booking
+            const todayIndex = days.indexOf(activeDay);
+            const targetShootDayIndex = (todayIndex + lookaheadDays) % 7;
+            const targetShootDay = days[targetShootDayIndex];
+
+            // Save state to Local Storage whenever it changes
+            useEffect(() => { localStorage.setItem('alp_phones', JSON.stringify(phoneNumbers)); }, [phoneNumbers]);
+            useEffect(() => { localStorage.setItem('alp_custom_artists', JSON.stringify(customArtists)); }, [customArtists]);
+            useEffect(() => { localStorage.setItem('alp_video_ready', JSON.stringify(videoReady)); }, [videoReady]);
+
+            // Helper to find all unique artists scheduled for a specific day
+            const getArtistsForDay = (dayName) => {
+                const data = scheduleData[dayName];
+                const names = new Set();
+                const traverse = (obj) => {
+                    for (let key in obj) {
+                        if (typeof obj[key] === 'object') traverse(obj[key]);
+                        else names.add(obj[key]);
+                    }
+                };
+                traverse(data);
+                return Array.from(names).filter(n => !n.toLowerCase().includes("volunteer"));
+            };
+            
+            // Merge official scheduled artists with manually added custom artists for the target day
+            const baseArtists = getArtistsForDay(targetShootDay);
+            const dayCustomArtists = customArtists[targetShootDay] || [];
+            const artistsToCall = Array.from(new Set([...baseArtists, ...dayCustomArtists]));
+
+            // Logic to toggle video readiness
+            const toggleVideoReady = (artist) => {
+                setVideoReady(prev => ({
+                    ...prev,
+                    [`${targetShootDay}_${artist}`]: !prev[`${targetShootDay}_${artist}`]
+                }));
+            };
+
+            // Logic to add a custom artist
+            const handleAddCustomArtist = (e) => {
+                e.preventDefault();
+                if (!newArtistName.trim() || !newArtistPhone.trim()) return;
+
+                setCustomArtists(prev => {
+                    const currentDayArr = prev[targetShootDay] || [];
+                    if (currentDayArr.includes(newArtistName.trim())) return prev;
+                    return { ...prev, [targetShootDay]: [...currentDayArr, newArtistName.trim()] };
+                });
+
+                setPhoneNumbers(prev => ({ ...prev, [newArtistName.trim()]: newArtistPhone.trim() }));
+                setNewArtistName("");
+                setNewArtistPhone("");
+            };
+
+            // Inline Component for the Morning Checklist Task
+            const ShootChecklistPanel = () => (
+                <div className="bg-orange-50 rounded-xl p-4 border-2 border-orange-200 flex flex-col h-full shadow-sm">
+                    <h3 className="font-bold text-orange-800 mb-3 border-b border-orange-200 pb-2 flex justify-between items-center">
+                        <span className="flex items-center gap-2"><i data-lucide="camera" className="w-4 h-4"></i> Shoot Checklist</span>
+                        <span className="text-[10px] bg-orange-200 text-orange-900 px-2 py-1 rounded font-bold uppercase">For {targetShootDay}</span>
+                    </h3>
+                    <ul className="space-y-2.5 flex-1 overflow-y-auto max-h-[160px] pr-1">
+                        {artistsToCall.length === 0 ? <li className="text-sm text-gray-500 italic">No shoots needed.</li> : null}
+                        {artistsToCall.map(artist => {
+                            const isReady = videoReady[`${targetShootDay}_${artist}`];
+                            return (
+                                <li key={artist} className="flex items-center justify-between p-3 sm:p-2 bg-white rounded-lg sm:rounded border border-orange-100 shadow-sm transition-all">
+                                    <label className="flex items-center gap-3 sm:gap-2 text-base sm:text-sm cursor-pointer w-full py-1 sm:py-0">
+                                        <input type="checkbox" checked={!!isReady} onChange={() => toggleVideoReady(artist)} className="w-5 h-5 sm:w-4 sm:h-4 text-orange-600 rounded border-gray-300 focus:ring-orange-500" />
+                                        <span className={isReady ? "line-through text-gray-400 font-medium" : "font-bold text-gray-700"}>{artist}</span>
+                                    </label>
+                                    {!isReady && <span className="text-xs sm:text-[9px] font-bold bg-red-100 text-red-600 px-2 py-1 sm:px-1.5 sm:py-0.5 rounded-md sm:rounded ml-2 whitespace-nowrap animate-pulse border border-red-200 shadow-sm">MISSING</span>}
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </div>
+            );
+
+            useEffect(() => {
+                // Ticking digital clock (updates every second)
+                const timer = setInterval(() => {
+                    setCurrentTime(getISTDate());
+                }, 1000);
+                return () => clearInterval(timer);
+            }, []);
+
+            useEffect(() => {
+                // Refresh icons on renders to catch dynamic status badges
+                lucide.createIcons();
+            });
+
+            return (
+                <div className="min-h-screen bg-gray-100 flex flex-col items-center py-4 px-2 sm:py-8 sm:px-4">
+                    
+                    {/* Header */}
+                    <div className="max-w-6xl w-full bg-white rounded-2xl shadow-sm p-4 sm:p-6 mb-6 sm:mb-8 border border-gray-200">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                            <div className="w-full">
+                                <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 flex items-center gap-2 sm:gap-3">
+                                    <i data-lucide="calendar-clock" className="text-blue-600 w-7 h-7 sm:w-8 sm:h-8"></i>
+                                    ALP Team Schedule
+                                </h1>
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-3 sm:mt-2">
+                                    <p className="text-sm sm:text-base text-gray-500 font-medium flex items-center gap-2"><i data-lucide="briefcase" className="w-4 h-4 sm:hidden"></i> Operational: 10 AM - 6 PM</p>
+                                    <div className="bg-blue-50 text-blue-800 px-3 py-2 sm:py-1.5 rounded-lg font-bold text-sm sm:text-md flex items-center gap-2 border border-blue-200 shadow-sm w-full sm:w-fit justify-center sm:justify-start">
+                                        <i data-lucide="clock" className="w-4 h-4 text-blue-600"></i>
+                                        IST: {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Controls Right Side */}
+                            <div className="flex flex-col items-end gap-4 w-full md:w-auto">
+                                {/* Day Selector */}
+                                <div className="flex gap-2 overflow-x-auto hide-scrollbar w-full md:w-auto pb-2 md:pb-0 snap-x">
+                                    {days.map(day => {
+                                        // Highlight today specially if it's the actual current day
+                                        const isActualToday = days.indexOf(day) === currentTime.getDay();
+                                        return (
+                                            <button 
+                                                key={day}
+                                                onClick={() => setActiveDay(day)}
+                                                className={`px-5 py-2.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-lg font-medium transition-all whitespace-nowrap flex items-center gap-1.5 snap-center touch-manipulation
+                                                    ${activeDay === day ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}
+                                                    ${isActualToday && activeDay !== day ? 'border-2 border-blue-300' : ''}
+                                                `}
+                                            >
+                                                {isActualToday && <span className="w-2.5 h-2.5 sm:w-2 sm:h-2 rounded-full bg-red-500 animate-pulse mr-1"></span>}
+                                                {day}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+
+                                {/* Recording Mode Selector */}
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-amber-50 p-3 sm:p-2 rounded-xl sm:rounded-lg border border-amber-200 w-full md:w-auto">
+                                    <span className="text-sm font-bold text-amber-800 flex items-center gap-1">
+                                        <i data-lucide="video" className="w-4 h-4"></i>
+                                        Morning Recording?
+                                    </span>
+                                    <select 
+                                        value={recordingTeam} 
+                                        onChange={(e) => setRecordingTeam(e.target.value)}
+                                        className="bg-white border border-amber-300 text-amber-900 text-sm rounded-lg sm:rounded-md focus:ring-amber-500 focus:border-amber-500 block w-full sm:w-auto p-2 sm:p-1.5 font-medium min-h-[44px] sm:min-h-0"
+                                    >
+                                        <option value="None">No (Normal Day)</option>
+                                        <option value="Ranjith">Ranjith Team is Recording</option>
+                                        <option value="Santhosh">Santhosh Team is Recording</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* NEW: Artist Call & Booking Module */}
+                    <div className="max-w-6xl w-full bg-white rounded-2xl shadow-sm p-4 sm:p-6 mb-6 sm:mb-8 border-l-4 border-green-500 flex flex-col gap-4 transition-all hover:shadow-md">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-100 pb-4">
+                            <div className="w-full sm:w-auto">
+                                <h2 className="text-lg sm:text-xl font-bold text-gray-800 flex items-center gap-2">
+                                    <i data-lucide="phone-outgoing" className="text-green-600"></i>
+                                    Advance Shoot Booking
+                                </h2>
+                                <div className="text-sm text-gray-500 mt-2 sm:mt-1 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-0">
+                                    <span>Lookahead:</span> 
+                                    <select 
+                                        value={lookaheadDays} 
+                                        onChange={(e)=>setLookaheadDays(Number(e.target.value))} 
+                                        className="bg-gray-50 border border-gray-200 rounded-lg sm:rounded px-2 py-2 sm:py-0.5 text-sm sm:text-xs text-gray-700 sm:ml-1 font-bold focus:ring-green-500 min-h-[44px] sm:min-h-0 w-full sm:w-auto mt-1 sm:mt-0"
+                                    >
+                                        <option value={2}>2 Days Before</option>
+                                        <option value={3}>3 Days Before</option>
+                                        <option value={4}>4 Days Before</option>
+                                        <option value={5}>5 Days Before</option>
+                                    </select>
+                                    <span className="mt-1 sm:mt-0 block sm:inline">
+                                        &nbsp;<span className="hidden sm:inline">—</span> Call artists today to schedule for <strong>{targetShootDay}</strong>.
+                                    </span>
+                                </div>
+                            </div>
+                            <span className="bg-green-50 text-green-800 text-sm sm:text-xs font-bold px-3 py-2 sm:py-1.5 rounded-lg border border-green-200 shadow-sm flex items-center justify-center gap-1 w-full sm:w-auto">
+                                <i data-lucide="calendar-check" className="w-4 h-4"></i>
+                                Posting Target: {targetShootDay}
+                            </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            {artistsToCall.map(artist => (
+                                <div key={artist} className="flex flex-col bg-gray-50 hover:bg-green-50 transition-colors rounded-xl sm:rounded-lg p-4 sm:p-3 border border-gray-200 shadow-sm">
+                                    <span className="font-bold text-gray-700 text-base sm:text-sm mb-3 sm:mb-2 flex items-center gap-2">
+                                        <i data-lucide="user-circle" className="w-5 h-5 sm:w-4 sm:h-4 text-blue-500"></i> {artist}
+                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        <input 
+                                            type="tel" 
+                                            value={phoneNumbers[artist] || ''} 
+                                            onChange={(e) => setPhoneNumbers({...phoneNumbers, [artist]: e.target.value})}
+                                            placeholder="Enter Phone No..."
+                                            className="flex-1 bg-white border border-gray-300 text-gray-700 text-sm sm:text-xs rounded-lg sm:rounded focus:ring-green-500 focus:border-green-500 block w-full p-2.5 sm:p-2 min-h-[44px] sm:min-h-0"
+                                        />
+                                        <a 
+                                            href={phoneNumbers[artist] ? `tel:${phoneNumbers[artist].replace(/\s+/g, '')}` : '#'}
+                                            onClick={(e) => !phoneNumbers[artist] && e.preventDefault()}
+                                            className={`p-3 sm:p-2 rounded-lg sm:rounded flex-shrink-0 transition-colors flex items-center justify-center min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 ${phoneNumbers[artist] ? 'bg-green-500 hover:bg-green-600 text-white shadow-sm' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
+                                            title={phoneNumbers[artist] ? "Click to Call" : "Add number to call"}
+                                        >
+                                            <i data-lucide="phone" className="w-5 h-5 sm:w-4 sm:h-4"></i>
+                                        </a>
+                                    </div>
+                                    
+                                    {/* NEW: Video Tracking Checkbox & Alert */}
+                                    <div className="mt-3 pt-3 border-t border-gray-200 flex justify-between items-center bg-white p-3 sm:p-2 rounded-lg sm:rounded border border-gray-100">
+                                        <label className="text-sm sm:text-xs font-bold text-gray-700 flex items-center gap-2 sm:gap-1.5 cursor-pointer select-none py-1 sm:py-0">
+                                            <input 
+                                                type="checkbox" 
+                                                checked={!!videoReady[`${targetShootDay}_${artist}`]} 
+                                                onChange={() => toggleVideoReady(artist)} 
+                                                className="rounded border-gray-300 text-green-600 focus:ring-green-500 w-5 h-5 sm:w-3.5 sm:h-3.5 cursor-pointer" 
+                                            />
+                                            Video Ready?
+                                        </label>
+                                        {!videoReady[`${targetShootDay}_${artist}`] && (
+                                            <button 
+                                                onClick={() => alert(`🚨 ALERT SENT TO TEAM: We urgently need ${artist}'s video for the ${targetShootDay} schedule!`)} 
+                                                className="bg-red-50 text-red-700 hover:bg-red-100 text-xs sm:text-[10px] font-bold px-3 sm:px-2 py-2 sm:py-1 rounded-lg sm:rounded border border-red-200 shadow-sm flex items-center gap-1 transition-colors animate-pulse"
+                                            >
+                                                <i data-lucide="bell-ring" className="w-4 h-4 sm:w-3 sm:h-3"></i> ALERT
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                            
+                            {/* NEW: Add Extra Artist Form */}
+                            <div className="flex flex-col bg-green-50 rounded-xl sm:rounded-lg p-4 sm:p-3 border-2 border-dashed border-green-300 justify-center">
+                                <span className="font-bold text-green-800 text-base sm:text-sm mb-3 flex items-center gap-2">
+                                    <i data-lucide="user-plus" className="w-5 h-5 sm:w-4 sm:h-4"></i> Add Extra Artist
+                                </span>
+                                <form onSubmit={handleAddCustomArtist} className="flex flex-col gap-2.5 sm:gap-2">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Artist Name" 
+                                        value={newArtistName} 
+                                        onChange={e=>setNewArtistName(e.target.value)} 
+                                        className="bg-white border border-green-200 text-gray-700 text-sm sm:text-xs rounded-lg sm:rounded focus:ring-green-500 block w-full p-2.5 sm:p-2 shadow-sm min-h-[44px] sm:min-h-0" 
+                                        required 
+                                    />
+                                    <input 
+                                        type="tel" 
+                                        placeholder="Phone Number" 
+                                        value={newArtistPhone} 
+                                        onChange={e=>setNewArtistPhone(e.target.value)} 
+                                        className="bg-white border border-green-200 text-gray-700 text-sm sm:text-xs rounded-lg sm:rounded focus:ring-green-500 block w-full p-2.5 sm:p-2 shadow-sm min-h-[44px] sm:min-h-0" 
+                                        required 
+                                    />
+                                    <button type="submit" className="bg-green-600 hover:bg-green-700 text-white text-sm sm:text-xs font-bold py-3 sm:py-2 mt-1 rounded-lg sm:rounded shadow-sm transition-colors min-h-[44px] sm:min-h-0">
+                                        Add to {targetShootDay}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Timeline Container */}
+                    <div className="max-w-6xl w-full flex flex-col gap-6">
+                        
+                        {/* MORNING SHIFT LOGIC (10 AM - 1 PM) */}
+                        {recordingTeam === "None" ? (
+                            <>
+                                {/* Normal 10:00 AM - Prep Time */}
+                                <TimeSlot time="10:00 AM - 11:00 AM" title="Morning Prep & Content Review" icon="coffee" color="bg-purple-100" textColor="text-purple-700" currentTime={currentTime} activeDay={activeDay}>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <TaskCard team="Ranjith Team" tasks={["Download raw edits from Drive", "Create Thumbnails (YT)", "Quality Check Descriptions"]} />
+                                        <TaskCard team="Santhosh Team" tasks={["Check platform leads/comments", "Review QC for yesterday's posts", "Setup daily tracking sheet"]} />
+                                        {/* NEW: Inserted the interactive Shoot Checklist here */}
+                                        <ShootChecklistPanel />
+                                    </div>
+                                </TimeSlot>
+
+                                {/* Normal 11:00 AM - YouTube */}
+                                <TimeSlot time="11:00 AM - 01:00 PM" title="YouTube Uploads & Optimization" icon="youtube" color="bg-red-100" textColor="text-red-700" currentTime={currentTime} activeDay={activeDay}>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <ContentCard team="Ranjith Team" sasti={activeData.Ranjith.SastiTV.YT} siddhar={activeData.Ranjith.SiddharBhoomi.YT} platform="YouTube" assignedChannels={teamChannels.Ranjith.YT} />
+                                        <ContentCard team="Santhosh Team" sasti={activeData.Santhosh.SastiTV.YT} siddhar={activeData.Santhosh.SiddharBhoomi.YT} platform="YouTube" assignedChannels={teamChannels.Santhosh.YT} />
+                                    </div>
+                                </TimeSlot>
+                            </>
+                        ) : (
+                            /* Contingency Morning Shift (Recording Active) */
+                            <TimeSlot time="10:00 AM - 01:00 PM" title="Morning Shift: Recording Contingency Active" icon="alert-circle" color="bg-amber-100" textColor="text-amber-800" currentTime={currentTime} activeDay={activeDay}>
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                    
+                                    {/* Column 1: Ranjith Team Status */}
+                                    <div className="bg-white p-4 rounded-xl border border-gray-200">
+                                        <h3 className="font-bold text-lg mb-4 text-gray-800 border-b pb-2">Ranjith Team</h3>
+                                        {recordingTeam === "Ranjith" ? (
+                                            <div className="flex flex-col items-center justify-center h-40 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                                                <i data-lucide="camera" className="w-10 h-10 text-gray-400 mb-2"></i>
+                                                <p className="font-bold text-gray-600">Off-Desk: Video Recording</p>
+                                                <p className="text-sm text-gray-500">Camera Operations until 1:00 PM</p>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-4">
+                                                <TaskCard team="Task Override" tasks={["Skipping prep, executing core YT uploads for BOTH teams"]} />
+                                                <div className="grid grid-cols-1 gap-2">
+                                                    <ContentCard team="Own Uploads" sasti={activeData.Ranjith.SastiTV.YT} siddhar={activeData.Ranjith.SiddharBhoomi.YT} platform="YouTube" assignedChannels={teamChannels.Ranjith.YT} />
+                                                    <ContentCard team="Covering for Santhosh" sasti={activeData.Santhosh.SastiTV.YT} siddhar={activeData.Santhosh.SiddharBhoomi.YT} platform="YouTube" />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Column 3: Shoot Checklist stays visible even in contingency */}
+                                    <ShootChecklistPanel />
+
+                                </div>
+                            </TimeSlot>
+                        )}
+
+                        {/* 1:00 PM - Lunch */}
+                        <LunchBreak currentTime={currentTime} activeDay={activeDay} />
+
+                        {/* 2:00 PM - Facebook */}
+                        <TimeSlot time="02:00 PM - 03:30 PM" title="Facebook Scheduling & Posting" icon="facebook" color="bg-blue-100" textColor="text-blue-700" currentTime={currentTime} activeDay={activeDay}>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <ContentCard 
+                                    team="Ranjith Team" 
+                                    sasti={activeData.Ranjith.SastiTV.FB} 
+                                    siddhar={activeData.Ranjith.SiddharBhoomi.FB} 
+                                    platform="Facebook"
+                                    assignedChannels={teamChannels.Ranjith.FB}
+                                />
+                                <ContentCard 
+                                    team="Santhosh Team" 
+                                    sasti={activeData.Santhosh.SastiTV.FB} 
+                                    siddhar={activeData.Santhosh.SiddharBhoomi.FB} 
+                                    platform="Facebook"
+                                    assignedChannels={teamChannels.Santhosh.FB}
+                                />
+                            </div>
+                        </TimeSlot>
+
+                        {/* 3:30 PM - Instagram & Other Platforms */}
+                        <TimeSlot time="03:30 PM - 05:00 PM" title="Instagram Reels & Alt Platforms" icon="instagram" color="bg-pink-100" textColor="text-pink-700" currentTime={currentTime} activeDay={activeDay}>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <ContentCard 
+                                    team="Ranjith Team" 
+                                    sasti={activeData.Ranjith.SastiTV.IG} 
+                                    siddhar={activeData.Ranjith.SiddharBhoomi.IG} 
+                                    platform="Instagram"
+                                    assignedChannels={teamChannels.Ranjith.IG}
+                                />
+                                <ContentCard 
+                                    team="Santhosh Team" 
+                                    sasti={activeData.Santhosh.SastiTV.IG} 
+                                    siddhar={activeData.Santhosh.SiddharBhoomi.IG} 
+                                    platform="Instagram"
+                                    assignedChannels={[...teamChannels.Santhosh.IG, ...teamChannels.Santhosh.Other]}
+                                />
+                            </div>
+                        </TimeSlot>
+
+                        {/* 5:00 PM - Meeting */}
+                        <TimeSlot time="05:00 PM - 05:30 PM" title="Daily Company Meeting" icon="users" color="bg-indigo-100" textColor="text-indigo-700" currentTime={currentTime} activeDay={activeDay}>
+                            <div className="bg-white p-4 rounded-lg border border-indigo-200 flex items-center justify-center shadow-sm">
+                                <p className="font-bold text-indigo-800 text-center flex items-center gap-2">
+                                    <i data-lucide="mic" className="w-5 h-5"></i>
+                                    All-Hands Status Sync & Content Planning
+                                </p>
+                            </div>
+                        </TimeSlot>
+
+                        {/* 5:30 PM - Wrap up */}
+                        <TimeSlot time="05:30 PM - 06:00 PM" title="End of Day Wrap-Up & Tracking" icon="file-spreadsheet" color="bg-green-100" textColor="text-green-700" currentTime={currentTime} activeDay={activeDay}>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <TaskCard team="Ranjith Team" tasks={["Upload Community Tab Posters", "Final description updates", "Log daily status in Tracker"]} />
+                                <TaskCard team="Santhosh Team" tasks={["Final check of incoming leads", "Double check Telegram/Blogger posts", "Update Tracking Sheets"]} />
+                            </div>
+                        </TimeSlot>
+
+                    </div>
+                </div>
+            );
+        };
+
+        const LunchBreak = ({ currentTime, activeDay }) => {
+            const status = getSlotStatus("01:00 PM - 02:00 PM", currentTime, activeDay);
+            
+            if (status === 'current') {
+                return (
+                    <div className="flex items-center gap-4 my-2 p-3 bg-amber-50 border-2 border-amber-400 rounded-lg shadow-sm transition-all duration-500 transform scale-[1.01]">
+                        <div className="flex-1 border-t-2 border-amber-300 border-dashed"></div>
+                        <span className="text-amber-800 font-bold flex items-center gap-2 animate-pulse">
+                            <i data-lucide="utensils" className="w-5 h-5"></i>
+                            ACTIVE NOW: 1:00 PM - 2:00 PM (Lunch Break)
+                        </span>
+                        <div className="flex-1 border-t-2 border-amber-300 border-dashed"></div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className={`flex items-center gap-4 my-2 transition-all duration-500 ${status === 'past' ? 'opacity-40 grayscale' : 'opacity-60'}`}>
+                    <hr className="flex-1 border-gray-300" />
+                    <span className="text-gray-500 font-medium flex items-center gap-2">
+                        {status === 'past' ? <i data-lucide="check-circle-2" className="w-4 h-4 text-green-500"></i> : <i data-lucide="utensils" className="w-4 h-4"></i>}
+                        1:00 PM - 2:00 PM (Lunch Break)
+                    </span>
+                    <hr className="flex-1 border-gray-300" />
+                </div>
+            );
+        };
+
+        const TimeSlot = ({ time, title, icon, color, textColor, currentTime, activeDay, children }) => {
+            const status = getSlotStatus(time, currentTime, activeDay);
+            
+            // Dynamic styling based on real-time status
+            let containerClass = "bg-white rounded-xl shadow-sm border overflow-hidden transition-all duration-500 ";
+            let headerClass = `${color} px-4 sm:px-6 py-4 flex items-center justify-between border-b border-gray-100 transition-colors `;
+            let badgeContent = null;
+
+            if (status === 'current') {
+                containerClass += "border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.25)] transform scale-[1.01]";
+                badgeContent = (
+                    <span className="bg-blue-600 text-white px-3 py-1.5 sm:py-1 rounded-md sm:rounded-full text-[11px] font-bold flex items-center justify-center gap-1.5 animate-pulse shadow-sm whitespace-nowrap w-full sm:w-auto">
+                        <span className="w-2 h-2 bg-white rounded-full"></span> ACTIVE NOW
+                    </span>
+                );
+            } else if (status === 'past') {
+                containerClass += "border-gray-200 bg-gray-50 opacity-80";
+                headerClass = "bg-gray-200 px-4 sm:px-6 py-4 flex items-center justify-between border-b border-gray-300 grayscale-[40%]";
+                badgeContent = (
+                    <span className="bg-green-100 text-green-700 border border-green-300 px-3 py-1.5 sm:py-1 rounded-md sm:rounded-full text-[11px] font-bold flex items-center justify-center gap-1 whitespace-nowrap w-full sm:w-auto">
+                        <i data-lucide="check-double" className="w-3 h-3"></i> COMPLETED
+                    </span>
+                );
+            } else {
+                containerClass += "border-gray-200";
+            }
+
+            return (
+                <div className={containerClass}>
+                    <div className={`${headerClass} flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-0`}>
+                        <div className="flex items-center gap-3 w-full sm:w-auto">
+                            <i data-lucide={icon} className={`${status === 'past' ? 'text-gray-600' : textColor} w-7 h-7 sm:w-6 sm:h-6 flex-shrink-0`}></i>
+                            <h2 className={`font-bold text-base sm:text-lg ${status === 'past' ? 'text-gray-700' : textColor} leading-tight`}>{title}</h2>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto mt-1 sm:mt-0">
+                            {badgeContent}
+                            <span className={`font-semibold bg-white/80 px-3 py-1.5 sm:py-1 rounded-md text-xs sm:text-sm shadow-sm border border-gray-100 whitespace-nowrap flex-1 sm:flex-none text-center ${status === 'past' ? 'text-gray-500' : 'text-gray-700'}`}>
+                                {time}
+                            </span>
+                        </div>
+                    </div>
+                    <div className={`p-4 sm:p-6 transition-opacity duration-500 ${status === 'past' ? 'pointer-events-none opacity-60' : ''}`}>
+                        {children}
+                    </div>
+                </div>
+            );
+        };
+
+        const TaskCard = ({ team, tasks }) => (
+            <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                <h3 className="font-bold text-gray-800 mb-3 border-b pb-2">{team}</h3>
+                <ul className="space-y-2">
+                    {tasks.map((task, i) => (
+                        <li key={i} className="flex items-start gap-2 text-gray-600 text-sm">
+                            <i data-lucide="check-circle-2" className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0"></i>
+                            {task}
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        );
+
+        const ContentCard = ({ team, sasti, siddhar, platform, assignedChannels = [] }) => {
+            // Helper to assign a slight color code based on speaker
+            const getBgColor = (speaker) => {
+                if(speaker.includes("Pothuvudai")) return "bg-orange-50 border-orange-200 text-orange-800";
+                if(speaker.includes("Shanthi")) return "bg-teal-50 border-teal-200 text-teal-800";
+                if(speaker.includes("Sathya")) return "bg-blue-50 border-blue-200 text-blue-800";
+                if(speaker.includes("Arularasi")) return "bg-purple-50 border-purple-200 text-purple-800";
+                if(speaker.includes("UmaVenkat")) return "bg-pink-50 border-pink-200 text-pink-800";
+                return "bg-gray-50 border-gray-200 text-gray-800";
+            };
+
+            return (
+                <div className="bg-white rounded-lg p-5 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                    <h3 className="font-bold text-gray-800 mb-4 flex items-center justify-between">
+                        {team}
+                        <span className="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-1 rounded">{platform}</span>
+                    </h3>
+                    
+                    <div className="space-y-4">
+                        <div>
+                            <p className="text-xs text-gray-500 font-semibold uppercase mb-1">SASTI TV</p>
+                            <div className={`p-3 rounded-md border ${getBgColor(sasti)} flex items-center gap-2`}>
+                                <i data-lucide="user" className="w-4 h-4 opacity-70"></i>
+                                <span className="font-medium">{sasti}</span>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <p className="text-xs text-gray-500 font-semibold uppercase mb-1">SIDDHAR BOOMI</p>
+                            <div className={`p-3 rounded-md border ${getBgColor(siddhar)} flex items-center gap-2`}>
+                                <i data-lucide="user" className="w-4 h-4 opacity-70"></i>
+                                <span className="font-medium">{siddhar}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Assigned Dedicated Channels */}
+                    {assignedChannels.length > 0 && (
+                        <div className="mt-5 pt-4 border-t-2 border-dashed border-gray-200">
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-3 gap-2">
+                                <p className="text-sm text-gray-800 font-bold flex items-center gap-2">
+                                    <i data-lucide="award" className="text-blue-500 w-4 h-4"></i> Dedicated Channels
+                                </p>
+                                <span className="text-[10px] bg-red-100 text-red-700 border border-red-200 px-2 py-1 rounded font-bold shadow-sm inline-flex items-center gap-1 w-fit">
+                                    <i data-lucide="alert-circle" className="w-3 h-3"></i> MUST POST: 1-2 / DAY
+                                </span>
+                            </div>
+                            <div className="space-y-3 sm:space-y-2">
+                                {assignedChannels.map((ch, idx) => (
+                                    <div key={idx} className="flex flex-col sm:flex-row justify-between sm:items-center p-3 sm:p-2.5 bg-gray-50 border border-gray-200 rounded-xl sm:rounded-lg hover:bg-blue-50 transition-colors">
+                                        <span className="text-sm sm:text-xs font-semibold text-gray-700" title={ch}>{ch}</span>
+                                        <div className="flex items-center gap-4 sm:gap-3 mt-3 sm:mt-0 w-full sm:w-auto justify-start sm:justify-end border-t sm:border-0 border-gray-200 pt-2 sm:pt-0">
+                                            <label className="text-xs sm:text-[10px] text-gray-600 font-medium flex items-center gap-2 sm:gap-1 cursor-pointer py-1">
+                                                <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-5 h-5 sm:w-3.5 sm:h-3.5" /> Post 1
+                                            </label>
+                                            <label className="text-xs sm:text-[10px] text-gray-600 font-medium flex items-center gap-2 sm:gap-1 cursor-pointer py-1">
+                                                <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-5 h-5 sm:w-3.5 sm:h-3.5" /> Post 2
+                                            </label>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
