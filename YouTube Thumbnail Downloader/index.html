@@ -209,21 +209,90 @@
                                 <p class="text-sm text-slate-400">${quality.res}</p>
                             </div>
                             
-                            <a 
-                                href="${imgUrl}" 
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-600 text-white px-5 py-2.5 rounded-lg transition-colors font-medium text-sm"
-                                title="Right-click and 'Save image as...' on the next page"
-                            >
-                                <i data-lucide="download" class="w-4 h-4"></i>
-                                View / Save
-                            </a>
+                            <div class="flex flex-row gap-2 w-full sm:w-auto mt-3 sm:mt-0">
+                                <a 
+                                    href="${imgUrl}" 
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-600 text-white px-4 py-2.5 rounded-lg transition-colors font-medium text-sm"
+                                >
+                                    <i data-lucide="external-link" class="w-4 h-4"></i>
+                                    View
+                                </a>
+                                <button 
+                                    onclick="forceDownload('${imgUrl}', 'thumbnail-${quality.id}.jpg', this)"
+                                    class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 disabled:opacity-70 disabled:pointer-events-none text-white px-4 py-2.5 rounded-lg transition-colors font-medium text-sm transition-transform active:scale-95"
+                                >
+                                    <i data-lucide="download" class="w-4 h-4"></i>
+                                    <span>Download</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `;
                 thumbnailsGrid.insertAdjacentHTML('beforeend', cardHTML);
             });
+        }
+
+        // Force download bypassing CORS issues using multiple public proxies
+        async function forceDownload(url, filename, btnElement) {
+            // Setup loading state on the button
+            const originalContent = btnElement.innerHTML;
+            btnElement.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Downloading</span>`;
+            btnElement.disabled = true;
+            lucide.createIcons(); // Refresh new icon
+
+            // wsrv.nl is a highly reliable image proxy that correctly sets permissive CORS headers for canvas/blobs
+            const proxies = [
+                `https://wsrv.nl/?url=${encodeURIComponent(url)}`,
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+            ];
+
+            let success = false;
+
+            for (const proxyUrl of proxies) {
+                try {
+                    const response = await fetch(proxyUrl, { mode: 'cors' });
+                    
+                    if (!response.ok) continue; 
+                    
+                    const blob = await response.blob();
+                    const blobUrl = window.URL.createObjectURL(blob);
+                    
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = blobUrl;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    
+                    window.URL.revokeObjectURL(blobUrl);
+                    document.body.removeChild(a);
+                    success = true;
+                    break; // Successfully downloaded, exit the loop
+                } catch (error) {
+                    console.warn(`Proxy check failed, trying next...`);
+                    // Silently continue to the next proxy in the array
+                }
+            }
+
+            if (!success) {
+                // If all proxies fail, fallback to safely opening the image in a new tab 
+                // Creating an anchor tag dynamically bypasses some strict popup blockers better than window.open inside async functions
+                const fallbackLink = document.createElement('a');
+                fallbackLink.href = url;
+                fallbackLink.target = '_blank';
+                fallbackLink.rel = 'noopener noreferrer';
+                document.body.appendChild(fallbackLink);
+                fallbackLink.click();
+                document.body.removeChild(fallbackLink);
+            }
+
+            // Restore original button state
+            btnElement.innerHTML = originalContent;
+            btnElement.disabled = false;
+            lucide.createIcons();
         }
     </script>
 </body>
