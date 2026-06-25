@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Thumbnail Downloader</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #f8fafc; /* Slate 50 */
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom scrollbar for a polished look */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-red-500 selection:text-white">
+
+    <!-- Navbar -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-10 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 h-16 flex items-center gap-2 text-red-500">
+            <i data-lucide="youtube" class="w-8 h-8"></i>
+            <h1 class="text-xl font-bold text-white tracking-tight">Thumb<span class="text-red-500">Grabber</span></h1>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex flex-col items-center py-12 px-4 w-full max-w-5xl mx-auto">
+        
+        <!-- Hero Section -->
+        <div class="text-center w-full max-w-2xl mb-10">
+            <h2 class="text-3xl md:text-5xl font-bold mb-4">Download YouTube <br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400">Thumbnails</span> in HD</h2>
+            <p class="text-slate-400 text-sm md:text-base">Paste your YouTube video link below to instantly extract and download thumbnails in all available resolutions.</p>
+        </div>
+
+        <!-- Input Section -->
+        <div class="w-full max-w-2xl bg-slate-800 p-2 rounded-2xl shadow-xl shadow-black/20 flex flex-col sm:flex-row gap-2 border border-slate-700 focus-within:border-red-500/50 transition-colors">
+            <div class="relative flex-grow flex items-center">
+                <i data-lucide="link" class="absolute left-4 text-slate-400 w-5 h-5"></i>
+                <input 
+                    type="text" 
+                    id="urlInput"
+                    placeholder="https://www.youtube.com/watch?v=..." 
+                    class="w-full bg-transparent text-white pl-12 pr-4 py-4 rounded-xl focus:outline-none placeholder-slate-500"
+                    autocomplete="off"
+                >
+            </div>
+            <button 
+                id="extractBtn"
+                class="bg-red-600 hover:bg-red-700 text-white font-semibold py-4 px-8 rounded-xl transition-all flex items-center justify-center gap-2 active:scale-95"
+            >
+                <span>Extract</span>
+                <i data-lucide="arrow-right" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <!-- Error Message Container -->
+        <div id="errorContainer" class="hidden mt-6 bg-red-950/50 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg flex items-center gap-2 w-full max-w-2xl">
+            <i data-lucide="alert-circle" class="w-5 h-5 flex-shrink-0"></i>
+            <p id="errorMessage" class="text-sm font-medium">Invalid URL</p>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsContainer" class="hidden w-full mt-12 fade-in">
+            <div class="border-t border-slate-800 pt-8">
+                <h3 class="text-2xl font-bold mb-6 flex items-center gap-2">
+                    <i data-lucide="image" class="text-red-500"></i> Available Thumbnails
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="thumbnailsGrid">
+                    <!-- Cards will be injected here via JS -->
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 py-6 mt-auto text-center text-slate-500 text-sm">
+        <p>Built for extracting public YouTube thumbnails. Works with standard, mobile, and Shorts URLs.</p>
+    </footer>
+
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // DOM Elements
+        const urlInput = document.getElementById('urlInput');
+        const extractBtn = document.getElementById('extractBtn');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const thumbnailsGrid = document.getElementById('thumbnailsGrid');
+        const errorContainer = document.getElementById('errorContainer');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Thumbnail Qualities config
+        const qualities = [
+            { id: 'maxresdefault', name: 'Maximum Resolution (HD)', res: '1280x720 or higher', tag: 'Best' },
+            { id: 'sddefault', name: 'Standard Definition', res: '640x480' },
+            { id: 'hqdefault', name: 'High Quality', res: '480x360' },
+            { id: 'mqdefault', name: 'Medium Quality', res: '320x180' }
+        ];
+
+        // Event Listeners
+        extractBtn.addEventListener('click', processUrl);
+        urlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') processUrl();
+        });
+
+        function processUrl() {
+            const url = urlInput.value.trim();
+            
+            // Hide previous state
+            errorContainer.classList.add('hidden');
+            resultsContainer.classList.add('hidden');
+            thumbnailsGrid.innerHTML = '';
+
+            if (!url) {
+                showError("Please enter a YouTube link.");
+                return;
+            }
+
+            const videoId = extractVideoID(url);
+
+            if (!videoId) {
+                showError("Could not detect a valid YouTube Video ID. Please check the link.");
+                return;
+            }
+
+            // Generate and render thumbnails
+            renderThumbnails(videoId);
+            resultsContainer.classList.remove('hidden');
+            
+            // Re-initialize icons for newly added HTML
+            lucide.createIcons();
+        }
+
+        // Extracts YouTube ID from various URL formats
+        function extractVideoID(url) {
+            // Handles youtube.com, youtu.be, shorts, embeds, and parameters
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/)([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorContainer.classList.remove('hidden');
+            
+            // Shake animation on error
+            errorContainer.animate([
+                { transform: 'translateX(0)' },
+                { transform: 'translateX(-5px)' },
+                { transform: 'translateX(5px)' },
+                { transform: 'translateX(-5px)' },
+                { transform: 'translateX(5px)' },
+                { transform: 'translateX(0)' }
+            ], { duration: 400, easing: 'ease-in-out' });
+        }
+
+        function renderThumbnails(videoId) {
+            qualities.forEach((quality, index) => {
+                const imgUrl = `https://img.youtube.com/vi/${videoId}/${quality.id}.jpg`;
+                
+                // For layout: Make the first one (HD) span full width if desired, 
+                // but 2-col grid works well uniformly. Let's make the Best quality card slightly styled differently.
+                const isBest = quality.tag === 'Best';
+                const cardClass = isBest ? 'md:col-span-2 border-red-500/30 bg-slate-800/80' : 'border-slate-700 bg-slate-800';
+
+                const cardHTML = `
+                    <div class="rounded-2xl border overflow-hidden shadow-lg flex flex-col ${cardClass} group hover:border-slate-500 transition-colors">
+                        <!-- Image Container -->
+                        <div class="relative aspect-video bg-slate-900 flex items-center justify-center overflow-hidden">
+                            <div class="absolute inset-0 flex items-center justify-center text-slate-600">
+                                <i data-lucide="image" class="w-10 h-10 animate-pulse"></i>
+                            </div>
+                            <img 
+                                src="${imgUrl}" 
+                                alt="${quality.name} Thumbnail" 
+                                class="w-full h-full object-cover relative z-10 opacity-0 transition-opacity duration-300"
+                                onload="this.classList.remove('opacity-0');"
+                                onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100%\\' height=\\'100%\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%231e293b\\'/><text x=\\'50%\\' y=\\'50%\\' font-family=\\'Arial\\' font-size=\\'14\\' fill=\\'%2394a3b8\\' text-anchor=\\'middle\\' dominant-baseline=\\'middle\\'>Quality Unavailable</text></svg>';"
+                            >
+                            ${isBest ? '<div class="absolute top-3 right-3 z-20 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">Highest Quality</div>' : ''}
+                        </div>
+                        
+                        <!-- Info & Action Container -->
+                        <div class="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <div>
+                                <h4 class="font-bold text-slate-100">${quality.name}</h4>
+                                <p class="text-sm text-slate-400">${quality.res}</p>
+                            </div>
+                            
+                            <a 
+                                href="${imgUrl}" 
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-600 text-white px-5 py-2.5 rounded-lg transition-colors font-medium text-sm"
+                                title="Right-click and 'Save image as...' on the next page"
+                            >
+                                <i data-lucide="download" class="w-4 h-4"></i>
+                                View / Save
+                            </a>
+                        </div>
+                    </div>
+                `;
+                thumbnailsGrid.insertAdjacentHTML('beforeend', cardHTML);
+            });
+        }
+    </script>
+</body>
+</html>
