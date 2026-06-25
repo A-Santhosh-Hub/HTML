@@ -84,6 +84,8 @@
 
 # Project 41 SanVibe ---> [ https://a-santhosh-hub.github.io/WEB_APPLICATION-S/SanVibe/index.html ]
 
+# Project 42 Download YouTube Thumbnails in HD ---> [https://a-santhosh-hub.github.io/HTML/YouTube%20Thumbnail%20Downloader/]
+
 
 # Project   https://santhosh2024.neocities.org/skill/in ---[ SKILL ]
 
