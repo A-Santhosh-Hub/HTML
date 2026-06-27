@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en" class="dark">
 
@@ -802,6 +801,490 @@
             color: var(--vs-textMuted);
             grid-column: 1 / -1;
         }
+        /* ===== MOBILE RESPONSIVE STYLES ===== */
+        @media (max-width: 768px) {
+
+            /* --- Global Mobile Overrides --- */
+            body {
+                padding-bottom: 0;
+            }
+
+            /* --- Title Bar: Compact --- */
+            header.h-8 {
+                height: 40px !important;
+                padding: 0 8px !important;
+            }
+
+            header .hidden.sm\:flex {
+                display: none !important;
+            }
+
+            header .hidden.sm\:block {
+                display: none !important;
+            }
+
+            #window-title {
+                font-size: 11px;
+                max-width: 50vw;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            /* --- Activity Bar: Hidden on mobile (replaced by bottom nav) --- */
+            #activity-bar {
+                display: none !important;
+            }
+
+            /* --- Sidebar: Full-screen overlay on mobile --- */
+            #sidebar {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                bottom: 0 !important;
+                width: 100vw !important;
+                max-width: 100vw !important;
+                z-index: 100 !important;
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                border-right: none !important;
+            }
+
+            #sidebar.mobile-hidden {
+                transform: translateX(-100%) !important;
+                pointer-events: none;
+            }
+
+            #sidebar.mobile-visible {
+                transform: translateX(0) !important;
+                pointer-events: auto;
+            }
+
+            /* --- Sidebar Resizer: Hidden on mobile --- */
+            #sidebar-resizer {
+                display: none !important;
+            }
+
+            /* --- Breadcrumbs: Hidden on mobile --- */
+            .h-6.flex.items-center.px-4.text-xs.text-vs-textMuted.border-b {
+                display: none !important;
+            }
+
+            /* --- Editor Tabs: Larger touch targets --- */
+            .h-9.flex.bg-vs-sidebar.shrink-0.overflow-x-auto {
+                height: 40px !important;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            #editor-tabs-container > div {
+                min-width: 100px !important;
+                max-width: 160px !important;
+                padding: 0 8px !important;
+            }
+
+            #editor-tabs-container > div button {
+                width: 28px !important;
+                height: 28px !important;
+                opacity: 1 !important;
+            }
+
+            /* --- Editor: Mobile-optimized --- */
+            #editor {
+                font-size: 16px !important;
+                line-height: 1.6 !important;
+                padding-left: 40px !important;
+                padding-right: 8px !important;
+                -webkit-text-size-adjust: 100%;
+            }
+
+            #line-numbers {
+                width: 36px !important;
+                font-size: 12px !important;
+                padding-right: 4px !important;
+            }
+
+            /* --- Status Bar: Simplified on mobile --- */
+            footer.h-6 {
+                height: 24px !important;
+                padding: 0 6px !important;
+                margin-bottom: env(safe-area-inset-bottom, 0);
+            }
+
+            #status-counts {
+                display: none !important;
+            }
+
+            footer .hidden.sm\:flex {
+                display: none !important;
+            }
+
+            /* --- Word Processor Mobile --- */
+            .word-canvas {
+                width: 100% !important;
+                min-height: auto !important;
+                padding: 16px !important;
+                box-sizing: border-box;
+            }
+
+            .word-canvas-container {
+                padding: 0 !important;
+            }
+
+            .word-toolbar {
+                flex-wrap: wrap !important;
+                gap: 2px !important;
+            }
+
+            /* --- Toast: Center bottom, above bottom nav --- */
+            #toast-container {
+                bottom: 70px !important;
+                right: 50% !important;
+                transform: translateX(50%) !important;
+                width: 90vw !important;
+                max-width: 360px;
+            }
+
+            /* --- About Modal: Mobile-friendly --- */
+            #about-modal .relative.group {
+                width: 90vw !important;
+                max-width: 360px;
+            }
+
+            #about-modal .relative.group > div:last-child {
+                padding: 24px 20px !important;
+            }
+
+            /* --- Confirm Modal: Full width on mobile --- */
+            #confirm-modal > div {
+                width: 90vw !important;
+            }
+
+            /* --- Spreadsheet: Scrollable on mobile --- */
+            .spreadsheet-td {
+                min-width: 80px !important;
+            }
+
+            /* --- WAE Grid: Single column on mobile --- */
+            .wae-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+                gap: 8px !important;
+            }
+
+            /* --- HTML Preview Pane: Full width on mobile --- */
+            #html-preview-pane {
+                position: fixed !important;
+                top: 40px !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 24px !important;
+                z-index: 90 !important;
+                border-left: none !important;
+            }
+        }
+
+        /* ===== MOBILE BOTTOM NAVIGATION BAR ===== */
+        #mobile-bottom-nav {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            #mobile-bottom-nav {
+                display: flex !important;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 56px;
+                background: var(--vs-activity);
+                border-top: 1px solid var(--vs-border);
+                z-index: 110;
+                align-items: center;
+                justify-content: space-around;
+                padding: 0 4px;
+                padding-bottom: env(safe-area-inset-bottom, 0);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+            }
+
+            #mobile-bottom-nav button {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 2px;
+                height: 100%;
+                border: none;
+                background: transparent;
+                color: var(--vs-activityInactive);
+                font-size: 10px;
+                font-family: 'Inter', sans-serif;
+                cursor: pointer;
+                transition: color 0.2s ease;
+                position: relative;
+                -webkit-tap-highlight-color: transparent;
+            }
+
+            #mobile-bottom-nav button i {
+                font-size: 18px;
+                transition: transform 0.2s ease;
+            }
+
+            #mobile-bottom-nav button.active {
+                color: var(--vs-accent);
+            }
+
+            #mobile-bottom-nav button.active i {
+                transform: scale(1.15);
+            }
+
+            #mobile-bottom-nav button.active::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 25%;
+                right: 25%;
+                height: 2px;
+                background: var(--vs-accent);
+                border-radius: 0 0 2px 2px;
+            }
+
+            /* Push the main content up so it's not hidden behind bottom nav */
+            footer.h-6 {
+                margin-bottom: 56px !important;
+            }
+        }
+
+        /* ===== MOBILE SIDEBAR OVERLAY BACKDROP ===== */
+        #mobile-sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 99;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #mobile-sidebar-backdrop.show {
+            display: block;
+            opacity: 1;
+        }
+
+        /* ===== MOBILE SIDEBAR CLOSE BUTTON ===== */
+        #mobile-sidebar-close {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            #mobile-sidebar-close {
+                display: flex !important;
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                width: 36px;
+                height: 36px;
+                align-items: center;
+                justify-content: center;
+                border-radius: 8px;
+                background: var(--vs-hover);
+                border: 1px solid var(--vs-border);
+                color: var(--vs-text);
+                font-size: 16px;
+                cursor: pointer;
+                z-index: 10;
+                -webkit-tap-highlight-color: transparent;
+            }
+        }
+
+        /* ===== MOBILE TOOL DRAWER ===== */
+        #mobile-tool-drawer {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-height: 75vh;
+            background: var(--vs-sidebar);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            z-index: 120;
+            flex-direction: column;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
+            padding-bottom: env(safe-area-inset-bottom, 0);
+        }
+
+        #mobile-tool-drawer.open {
+            display: flex;
+            transform: translateY(0);
+        }
+
+        #mobile-tool-drawer .drawer-handle {
+            width: 36px;
+            height: 4px;
+            background: var(--vs-textMuted);
+            border-radius: 2px;
+            margin: 10px auto 6px;
+            opacity: 0.5;
+        }
+
+        #mobile-tool-drawer .drawer-header {
+            padding: 8px 20px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--vs-text);
+            border-bottom: 1px solid var(--vs-border);
+        }
+
+        #mobile-tool-drawer .drawer-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+            padding: 16px 12px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #mobile-tool-drawer .drawer-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 14px 4px;
+            border-radius: 12px;
+            background: transparent;
+            border: none;
+            color: var(--vs-textMuted);
+            font-size: 9px;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            line-height: 1.2;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #mobile-tool-drawer .drawer-item i {
+            font-size: 20px;
+        }
+
+        #mobile-tool-drawer .drawer-item:hover,
+        #mobile-tool-drawer .drawer-item:active {
+            background: var(--vs-hover);
+            color: var(--vs-text);
+        }
+
+        #mobile-tool-drawer .drawer-item.active {
+            background: var(--vs-accent);
+            color: #fff;
+        }
+
+        #mobile-tool-drawer .drawer-section-title {
+            grid-column: 1 / -1;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--vs-textMuted);
+            padding: 8px 8px 4px;
+            opacity: 0.7;
+        }
+
+        /* ===== MOBILE DRAWER BACKDROP ===== */
+        #mobile-drawer-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 115;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #mobile-drawer-backdrop.show {
+            display: block;
+        }
+
+        /* ===== MOBILE HAMBURGER MENU ===== */
+        #mobile-hamburger-btn {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            #mobile-hamburger-btn {
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                width: 32px;
+                height: 32px;
+                border-radius: 6px;
+                background: transparent;
+                border: none;
+                color: var(--vs-textMuted);
+                font-size: 16px;
+                cursor: pointer;
+                -webkit-tap-highlight-color: transparent;
+            }
+
+            #mobile-hamburger-btn:active {
+                background: var(--vs-hover);
+            }
+        }
+
+        #mobile-hamburger-menu {
+            display: none;
+            position: fixed;
+            top: 40px;
+            right: 8px;
+            width: 200px;
+            background: var(--vs-sidebar);
+            border: 1px solid var(--vs-border);
+            border-radius: 10px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            z-index: 130;
+            flex-direction: column;
+            padding: 6px 0;
+            animation: modalBounce 0.2s ease forwards;
+        }
+
+        #mobile-hamburger-menu.show {
+            display: flex;
+        }
+
+        #mobile-hamburger-menu button {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            background: transparent;
+            border: none;
+            color: var(--vs-text);
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            text-align: left;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #mobile-hamburger-menu button:active {
+            background: var(--vs-selection);
+            color: #fff;
+        }
+
+        #mobile-hamburger-menu button i {
+            width: 18px;
+            text-align: center;
+            color: var(--vs-textMuted);
+            font-size: 14px;
+        }
+
+        #mobile-hamburger-menu .menu-divider {
+            height: 1px;
+            background: var(--vs-border);
+            margin: 4px 12px;
+        }
     </style>
 </head>
 
@@ -864,6 +1347,10 @@
             <div class="w-3 h-3 rounded-full bg-yellow-500 hidden sm:block"></div>
             <div class="w-3 h-3 rounded-full bg-green-500 hidden sm:block"></div>
             <div class="w-3 h-3 rounded-full bg-red-500 hidden sm:block"></div>
+            <!-- Mobile Hamburger Button -->
+            <button id="mobile-hamburger-btn" onclick="toggleMobileHamburger()" title="Menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
         </div>
     </header>
 
@@ -871,7 +1358,7 @@
     <div class="flex flex-1 overflow-hidden relative">
 
         <!-- Activity Bar (Far Left) -->
-        <aside
+        <aside id="activity-bar"
             class="w-12 bg-vs-activity flex flex-col items-center py-2 shrink-0 z-20 border-r border-vs-border overflow-y-auto hide-scrollbar">
             <button onclick="switchSidebarTab('workspace')" id="activity-workspace"
                 class="w-12 h-12 flex items-center justify-center text-vs-activityActive relative group mb-1"
@@ -1001,6 +1488,11 @@
         <!-- Primary Sidebar -->
         <aside id="sidebar" style="width: 256px;"
             class="bg-vs-sidebar border-r border-vs-border flex flex-col shrink-0 z-10 overflow-hidden relative transition-none">
+
+            <!-- Mobile Sidebar Close Button -->
+            <button id="mobile-sidebar-close" onclick="closeMobileSidebar()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
 
             <!-- Sidebar Header -->
             <div
@@ -2308,6 +2800,160 @@ or paste phone numbers..." class="w-full bg-vs-editor border border-vs-border te
     <!-- Toast Container -->
     <div id="toast-container" class="fixed bottom-10 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
+    <!-- ===== MOBILE: Sidebar Overlay Backdrop ===== -->
+    <div id="mobile-sidebar-backdrop" onclick="closeMobileSidebar()"></div>
+
+    <!-- ===== MOBILE: Bottom Navigation Bar ===== -->
+    <nav id="mobile-bottom-nav">
+        <button id="mob-nav-editor" class="active" onclick="mobileNavSwitch('editor')">
+            <i class="fa-solid fa-code"></i>
+            <span>Editor</span>
+        </button>
+        <button id="mob-nav-tools" onclick="mobileNavSwitch('tools')">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>Tools</span>
+        </button>
+        <button id="mob-nav-files" onclick="mobileNavSwitch('files')">
+            <i class="fa-regular fa-folder-open"></i>
+            <span>Files</span>
+        </button>
+        <button id="mob-nav-notes" onclick="mobileNavSwitch('notes')">
+            <i class="fa-solid fa-note-sticky"></i>
+            <span>Notes</span>
+        </button>
+        <button id="mob-nav-more" onclick="toggleMobileToolDrawer()">
+            <i class="fa-solid fa-grip"></i>
+            <span>More</span>
+        </button>
+    </nav>
+
+    <!-- ===== MOBILE: Tool Drawer Backdrop ===== -->
+    <div id="mobile-drawer-backdrop" onclick="closeMobileToolDrawer()"></div>
+
+    <!-- ===== MOBILE: Tool Drawer ===== -->
+    <div id="mobile-tool-drawer">
+        <div class="drawer-handle"></div>
+        <div class="drawer-header">All Tools</div>
+        <div class="drawer-grid">
+            <!-- Editors -->
+            <div class="drawer-section-title">Editors</div>
+            <button class="drawer-item" onclick="mobileOpenTool('workspace')">
+                <i class="fa-regular fa-folder-open text-blue-400"></i>
+                <span>Workspace</span>
+            </button>
+            <button class="drawer-item" onclick="mobileOpenTool('explorer')">
+                <i class="fa-regular fa-clock text-yellow-400"></i>
+                <span>History</span>
+            </button>
+            <button class="drawer-item" onclick="mobileOpenTool('word')">
+                <i class="fa-solid fa-file-word text-blue-500"></i>
+                <span>Word</span>
+            </button>
+            <button class="drawer-item" onclick="mobileOpenTool('excel')">
+                <i class="fa-solid fa-table text-green-500"></i>
+                <span>Excel</span>
+            </button>
+
+            <!-- Tools -->
+            <div class="drawer-section-title">Tools</div>
+            <button class="drawer-item" onclick="mobileOpenTool('tools')">
+                <i class="fa-solid fa-wand-magic-sparkles text-purple-400"></i>
+                <span>Format</span>
+            </button>
+            <button class="drawer-item" onclick="mobileOpenTool('snippets')">
+                <i class="fa-solid fa-puzzle-piece text-orange-400"></i>
+                <span>Snippets</span>
+            </button>
+            <button class="drawer-item" onclick="mobileOpenTool('devkit')">
+                <i class="fa-solid fa-toolbox text-cyan-400"></i>
+                <span>DevKit</span>
+            </button>
+            <button class="drawer-item" onclick="mobileOpenTool('formatter')">
+                <i class="fa-solid fa-phone-flip text-green-400"></i>
+                <span>IN Numbers</span>
+            </button>
+
+            <!-- Generators -->
+            <div class="drawer-section-title">Generators</div>
+            <button class="drawer-item" onclick="mobileOpenTool('qr-generator')">
+                <i class="fa-solid fa-qrcode text-indigo-400"></i>
+                <span>QR Code</span>
+            </button>
+            <button class="drawer-item" onclick="mobileOpenTool('contact-links')">
+                <i class="fa-solid fa-link text-teal-400"></i>
+                <span>Contact Links</span>
+            </button>
+
+            <!-- Media & Web -->
+            <div class="drawer-section-title">Media & Web</div>
+            <button class="drawer-item" onclick="mobileOpenTool('video')">
+                <i class="fa-solid fa-circle-play text-red-400"></i>
+                <span>Media Player</span>
+            </button>
+            <button class="drawer-item" onclick="mobileOpenTool('yt-thumbnail')">
+                <i class="fa-solid fa-image text-pink-400"></i>
+                <span>YT Thumbs</span>
+            </button>
+            <button class="drawer-item" onclick="mobileOpenTool('extractor')">
+                <i class="fa-solid fa-globe text-blue-400"></i>
+                <span>Web Extract</span>
+            </button>
+            <button class="drawer-item" onclick="mobileOpenTool('drive-extractor')">
+                <i class="fa-brands fa-google-drive text-yellow-500"></i>
+                <span>Drive Extract</span>
+            </button>
+            <button class="drawer-item" onclick="mobileOpenTool('asset-explorer')">
+                <i class="fa-solid fa-satellite-dish text-purple-400"></i>
+                <span>Web Assets</span>
+            </button>
+
+            <!-- Other -->
+            <div class="drawer-section-title">Other</div>
+            <button class="drawer-item" onclick="mobileOpenTool('keep-notes')">
+                <i class="fa-solid fa-note-sticky text-yellow-400"></i>
+                <span>Keep Notes</span>
+            </button>
+            <button class="drawer-item" onclick="mobileOpenTool('settings')">
+                <i class="fa-solid fa-gear text-gray-400"></i>
+                <span>Settings</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== MOBILE: Hamburger Menu ===== -->
+    <div id="mobile-hamburger-menu">
+        <button onclick="closeMobileHamburger(); createNewFile();">
+            <i class="fa-solid fa-file-circle-plus"></i> New File
+        </button>
+        <button onclick="closeMobileHamburger(); document.getElementById('file-input').click();">
+            <i class="fa-solid fa-folder-open"></i> Open File
+        </button>
+        <button onclick="closeMobileHamburger(); document.getElementById('folder-input').click();">
+            <i class="fa-solid fa-folder-tree"></i> Open Folder
+        </button>
+        <div class="menu-divider"></div>
+        <button onclick="closeMobileHamburger(); downloadFile();">
+            <i class="fa-solid fa-download"></i> Save File
+        </button>
+        <button onclick="closeMobileHamburger(); downloadZip();">
+            <i class="fa-solid fa-file-zipper"></i> Download ZIP
+        </button>
+        <div class="menu-divider"></div>
+        <button onclick="closeMobileHamburger(); formatContent();">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Format Code
+        </button>
+        <button onclick="closeMobileHamburger(); toggleHtmlPreview();">
+            <i class="fa-brands fa-html5"></i> Live Preview
+        </button>
+        <div class="menu-divider"></div>
+        <button onclick="closeMobileHamburger(); openAboutModal();">
+            <i class="fa-regular fa-circle-user"></i> About
+        </button>
+    </div>
+
+    <!-- ===== MOBILE: Hamburger Menu Backdrop (invisible tap to close) ===== -->
+    <div id="mobile-hamburger-backdrop" style="display:none; position:fixed; inset:0; z-index:125; -webkit-tap-highlight-color:transparent;" onclick="closeMobileHamburger()"></div>
+
     <script>
         // --- State Management ---
         const state = {
@@ -2412,6 +3058,7 @@ or paste phone numbers..." class="w-full bg-vs-editor border border-vs-border te
             initSpreadsheet();
             renderKeepNotes();
             switchSidebarTab('workspace'); // default
+            initMobile(); // Initialize mobile state (hide sidebar on mobile)
 
             // Global Keyboard Shortcuts
             document.addEventListener('keydown', handleGlobalKeydown);
@@ -3120,7 +3767,21 @@ or paste phone numbers..." class="w-full bg-vs-editor border border-vs-border te
             }
         }
 
+        function isMobile() {
+            return window.innerWidth <= 768;
+        }
+
         function toggleSidebar() {
+            // On mobile, use overlay behavior
+            if (isMobile()) {
+                if (state.sidebarVisible) {
+                    closeMobileSidebar();
+                } else {
+                    openMobileSidebar();
+                }
+                return;
+            }
+
             state.sidebarVisible = !state.sidebarVisible;
             const titleContainer = document.getElementById('sidebar-title')?.parentElement;
             const resizer = document.getElementById('sidebar-resizer');
@@ -3146,11 +3807,17 @@ or paste phone numbers..." class="w-full bg-vs-editor border border-vs-border te
         }
 
         function switchSidebarTab(tab) {
-            if (state.sidebarTab === tab && state.sidebarVisible) {
-                toggleSidebar();
-                return;
+            // On mobile: always show sidebar as overlay
+            if (isMobile()) {
+                state.sidebarTab = tab;
+                openMobileSidebar();
+            } else {
+                if (state.sidebarTab === tab && state.sidebarVisible) {
+                    toggleSidebar();
+                    return;
+                }
+                if (!state.sidebarVisible) toggleSidebar();
             }
-            if (!state.sidebarVisible) toggleSidebar();
 
             state.sidebarTab = tab;
 
@@ -3207,6 +3874,151 @@ or paste phone numbers..." class="w-full bg-vs-editor border border-vs-border te
                 if (icon) icon.classList.remove('-rotate-90');
             }
         }
+
+        // ===== MOBILE FUNCTIONS =====
+
+        function openMobileSidebar() {
+            if (!els.sidebar) return;
+            state.sidebarVisible = true;
+            els.sidebar.classList.remove('mobile-hidden');
+            els.sidebar.classList.add('mobile-visible');
+            const backdrop = document.getElementById('mobile-sidebar-backdrop');
+            if (backdrop) backdrop.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMobileSidebar() {
+            if (!els.sidebar) return;
+            state.sidebarVisible = false;
+            els.sidebar.classList.remove('mobile-visible');
+            els.sidebar.classList.add('mobile-hidden');
+            const backdrop = document.getElementById('mobile-sidebar-backdrop');
+            if (backdrop) backdrop.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        function mobileNavSwitch(target) {
+            // Update active state on bottom nav buttons
+            const navBtns = document.querySelectorAll('#mobile-bottom-nav button');
+            navBtns.forEach(btn => btn.classList.remove('active'));
+
+            const targetBtn = document.getElementById('mob-nav-' + target);
+            if (targetBtn) targetBtn.classList.add('active');
+
+            switch (target) {
+                case 'editor':
+                    closeMobileSidebar();
+                    break;
+                case 'tools':
+                    switchSidebarTab('tools');
+                    break;
+                case 'files':
+                    switchSidebarTab('workspace');
+                    break;
+                case 'notes':
+                    switchSidebarTab('keep-notes');
+                    break;
+                case 'more':
+                    toggleMobileToolDrawer();
+                    break;
+            }
+        }
+
+        function toggleMobileToolDrawer() {
+            const drawer = document.getElementById('mobile-tool-drawer');
+            const backdrop = document.getElementById('mobile-drawer-backdrop');
+            if (!drawer) return;
+
+            if (drawer.classList.contains('open')) {
+                closeMobileToolDrawer();
+            } else {
+                // First show the element, then trigger the animation
+                drawer.style.display = 'flex';
+                backdrop.classList.add('show');
+                // Force reflow before adding open class for animation
+                drawer.offsetHeight;
+                drawer.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeMobileToolDrawer() {
+            const drawer = document.getElementById('mobile-tool-drawer');
+            const backdrop = document.getElementById('mobile-drawer-backdrop');
+            if (!drawer) return;
+
+            drawer.classList.remove('open');
+            if (backdrop) backdrop.classList.remove('show');
+            document.body.style.overflow = '';
+
+            // Hide after animation completes
+            setTimeout(() => {
+                if (!drawer.classList.contains('open')) {
+                    drawer.style.display = 'none';
+                }
+            }, 350);
+        }
+
+        function mobileOpenTool(toolName) {
+            closeMobileToolDrawer();
+            // Small delay to let drawer close animation start before opening sidebar
+            setTimeout(() => {
+                switchSidebarTab(toolName);
+            }, 100);
+
+            // Update bottom nav active state
+            const navBtns = document.querySelectorAll('#mobile-bottom-nav button');
+            navBtns.forEach(btn => btn.classList.remove('active'));
+        }
+
+        function toggleMobileHamburger() {
+            const menu = document.getElementById('mobile-hamburger-menu');
+            const backdrop = document.getElementById('mobile-hamburger-backdrop');
+            if (!menu) return;
+
+            if (menu.classList.contains('show')) {
+                closeMobileHamburger();
+            } else {
+                menu.classList.add('show');
+                if (backdrop) backdrop.style.display = 'block';
+            }
+        }
+
+        function closeMobileHamburger() {
+            const menu = document.getElementById('mobile-hamburger-menu');
+            const backdrop = document.getElementById('mobile-hamburger-backdrop');
+            if (menu) menu.classList.remove('show');
+            if (backdrop) backdrop.style.display = 'none';
+        }
+
+        // Initialize mobile state on load
+        function initMobile() {
+            if (isMobile() && els.sidebar) {
+                els.sidebar.classList.add('mobile-hidden');
+                state.sidebarVisible = false;
+            }
+        }
+
+        // Re-check on resize (e.g. rotating device)
+        window.addEventListener('resize', () => {
+            if (isMobile()) {
+                if (!state.sidebarVisible) {
+                    els.sidebar?.classList.add('mobile-hidden');
+                    els.sidebar?.classList.remove('mobile-visible');
+                }
+            } else {
+                // Switching back to desktop: remove mobile classes
+                els.sidebar?.classList.remove('mobile-hidden', 'mobile-visible');
+                const backdrop = document.getElementById('mobile-sidebar-backdrop');
+                if (backdrop) backdrop.classList.remove('show');
+                document.body.style.overflow = '';
+
+                // Restore sidebar width
+                if (state.sidebarVisible && els.sidebar) {
+                    els.sidebar.style.width = state.sidebarWidth + 'px';
+                }
+            }
+        });
 
         // --- Previews & Tabs ---
 
