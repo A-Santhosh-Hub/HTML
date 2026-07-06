@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALP Admin OS - Command Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        @keyframes pulseAlert {
+            0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(220, 38, 38, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+        }
+        .alarm-active { animation: pulseAlert 2s infinite; border-color: #dc2626 !important; }
+        
+        /* Timeline styling */
+        .timeline-line::before {
+            content: '';
+            position: absolute;
+            left: 80px; /* Shifted from 24px to 80px to make room for time text */
+            top: 30px;
+            bottom: -30px;
+            width: 2px;
+            background-color: #e2e8f0;
+            z-index: 0;
+        }
+        .timeline-item:last-child .timeline-line::before { display: none; }
+    </style>
+</head>
+<body class="text-slate-800 h-screen overflow-hidden flex relative">
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="mobile-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/50 z-20 hidden md:hidden"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-64 bg-slate-900 text-slate-300 flex flex-col shrink-0 transition-transform duration-300 fixed inset-y-0 left-0 z-30 transform -translate-x-full md:relative md:translate-x-0">
+        <div class="h-16 flex items-center justify-between px-6 border-b border-slate-800 bg-slate-950">
+            <div class="flex items-center">
+                <i class="ph ph-planet text-2xl text-amber-500 mr-3"></i>
+                <h1 class="text-lg font-bold text-white tracking-wide">ALP OS</h1>
+            </div>
+            <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white">
+                <i class="ph ph-x text-xl"></i>
+            </button>
+        </div>
+        
+        <nav class="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
+            <button onclick="switchView('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium bg-indigo-600 text-white transition-colors">
+                <i class="ph ph-squares-four text-lg"></i> Daily Schedule
+            </button>
+            <button onclick="switchView('crm')" id="nav-crm" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition-colors">
+                <i class="ph ph-users text-lg"></i> CRM & Enquiries
+            </button>
+            <button onclick="switchView('students')" id="nav-students" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition-colors">
+                <i class="ph ph-graduation-cap text-lg"></i> Students & Consults
+            </button>
+            <button onclick="switchView('today')" id="nav-today" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition-colors mt-2 border-t border-slate-800 pt-3">
+                <i class="ph ph-chart-line-up text-lg text-emerald-400"></i> Today's Enrollments
+            </button>
+        </nav>
+
+        <div class="p-4 border-t border-slate-800">
+            <div class="bg-slate-800 rounded-xl p-4 text-center">
+                <p class="text-xs text-slate-400 mb-1">Current Time</p>
+                <div id="sidebar-clock" class="text-xl font-mono font-bold text-amber-400">00:00:00</div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden bg-slate-50 relative w-full">
+        
+        <!-- Header -->
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 shrink-0 z-10 shadow-sm">
+            <div class="flex items-center gap-3">
+                <button onclick="toggleSidebar()" class="md:hidden text-slate-600 p-2 hover:bg-slate-100 rounded-lg">
+                    <i class="ph ph-list text-2xl"></i>
+                </button>
+                <h2 id="view-title" class="text-lg md:text-xl font-bold text-slate-800 truncate">Daily Schedule & Tasks</h2>
+            </div>
+            <div class="flex items-center gap-2 md:gap-4">
+                <button onclick="generateSmartRoutine()" class="hidden sm:flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg text-sm font-semibold transition-colors border border-indigo-200">
+                    <i class="ph ph-magic-wand text-lg"></i> Auto-Generate
+                </button>
+                <button onclick="generateSmartRoutine()" class="sm:hidden p-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg transition-colors border border-indigo-200">
+                    <i class="ph ph-magic-wand text-xl"></i>
+                </button>
+                <div class="hidden md:block w-px h-6 bg-slate-200"></div>
+                <div class="flex items-center gap-2 md:gap-3">
+                    <div class="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-sm">A</div>
+                    <span class="hidden md:inline text-sm font-medium">Admin Profile</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Views Container -->
+        <div id="views-container" class="flex-1 overflow-y-auto p-4 md:p-8">
+            
+            <!-- View: Dashboard (Tasks & Timeline) -->
+            <div id="view-dashboard" class="fade-in max-w-5xl mx-auto space-y-6">
+                <!-- Stats Row -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                    <div class="bg-white p-4 md:p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-lg md:text-xl"><i class="ph ph-check-circle"></i></div>
+                        <div><p class="text-xs md:text-sm text-slate-500 font-medium">Tasks Done</p><p class="text-xl md:text-2xl font-bold" id="stat-tasks">0/0</p></div>
+                    </div>
+                    <div class="bg-white p-4 md:p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-lg md:text-xl"><i class="ph ph-phone-call"></i></div>
+                        <div><p class="text-xs md:text-sm text-slate-500 font-medium">Calls / Msg</p><p class="text-xl md:text-2xl font-bold" id="stat-comms">0</p></div>
+                    </div>
+                    <div class="bg-white p-4 md:p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-lg md:text-xl"><i class="ph ph-users-three"></i></div>
+                        <div><p class="text-xs md:text-sm text-slate-500 font-medium">Meetings</p><p class="text-xl md:text-2xl font-bold" id="stat-meetings">1</p></div>
+                    </div>
+                    <div class="bg-white p-4 md:p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-lg md:text-xl"><i class="ph ph-clock-countdown"></i></div>
+                        <div><p class="text-xs md:text-sm text-slate-500 font-medium">Next Event</p><p class="text-base md:text-lg font-bold truncate" id="stat-next">--</p></div>
+                    </div>
+                </div>
+
+                <!-- Custom Task Input (Responsive Form) -->
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <form id="custom-task-form" class="flex flex-col md:flex-row gap-3">
+                        <input type="text" id="task-input" placeholder="Add task (leave time blank for auto-schedule)..." required class="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm w-full">
+                        <div class="flex gap-2 w-full md:w-auto">
+                            <input type="time" id="task-time" title="Leave blank for smart auto-schedule" class="flex-1 md:w-32 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm cursor-pointer">
+                            <select id="task-category" class="flex-1 md:w-36 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                                <option value="admin">Admin</option>
+                                <option value="call">Call/Msg</option>
+                                <option value="class">Class</option>
+                                <option value="consultation">Consultation</option>
+                            </select>
+                            <button type="submit" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2 text-sm shrink-0 shadow-sm">
+                                <i class="ph ph-plus"></i> <span class="hidden md:inline">Add</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Task Timeline -->
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="px-4 md:px-6 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                        <h3 class="font-semibold text-slate-800 text-sm md:text-base">Today's Workflow (9:30 AM - 6:00 PM)</h3>
+                        <span class="text-[10px] md:text-xs font-medium px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full border border-indigo-200 whitespace-nowrap">Time is Gold</span>
+                    </div>
+                    <div class="p-4 md:p-6 overflow-x-hidden">
+                        <div id="timeline-container" class="space-y-0 relative">
+                            <!-- Tasks injected here -->
+                            <div class="text-center py-10 text-slate-400" id="empty-state">
+                                <i class="ph ph-calendar-blank text-4xl md:text-5xl mb-3"></i>
+                                <p class="text-sm">No tasks scheduled. Click "Auto-Generate" to load your template.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View: CRM & Enquiries -->
+            <div id="view-crm" class="hidden fade-in max-w-6xl mx-auto space-y-6">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-slate-800">Lead & Enquiry Record</h3>
+                        <p class="text-sm text-slate-500">Track inquiries for software, books, and basic classes.</p>
+                    </div>
+                    <button onclick="openModal('crm-modal')" class="w-full sm:w-auto px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2 text-sm shadow-sm shrink-0">
+                        <i class="ph ph-user-plus"></i> New Enquiry
+                    </button>
+                </div>
+                
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[600px]">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200">
+                                    <th class="px-6 py-4 font-medium">Name & Phone</th>
+                                    <th class="px-6 py-4 font-medium">Location</th>
+                                    <th class="px-6 py-4 font-medium">Requirement</th>
+                                    <th class="px-6 py-4 font-medium">Status</th>
+                                    <th class="px-6 py-4 font-medium text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="crm-table-body" class="divide-y divide-slate-100">
+                                <!-- CRM rows injected -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View: Students & Consultations -->
+            <div id="view-students" class="hidden fade-in max-w-6xl mx-auto space-y-6">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-slate-800">Students & Consultations</h3>
+                        <p class="text-sm text-slate-500">Manage class registrations, 64-videos prep, and horoscopes.</p>
+                    </div>
+                    <button onclick="openModal('student-modal')" class="w-full sm:w-auto px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2 text-sm shadow-sm shrink-0">
+                        <i class="ph ph-plus-circle"></i> Add Record
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[800px]">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200">
+                                    <th class="px-6 py-4 font-medium">Username & Contact</th>
+                                    <th class="px-6 py-4 font-medium">Type</th>
+                                    <th class="px-6 py-4 font-medium">Details (Code/Coach/Videos)</th>
+                                    <th class="px-6 py-4 font-medium">Payment</th>
+                                    <th class="px-6 py-4 font-medium text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="students-table-body" class="divide-y divide-slate-100">
+                                <!-- Student rows injected -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View: Today's Completed (Enrollments & Sales) -->
+            <div id="view-today" class="hidden fade-in max-w-7xl mx-auto space-y-8">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 border-b border-slate-200 pb-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800">Today's Completed Records</h3>
+                        <p class="text-sm text-slate-500">Track daily course bookings, scheduled consultations, and software sales.</p>
+                    </div>
+                    <button onclick="openNewTodayModal()" class="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-2 text-sm shadow-sm shrink-0">
+                        <i class="ph ph-plus-circle text-lg"></i> Add New Entry
+                    </button>
+                </div>
+
+                <!-- New Leads Section -->
+                <div class="space-y-3">
+                    <h4 class="font-semibold text-slate-700 flex items-center gap-2">
+                        <i class="ph ph-magnet text-blue-500 text-xl"></i> Today's New Leads
+                        <span id="count-leads" class="bg-blue-100 text-blue-700 py-0.5 px-2 rounded-full text-xs ml-2 shadow-sm font-bold">0</span>
+                    </h4>
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse min-w-[800px]">
+                                <thead>
+                                    <tr class="bg-blue-50 text-blue-800 text-xs uppercase tracking-wider border-b border-blue-100">
+                                        <th class="px-4 py-3 font-semibold">Name & Phone</th>
+                                        <th class="px-4 py-3 font-semibold">Source & Interest</th>
+                                        <th class="px-4 py-3 font-semibold">Follow-up Notes</th>
+                                        <th class="px-4 py-3 font-semibold text-right">Convert / Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="today-leads-body" class="divide-y divide-slate-100 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course Bookings Section -->
+                <div class="space-y-3">
+                    <h4 class="font-semibold text-slate-700 flex items-center gap-2">
+                        <i class="ph ph-books text-indigo-500 text-xl"></i> Course Bookings
+                        <span id="count-course" class="bg-indigo-100 text-indigo-700 py-0.5 px-2 rounded-full text-xs ml-2 shadow-sm font-bold">0</span>
+                    </h4>
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse min-w-[850px]">
+                                <thead>
+                                    <tr class="bg-indigo-50 text-indigo-800 text-xs uppercase tracking-wider border-b border-indigo-100">
+                                        <th class="px-4 py-3 font-semibold">Name & Phone</th>
+                                        <th class="px-4 py-3 font-semibold">ID & Key</th>
+                                        <th class="px-4 py-3 font-semibold">Payment Status</th>
+                                        <th class="px-4 py-3 font-semibold">Notes</th>
+                                        <th class="px-4 py-3 font-semibold text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="today-course-body" class="divide-y divide-slate-100 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Consultations Section -->
+                <div class="space-y-3">
+                    <h4 class="font-semibold text-slate-700 flex items-center gap-2">
+                        <i class="ph ph-sparkle text-purple-500 text-xl"></i> Consultations
+                        <span id="count-consult" class="bg-purple-100 text-purple-700 py-0.5 px-2 rounded-full text-xs ml-2 shadow-sm font-bold">0</span>
+                    </h4>
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse min-w-[900px]">
+                                <thead>
+                                    <tr class="bg-purple-50 text-purple-800 text-xs uppercase tracking-wider border-b border-purple-100">
+                                        <th class="px-4 py-3 font-semibold w-12">Status</th>
+                                        <th class="px-4 py-3 font-semibold">Consultation Name</th>
+                                        <th class="px-4 py-3 font-semibold">Teacher / Prep</th>
+                                        <th class="px-4 py-3 font-semibold">Time (24h) & Link</th>
+                                        <th class="px-4 py-3 font-semibold">Payment</th>
+                                        <th class="px-4 py-3 font-semibold">Notes</th>
+                                        <th class="px-4 py-3 font-semibold text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="today-consult-body" class="divide-y divide-slate-100 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Software Sales Section -->
+                <div class="space-y-3">
+                    <h4 class="font-semibold text-slate-700 flex items-center gap-2">
+                        <i class="ph ph-laptop text-emerald-500 text-xl"></i> Software Sales
+                        <span id="count-software" class="bg-emerald-100 text-emerald-700 py-0.5 px-2 rounded-full text-xs ml-2 shadow-sm font-bold">0</span>
+                    </h4>
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse min-w-[900px]">
+                                <thead>
+                                    <tr class="bg-emerald-50 text-emerald-800 text-xs uppercase tracking-wider border-b border-emerald-100">
+                                        <th class="px-4 py-3 font-semibold">Username & Phone</th>
+                                        <th class="px-4 py-3 font-semibold">ID & Coach</th>
+                                        <th class="px-4 py-3 font-semibold">Software Type</th>
+                                        <th class="px-4 py-3 font-semibold">Software Key</th>
+                                        <th class="px-4 py-3 font-semibold">Payment</th>
+                                        <th class="px-4 py-3 font-semibold text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="today-software-body" class="divide-y divide-slate-100 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <!-- Alarm Modal -->
+    <div id="alarm-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl border-4 border-transparent w-full max-w-md p-6 md:p-8 flex flex-col items-center text-center scale-95 opacity-0 transition-all duration-300 mx-4" id="alarm-modal-content">
+            <div class="w-16 h-16 md:w-20 md:h-20 bg-red-100 rounded-full flex items-center justify-center mb-4 text-red-600 relative">
+                <div class="absolute inset-0 rounded-full bg-red-100 animate-ping opacity-75"></div>
+                <i class="ph-fill ph-bell-ringing text-3xl md:text-4xl relative z-10"></i>
+            </div>
+            <h2 class="text-xl md:text-2xl font-bold text-slate-800 mb-2">Schedule Alert!</h2>
+            <p id="alarm-time-display" class="text-indigo-600 font-mono font-bold mb-1">00:00</p>
+            <p id="alarm-message" class="text-slate-600 mb-6 font-medium text-base md:text-lg leading-relaxed">Task description goes here</p>
+            <button onclick="dismissAlarm()" class="w-full py-3 md:py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl transition font-bold shadow-lg flex items-center justify-center gap-2 text-sm md:text-base">
+                <i class="ph ph-check-circle"></i> Acknowledge & Dismiss
+            </button>
+        </div>
+    </div>
+
+    <!-- Edit Task Modal -->
+    <div id="edit-task-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-5 md:p-6 mx-4">
+            <div class="flex justify-between items-center mb-5">
+                <h2 class="text-lg md:text-xl font-bold text-slate-800">Edit Task</h2>
+                <button onclick="closeModal('edit-task-modal')" class="text-slate-400 hover:text-slate-600 p-1"><i class="ph ph-x text-xl"></i></button>
+            </div>
+            <form id="edit-task-form" class="space-y-4">
+                <input type="hidden" id="edit-task-id">
+                <div>
+                    <label class="block text-xs font-medium text-slate-500 mb-1">Task Description</label>
+                    <input type="text" id="edit-task-text" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Time</label>
+                        <input type="time" id="edit-task-time" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Category</label>
+                        <select id="edit-task-category" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                            <option value="admin">Admin</option>
+                            <option value="call">Call/Msg</option>
+                            <option value="class">Class</option>
+                            <option value="consultation">Consultation</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="pt-4 flex justify-end gap-3">
+                    <button type="button" onclick="closeModal('edit-task-modal')" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium text-sm border border-transparent">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium text-sm hover:bg-indigo-700 shadow-sm">Update Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- CRM Modal -->
+    <div id="crm-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-5 md:p-6 mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-5">
+                <h2 class="text-lg md:text-xl font-bold text-slate-800">Add Lead / Enquiry</h2>
+                <button onclick="closeModal('crm-modal')" class="text-slate-400 hover:text-slate-600 p-1"><i class="ph ph-x text-xl"></i></button>
+            </div>
+            <form id="crm-form" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Name</label>
+                        <input type="text" id="crm-name" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Phone Number</label>
+                        <input type="text" id="crm-phone" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-500 mb-1">Location / Place</label>
+                    <input type="text" id="crm-place" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-500 mb-1">Requirement</label>
+                    <select id="crm-req" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                        <option value="Software Inquiry">Software Inquiry & Code</option>
+                        <option value="Book Inquiry">Book Inquiry</option>
+                        <option value="Basic Class">Basic Class Information</option>
+                        <option value="ChatGPT Help">ChatGPT Personal Inquiry</option>
+                        <option value="General">General Follow-up</option>
+                    </select>
+                </div>
+                <div class="pt-4 flex justify-end gap-3">
+                    <button type="button" onclick="closeModal('crm-modal')" class="w-full sm:w-auto px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium text-sm border border-transparent">Cancel</button>
+                    <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium text-sm hover:bg-indigo-700 shadow-sm">Save Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Student/Consult Modal -->
+    <div id="student-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-5 md:p-6 mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-5">
+                <h2 class="text-lg md:text-xl font-bold text-slate-800">Add Student / Consult Record</h2>
+                <button onclick="closeModal('student-modal')" class="text-slate-400 hover:text-slate-600 p-1"><i class="ph ph-x text-xl"></i></button>
+            </div>
+            <form id="student-form" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Username / Name</label>
+                        <input type="text" id="stu-name" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Phone Number</label>
+                        <input type="text" id="stu-phone" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Record Type</label>
+                        <select id="stu-type" onchange="toggleStudentFields()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                            <option value="Consultation">Consultation (Horoscope)</option>
+                            <option value="Basic Class">Basic Class Reg (64 Videos)</option>
+                            <option value="Advanced Class">Advanced Class Reg</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Payment Status</label>
+                        <select id="stu-payment" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                            <option value="Paid">Fully Paid</option>
+                            <option value="Pending">Pending Payment / Installment</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Dynamic Fields based on Type -->
+                <div id="dynamic-fields-wrapper" class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-3">
+                    <div id="field-consultation">
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Horoscope Details / Booking Date</label>
+                        <input type="text" id="stu-consult-details" placeholder="E.g., Seen on 12th, requires follow-up" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm">
+                    </div>
+                    <div id="field-basic-class" class="hidden">
+                        <label class="block text-xs font-medium text-slate-500 mb-1">64 Videos Pre-prep Status</label>
+                        <select id="stu-videos" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm">
+                            <option value="Not Started">Not Started</option>
+                            <option value="In Progress">Sent - In Progress</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+                    <div id="field-advanced-class" class="hidden">
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Reg No & Coach Change Request</label>
+                        <input type="text" id="stu-adv-details" placeholder="Reg: ADV-102 | Request Coach: Mr. X" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm">
+                    </div>
+                </div>
+
+                <div class="pt-4 flex flex-col sm:flex-row justify-end gap-3">
+                    <button type="button" onclick="closeModal('student-modal')" class="w-full sm:w-auto px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium text-sm">Cancel</button>
+                    <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium text-sm hover:bg-indigo-700 shadow-sm">Save Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Today's Record Modal -->
+    <div id="today-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl p-5 md:p-8 mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+                <h2 id="today-modal-title" class="text-xl font-bold text-slate-800">Add Today's Enrollment / Sale</h2>
+                <button onclick="closeModal('today-modal')" class="text-slate-400 hover:text-slate-600 p-1 bg-slate-100 rounded-full"><i class="ph ph-x text-lg"></i></button>
+            </div>
+            
+            <div class="mb-5">
+                <label class="block text-sm font-bold text-slate-700 mb-2">Select Category</label>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <button onclick="setTodayForm('lead')" id="btn-cat-lead" class="py-2 px-1 text-xs md:text-sm font-semibold rounded-lg bg-blue-100 text-blue-700 border-2 border-blue-500 transition-all">New Lead</button>
+                    <button onclick="setTodayForm('course')" id="btn-cat-course" class="py-2 px-1 text-xs md:text-sm font-semibold rounded-lg bg-slate-50 text-slate-500 border-2 border-transparent hover:bg-slate-100 transition-all">Course Booking</button>
+                    <button onclick="setTodayForm('consult')" id="btn-cat-consult" class="py-2 px-1 text-xs md:text-sm font-semibold rounded-lg bg-slate-50 text-slate-500 border-2 border-transparent hover:bg-slate-100 transition-all">Consultation</button>
+                    <button onclick="setTodayForm('software')" id="btn-cat-software" class="py-2 px-1 text-xs md:text-sm font-semibold rounded-lg bg-slate-50 text-slate-500 border-2 border-transparent hover:bg-slate-100 transition-all">Software Sale</button>
+                </div>
+            </div>
+
+            <form id="today-form" class="space-y-4">
+                <input type="hidden" id="today-category" value="course">
+                
+                <!-- Dynamic Fields Container -->
+                <div id="today-fields-container" class="space-y-4">
+                    <!-- Fields injected here via JS -->
+                </div>
+
+                <div class="pt-6 border-t border-slate-100 flex justify-end gap-3">
+                    <button type="button" onclick="closeModal('today-modal')" class="px-5 py-2.5 text-slate-600 hover:bg-slate-100 rounded-lg font-medium text-sm">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 bg-emerald-600 text-white rounded-lg font-bold text-sm hover:bg-emerald-700 shadow-md">Add Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        // --- State Management (In-Memory per constraints) ---
+        const state = {
+            tasks: [],
+            enquiries: [],
+            students: [],
+            todayRecords: { leads: [], course: [], consult: [], software: [] },
+            currentView: 'dashboard',
+            audioContext: null
+        };
+        
+        let convertingRecord = null; // Tracks records when swapping/promoting
+        let editingTodayRecord = null; // Tracks records being directly edited
+
+        // --- Core Application Initialization ---
+        function initApp() {
+            loadTodayState(); // Load Local Storage and check for daily reset
+            startClock();
+            setInterval(checkAlarms, 1000); // Check alarms every second
+            renderCRM();
+            renderStudents();
+            renderTodayRecords();
+            updateStats();
+        }
+
+        // --- Local Storage & Daily Smart Reset ---
+        function loadTodayState() {
+            const savedStr = localStorage.getItem('alp_today_records');
+            const lastDate = localStorage.getItem('alp_last_date');
+            const todayDate = new Date().toDateString();
+
+            if (savedStr) {
+                state.todayRecords = JSON.parse(savedStr);
+            }
+
+            if (lastDate !== todayDate) {
+                // It's a new day! Reset Course and Software. KEEP LEADS!
+                state.todayRecords.course = [];
+                state.todayRecords.software = [];
+                
+                // SMART RETAIN: Keep Consultations that are scheduled for the future!
+                state.todayRecords.consult = state.todayRecords.consult.filter(c => {
+                    if (!c.time) return false;
+                    const cTime = new Date(c.time).getTime();
+                    // Keep if the booking is in the future and hasn't been checked off
+                    return !c.completed && cTime > Date.now();
+                });
+
+                localStorage.setItem('alp_last_date', todayDate);
+                saveTodayState();
+            }
+        }
+
+        function saveTodayState() {
+            localStorage.setItem('alp_today_records', JSON.stringify(state.todayRecords));
+        }
+
+        // --- Navigation & Mobile Sidebar ---
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            const isClosed = sidebar.classList.contains('-translate-x-full');
+            
+            if (isClosed) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        function switchView(viewName) {
+            // Hide all
+            document.getElementById('view-dashboard').classList.add('hidden');
+            document.getElementById('view-crm').classList.add('hidden');
+            document.getElementById('view-students').classList.add('hidden');
+            document.getElementById('view-today').classList.add('hidden');
+            
+            // Reset nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if(btn.id === 'nav-today') {
+                    btn.className = 'nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition-colors mt-2 border-t border-slate-800 pt-3 text-slate-400';
+                } else {
+                    btn.className = 'nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition-colors';
+                }
+            });
+
+            // Show target
+            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+            
+            if(viewName === 'today') {
+                document.getElementById(`nav-${viewName}`).className = 'nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium bg-emerald-600 text-white transition-colors mt-2 border-t border-slate-800 pt-3';
+            } else {
+                document.getElementById(`nav-${viewName}`).className = 'nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium bg-indigo-600 text-white transition-colors';
+            }
+            
+            // Update Title
+            const titles = {
+                'dashboard': 'Daily Schedule & Tasks',
+                'crm': 'CRM & Lead Management',
+                'students': 'Students & Consultation Master',
+                'today': "Today's Enrollments & Sales"
+            };
+            document.getElementById('view-title').textContent = titles[viewName];
+            state.currentView = viewName;
+            
+            // Close mobile sidebar if open
+            if(window.innerWidth < 768) {
+                toggleSidebar();
+            }
+        }
+
+        // --- Clock & Timer Logic ---
+        function startClock() {
+            const clockEl = document.getElementById('sidebar-clock');
+            setInterval(() => {
+                const now = new Date();
+                clockEl.textContent = now.toLocaleTimeString('en-US', { hour12: false });
+            }, 1000);
+        }
+
+        function getTodayTimestampStr(timeStr) {
+            // timeStr format: "09:30"
+            const today = new Date();
+            const [hours, minutes] = timeStr.split(':');
+            today.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+            return today.getTime();
+        }
+
+        // --- Smart Workflow Generator (The 20 Points Logic) ---
+        function generateSmartRoutine() {
+            if (state.tasks.length > 0) {
+                if(!confirm("This will clear your current timeline and regenerate the standard ALP routine. Continue?")) return;
+            }
+            
+            state.tasks = [];
+            
+            // Defining the precise daily workflow based on user's 20 points
+            const workflowTemplate = [
+                { time: "09:30", cat: "call", text: "Morning Sync & WhatsApp Message Responses" },
+                { time: "10:00", cat: "call", text: "Phone Call Management (Register data in Excel/CRM)" },
+                { time: "10:30", cat: "consultation", text: "Consultation Tracking (Who saw horoscopes & updates)" },
+                { time: "11:00", cat: "admin", text: "Break Time (Refresh & Recharge)" },
+                { time: "12:00", cat: "admin", text: "Pending Payment & Installments Management" },
+                { time: "14:00", cat: "class", text: "Book Inquiries & Appointment Booking Responses" },
+                { time: "15:00", cat: "class", text: "Software Inquiry, Code Distribution & Missing Code Follow-up" },
+                { time: "15:45", cat: "class", text: "Class Reg: Basic (64 Videos) & Advanced (Reg # / Coach Change)" },
+                { time: "16:30", cat: "call", text: "ChatGPT Inquiries & Client/Student Direct Responses" },
+                { time: "17:00", cat: "admin", text: "Teachers and Coaches Meeting (MANDATORY)" },
+                { time: "17:45", cat: "call", text: "Community Updates (Broadcasts) & Final Enquiry Record Keeping" }
+            ];
+
+            workflowTemplate.forEach(item => {
+                const ts = getTodayTimestampStr(item.time);
+                state.tasks.push({
+                    id: 'task_' + Math.random().toString(36).substr(2, 9),
+                    text: item.text,
+                    timeStr: item.time,
+                    timestamp: ts,
+                    category: item.cat,
+                    completed: false,
+                    alarmTriggered: ts < Date.now() // If generated past the time, don't trigger alarm
+                });
+            });
+
+            // Sort ensures timeline stays strictly sequential
+            state.tasks.sort((a, b) => a.timestamp - b.timestamp);
+            renderTimeline();
+            updateStats();
+        }
+
+        function initApp() {
+            startClock();
+            setInterval(checkAlarms, 1000); // Check alarms every second
+            renderCRM();
+            renderStudents();
+            renderTodayRecords();
+            updateStats();
+        }
+
+        // --- Custom Task Handling with AUTO-SCHEDULE feature ---
+        document.getElementById('custom-task-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const text = document.getElementById('task-input').value.trim();
+            let timeVal = document.getElementById('task-time').value; // "HH:MM"
+            const cat = document.getElementById('task-category').value;
+
+            if (!text) return alert("Please provide a task description.");
+
+            let finalTimestamp;
+            let finalTimeStr;
+
+            // SMART AUTO-SCHEDULER LOGIC (30 min gaps)
+            if (!timeVal) {
+                // Base start time is 09:30
+                let baseTs = getTodayTimestampStr("09:30");
+                
+                if (state.tasks.length > 0) {
+                    // Find the chronologically latest task
+                    const latestTask = state.tasks.reduce((latest, current) => {
+                        return current.timestamp > latest.timestamp ? current : latest;
+                    }, state.tasks[0]);
+                    
+                    // Add 30 minutes (1800000 milliseconds) to the latest task's time
+                    baseTs = latestTask.timestamp + 1800000;
+                }
+
+                // Guardrail: Do not schedule past 6:00 PM (18:00)
+                const maxTs = getTodayTimestampStr("18:00");
+                if (baseTs > maxTs) {
+                    alert("Your day is full! Capping this task at 6:00 PM (18:00).");
+                    baseTs = maxTs;
+                }
+
+                finalTimestamp = baseTs;
+                
+                // Format the automatically assigned timestamp back to "HH:MM" string for display
+                const d = new Date(baseTs);
+                finalTimeStr = d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
+            } else {
+                // User provided a specific time
+                finalTimestamp = getTodayTimestampStr(timeVal);
+                finalTimeStr = timeVal;
+            }
+
+            // Create and push the new task
+            state.tasks.push({
+                id: 'task_' + Math.random().toString(36).substr(2, 9),
+                text: text,
+                timeStr: finalTimeStr,
+                timestamp: finalTimestamp,
+                category: cat,
+                completed: false,
+                alarmTriggered: finalTimestamp < Date.now()
+            });
+
+            // Re-sort the array in case a custom time was inserted in the middle
+            state.tasks.sort((a, b) => a.timestamp - b.timestamp);
+            
+            // Reset input
+            document.getElementById('task-input').value = '';
+            document.getElementById('task-time').value = '';
+            
+            initAudio();
+            renderTimeline();
+            updateStats();
+        });
+
+
+        // --- Timeline Rendering (Fix applied here for time UI) ---
+        function renderTimeline() {
+            const container = document.getElementById('timeline-container');
+            const empty = document.getElementById('empty-state');
+            
+            // Clean specific task elements, keep empty state element
+            Array.from(container.children).forEach(child => {
+                if (child.id !== 'empty-state') child.remove();
+            });
+
+            if (state.tasks.length === 0) {
+                empty.style.display = 'block';
+                return;
+            }
+            empty.style.display = 'none';
+
+            const catConfig = {
+                'admin': { icon: 'ph-briefcase', color: 'bg-slate-100 text-slate-600', ring: 'ring-slate-200' },
+                'call': { icon: 'ph-whatsapp-logo', color: 'bg-green-100 text-green-600', ring: 'ring-green-200' },
+                'class': { icon: 'ph-monitor-play', color: 'bg-blue-100 text-blue-600', ring: 'ring-blue-200' },
+                'consultation': { icon: 'ph-sparkle', color: 'bg-purple-100 text-purple-600', ring: 'ring-purple-200' }
+            };
+
+            state.tasks.forEach(task => {
+                const conf = catConfig[task.category] || catConfig['admin'];
+                const isOverdue = !task.completed && task.timestamp < Date.now();
+                
+                const div = document.createElement('div');
+                // Updated pl-28 to leave room for expanded time box and shifted icon
+                div.className = `timeline-item timeline-line relative pl-28 py-4 transition-all duration-300 ${task.completed ? 'opacity-50' : ''}`;
+                
+                div.innerHTML = `
+                    <div class="absolute left-0 top-6 w-16 text-right pr-2">
+                        <span class="text-sm font-bold tracking-tight ${isOverdue ? 'text-red-500' : 'text-slate-500'}">${task.timeStr}</span>
+                    </div>
+                    <div class="absolute left-20 top-5 transform -translate-x-1/2 w-8 h-8 rounded-full ${conf.color} ring-4 ${conf.ring} flex items-center justify-center z-10 bg-white">
+                        <i class="ph ${task.completed ? 'ph-check-circle text-indigo-600' : conf.icon}"></i>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border ${isOverdue ? 'border-red-200 bg-red-50/30' : 'border-slate-200'} shadow-sm hover:shadow-md transition-shadow group flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
+                        <div class="pr-0 sm:pr-4">
+                            <h4 class="font-semibold text-slate-800 text-sm md:text-base ${task.completed ? 'line-through text-slate-500' : ''}">${task.text}</h4>
+                            <p class="text-[10px] sm:text-xs text-slate-500 mt-1 uppercase tracking-wider">${task.category} TASK</p>
+                        </div>
+                        <div class="flex gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity self-end sm:self-auto shrink-0 mt-2 sm:mt-0">
+                            <button onclick="toggleTask('${task.id}')" title="Mark Complete" class="w-8 h-8 rounded-full flex items-center justify-center border ${task.completed ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 text-slate-400 hover:border-indigo-500 hover:text-indigo-600'} transition-colors">
+                                <i class="ph ph-check font-bold"></i>
+                            </button>
+                            <button onclick="openEditTask('${task.id}')" title="Edit Task" class="w-8 h-8 rounded-full flex items-center justify-center border border-slate-300 text-slate-400 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50 transition-colors">
+                                <i class="ph ph-pencil-simple font-bold"></i>
+                            </button>
+                            <button onclick="swapTaskNext('${task.id}')" title="Missed? Swap Time With Next Task" class="w-8 h-8 rounded-full flex items-center justify-center border border-slate-300 text-slate-400 hover:border-amber-500 hover:text-amber-600 hover:bg-amber-50 transition-colors">
+                                <i class="ph ph-arrows-down-up font-bold"></i>
+                            </button>
+                            <button onclick="deleteTask('${task.id}')" title="Delete Task" class="w-8 h-8 rounded-full flex items-center justify-center border border-slate-300 text-slate-400 hover:border-red-500 hover:text-red-600 hover:bg-red-50 transition-colors">
+                                <i class="ph ph-trash font-bold"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function toggleTask(id) {
+            const task = state.tasks.find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                renderTimeline();
+                updateStats();
+            }
+        }
+        
+        // --- Task Edit & Swap Logic ---
+        function openEditTask(id) {
+            const task = state.tasks.find(t => t.id === id);
+            if(!task) return;
+            document.getElementById('edit-task-id').value = task.id;
+            document.getElementById('edit-task-text').value = task.text;
+            document.getElementById('edit-task-time').value = task.timeStr;
+            document.getElementById('edit-task-category').value = task.category;
+            openModal('edit-task-modal');
+        }
+
+        document.getElementById('edit-task-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-task-id').value;
+            const task = state.tasks.find(t => t.id === id);
+            if(task) {
+                task.text = document.getElementById('edit-task-text').value;
+                task.timeStr = document.getElementById('edit-task-time').value;
+                task.category = document.getElementById('edit-task-category').value;
+                
+                const newTimestamp = getTodayTimestampStr(task.timeStr);
+                
+                // If time changed and is in future, reset alarm trigger
+                if(task.timestamp !== newTimestamp && newTimestamp > Date.now()) {
+                    task.alarmTriggered = false;
+                }
+                
+                task.timestamp = newTimestamp;
+
+                state.tasks.sort((a, b) => a.timestamp - b.timestamp);
+                renderTimeline();
+                updateStats();
+                closeModal('edit-task-modal');
+            }
+        });
+
+        function swapTaskNext(id) {
+            const index = state.tasks.findIndex(t => t.id === id);
+            
+            // Check if it's the last task
+            if (index === -1) return;
+            if (index === state.tasks.length - 1) {
+                alert("This is the last task on your schedule! You cannot push it further down.");
+                return;
+            }
+
+            // Swap times with the very next scheduled task
+            const currentTask = state.tasks[index];
+            const nextTask = state.tasks[index + 1];
+
+            const tempTimeStr = currentTask.timeStr;
+            const tempTimestamp = currentTask.timestamp;
+            const tempAlarmTriggered = currentTask.alarmTriggered;
+
+            currentTask.timeStr = nextTask.timeStr;
+            currentTask.timestamp = nextTask.timestamp;
+            
+            // If pushed to the future, re-arm the alarm!
+            if(currentTask.timestamp > Date.now()) currentTask.alarmTriggered = false;
+            else currentTask.alarmTriggered = nextTask.alarmTriggered;
+
+            nextTask.timeStr = tempTimeStr;
+            nextTask.timestamp = tempTimestamp;
+            nextTask.alarmTriggered = tempAlarmTriggered;
+
+            // Sort ensures timeline stays strictly sequential
+            state.tasks.sort((a, b) => a.timestamp - b.timestamp);
+            renderTimeline();
+            updateStats();
+        }
+
+        function deleteTask(id) {
+            state.tasks = state.tasks.filter(t => t.id !== id);
+            renderTimeline();
+            updateStats();
+        }
+
+        function updateStats() {
+            const total = state.tasks.length;
+            const done = state.tasks.filter(t => t.completed).length;
+            document.getElementById('stat-tasks').textContent = `${done}/${total}`;
+
+            const comms = state.tasks.filter(t => (t.category === 'call' || t.category === 'consultation') && !t.completed).length;
+            document.getElementById('stat-comms').textContent = comms;
+
+            // Find next upcoming
+            const now = Date.now();
+            const upcoming = state.tasks.filter(t => !t.completed && t.timestamp > now).sort((a,b) => a.timestamp - b.timestamp);
+            document.getElementById('stat-next').textContent = upcoming.length > 0 ? upcoming[0].timeStr : '--';
+        }
+
+
+        // --- Alarm System (Web Audio API) ---
+        function initAudio() {
+            if (!state.audioContext) {
+                state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function checkAlarms() {
+            const now = Date.now();
+            let needsRender = false;
+            let needsSave = false;
+
+            // 1. Check Standard Tasks Workflow
+            state.tasks.forEach(task => {
+                if (!task.completed && !task.alarmTriggered && now >= task.timestamp) {
+                    task.alarmTriggered = true;
+                    showAlarm(task);
+                    needsRender = true;
+                }
+            });
+
+            // 2. Check Consultations for 5-Minute Reminder Alarm
+            state.todayRecords.consult.forEach(c => {
+                if (!c.completed && !c.alarmTriggered && c.time) {
+                    const consultTime = new Date(c.time).getTime();
+                    if (!isNaN(consultTime)) {
+                        const reminderTime = consultTime - (5 * 60 * 1000); // 5 minutes before
+                        if (now >= reminderTime) {
+                            c.alarmTriggered = true;
+                            needsSave = true;
+                            showAlarm({
+                                timeStr: '5 Min Warning!',
+                                text: `Upcoming Zoom Consultation: ${c.name} (Teacher: ${c.teacher})`
+                            });
+                        }
+                    }
+                }
+            });
+
+            if (needsSave) saveTodayState();
+
+            if (needsRender || needsSave) {
+                renderTimeline();
+                updateStats();
+                renderTodayRecords();
+            }
+        }
+
+        function showAlarm(task) {
+            const modal = document.getElementById('alarm-modal');
+            const content = document.getElementById('alarm-modal-content');
+            
+            document.getElementById('alarm-time-display').textContent = task.timeStr;
+            document.getElementById('alarm-message').textContent = task.text;
+            
+            modal.classList.remove('hidden');
+            content.classList.add('alarm-active');
+            
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+            
+            playSiren();
+        }
+
+        function dismissAlarm() {
+            const modal = document.getElementById('alarm-modal');
+            const content = document.getElementById('alarm-modal-content');
+            
+            content.classList.remove('alarm-active', 'scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        function playSiren() {
+            if (!state.audioContext) initAudio();
+            if (state.audioContext.state === 'suspended') state.audioContext.resume();
+            
+            // Synthesize an attention-grabbing dual tone
+            const playNote = (freq, startTime, duration) => {
+                const osc = state.audioContext.createOscillator();
+                const gain = state.audioContext.createGain();
+                osc.connect(gain);
+                gain.connect(state.audioContext.destination);
+                osc.type = 'square';
+                osc.frequency.value = freq;
+                
+                gain.gain.setValueAtTime(0, startTime);
+                gain.gain.linearRampToValueAtTime(0.3, startTime + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+                
+                osc.start(startTime);
+                osc.stop(startTime + duration);
+            };
+
+            const now = state.audioContext.currentTime;
+            playNote(880, now, 0.4);       // High A
+            playNote(1108.7, now + 0.2, 0.4); // High C#
+            playNote(880, now + 0.6, 0.4);
+            playNote(1108.7, now + 0.8, 0.6);
+        }
+
+
+        // --- CRM Data Management ---
+        document.getElementById('crm-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const record = {
+                id: 'crm_' + Date.now(),
+                name: document.getElementById('crm-name').value,
+                phone: document.getElementById('crm-phone').value,
+                place: document.getElementById('crm-place').value,
+                req: document.getElementById('crm-req').value,
+                status: 'New'
+            };
+            state.enquiries.push(record);
+            closeModal('crm-modal');
+            e.target.reset();
+            renderCRM();
+        });
+
+        function renderCRM() {
+            const tbody = document.getElementById('crm-table-body');
+            tbody.innerHTML = '';
+            
+            if (state.enquiries.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-slate-400">No enquiries added yet.</td></tr>`;
+                return;
+            }
+
+            state.enquiries.reverse().forEach(req => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors";
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="font-medium text-slate-800">${req.name}</div>
+                        <div class="text-xs text-slate-500">${req.phone}</div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">${req.place}</td>
+                    <td class="px-6 py-4 text-sm text-slate-600 whitespace-nowrap"><span class="px-2 py-1 bg-slate-100 rounded text-xs font-medium">${req.req}</span></td>
+                    <td class="px-6 py-4 whitespace-nowrap"><span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">${req.status}</span></td>
+                    <td class="px-6 py-4 text-right whitespace-nowrap">
+                        <button onclick="deleteCRM('${req.id}')" class="text-red-400 hover:text-red-600 p-2"><i class="ph ph-trash text-lg"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        function deleteCRM(id) {
+            state.enquiries = state.enquiries.filter(e => e.id !== id);
+            renderCRM();
+        }
+
+        // --- Students & Consultations Management ---
+        function toggleStudentFields() {
+            const type = document.getElementById('stu-type').value;
+            document.getElementById('field-consultation').classList.add('hidden');
+            document.getElementById('field-basic-class').classList.add('hidden');
+            document.getElementById('field-advanced-class').classList.add('hidden');
+            
+            if (type === 'Consultation') document.getElementById('field-consultation').classList.remove('hidden');
+            else if (type === 'Basic Class') document.getElementById('field-basic-class').classList.remove('hidden');
+            else if (type === 'Advanced Class') document.getElementById('field-advanced-class').classList.remove('hidden');
+        }
+
+        document.getElementById('student-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const type = document.getElementById('stu-type').value;
+            let details = '';
+            if (type === 'Consultation') details = document.getElementById('stu-consult-details').value;
+            else if (type === 'Basic Class') details = '64 Videos: ' + document.getElementById('stu-videos').value;
+            else if (type === 'Advanced Class') details = document.getElementById('stu-adv-details').value;
+
+            const record = {
+                id: 'stu_' + Date.now(),
+                name: document.getElementById('stu-name').value,
+                phone: document.getElementById('stu-phone').value,
+                type: type,
+                payment: document.getElementById('stu-payment').value,
+                details: details
+            };
+            state.students.push(record);
+            closeModal('student-modal');
+            e.target.reset();
+            toggleStudentFields();
+            renderStudents();
+        });
+
+        function renderStudents() {
+            const tbody = document.getElementById('students-table-body');
+            tbody.innerHTML = '';
+            
+            if (state.students.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-slate-400">No students or consultations recorded yet.</td></tr>`;
+                return;
+            }
+
+            state.students.reverse().forEach(stu => {
+                let payClass = stu.payment === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700';
+                
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors";
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="font-medium text-slate-800">${stu.name}</div>
+                        <div class="text-xs text-slate-500">${stu.phone}</div>
+                    </td>
+                    <td class="px-6 py-4 text-sm font-medium text-indigo-600 whitespace-nowrap">${stu.type}</td>
+                    <td class="px-6 py-4 text-sm text-slate-600 min-w-[200px]">${stu.details || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap"><span class="px-2 py-1 ${payClass} rounded-full text-xs font-semibold">${stu.payment}</span></td>
+                    <td class="px-6 py-4 text-right whitespace-nowrap">
+                        <button onclick="deleteStudent('${stu.id}')" class="text-red-400 hover:text-red-600 p-2"><i class="ph ph-trash text-lg"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        function deleteStudent(id) {
+            state.students = state.students.filter(s => s.id !== id);
+            renderStudents();
+        }
+
+        // --- Today's Enrollments Logic ---
+        function openNewTodayModal() {
+            editingTodayRecord = null;
+            convertingRecord = null;
+            document.getElementById('today-modal-title').textContent = "Add Today's Enrollment / Sale";
+            openModal('today-modal');
+            setTodayForm('lead'); // Default to leads for convenience
+        }
+
+        function openEditTodayModal(category, id) {
+            editingTodayRecord = { category, id };
+            convertingRecord = null;
+            
+            document.getElementById('today-modal-title').textContent = "Edit Record";
+            openModal('today-modal');
+            setTodayForm(category);
+            
+            // Wait slightly for DOM to render inputs, then pre-fill existing data
+            setTimeout(() => {
+                const r = state.todayRecords[category].find(rec => rec.id === id);
+                if (!r) return;
+                
+                if (category === 'leads') {
+                    document.getElementById('t-lead-name').value = r.name;
+                    document.getElementById('t-lead-phone').value = r.phone;
+                    document.getElementById('t-lead-source').value = r.source;
+                    if(document.getElementById('t-lead-interest')) document.getElementById('t-lead-interest').value = r.interest || 'Course';
+                    if(document.getElementById('t-lead-notes')) document.getElementById('t-lead-notes').value = r.notes && r.notes !== '-' ? r.notes : '';
+                } else if (category === 'course') {
+                    document.getElementById('t-course-name').value = r.name;
+                    document.getElementById('t-course-id').value = r.studentId;
+                    document.getElementById('t-course-phone').value = r.phone;
+                    document.getElementById('t-course-key').value = r.keyInfo !== 'N/A' ? r.keyInfo : '';
+                    if(document.getElementById('t-course-pay-status')) document.getElementById('t-course-pay-status').value = r.paymentStatus || 'Full Payment';
+                    if(document.getElementById('t-course-pay-notes')) document.getElementById('t-course-pay-notes').value = r.paymentNotes && r.paymentNotes !== '-' ? r.paymentNotes : '';
+                    document.getElementById('t-course-notes').value = r.notes !== '-' ? r.notes : '';
+                } else if (category === 'consult') {
+                    document.getElementById('t-con-name').value = r.name;
+                    document.getElementById('t-con-teacher').value = r.teacher;
+                    document.getElementById('t-con-pay').value = r.payment;
+                    document.getElementById('t-con-time').value = r.time;
+                    document.getElementById('t-con-link').value = r.link || '';
+                    document.getElementById('t-con-notes').value = r.notes !== '-' ? r.notes : '';
+                } else if (category === 'software') {
+                    document.getElementById('t-soft-type').value = r.type;
+                    document.getElementById('t-soft-key').value = r.keyInfo;
+                    document.getElementById('t-soft-name').value = r.name;
+                    document.getElementById('t-soft-id').value = r.studentId;
+                    document.getElementById('t-soft-phone').value = r.phone;
+                    document.getElementById('t-soft-coach').value = r.coach;
+                    document.getElementById('t-soft-pay').value = r.payment;
+                }
+            }, 10);
+        }
+
+        function setTodayForm(category) {
+            document.getElementById('today-category').value = category;
+            
+            // Update Tab Styles
+            const activeClass = 'py-2 px-1 text-xs md:text-sm font-semibold rounded-lg transition-all';
+            const inactiveClass = 'py-2 px-1 text-xs md:text-sm font-semibold rounded-lg bg-slate-50 text-slate-500 border-2 border-transparent hover:bg-slate-100 transition-all';
+            
+            document.getElementById('btn-cat-lead').className = inactiveClass;
+            document.getElementById('btn-cat-course').className = inactiveClass;
+            document.getElementById('btn-cat-consult').className = inactiveClass;
+            document.getElementById('btn-cat-software').className = inactiveClass;
+            
+            if(category === 'lead') document.getElementById('btn-cat-lead').className = activeClass + ' bg-blue-100 text-blue-700 border-2 border-blue-500';
+            if(category === 'course') document.getElementById('btn-cat-course').className = activeClass + ' bg-indigo-100 text-indigo-700 border-2 border-indigo-500';
+            if(category === 'consult') document.getElementById('btn-cat-consult').className = activeClass + ' bg-purple-100 text-purple-700 border-2 border-purple-500';
+            if(category === 'software') document.getElementById('btn-cat-software').className = activeClass + ' bg-emerald-100 text-emerald-700 border-2 border-emerald-500';
+
+            // Inject Fields
+            const container = document.getElementById('today-fields-container');
+            container.innerHTML = '';
+
+            if (category === 'lead') {
+                container.innerHTML = `
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-xs font-medium text-slate-500 mb-1">Name</label><input type="text" id="t-lead-name" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
+                        <div><label class="block text-xs font-medium text-slate-500 mb-1">Phone Number</label><input type="text" id="t-lead-phone" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1">Lead Source</label>
+                            <select id="t-lead-source" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
+                                <option value="Social Media">Social Media (FB, Insta, YouTube)</option>
+                                <option value="Self">By Myself / Direct Call</option>
+                                <option value="Others">Others / Referral</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1">Interested In</label>
+                            <select id="t-lead-interest" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
+                                <option value="Course">Basic/Advanced Course</option>
+                                <option value="Consultation">Consultation</option>
+                                <option value="Software">Software</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div><label class="block text-xs font-medium text-slate-500 mb-1">Follow-up Notes (Progress)</label><input type="text" id="t-lead-notes" placeholder="E.g., Discussing with family, callback tomorrow..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
+                `;
+            } else if (category === 'course') {
+                container.innerHTML = `
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-xs font-medium text-slate-500 mb-1">Name</label><input type="text" id="t-course-name" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
+                        <div><label class="block text-xs font-medium text-slate-500 mb-1">Student ID</label><input type="text" id="t-course-id" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-xs font-medium text-slate-500 mb-1">Phone Number</label><input type="text" id="t-course-phone" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
+                        <div><label class="block text-xs font-medium text-slate-500 mb-1">Key Given</label><input type="text" id="t-course-key" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1">Payment Status</label>
+                            <select id="t-course-pay-status" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
+                                <option value="Full Payment">Full Payment (₹5900)</option>
+                                <option value="Installment">Installment / Initial (e.g. ₹3000)</option>
+                            </select>
+                        </div>
+                        <div><label class="block text-xs font-medium text-slate-500 mb-1">Payment Balance Details</label><input type="text" id="t-course-pay-notes" placeholder="E.g. Paid 3000, 2900 pending" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
+                    </div>
+                    <div><label class="block text-xs font-medium text-slate-500 mb-1">General Notes</label><input type="text" id="t-course-notes" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
+                `;
+            } else if (category === 'consult') {
+                container.innerHTML = `
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-xs font-medium text-slate-500 mb-1">Consultation Name (Client)</label><input type="text" id="t-con-name" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
+                        <div><label class="block text-xs font-medium text-slate-500 mb-1">Teacher / Prepared By</label><input type="text" id="t-con-teacher" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1">Payment Amount & Status</label>
+                            <select id="t-con-pay" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
+                                <option value="Paid">Paid Fully</option>
+                                <option value="Pending">Pending Payment</option>
+                            </select>
+                        </div>
+                        <div><label class="block text-xs font-medium text-slate-500 mb-1">Date & Time (For Zoom)</label><input type="datetime-local" id="t-con-time" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
+                    </div>
+                    <div><label class="block text-xs font-medium text-slate-500 mb-1">Meeting Link</label><input type="url" id="t-con-link" placeholder="https://..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
+                    <div><label class="block text-xs font-medium text-slate-500 mb-1">Key Notes</label><input type="text" id="t-con-notes" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
+                `;
+            } else if (category === 'software') {
+                container.innerHTML = `
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1">Software Type</label>
+                            <select id="t-soft-type" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
+                                <option value="Basic Software">Basic Software</option>
+                                <option value="Advanced Software">Advanced Software</option>
+                                <option value="Other Add-on">Other Add-on</option>
+                            </select>
+                        </div>
+                        <div><label class="block text-xs font-medium text-slate-500 mb-1">Software Key</label><input type="text" id="t-soft-key" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-xs font-medium text-slate-500 mb-1">Username (Buyer)</label><input type="text" id="t-soft-name" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
+                        <div><label class="block text-xs font-medium text-slate-500 mb-1">User ID</label><input type="text" id="t-soft-id" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-xs font-medium text-slate-500 mb-1">Phone Number</label><input type="text" id="t-soft-phone" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
+                        <div><label class="block text-xs font-medium text-slate-500 mb-1">Assigned Coach</label><input type="text" id="t-soft-coach" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Payment Status</label>
+                        <select id="t-soft-pay" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
+                            <option value="Paid">Paid Fully</option>
+                            <option value="Pending">Pending Payment</option>
+                        </select>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize default form inside the modal
+        setTodayForm('lead');
+
+        document.getElementById('today-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const cat = document.getElementById('today-category').value;
+            
+            let record;
+            let actualCatName = cat;
+            if (cat === 'lead') actualCatName = 'leads';
+
+            // Find existing record if editing, otherwise create new
+            if (editingTodayRecord) {
+                record = state.todayRecords[editingTodayRecord.category].find(r => r.id === editingTodayRecord.id);
+            } else {
+                record = { id: 'today_' + Date.now() };
+            }
+
+            if (cat === 'lead') {
+                record.name = document.getElementById('t-lead-name').value;
+                record.phone = document.getElementById('t-lead-phone').value;
+                record.source = document.getElementById('t-lead-source').value;
+                record.interest = document.getElementById('t-lead-interest').value;
+                record.notes = document.getElementById('t-lead-notes').value || '-';
+                if(!editingTodayRecord) state.todayRecords.leads.push(record);
+            } else if (cat === 'course') {
+                record.name = document.getElementById('t-course-name').value;
+                record.studentId = document.getElementById('t-course-id').value;
+                record.phone = document.getElementById('t-course-phone').value;
+                record.keyInfo = document.getElementById('t-course-key').value || 'N/A';
+                record.paymentStatus = document.getElementById('t-course-pay-status').value;
+                record.paymentNotes = document.getElementById('t-course-pay-notes').value || '-';
+                record.notes = document.getElementById('t-course-notes').value || '-';
+                if(!editingTodayRecord) state.todayRecords.course.push(record);
+            } else if (cat === 'consult') {
+                const newTime = document.getElementById('t-con-time').value;
+                
+                // Alarm reset logic if edited
+                if (editingTodayRecord && record.time !== newTime) {
+                    record.alarmTriggered = false; 
+                } else if (!editingTodayRecord) {
+                    record.completed = false;
+                    record.alarmTriggered = false;
+                }
+
+                record.name = document.getElementById('t-con-name').value;
+                record.teacher = document.getElementById('t-con-teacher').value;
+                record.payment = document.getElementById('t-con-pay').value;
+                record.time = newTime;
+                record.link = document.getElementById('t-con-link').value;
+                record.notes = document.getElementById('t-con-notes').value || '-';
+                
+                if(!editingTodayRecord) {
+                    state.todayRecords.consult.push(record);
+                }
+            } else if (cat === 'software') {
+                record.type = document.getElementById('t-soft-type').value;
+                record.keyInfo = document.getElementById('t-soft-key').value;
+                record.name = document.getElementById('t-soft-name').value;
+                record.studentId = document.getElementById('t-soft-id').value;
+                record.phone = document.getElementById('t-soft-phone').value;
+                record.coach = document.getElementById('t-soft-coach').value;
+                record.payment = document.getElementById('t-soft-pay').value;
+                if(!editingTodayRecord) state.todayRecords.software.push(record);
+            }
+
+            // Remove the original record if this is a Swap/Promotion
+            if (convertingRecord) {
+                state.todayRecords[convertingRecord.sourceType] = state.todayRecords[convertingRecord.sourceType].filter(r => r.id !== convertingRecord.id);
+                convertingRecord = null; // reset state
+            }
+
+            editingTodayRecord = null; // Reset edit state
+            saveTodayState(); // Save updates directly to local storage
+
+            closeModal('today-modal');
+            renderTodayRecords();
+            setTodayForm(cat); // Reset form visually
+        });
+
+        function toggleConsultComplete(id) {
+            const consult = state.todayRecords.consult.find(c => c.id === id);
+            if(consult) {
+                consult.completed = !consult.completed;
+                saveTodayState();
+                renderTodayRecords();
+            }
+        }
+
+        function deleteTodayRecord(cat, id) {
+            state.todayRecords[cat] = state.todayRecords[cat].filter(r => r.id !== id);
+            saveTodayState();
+            renderTodayRecords();
+        }
+
+        // SWAP / PROMOTE LOGIC
+        function openPromoteModal(sourceType, id, targetType) {
+            const sourceRecord = state.todayRecords[sourceType].find(r => r.id === id);
+            if (!sourceRecord) return;
+            
+            editingTodayRecord = null; // Disable edit mode
+            convertingRecord = { sourceType, id }; // Flag that we are converting
+            
+            document.getElementById('today-modal-title').textContent = `Promote to ${targetType === 'course' ? 'Course Booking' : 'Consultation'}`;
+            openModal('today-modal');
+            setTodayForm(targetType);
+            
+            // Wait slightly for DOM to render inputs, then pre-fill known data
+            setTimeout(() => {
+                if (targetType === 'course') {
+                    if (document.getElementById('t-course-name')) document.getElementById('t-course-name').value = sourceRecord.name || '';
+                    if (document.getElementById('t-course-phone') && sourceRecord.phone) document.getElementById('t-course-phone').value = sourceRecord.phone;
+                } else if (targetType === 'consult') {
+                    if (document.getElementById('t-con-name')) document.getElementById('t-con-name').value = sourceRecord.name || '';
+                }
+            }, 10);
+        }
+
+        function renderTodayRecords() {
+            // Update Dynamic Counters
+            document.getElementById('count-leads').textContent = state.todayRecords.leads.length;
+            document.getElementById('count-course').textContent = state.todayRecords.course.length;
+            document.getElementById('count-consult').textContent = state.todayRecords.consult.length;
+            document.getElementById('count-software').textContent = state.todayRecords.software.length;
+
+            // Leads Render
+            const lTbody = document.getElementById('today-leads-body');
+            lTbody.innerHTML = '';
+            if (state.todayRecords.leads.length === 0) lTbody.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-slate-400">No new leads recorded today.</td></tr>`;
+            state.todayRecords.leads.forEach(r => {
+                const interestBadge = r.interest === 'Course' ? 'bg-indigo-100 text-indigo-700' : r.interest === 'Consultation' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-700';
+                lTbody.innerHTML += `
+                    <tr class="hover:bg-slate-50">
+                        <td class="px-4 py-3"><div class="font-medium text-slate-800">${r.name}</div><div class="text-xs text-slate-500">${r.phone}</div></td>
+                        <td class="px-4 py-3">
+                            <div class="text-xs font-medium text-slate-600 mb-1">Source: ${r.source}</div>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${interestBadge}">Wants: ${r.interest || 'Course'}</span>
+                        </td>
+                        <td class="px-4 py-3 text-xs text-slate-600 max-w-[200px] truncate" title="${r.notes || '-'}">${r.notes || '-'}</td>
+                        <td class="px-4 py-3 text-right">
+                            <div class="flex justify-end gap-2 items-center">
+                                <button onclick="openPromoteModal('leads', '${r.id}', 'consult')" title="Swap to Consultation" class="px-2 py-1 bg-purple-50 text-purple-600 hover:bg-purple-100 rounded border border-purple-200 text-xs font-semibold flex items-center gap-1 transition-colors shadow-sm">
+                                    <i class="ph ph-sparkle text-sm"></i> Consult
+                                </button>
+                                <button onclick="openPromoteModal('leads', '${r.id}', 'course')" title="Swap to Course Booking" class="px-2 py-1 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded border border-indigo-200 text-xs font-semibold flex items-center gap-1 transition-colors shadow-sm">
+                                    <i class="ph ph-books text-sm"></i> Course
+                                </button>
+                                <button onclick="openEditTodayModal('leads', '${r.id}')" class="text-blue-500 hover:text-blue-700 p-1 ml-1" title="Edit Data"><i class="ph ph-pencil-simple text-lg"></i></button>
+                                <button onclick="deleteTodayRecord('leads', '${r.id}')" class="text-red-400 hover:text-red-600 p-1"><i class="ph ph-trash text-lg"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            // Course Render
+            const cTbody = document.getElementById('today-course-body');
+            cTbody.innerHTML = '';
+            if (state.todayRecords.course.length === 0) cTbody.innerHTML = `<tr><td colspan="5" class="px-4 py-6 text-center text-slate-400">No course bookings today.</td></tr>`;
+            state.todayRecords.course.forEach(r => {
+                const payBadge = r.paymentStatus === 'Installment' ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-emerald-100 text-emerald-700 border-emerald-200';
+                cTbody.innerHTML += `
+                    <tr class="hover:bg-slate-50">
+                        <td class="px-4 py-3"><div class="font-medium text-slate-800">${r.name}</div><div class="text-xs text-slate-500">${r.phone}</div></td>
+                        <td class="px-4 py-3">
+                            <div class="font-mono text-slate-700 font-medium">${r.studentId}</div>
+                            <div class="text-xs text-slate-500">Key: ${r.keyInfo}</div>
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${payBadge}">${r.paymentStatus || 'Full Payment'}</span>
+                            ${r.paymentNotes && r.paymentNotes !== '-' ? `<div class="text-[10px] text-slate-500 mt-1 font-medium">${r.paymentNotes}</div>` : ''}
+                        </td>
+                        <td class="px-4 py-3 text-slate-500 text-xs max-w-[150px] truncate" title="${r.notes}">${r.notes}</td>
+                        <td class="px-4 py-3 text-right">
+                            <div class="flex justify-end gap-2 items-center">
+                                <button onclick="openEditTodayModal('course', '${r.id}')" class="text-blue-500 hover:text-blue-700 p-1" title="Edit Data"><i class="ph ph-pencil-simple text-lg"></i></button>
+                                <button onclick="deleteTodayRecord('course', '${r.id}')" class="text-red-400 hover:text-red-600 p-1"><i class="ph ph-trash text-lg"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            // Consult Render
+            const conTbody = document.getElementById('today-consult-body');
+            conTbody.innerHTML = '';
+            if (state.todayRecords.consult.length === 0) conTbody.innerHTML = `<tr><td colspan="7" class="px-4 py-6 text-center text-slate-400">No consultations scheduled today.</td></tr>`;
+            state.todayRecords.consult.forEach(r => {
+                const payClass = r.payment === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700';
+                
+                // Format the calendar date beautifully
+                let displayTime = r.time;
+                const dObj = new Date(r.time);
+                if(!isNaN(dObj)) {
+                    displayTime = dObj.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+                }
+
+                conTbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 ${r.completed ? 'opacity-50' : ''}">
+                        <td class="px-4 py-3">
+                            <button onclick="toggleConsultComplete('${r.id}')" class="w-6 h-6 rounded border flex items-center justify-center ${r.completed ? 'bg-purple-600 border-purple-600 text-white' : 'border-slate-300 text-transparent hover:border-purple-500'} transition-colors">
+                                <i class="ph ph-check text-sm font-bold"></i>
+                            </button>
+                        </td>
+                        <td class="px-4 py-3 font-medium text-slate-800 ${r.completed ? 'line-through' : ''}">${r.name}</td>
+                        <td class="px-4 py-3 text-slate-700">${r.teacher}</td>
+                        <td class="px-4 py-3">
+                            <div class="font-bold text-slate-700">${displayTime}</div>
+                            ${r.link ? `<a href="${r.link}" target="_blank" class="text-xs text-blue-500 hover:underline">Join Link</a>` : '<span class="text-xs text-slate-400">No link</span>'}
+                        </td>
+                        <td class="px-4 py-3"><span class="px-2 py-0.5 rounded text-xs font-semibold ${payClass}">${r.payment}</span></td>
+                        <td class="px-4 py-3 text-slate-500 text-xs">${r.notes}</td>
+                        <td class="px-4 py-3 text-right">
+                            <div class="flex justify-end gap-2 items-center">
+                                <button onclick="openPromoteModal('consult', '${r.id}', 'course')" title="Client Joined Course" class="px-2 py-1 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded border border-indigo-200 text-xs font-semibold flex items-center gap-1 transition-colors shadow-sm">
+                                    <i class="ph ph-arrow-circle-right text-base"></i> To Course
+                                </button>
+                                <button onclick="openEditTodayModal('consult', '${r.id}')" class="text-blue-500 hover:text-blue-700 p-1 ml-1" title="Edit Data"><i class="ph ph-pencil-simple text-lg"></i></button>
+                                <button onclick="deleteTodayRecord('consult', '${r.id}')" class="text-red-400 hover:text-red-600 p-1"><i class="ph ph-trash text-lg"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            // Software Render
+            const sTbody = document.getElementById('today-software-body');
+            sTbody.innerHTML = '';
+            if (state.todayRecords.software.length === 0) sTbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-400">No software sales today.</td></tr>`;
+            state.todayRecords.software.forEach(r => {
+                const payClass = r.payment === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700';
+                sTbody.innerHTML += `
+                    <tr class="hover:bg-slate-50">
+                        <td class="px-4 py-3"><div class="font-medium text-slate-800">${r.name}</div><div class="text-xs text-slate-500">${r.phone}</div></td>
+                        <td class="px-4 py-3"><div class="font-mono text-slate-700">${r.studentId}</div><div class="text-xs text-slate-500">Coach: ${r.coach}</div></td>
+                        <td class="px-4 py-3 font-semibold text-emerald-600">${r.type}</td>
+                        <td class="px-4 py-3 font-mono text-slate-600 text-xs">${r.keyInfo}</td>
+                        <td class="px-4 py-3"><span class="px-2 py-0.5 rounded text-xs font-semibold ${payClass}">${r.payment}</span></td>
+                        <td class="px-4 py-3 text-right">
+                            <div class="flex justify-end gap-2 items-center">
+                                <button onclick="openEditTodayModal('software', '${r.id}')" class="text-blue-500 hover:text-blue-700 p-1" title="Edit Data"><i class="ph ph-pencil-simple text-lg"></i></button>
+                                <button onclick="deleteTodayRecord('software', '${r.id}')" class="text-red-400 hover:text-red-600 p-1"><i class="ph ph-trash text-lg"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+
+        // --- Modals Global Logic ---
+        window.openModal = (id) => {
+            const modal = document.getElementById(id);
+            modal.classList.remove('hidden');
+        };
+        window.closeModal = (id) => {
+            const modal = document.getElementById(id);
+            modal.classList.add('hidden');
+        };
+
+        // --- Startup ---
+        initApp();
+
+    </script>
+</body>
+</html>
