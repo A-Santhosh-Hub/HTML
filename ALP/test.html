@@ -25,11 +25,17 @@
         }
         .alarm-active { animation: pulseAlert 2s infinite; border-color: #dc2626 !important; }
         
+        /* Toast Animations */
+        .toast-enter { animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .toast-leave { animation: slideOutRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+
         /* Timeline styling */
         .timeline-line::before {
             content: '';
             position: absolute;
-            left: 80px; /* Shifted from 24px to 80px to make room for time text */
+            left: 80px;
             top: 30px;
             bottom: -30px;
             width: 2px;
@@ -45,13 +51,13 @@
     <div id="mobile-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/50 z-20 hidden md:hidden"></div>
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="w-64 bg-slate-900 text-slate-300 flex flex-col shrink-0 transition-transform duration-300 fixed inset-y-0 left-0 z-30 transform -translate-x-full md:relative md:translate-x-0">
+    <aside id="sidebar" class="w-64 bg-slate-900 text-slate-300 flex flex-col shrink-0 transition-transform duration-300 fixed inset-y-0 left-0 z-30 transform -translate-x-full md:relative md:translate-x-0 shadow-xl md:shadow-none">
         <div class="h-16 flex items-center justify-between px-6 border-b border-slate-800 bg-slate-950">
             <div class="flex items-center">
                 <i class="ph ph-planet text-2xl text-amber-500 mr-3"></i>
                 <h1 class="text-lg font-bold text-white tracking-wide">ALP OS</h1>
             </div>
-            <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white">
+            <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white transition-colors">
                 <i class="ph ph-x text-xl"></i>
             </button>
         </div>
@@ -85,13 +91,16 @@
         <!-- Header -->
         <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 shrink-0 z-10 shadow-sm">
             <div class="flex items-center gap-3">
-                <button onclick="toggleSidebar()" class="md:hidden text-slate-600 p-2 hover:bg-slate-100 rounded-lg">
+                <button onclick="toggleSidebar()" class="md:hidden text-slate-600 p-2 hover:bg-slate-100 rounded-lg transition-colors">
                     <i class="ph ph-list text-2xl"></i>
                 </button>
                 <h2 id="view-title" class="text-lg md:text-xl font-bold text-slate-800 truncate">Daily Schedule & Tasks</h2>
             </div>
             <div class="flex items-center gap-2 md:gap-4">
-                <button onclick="generateSmartRoutine()" class="hidden sm:flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg text-sm font-semibold transition-colors border border-indigo-200">
+                <button onclick="exportData()" title="Backup Database" class="p-2 bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-800 rounded-lg transition-colors border border-slate-200 flex items-center gap-2">
+                    <i class="ph ph-download-simple text-lg"></i> <span class="hidden md:inline text-sm font-semibold">Export</span>
+                </button>
+                <button onclick="generateSmartRoutine()" title="Auto-Generate Standard Routine" class="hidden sm:flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg text-sm font-semibold transition-colors border border-indigo-200">
                     <i class="ph ph-magic-wand text-lg"></i> Auto-Generate
                 </button>
                 <button onclick="generateSmartRoutine()" class="sm:hidden p-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg transition-colors border border-indigo-200">
@@ -99,7 +108,7 @@
                 </button>
                 <div class="hidden md:block w-px h-6 bg-slate-200"></div>
                 <div class="flex items-center gap-2 md:gap-3">
-                    <div class="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-sm">A</div>
+                    <div class="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-sm shadow-inner">A</div>
                     <span class="hidden md:inline text-sm font-medium">Admin Profile</span>
                 </div>
             </div>
@@ -112,19 +121,19 @@
             <div id="view-dashboard" class="fade-in max-w-5xl mx-auto space-y-6">
                 <!-- Stats Row -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-                    <div class="bg-white p-4 md:p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+                    <div class="bg-white p-4 md:p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center gap-2 md:gap-4 transition-transform hover:-translate-y-0.5">
                         <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-lg md:text-xl"><i class="ph ph-check-circle"></i></div>
                         <div><p class="text-xs md:text-sm text-slate-500 font-medium">Tasks Done</p><p class="text-xl md:text-2xl font-bold" id="stat-tasks">0/0</p></div>
                     </div>
-                    <div class="bg-white p-4 md:p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+                    <div class="bg-white p-4 md:p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center gap-2 md:gap-4 transition-transform hover:-translate-y-0.5">
                         <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-lg md:text-xl"><i class="ph ph-phone-call"></i></div>
                         <div><p class="text-xs md:text-sm text-slate-500 font-medium">Calls / Msg</p><p class="text-xl md:text-2xl font-bold" id="stat-comms">0</p></div>
                     </div>
-                    <div class="bg-white p-4 md:p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+                    <div class="bg-white p-4 md:p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center gap-2 md:gap-4 transition-transform hover:-translate-y-0.5">
                         <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-lg md:text-xl"><i class="ph ph-users-three"></i></div>
-                        <div><p class="text-xs md:text-sm text-slate-500 font-medium">Meetings</p><p class="text-xl md:text-2xl font-bold" id="stat-meetings">1</p></div>
+                        <div><p class="text-xs md:text-sm text-slate-500 font-medium">Meetings</p><p class="text-xl md:text-2xl font-bold" id="stat-meetings">0</p></div>
                     </div>
-                    <div class="bg-white p-4 md:p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+                    <div class="bg-white p-4 md:p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center gap-2 md:gap-4 transition-transform hover:-translate-y-0.5">
                         <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-lg md:text-xl"><i class="ph ph-clock-countdown"></i></div>
                         <div><p class="text-xs md:text-sm text-slate-500 font-medium">Next Event</p><p class="text-base md:text-lg font-bold truncate" id="stat-next">--</p></div>
                     </div>
@@ -133,10 +142,10 @@
                 <!-- Custom Task Input (Responsive Form) -->
                 <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
                     <form id="custom-task-form" class="flex flex-col md:flex-row gap-3">
-                        <input type="text" id="task-input" placeholder="Add task (leave time blank for auto-schedule)..." required class="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm w-full">
+                        <input type="text" id="task-input" placeholder="Add task (leave time blank for auto-schedule)..." required class="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm w-full transition-shadow">
                         <div class="flex gap-2 w-full md:w-auto">
-                            <input type="time" id="task-time" title="Leave blank for smart auto-schedule" class="flex-1 md:w-32 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm cursor-pointer">
-                            <select id="task-category" class="flex-1 md:w-36 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                            <input type="time" id="task-time" title="Leave blank for smart auto-schedule" class="flex-1 md:w-32 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm cursor-pointer transition-shadow">
+                            <select id="task-category" class="flex-1 md:w-36 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm transition-shadow">
                                 <option value="admin">Admin</option>
                                 <option value="call">Call/Msg</option>
                                 <option value="class">Class</option>
@@ -159,7 +168,7 @@
                         <div id="timeline-container" class="space-y-0 relative">
                             <!-- Tasks injected here -->
                             <div class="text-center py-10 text-slate-400" id="empty-state">
-                                <i class="ph ph-calendar-blank text-4xl md:text-5xl mb-3"></i>
+                                <i class="ph ph-calendar-blank text-4xl md:text-5xl mb-3 opacity-50"></i>
                                 <p class="text-sm">No tasks scheduled. Click "Auto-Generate" to load your template.</p>
                             </div>
                         </div>
@@ -174,9 +183,15 @@
                         <h3 class="text-lg font-semibold text-slate-800">Lead & Enquiry Record</h3>
                         <p class="text-sm text-slate-500">Track inquiries for software, books, and basic classes.</p>
                     </div>
-                    <button onclick="openModal('crm-modal')" class="w-full sm:w-auto px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2 text-sm shadow-sm shrink-0">
-                        <i class="ph ph-user-plus"></i> New Enquiry
-                    </button>
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <div class="relative flex-1 sm:w-64">
+                            <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" onkeyup="filterTable('crm-table-body', this.value)" placeholder="Search enquiries..." class="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 shadow-sm transition-shadow">
+                        </div>
+                        <button onclick="openModal('crm-modal')" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2 text-sm shadow-sm shrink-0">
+                            <i class="ph ph-user-plus"></i> <span class="hidden sm:inline">New Enquiry</span>
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
@@ -206,9 +221,15 @@
                         <h3 class="text-lg font-semibold text-slate-800">Students & Consultations</h3>
                         <p class="text-sm text-slate-500">Manage class registrations, 64-videos prep, and horoscopes.</p>
                     </div>
-                    <button onclick="openModal('student-modal')" class="w-full sm:w-auto px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2 text-sm shadow-sm shrink-0">
-                        <i class="ph ph-plus-circle"></i> Add Record
-                    </button>
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <div class="relative flex-1 sm:w-64">
+                            <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" onkeyup="filterTable('students-table-body', this.value)" placeholder="Search students..." class="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 shadow-sm transition-shadow">
+                        </div>
+                        <button onclick="openModal('student-modal')" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2 text-sm shadow-sm shrink-0">
+                            <i class="ph ph-plus-circle"></i> <span class="hidden sm:inline">Add Record</span>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
@@ -235,12 +256,19 @@
             <div id="view-today" class="hidden fade-in max-w-7xl mx-auto space-y-8">
                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 border-b border-slate-200 pb-4">
                     <div>
-                        <h3 class="text-xl font-bold text-slate-800">Today's Completed Records</h3>
+                        <h3 class="text-xl font-bold text-slate-800" id="enrollments-view-title">Today's Completed Records</h3>
                         <p class="text-sm text-slate-500">Track daily course bookings, scheduled consultations, and software sales.</p>
                     </div>
-                    <button onclick="openNewTodayModal()" class="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-2 text-sm shadow-sm shrink-0">
-                        <i class="ph ph-plus-circle text-lg"></i> Add New Entry
-                    </button>
+                    <div class="flex gap-2 w-full sm:w-auto items-center flex-wrap sm:flex-nowrap">
+                        <input type="date" id="history-date-picker" onchange="loadHistoryDate(this.value)" title="Select date to view history" class="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-slate-700 bg-white w-full sm:w-auto shadow-sm transition-shadow cursor-pointer font-medium">
+                        <div class="relative flex-1 sm:w-56 hidden md:block">
+                            <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" onkeyup="filterMultiTables(['today-leads-body','today-course-body','today-consult-body','today-software-body'], this.value)" placeholder="Global search..." class="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 shadow-sm transition-shadow">
+                        </div>
+                        <button id="btn-add-today" onclick="openNewTodayModal()" class="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-2 text-sm shadow-sm shrink-0">
+                            <i class="ph ph-plus-circle text-lg"></i> Add New Entry
+                        </button>
+                    </div>
                 </div>
 
                 <!-- New Leads Section -->
@@ -345,7 +373,36 @@
         </div>
     </main>
 
-    <!-- Modals -->
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-[70] flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Custom Alert Modal -->
+    <div id="custom-alert-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 text-center transform transition-all scale-95 opacity-0" id="custom-alert-content">
+            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600">
+                <i class="ph ph-info text-3xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Notice</h3>
+            <p id="custom-alert-message" class="text-sm text-slate-600 mb-6"></p>
+            <button onclick="closeCustomAlert()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors">OK</button>
+        </div>
+    </div>
+
+    <!-- Custom Confirm Modal -->
+    <div id="custom-confirm-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 text-center transform transition-all scale-95 opacity-0" id="custom-confirm-content">
+            <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4 text-amber-600">
+                <i class="ph ph-warning text-3xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Confirm Action</h3>
+            <p id="custom-confirm-message" class="text-sm text-slate-600 mb-6"></p>
+            <div class="flex gap-3">
+                <button onclick="closeCustomConfirm(false)" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors">Cancel</button>
+                <button onclick="closeCustomConfirm(true)" id="custom-confirm-btn" class="flex-1 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-medium transition-colors">Proceed</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Alarm Modal -->
     <div id="alarm-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl border-4 border-transparent w-full max-w-md p-6 md:p-8 flex flex-col items-center text-center scale-95 opacity-0 transition-all duration-300 mx-4" id="alarm-modal-content">
@@ -367,22 +424,22 @@
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-5 md:p-6 mx-4">
             <div class="flex justify-between items-center mb-5">
                 <h2 class="text-lg md:text-xl font-bold text-slate-800">Edit Task</h2>
-                <button onclick="closeModal('edit-task-modal')" class="text-slate-400 hover:text-slate-600 p-1"><i class="ph ph-x text-xl"></i></button>
+                <button onclick="closeModal('edit-task-modal')" class="text-slate-400 hover:text-slate-600 p-1 transition-colors rounded-full hover:bg-slate-100"><i class="ph ph-x text-xl"></i></button>
             </div>
             <form id="edit-task-form" class="space-y-4">
                 <input type="hidden" id="edit-task-id">
                 <div>
                     <label class="block text-xs font-medium text-slate-500 mb-1">Task Description</label>
-                    <input type="text" id="edit-task-text" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                    <input type="text" id="edit-task-text" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 transition-shadow">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-medium text-slate-500 mb-1">Time</label>
-                        <input type="time" id="edit-task-time" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                        <input type="time" id="edit-task-time" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 transition-shadow">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-500 mb-1">Category</label>
-                        <select id="edit-task-category" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                        <select id="edit-task-category" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 transition-shadow">
                             <option value="admin">Admin</option>
                             <option value="call">Call/Msg</option>
                             <option value="class">Class</option>
@@ -391,8 +448,8 @@
                     </div>
                 </div>
                 <div class="pt-4 flex justify-end gap-3">
-                    <button type="button" onclick="closeModal('edit-task-modal')" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium text-sm border border-transparent">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium text-sm hover:bg-indigo-700 shadow-sm">Update Task</button>
+                    <button type="button" onclick="closeModal('edit-task-modal')" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium text-sm border border-transparent transition-colors">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium text-sm hover:bg-indigo-700 shadow-sm transition-colors">Update Task</button>
                 </div>
             </form>
         </div>
@@ -403,26 +460,26 @@
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-5 md:p-6 mx-4 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-5">
                 <h2 class="text-lg md:text-xl font-bold text-slate-800">Add Lead / Enquiry</h2>
-                <button onclick="closeModal('crm-modal')" class="text-slate-400 hover:text-slate-600 p-1"><i class="ph ph-x text-xl"></i></button>
+                <button onclick="closeModal('crm-modal')" class="text-slate-400 hover:text-slate-600 p-1 transition-colors rounded-full hover:bg-slate-100"><i class="ph ph-x text-xl"></i></button>
             </div>
             <form id="crm-form" class="space-y-4">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-medium text-slate-500 mb-1">Name</label>
-                        <input type="text" id="crm-name" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                        <input type="text" id="crm-name" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 transition-shadow">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-500 mb-1">Phone Number</label>
-                        <input type="text" id="crm-phone" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                        <input type="text" id="crm-phone" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 transition-shadow">
                     </div>
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-slate-500 mb-1">Location / Place</label>
-                    <input type="text" id="crm-place" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                    <input type="text" id="crm-place" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 transition-shadow">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-slate-500 mb-1">Requirement</label>
-                    <select id="crm-req" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                    <select id="crm-req" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 transition-shadow">
                         <option value="Software Inquiry">Software Inquiry & Code</option>
                         <option value="Book Inquiry">Book Inquiry</option>
                         <option value="Basic Class">Basic Class Information</option>
@@ -431,8 +488,8 @@
                     </select>
                 </div>
                 <div class="pt-4 flex justify-end gap-3">
-                    <button type="button" onclick="closeModal('crm-modal')" class="w-full sm:w-auto px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium text-sm border border-transparent">Cancel</button>
-                    <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium text-sm hover:bg-indigo-700 shadow-sm">Save Record</button>
+                    <button type="button" onclick="closeModal('crm-modal')" class="w-full sm:w-auto px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium text-sm border border-transparent transition-colors">Cancel</button>
+                    <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium text-sm hover:bg-indigo-700 shadow-sm transition-colors">Save Record</button>
                 </div>
             </form>
         </div>
@@ -443,23 +500,23 @@
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-5 md:p-6 mx-4 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-5">
                 <h2 class="text-lg md:text-xl font-bold text-slate-800">Add Student / Consult Record</h2>
-                <button onclick="closeModal('student-modal')" class="text-slate-400 hover:text-slate-600 p-1"><i class="ph ph-x text-xl"></i></button>
+                <button onclick="closeModal('student-modal')" class="text-slate-400 hover:text-slate-600 p-1 transition-colors rounded-full hover:bg-slate-100"><i class="ph ph-x text-xl"></i></button>
             </div>
             <form id="student-form" class="space-y-4">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-medium text-slate-500 mb-1">Username / Name</label>
-                        <input type="text" id="stu-name" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                        <input type="text" id="stu-name" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 transition-shadow">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-500 mb-1">Phone Number</label>
-                        <input type="text" id="stu-phone" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                        <input type="text" id="stu-phone" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 transition-shadow">
                     </div>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-medium text-slate-500 mb-1">Record Type</label>
-                        <select id="stu-type" onchange="toggleStudentFields()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                        <select id="stu-type" onchange="toggleStudentFields()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 transition-shadow">
                             <option value="Consultation">Consultation (Horoscope)</option>
                             <option value="Basic Class">Basic Class Reg (64 Videos)</option>
                             <option value="Advanced Class">Advanced Class Reg</option>
@@ -467,7 +524,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-500 mb-1">Payment Status</label>
-                        <select id="stu-payment" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                        <select id="stu-payment" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 transition-shadow">
                             <option value="Paid">Fully Paid</option>
                             <option value="Pending">Pending Payment / Installment</option>
                         </select>
@@ -478,11 +535,11 @@
                 <div id="dynamic-fields-wrapper" class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-3">
                     <div id="field-consultation">
                         <label class="block text-xs font-medium text-slate-500 mb-1">Horoscope Details / Booking Date</label>
-                        <input type="text" id="stu-consult-details" placeholder="E.g., Seen on 12th, requires follow-up" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm">
+                        <input type="text" id="stu-consult-details" placeholder="E.g., Seen on 12th, requires follow-up" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm transition-shadow focus:ring-2 focus:ring-indigo-500 outline-none">
                     </div>
                     <div id="field-basic-class" class="hidden">
                         <label class="block text-xs font-medium text-slate-500 mb-1">64 Videos Pre-prep Status</label>
-                        <select id="stu-videos" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm">
+                        <select id="stu-videos" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm transition-shadow focus:ring-2 focus:ring-indigo-500 outline-none">
                             <option value="Not Started">Not Started</option>
                             <option value="In Progress">Sent - In Progress</option>
                             <option value="Completed">Completed</option>
@@ -490,13 +547,13 @@
                     </div>
                     <div id="field-advanced-class" class="hidden">
                         <label class="block text-xs font-medium text-slate-500 mb-1">Reg No & Coach Change Request</label>
-                        <input type="text" id="stu-adv-details" placeholder="Reg: ADV-102 | Request Coach: Mr. X" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm">
+                        <input type="text" id="stu-adv-details" placeholder="Reg: ADV-102 | Request Coach: Mr. X" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm transition-shadow focus:ring-2 focus:ring-indigo-500 outline-none">
                     </div>
                 </div>
 
                 <div class="pt-4 flex flex-col sm:flex-row justify-end gap-3">
-                    <button type="button" onclick="closeModal('student-modal')" class="w-full sm:w-auto px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium text-sm">Cancel</button>
-                    <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium text-sm hover:bg-indigo-700 shadow-sm">Save Record</button>
+                    <button type="button" onclick="closeModal('student-modal')" class="w-full sm:w-auto px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium text-sm transition-colors">Cancel</button>
+                    <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium text-sm hover:bg-indigo-700 shadow-sm transition-colors">Save Record</button>
                 </div>
             </form>
         </div>
@@ -507,16 +564,16 @@
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl p-5 md:p-8 mx-4 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
                 <h2 id="today-modal-title" class="text-xl font-bold text-slate-800">Add Today's Enrollment / Sale</h2>
-                <button onclick="closeModal('today-modal')" class="text-slate-400 hover:text-slate-600 p-1 bg-slate-100 rounded-full"><i class="ph ph-x text-lg"></i></button>
+                <button onclick="closeModal('today-modal')" class="text-slate-400 hover:text-slate-600 p-1 bg-slate-100 rounded-full transition-colors hover:bg-slate-200"><i class="ph ph-x text-lg"></i></button>
             </div>
             
             <div class="mb-5">
                 <label class="block text-sm font-bold text-slate-700 mb-2">Select Category</label>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    <button onclick="setTodayForm('lead')" id="btn-cat-lead" class="py-2 px-1 text-xs md:text-sm font-semibold rounded-lg bg-blue-100 text-blue-700 border-2 border-blue-500 transition-all">New Lead</button>
-                    <button onclick="setTodayForm('course')" id="btn-cat-course" class="py-2 px-1 text-xs md:text-sm font-semibold rounded-lg bg-slate-50 text-slate-500 border-2 border-transparent hover:bg-slate-100 transition-all">Course Booking</button>
-                    <button onclick="setTodayForm('consult')" id="btn-cat-consult" class="py-2 px-1 text-xs md:text-sm font-semibold rounded-lg bg-slate-50 text-slate-500 border-2 border-transparent hover:bg-slate-100 transition-all">Consultation</button>
-                    <button onclick="setTodayForm('software')" id="btn-cat-software" class="py-2 px-1 text-xs md:text-sm font-semibold rounded-lg bg-slate-50 text-slate-500 border-2 border-transparent hover:bg-slate-100 transition-all">Software Sale</button>
+                    <button type="button" onclick="setTodayForm('lead')" id="btn-cat-lead" class="py-2 px-1 text-xs md:text-sm font-semibold rounded-lg bg-blue-100 text-blue-700 border-2 border-blue-500 transition-all">New Lead</button>
+                    <button type="button" onclick="setTodayForm('course')" id="btn-cat-course" class="py-2 px-1 text-xs md:text-sm font-semibold rounded-lg bg-slate-50 text-slate-500 border-2 border-transparent hover:bg-slate-100 transition-all">Course Booking</button>
+                    <button type="button" onclick="setTodayForm('consult')" id="btn-cat-consult" class="py-2 px-1 text-xs md:text-sm font-semibold rounded-lg bg-slate-50 text-slate-500 border-2 border-transparent hover:bg-slate-100 transition-all">Consultation</button>
+                    <button type="button" onclick="setTodayForm('software')" id="btn-cat-software" class="py-2 px-1 text-xs md:text-sm font-semibold rounded-lg bg-slate-50 text-slate-500 border-2 border-transparent hover:bg-slate-100 transition-all">Software Sale</button>
                 </div>
             </div>
 
@@ -529,21 +586,22 @@
                 </div>
 
                 <div class="pt-6 border-t border-slate-100 flex justify-end gap-3">
-                    <button type="button" onclick="closeModal('today-modal')" class="px-5 py-2.5 text-slate-600 hover:bg-slate-100 rounded-lg font-medium text-sm">Cancel</button>
-                    <button type="submit" class="px-5 py-2.5 bg-emerald-600 text-white rounded-lg font-bold text-sm hover:bg-emerald-700 shadow-md">Add Record</button>
+                    <button type="button" onclick="closeModal('today-modal')" class="px-5 py-2.5 text-slate-600 hover:bg-slate-100 rounded-lg font-medium text-sm transition-colors">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 bg-emerald-600 text-white rounded-lg font-bold text-sm hover:bg-emerald-700 shadow-md transition-colors">Add Record</button>
                 </div>
             </form>
         </div>
     </div>
 
-
     <script>
-        // --- State Management (In-Memory per constraints) ---
+        // --- State Management (In-Memory + LocalStorage Persistence) ---
         const state = {
             tasks: [],
             enquiries: [],
             students: [],
             todayRecords: { leads: [], course: [], consult: [], software: [] },
+            history: {}, // Stores past daily records safely archived
+            viewingDate: null, // Tracks currently selected date
             currentView: 'dashboard',
             audioContext: null
         };
@@ -551,48 +609,201 @@
         let convertingRecord = null; // Tracks records when swapping/promoting
         let editingTodayRecord = null; // Tracks records being directly edited
 
+        // Helper to format Date cleanly as YYYY-MM-DD for archiving
+        function getLocalDateString(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
         // --- Core Application Initialization ---
         function initApp() {
-            loadTodayState(); // Load Local Storage and check for daily reset
+            loadState(); // Universal data loading
             startClock();
             setInterval(checkAlarms, 1000); // Check alarms every second
+            renderTimeline();
             renderCRM();
             renderStudents();
             renderTodayRecords();
             updateStats();
         }
 
-        // --- Local Storage & Daily Smart Reset ---
-        function loadTodayState() {
-            const savedStr = localStorage.getItem('alp_today_records');
-            const lastDate = localStorage.getItem('alp_last_date');
-            const todayDate = new Date().toDateString();
-
-            if (savedStr) {
-                state.todayRecords = JSON.parse(savedStr);
-            }
-
-            if (lastDate !== todayDate) {
-                // It's a new day! Reset Course and Software. KEEP LEADS!
-                state.todayRecords.course = [];
-                state.todayRecords.software = [];
+        // --- Universal State Persistence ---
+        function loadState() {
+            try {
+                // Load all existing keys safely
+                const loadedTasks = localStorage.getItem('alp_tasks');
+                const loadedEnquiries = localStorage.getItem('alp_enquiries');
+                const loadedStudents = localStorage.getItem('alp_students');
+                const savedTodayStr = localStorage.getItem('alp_today_records');
+                const savedHistoryStr = localStorage.getItem('alp_history');
                 
-                // SMART RETAIN: Keep Consultations that are scheduled for the future!
-                state.todayRecords.consult = state.todayRecords.consult.filter(c => {
-                    if (!c.time) return false;
-                    const cTime = new Date(c.time).getTime();
-                    // Keep if the booking is in the future and hasn't been checked off
-                    return !c.completed && cTime > Date.now();
-                });
+                if (loadedTasks) state.tasks = JSON.parse(loadedTasks);
+                if (loadedEnquiries) state.enquiries = JSON.parse(loadedEnquiries);
+                if (loadedStudents) state.students = JSON.parse(loadedStudents);
+                if (savedTodayStr) state.todayRecords = JSON.parse(savedTodayStr);
+                if (savedHistoryStr) state.history = JSON.parse(savedHistoryStr);
 
-                localStorage.setItem('alp_last_date', todayDate);
-                saveTodayState();
+                // Smart Date Reset Logic for Today Records
+                const lastDate = localStorage.getItem('alp_last_date');
+                const todayDateStr = getLocalDateString(new Date());
+
+                // Setup the History Date Picker
+                state.viewingDate = todayDateStr;
+                const datePicker = document.getElementById('history-date-picker');
+                if (datePicker) {
+                    datePicker.value = todayDateStr;
+                    datePicker.max = todayDateStr; // Cannot select future dates
+                }
+
+                if (lastDate && lastDate !== todayDateStr) {
+                    // ARCHIVE PROCESS: Save previous day's data before wiping
+                    let archiveKey = lastDate;
+                    try { 
+                        const d = new Date(lastDate); 
+                        if (!isNaN(d.getTime())) archiveKey = getLocalDateString(d); 
+                    } catch(e) {}
+                    
+                    // Deep copy current records to the history object using the old date
+                    state.history[archiveKey] = JSON.parse(JSON.stringify(state.todayRecords));
+
+                    // It's a new day! Reset Course and Software. KEEP LEADS!
+                    state.todayRecords.course = [];
+                    state.todayRecords.software = [];
+                    
+                    // SMART RETAIN: Keep Consultations scheduled for the future
+                    if(state.todayRecords.consult) {
+                        state.todayRecords.consult = state.todayRecords.consult.filter(c => {
+                            if (!c.time) return false;
+                            const cTime = new Date(c.time).getTime();
+                            return !c.completed && cTime > Date.now();
+                        });
+                    }
+                    
+                    localStorage.setItem('alp_last_date', todayDateStr);
+                    saveState(); 
+                } else if (!lastDate) {
+                    localStorage.setItem('alp_last_date', todayDateStr);
+                }
+            } catch (e) {
+                console.error("Local storage initialization error:", e);
+                showToast("Failed to load local data. Storage might be blocked.", "error");
             }
         }
 
-        function saveTodayState() {
-            localStorage.setItem('alp_today_records', JSON.stringify(state.todayRecords));
+        function saveState() {
+            try {
+                localStorage.setItem('alp_tasks', JSON.stringify(state.tasks));
+                localStorage.setItem('alp_enquiries', JSON.stringify(state.enquiries));
+                localStorage.setItem('alp_students', JSON.stringify(state.students));
+                localStorage.setItem('alp_today_records', JSON.stringify(state.todayRecords));
+                localStorage.setItem('alp_history', JSON.stringify(state.history));
+            } catch (e) {
+                console.error("Local storage save error:", e);
+            }
         }
+
+        function loadHistoryDate(dateStr) {
+            if (!dateStr) {
+                dateStr = getLocalDateString(new Date());
+                document.getElementById('history-date-picker').value = dateStr;
+            }
+            state.viewingDate = dateStr;
+            renderTodayRecords();
+        }
+
+        // --- Toast & Custom Modal Notifications ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const colorClass = type === 'success' ? 'bg-emerald-500' : type === 'error' ? 'bg-red-500' : 'bg-slate-800';
+            const iconClass = type === 'success' ? 'ph-check-circle' : type === 'error' ? 'ph-warning-circle' : 'ph-info';
+
+            toast.className = `toast-enter flex items-center gap-3 px-4 py-3 rounded-lg text-white shadow-lg pointer-events-auto ${colorClass}`;
+            toast.innerHTML = `<i class="ph ${iconClass} text-xl"></i><span class="text-sm font-medium">${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.replace('toast-enter', 'toast-leave');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function showCustomAlert(message) {
+            document.getElementById('custom-alert-message').textContent = message;
+            const modal = document.getElementById('custom-alert-modal');
+            const content = document.getElementById('custom-alert-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeCustomAlert() {
+            const modal = document.getElementById('custom-alert-modal');
+            const content = document.getElementById('custom-alert-content');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        let confirmCallback = null;
+        function showCustomConfirm(message, callback) {
+            document.getElementById('custom-confirm-message').textContent = message;
+            confirmCallback = callback;
+            const modal = document.getElementById('custom-confirm-modal');
+            const content = document.getElementById('custom-confirm-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeCustomConfirm(result) {
+            const modal = document.getElementById('custom-confirm-modal');
+            const content = document.getElementById('custom-confirm-content');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                if(confirmCallback) confirmCallback(result);
+            }, 300);
+        }
+
+        // --- Data Export Feature ---
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href",     dataStr);
+            downloadAnchorNode.setAttribute("download", "ALP_Backup_" + new Date().toISOString().slice(0, 10) + ".json");
+            document.body.appendChild(downloadAnchorNode); // required for firefox
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+            showToast("Database successfully exported!");
+        }
+
+        // --- Generic Search/Filter Logic ---
+        function filterTable(tbodyId, query) {
+            const tbody = document.getElementById(tbodyId);
+            if(!tbody) return;
+            const rows = tbody.getElementsByTagName('tr');
+            const lowerQuery = query.toLowerCase();
+            for (let row of rows) {
+                // If it's the empty state row, ignore it
+                if (row.cells.length === 1 && row.cells[0].colSpan > 1) continue; 
+                row.style.display = row.textContent.toLowerCase().includes(lowerQuery) ? '' : 'none';
+            }
+        }
+
+        function filterMultiTables(tbodyIds, query) {
+            tbodyIds.forEach(id => filterTable(id, query));
+        }
+
 
         // --- Navigation & Mobile Sidebar ---
         function toggleSidebar() {
@@ -610,13 +821,11 @@
         }
 
         function switchView(viewName) {
-            // Hide all
             document.getElementById('view-dashboard').classList.add('hidden');
             document.getElementById('view-crm').classList.add('hidden');
             document.getElementById('view-students').classList.add('hidden');
             document.getElementById('view-today').classList.add('hidden');
             
-            // Reset nav buttons
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 if(btn.id === 'nav-today') {
                     btn.className = 'nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition-colors mt-2 border-t border-slate-800 pt-3 text-slate-400';
@@ -625,7 +834,6 @@
                 }
             });
 
-            // Show target
             document.getElementById(`view-${viewName}`).classList.remove('hidden');
             
             if(viewName === 'today') {
@@ -634,7 +842,6 @@
                 document.getElementById(`nav-${viewName}`).className = 'nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium bg-indigo-600 text-white transition-colors';
             }
             
-            // Update Title
             const titles = {
                 'dashboard': 'Daily Schedule & Tasks',
                 'crm': 'CRM & Lead Management',
@@ -644,7 +851,6 @@
             document.getElementById('view-title').textContent = titles[viewName];
             state.currentView = viewName;
             
-            // Close mobile sidebar if open
             if(window.innerWidth < 768) {
                 toggleSidebar();
             }
@@ -660,7 +866,6 @@
         }
 
         function getTodayTimestampStr(timeStr) {
-            // timeStr format: "09:30"
             const today = new Date();
             const [hours, minutes] = timeStr.split(':');
             today.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
@@ -670,12 +875,17 @@
         // --- Smart Workflow Generator (The 20 Points Logic) ---
         function generateSmartRoutine() {
             if (state.tasks.length > 0) {
-                if(!confirm("This will clear your current timeline and regenerate the standard ALP routine. Continue?")) return;
+                showCustomConfirm("This will clear your current timeline and regenerate the standard ALP routine. Continue?", (confirmed) => {
+                    if(confirmed) proceedGenerateSmartRoutine();
+                });
+                return;
             }
-            
+            proceedGenerateSmartRoutine();
+        }
+        
+        function proceedGenerateSmartRoutine() {
             state.tasks = [];
             
-            // Defining the precise daily workflow based on user's 20 points
             const workflowTemplate = [
                 { time: "09:30", cat: "call", text: "Morning Sync & WhatsApp Message Responses" },
                 { time: "10:00", cat: "call", text: "Phone Call Management (Register data in Excel/CRM)" },
@@ -699,22 +909,14 @@
                     timestamp: ts,
                     category: item.cat,
                     completed: false,
-                    alarmTriggered: ts < Date.now() // If generated past the time, don't trigger alarm
+                    alarmTriggered: ts < Date.now()
                 });
             });
 
-            // Sort ensures timeline stays strictly sequential
             state.tasks.sort((a, b) => a.timestamp - b.timestamp);
+            saveState(); // Persist generated timeline
+            showToast("Template successfully generated!");
             renderTimeline();
-            updateStats();
-        }
-
-        function initApp() {
-            startClock();
-            setInterval(checkAlarms, 1000); // Check alarms every second
-            renderCRM();
-            renderStudents();
-            renderTodayRecords();
             updateStats();
         }
 
@@ -725,45 +927,35 @@
             let timeVal = document.getElementById('task-time').value; // "HH:MM"
             const cat = document.getElementById('task-category').value;
 
-            if (!text) return alert("Please provide a task description.");
+            if (!text) return showCustomAlert("Please provide a task description.");
 
             let finalTimestamp;
             let finalTimeStr;
 
-            // SMART AUTO-SCHEDULER LOGIC (30 min gaps)
             if (!timeVal) {
-                // Base start time is 09:30
                 let baseTs = getTodayTimestampStr("09:30");
                 
                 if (state.tasks.length > 0) {
-                    // Find the chronologically latest task
                     const latestTask = state.tasks.reduce((latest, current) => {
                         return current.timestamp > latest.timestamp ? current : latest;
                     }, state.tasks[0]);
-                    
-                    // Add 30 minutes (1800000 milliseconds) to the latest task's time
                     baseTs = latestTask.timestamp + 1800000;
                 }
 
-                // Guardrail: Do not schedule past 6:00 PM (18:00)
                 const maxTs = getTodayTimestampStr("18:00");
                 if (baseTs > maxTs) {
-                    alert("Your day is full! Capping this task at 6:00 PM (18:00).");
+                    showCustomAlert("Your day is full! Capping this task at 6:00 PM (18:00).");
                     baseTs = maxTs;
                 }
 
                 finalTimestamp = baseTs;
-                
-                // Format the automatically assigned timestamp back to "HH:MM" string for display
                 const d = new Date(baseTs);
                 finalTimeStr = d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
             } else {
-                // User provided a specific time
                 finalTimestamp = getTodayTimestampStr(timeVal);
                 finalTimeStr = timeVal;
             }
 
-            // Create and push the new task
             state.tasks.push({
                 id: 'task_' + Math.random().toString(36).substr(2, 9),
                 text: text,
@@ -774,25 +966,24 @@
                 alarmTriggered: finalTimestamp < Date.now()
             });
 
-            // Re-sort the array in case a custom time was inserted in the middle
             state.tasks.sort((a, b) => a.timestamp - b.timestamp);
+            saveState();
             
-            // Reset input
             document.getElementById('task-input').value = '';
             document.getElementById('task-time').value = '';
             
             initAudio();
             renderTimeline();
             updateStats();
+            showToast("Task successfully added");
         });
 
 
-        // --- Timeline Rendering (Fix applied here for time UI) ---
+        // --- Timeline Rendering ---
         function renderTimeline() {
             const container = document.getElementById('timeline-container');
             const empty = document.getElementById('empty-state');
             
-            // Clean specific task elements, keep empty state element
             Array.from(container.children).forEach(child => {
                 if (child.id !== 'empty-state') child.remove();
             });
@@ -815,7 +1006,6 @@
                 const isOverdue = !task.completed && task.timestamp < Date.now();
                 
                 const div = document.createElement('div');
-                // Updated pl-28 to leave room for expanded time box and shifted icon
                 div.className = `timeline-item timeline-line relative pl-28 py-4 transition-all duration-300 ${task.completed ? 'opacity-50' : ''}`;
                 
                 div.innerHTML = `
@@ -854,6 +1044,7 @@
             const task = state.tasks.find(t => t.id === id);
             if (task) {
                 task.completed = !task.completed;
+                saveState();
                 renderTimeline();
                 updateStats();
             }
@@ -881,7 +1072,6 @@
                 
                 const newTimestamp = getTodayTimestampStr(task.timeStr);
                 
-                // If time changed and is in future, reset alarm trigger
                 if(task.timestamp !== newTimestamp && newTimestamp > Date.now()) {
                     task.alarmTriggered = false;
                 }
@@ -889,23 +1079,23 @@
                 task.timestamp = newTimestamp;
 
                 state.tasks.sort((a, b) => a.timestamp - b.timestamp);
+                saveState();
                 renderTimeline();
                 updateStats();
                 closeModal('edit-task-modal');
+                showToast("Task updated");
             }
         });
 
         function swapTaskNext(id) {
             const index = state.tasks.findIndex(t => t.id === id);
             
-            // Check if it's the last task
             if (index === -1) return;
             if (index === state.tasks.length - 1) {
-                alert("This is the last task on your schedule! You cannot push it further down.");
+                showCustomAlert("This is the last task on your schedule! You cannot push it further down.");
                 return;
             }
 
-            // Swap times with the very next scheduled task
             const currentTask = state.tasks[index];
             const nextTask = state.tasks[index + 1];
 
@@ -916,7 +1106,6 @@
             currentTask.timeStr = nextTask.timeStr;
             currentTask.timestamp = nextTask.timestamp;
             
-            // If pushed to the future, re-arm the alarm!
             if(currentTask.timestamp > Date.now()) currentTask.alarmTriggered = false;
             else currentTask.alarmTriggered = nextTask.alarmTriggered;
 
@@ -924,16 +1113,22 @@
             nextTask.timestamp = tempTimestamp;
             nextTask.alarmTriggered = tempAlarmTriggered;
 
-            // Sort ensures timeline stays strictly sequential
             state.tasks.sort((a, b) => a.timestamp - b.timestamp);
+            saveState();
             renderTimeline();
             updateStats();
         }
 
         function deleteTask(id) {
-            state.tasks = state.tasks.filter(t => t.id !== id);
-            renderTimeline();
-            updateStats();
+            showCustomConfirm("Are you sure you want to delete this task?", (confirmed) => {
+                if(confirmed) {
+                    state.tasks = state.tasks.filter(t => t.id !== id);
+                    saveState();
+                    renderTimeline();
+                    updateStats();
+                    showToast("Task deleted", "error");
+                }
+            });
         }
 
         function updateStats() {
@@ -950,7 +1145,6 @@
             document.getElementById('stat-next').textContent = upcoming.length > 0 ? upcoming[0].timeStr : '--';
         }
 
-
         // --- Alarm System (Web Audio API) ---
         function initAudio() {
             if (!state.audioContext) {
@@ -963,7 +1157,6 @@
             let needsRender = false;
             let needsSave = false;
 
-            // 1. Check Standard Tasks Workflow
             state.tasks.forEach(task => {
                 if (!task.completed && !task.alarmTriggered && now >= task.timestamp) {
                     task.alarmTriggered = true;
@@ -972,12 +1165,11 @@
                 }
             });
 
-            // 2. Check Consultations for 5-Minute Reminder Alarm
             state.todayRecords.consult.forEach(c => {
                 if (!c.completed && !c.alarmTriggered && c.time) {
                     const consultTime = new Date(c.time).getTime();
                     if (!isNaN(consultTime)) {
-                        const reminderTime = consultTime - (5 * 60 * 1000); // 5 minutes before
+                        const reminderTime = consultTime - (5 * 60 * 1000); // 5 mins before
                         if (now >= reminderTime) {
                             c.alarmTriggered = true;
                             needsSave = true;
@@ -990,7 +1182,7 @@
                 }
             });
 
-            if (needsSave) saveTodayState();
+            if (needsSave || needsRender) saveState();
 
             if (needsRender || needsSave) {
                 renderTimeline();
@@ -1031,7 +1223,6 @@
             if (!state.audioContext) initAudio();
             if (state.audioContext.state === 'suspended') state.audioContext.resume();
             
-            // Synthesize an attention-grabbing dual tone
             const playNote = (freq, startTime, duration) => {
                 const osc = state.audioContext.createOscillator();
                 const gain = state.audioContext.createGain();
@@ -1068,9 +1259,11 @@
                 status: 'New'
             };
             state.enquiries.push(record);
+            saveState();
             closeModal('crm-modal');
             e.target.reset();
             renderCRM();
+            showToast("New enquiry saved!");
         });
 
         function renderCRM() {
@@ -1082,7 +1275,7 @@
                 return;
             }
 
-            state.enquiries.reverse().forEach(req => {
+            state.enquiries.slice().reverse().forEach(req => {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 transition-colors";
                 tr.innerHTML = `
@@ -1101,8 +1294,14 @@
             });
         }
         function deleteCRM(id) {
-            state.enquiries = state.enquiries.filter(e => e.id !== id);
-            renderCRM();
+            showCustomConfirm("Delete this enquiry record?", (confirmed) => {
+                if(confirmed) {
+                    state.enquiries = state.enquiries.filter(e => e.id !== id);
+                    saveState();
+                    renderCRM();
+                    showToast("Record deleted", "error");
+                }
+            });
         }
 
         // --- Students & Consultations Management ---
@@ -1134,10 +1333,12 @@
                 details: details
             };
             state.students.push(record);
+            saveState();
             closeModal('student-modal');
             e.target.reset();
             toggleStudentFields();
             renderStudents();
+            showToast("Student recorded successfully");
         });
 
         function renderStudents() {
@@ -1149,7 +1350,7 @@
                 return;
             }
 
-            state.students.reverse().forEach(stu => {
+            state.students.slice().reverse().forEach(stu => {
                 let payClass = stu.payment === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700';
                 
                 const tr = document.createElement('tr');
@@ -1170,8 +1371,14 @@
             });
         }
         function deleteStudent(id) {
-            state.students = state.students.filter(s => s.id !== id);
-            renderStudents();
+            showCustomConfirm("Delete this student record?", (confirmed) => {
+                if(confirmed) {
+                    state.students = state.students.filter(s => s.id !== id);
+                    saveState();
+                    renderStudents();
+                    showToast("Student deleted", "error");
+                }
+            });
         }
 
         // --- Today's Enrollments Logic ---
@@ -1180,7 +1387,7 @@
             convertingRecord = null;
             document.getElementById('today-modal-title').textContent = "Add Today's Enrollment / Sale";
             openModal('today-modal');
-            setTodayForm('lead'); // Default to leads for convenience
+            setTodayForm('lead'); 
         }
 
         function openEditTodayModal(category, id) {
@@ -1191,7 +1398,6 @@
             openModal('today-modal');
             setTodayForm(category);
             
-            // Wait slightly for DOM to render inputs, then pre-fill existing data
             setTimeout(() => {
                 const r = state.todayRecords[category].find(rec => rec.id === id);
                 if (!r) return;
@@ -1232,7 +1438,6 @@
         function setTodayForm(category) {
             document.getElementById('today-category').value = category;
             
-            // Update Tab Styles
             const activeClass = 'py-2 px-1 text-xs md:text-sm font-semibold rounded-lg transition-all';
             const inactiveClass = 'py-2 px-1 text-xs md:text-sm font-semibold rounded-lg bg-slate-50 text-slate-500 border-2 border-transparent hover:bg-slate-100 transition-all';
             
@@ -1246,7 +1451,6 @@
             if(category === 'consult') document.getElementById('btn-cat-consult').className = activeClass + ' bg-purple-100 text-purple-700 border-2 border-purple-500';
             if(category === 'software') document.getElementById('btn-cat-software').className = activeClass + ' bg-emerald-100 text-emerald-700 border-2 border-emerald-500';
 
-            // Inject Fields
             const container = document.getElementById('today-fields-container');
             container.innerHTML = '';
 
@@ -1350,18 +1554,11 @@
             }
         }
 
-        // Initialize default form inside the modal
-        setTodayForm('lead');
-
         document.getElementById('today-form').addEventListener('submit', (e) => {
             e.preventDefault();
             const cat = document.getElementById('today-category').value;
             
             let record;
-            let actualCatName = cat;
-            if (cat === 'lead') actualCatName = 'leads';
-
-            // Find existing record if editing, otherwise create new
             if (editingTodayRecord) {
                 record = state.todayRecords[editingTodayRecord.category].find(r => r.id === editingTodayRecord.id);
             } else {
@@ -1387,7 +1584,6 @@
             } else if (cat === 'consult') {
                 const newTime = document.getElementById('t-con-time').value;
                 
-                // Alarm reset logic if edited
                 if (editingTodayRecord && record.time !== newTime) {
                     record.alarmTriggered = false; 
                 } else if (!editingTodayRecord) {
@@ -1416,48 +1612,51 @@
                 if(!editingTodayRecord) state.todayRecords.software.push(record);
             }
 
-            // Remove the original record if this is a Swap/Promotion
             if (convertingRecord) {
                 state.todayRecords[convertingRecord.sourceType] = state.todayRecords[convertingRecord.sourceType].filter(r => r.id !== convertingRecord.id);
-                convertingRecord = null; // reset state
+                convertingRecord = null;
             }
 
-            editingTodayRecord = null; // Reset edit state
-            saveTodayState(); // Save updates directly to local storage
+            editingTodayRecord = null;
+            saveState();
 
             closeModal('today-modal');
             renderTodayRecords();
-            setTodayForm(cat); // Reset form visually
+            setTodayForm(cat);
+            showToast("Record securely saved");
         });
 
         function toggleConsultComplete(id) {
             const consult = state.todayRecords.consult.find(c => c.id === id);
             if(consult) {
                 consult.completed = !consult.completed;
-                saveTodayState();
+                saveState();
                 renderTodayRecords();
             }
         }
 
         function deleteTodayRecord(cat, id) {
-            state.todayRecords[cat] = state.todayRecords[cat].filter(r => r.id !== id);
-            saveTodayState();
-            renderTodayRecords();
+            showCustomConfirm("Are you sure you want to delete this specific record?", (confirmed) => {
+                if(confirmed) {
+                    state.todayRecords[cat] = state.todayRecords[cat].filter(r => r.id !== id);
+                    saveState();
+                    renderTodayRecords();
+                    showToast("Record deleted", "error");
+                }
+            });
         }
 
-        // SWAP / PROMOTE LOGIC
         function openPromoteModal(sourceType, id, targetType) {
             const sourceRecord = state.todayRecords[sourceType].find(r => r.id === id);
             if (!sourceRecord) return;
             
-            editingTodayRecord = null; // Disable edit mode
-            convertingRecord = { sourceType, id }; // Flag that we are converting
+            editingTodayRecord = null;
+            convertingRecord = { sourceType, id };
             
             document.getElementById('today-modal-title').textContent = `Promote to ${targetType === 'course' ? 'Course Booking' : 'Consultation'}`;
             openModal('today-modal');
             setTodayForm(targetType);
             
-            // Wait slightly for DOM to render inputs, then pre-fill known data
             setTimeout(() => {
                 if (targetType === 'course') {
                     if (document.getElementById('t-course-name')) document.getElementById('t-course-name').value = sourceRecord.name || '';
@@ -1469,20 +1668,34 @@
         }
 
         function renderTodayRecords() {
-            // Update Dynamic Counters
-            document.getElementById('count-leads').textContent = state.todayRecords.leads.length;
-            document.getElementById('count-course').textContent = state.todayRecords.course.length;
-            document.getElementById('count-consult').textContent = state.todayRecords.consult.length;
-            document.getElementById('count-software').textContent = state.todayRecords.software.length;
+            const todayStr = getLocalDateString(new Date());
+            const isToday = state.viewingDate === todayStr;
+            
+            // Get records for the selected date (Today or Archived History)
+            const recordsToRender = {
+                leads: [], course: [], consult: [], software: [],
+                ...(isToday ? state.todayRecords : (state.history[state.viewingDate] || {}))
+            };
+
+            // Dynamic Header Updates
+            document.getElementById('enrollments-view-title').textContent = isToday ? "Today's Completed Records" : `Archived Records (${state.viewingDate})`;
+            document.getElementById('btn-add-today').style.display = isToday ? 'flex' : 'none';
+
+            document.getElementById('count-leads').textContent = recordsToRender.leads.length;
+            document.getElementById('count-course').textContent = recordsToRender.course.length;
+            document.getElementById('count-consult').textContent = recordsToRender.consult.length;
+            document.getElementById('count-software').textContent = recordsToRender.software.length;
+
+            const archivedBadgeHTML = `<span class="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Archived (Read-only)</span>`;
 
             // Leads Render
             const lTbody = document.getElementById('today-leads-body');
             lTbody.innerHTML = '';
-            if (state.todayRecords.leads.length === 0) lTbody.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-slate-400">No new leads recorded today.</td></tr>`;
-            state.todayRecords.leads.forEach(r => {
+            if (recordsToRender.leads.length === 0) lTbody.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-slate-400">No leads recorded on this date.</td></tr>`;
+            recordsToRender.leads.slice().reverse().forEach(r => {
                 const interestBadge = r.interest === 'Course' ? 'bg-indigo-100 text-indigo-700' : r.interest === 'Consultation' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-700';
                 lTbody.innerHTML += `
-                    <tr class="hover:bg-slate-50">
+                    <tr class="hover:bg-slate-50 transition-colors">
                         <td class="px-4 py-3"><div class="font-medium text-slate-800">${r.name}</div><div class="text-xs text-slate-500">${r.phone}</div></td>
                         <td class="px-4 py-3">
                             <div class="text-xs font-medium text-slate-600 mb-1">Source: ${r.source}</div>
@@ -1490,6 +1703,7 @@
                         </td>
                         <td class="px-4 py-3 text-xs text-slate-600 max-w-[200px] truncate" title="${r.notes || '-'}">${r.notes || '-'}</td>
                         <td class="px-4 py-3 text-right">
+                            ${isToday ? `
                             <div class="flex justify-end gap-2 items-center">
                                 <button onclick="openPromoteModal('leads', '${r.id}', 'consult')" title="Swap to Consultation" class="px-2 py-1 bg-purple-50 text-purple-600 hover:bg-purple-100 rounded border border-purple-200 text-xs font-semibold flex items-center gap-1 transition-colors shadow-sm">
                                     <i class="ph ph-sparkle text-sm"></i> Consult
@@ -1497,9 +1711,10 @@
                                 <button onclick="openPromoteModal('leads', '${r.id}', 'course')" title="Swap to Course Booking" class="px-2 py-1 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded border border-indigo-200 text-xs font-semibold flex items-center gap-1 transition-colors shadow-sm">
                                     <i class="ph ph-books text-sm"></i> Course
                                 </button>
-                                <button onclick="openEditTodayModal('leads', '${r.id}')" class="text-blue-500 hover:text-blue-700 p-1 ml-1" title="Edit Data"><i class="ph ph-pencil-simple text-lg"></i></button>
-                                <button onclick="deleteTodayRecord('leads', '${r.id}')" class="text-red-400 hover:text-red-600 p-1"><i class="ph ph-trash text-lg"></i></button>
+                                <button onclick="openEditTodayModal('leads', '${r.id}')" class="text-blue-500 hover:text-blue-700 p-1 ml-1 transition-colors" title="Edit Data"><i class="ph ph-pencil-simple text-lg"></i></button>
+                                <button onclick="deleteTodayRecord('leads', '${r.id}')" class="text-red-400 hover:text-red-600 p-1 transition-colors"><i class="ph ph-trash text-lg"></i></button>
                             </div>
+                            ` : archivedBadgeHTML}
                         </td>
                     </tr>
                 `;
@@ -1508,11 +1723,11 @@
             // Course Render
             const cTbody = document.getElementById('today-course-body');
             cTbody.innerHTML = '';
-            if (state.todayRecords.course.length === 0) cTbody.innerHTML = `<tr><td colspan="5" class="px-4 py-6 text-center text-slate-400">No course bookings today.</td></tr>`;
-            state.todayRecords.course.forEach(r => {
+            if (recordsToRender.course.length === 0) cTbody.innerHTML = `<tr><td colspan="5" class="px-4 py-6 text-center text-slate-400">No course bookings on this date.</td></tr>`;
+            recordsToRender.course.slice().reverse().forEach(r => {
                 const payBadge = r.paymentStatus === 'Installment' ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-emerald-100 text-emerald-700 border-emerald-200';
                 cTbody.innerHTML += `
-                    <tr class="hover:bg-slate-50">
+                    <tr class="hover:bg-slate-50 transition-colors">
                         <td class="px-4 py-3"><div class="font-medium text-slate-800">${r.name}</div><div class="text-xs text-slate-500">${r.phone}</div></td>
                         <td class="px-4 py-3">
                             <div class="font-mono text-slate-700 font-medium">${r.studentId}</div>
@@ -1524,10 +1739,12 @@
                         </td>
                         <td class="px-4 py-3 text-slate-500 text-xs max-w-[150px] truncate" title="${r.notes}">${r.notes}</td>
                         <td class="px-4 py-3 text-right">
+                            ${isToday ? `
                             <div class="flex justify-end gap-2 items-center">
-                                <button onclick="openEditTodayModal('course', '${r.id}')" class="text-blue-500 hover:text-blue-700 p-1" title="Edit Data"><i class="ph ph-pencil-simple text-lg"></i></button>
-                                <button onclick="deleteTodayRecord('course', '${r.id}')" class="text-red-400 hover:text-red-600 p-1"><i class="ph ph-trash text-lg"></i></button>
+                                <button onclick="openEditTodayModal('course', '${r.id}')" class="text-blue-500 hover:text-blue-700 p-1 transition-colors" title="Edit Data"><i class="ph ph-pencil-simple text-lg"></i></button>
+                                <button onclick="deleteTodayRecord('course', '${r.id}')" class="text-red-400 hover:text-red-600 p-1 transition-colors"><i class="ph ph-trash text-lg"></i></button>
                             </div>
+                            ` : archivedBadgeHTML}
                         </td>
                     </tr>
                 `;
@@ -1536,11 +1753,10 @@
             // Consult Render
             const conTbody = document.getElementById('today-consult-body');
             conTbody.innerHTML = '';
-            if (state.todayRecords.consult.length === 0) conTbody.innerHTML = `<tr><td colspan="7" class="px-4 py-6 text-center text-slate-400">No consultations scheduled today.</td></tr>`;
-            state.todayRecords.consult.forEach(r => {
+            if (recordsToRender.consult.length === 0) conTbody.innerHTML = `<tr><td colspan="7" class="px-4 py-6 text-center text-slate-400">No consultations scheduled for this date.</td></tr>`;
+            recordsToRender.consult.slice().reverse().forEach(r => {
                 const payClass = r.payment === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700';
                 
-                // Format the calendar date beautifully
                 let displayTime = r.time;
                 const dObj = new Date(r.time);
                 if(!isNaN(dObj)) {
@@ -1548,9 +1764,9 @@
                 }
 
                 conTbody.innerHTML += `
-                    <tr class="hover:bg-slate-50 ${r.completed ? 'opacity-50' : ''}">
+                    <tr class="hover:bg-slate-50 transition-colors ${r.completed ? 'opacity-50' : ''}">
                         <td class="px-4 py-3">
-                            <button onclick="toggleConsultComplete('${r.id}')" class="w-6 h-6 rounded border flex items-center justify-center ${r.completed ? 'bg-purple-600 border-purple-600 text-white' : 'border-slate-300 text-transparent hover:border-purple-500'} transition-colors">
+                            <button ${isToday ? `onclick="toggleConsultComplete('${r.id}')"` : 'disabled'} class="w-6 h-6 rounded border flex items-center justify-center ${r.completed ? 'bg-purple-600 border-purple-600 text-white' : 'border-slate-300 text-transparent hover:border-purple-500'} transition-colors ${!isToday ? 'opacity-50 cursor-not-allowed hover:border-slate-300' : ''}">
                                 <i class="ph ph-check text-sm font-bold"></i>
                             </button>
                         </td>
@@ -1563,13 +1779,15 @@
                         <td class="px-4 py-3"><span class="px-2 py-0.5 rounded text-xs font-semibold ${payClass}">${r.payment}</span></td>
                         <td class="px-4 py-3 text-slate-500 text-xs">${r.notes}</td>
                         <td class="px-4 py-3 text-right">
+                            ${isToday ? `
                             <div class="flex justify-end gap-2 items-center">
                                 <button onclick="openPromoteModal('consult', '${r.id}', 'course')" title="Client Joined Course" class="px-2 py-1 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded border border-indigo-200 text-xs font-semibold flex items-center gap-1 transition-colors shadow-sm">
                                     <i class="ph ph-arrow-circle-right text-base"></i> To Course
                                 </button>
-                                <button onclick="openEditTodayModal('consult', '${r.id}')" class="text-blue-500 hover:text-blue-700 p-1 ml-1" title="Edit Data"><i class="ph ph-pencil-simple text-lg"></i></button>
-                                <button onclick="deleteTodayRecord('consult', '${r.id}')" class="text-red-400 hover:text-red-600 p-1"><i class="ph ph-trash text-lg"></i></button>
+                                <button onclick="openEditTodayModal('consult', '${r.id}')" class="text-blue-500 hover:text-blue-700 p-1 ml-1 transition-colors" title="Edit Data"><i class="ph ph-pencil-simple text-lg"></i></button>
+                                <button onclick="deleteTodayRecord('consult', '${r.id}')" class="text-red-400 hover:text-red-600 p-1 transition-colors"><i class="ph ph-trash text-lg"></i></button>
                             </div>
+                            ` : archivedBadgeHTML}
                         </td>
                     </tr>
                 `;
@@ -1578,27 +1796,28 @@
             // Software Render
             const sTbody = document.getElementById('today-software-body');
             sTbody.innerHTML = '';
-            if (state.todayRecords.software.length === 0) sTbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-400">No software sales today.</td></tr>`;
-            state.todayRecords.software.forEach(r => {
+            if (recordsToRender.software.length === 0) sTbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-400">No software sales on this date.</td></tr>`;
+            recordsToRender.software.slice().reverse().forEach(r => {
                 const payClass = r.payment === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700';
                 sTbody.innerHTML += `
-                    <tr class="hover:bg-slate-50">
+                    <tr class="hover:bg-slate-50 transition-colors">
                         <td class="px-4 py-3"><div class="font-medium text-slate-800">${r.name}</div><div class="text-xs text-slate-500">${r.phone}</div></td>
                         <td class="px-4 py-3"><div class="font-mono text-slate-700">${r.studentId}</div><div class="text-xs text-slate-500">Coach: ${r.coach}</div></td>
                         <td class="px-4 py-3 font-semibold text-emerald-600">${r.type}</td>
                         <td class="px-4 py-3 font-mono text-slate-600 text-xs">${r.keyInfo}</td>
                         <td class="px-4 py-3"><span class="px-2 py-0.5 rounded text-xs font-semibold ${payClass}">${r.payment}</span></td>
                         <td class="px-4 py-3 text-right">
+                            ${isToday ? `
                             <div class="flex justify-end gap-2 items-center">
-                                <button onclick="openEditTodayModal('software', '${r.id}')" class="text-blue-500 hover:text-blue-700 p-1" title="Edit Data"><i class="ph ph-pencil-simple text-lg"></i></button>
-                                <button onclick="deleteTodayRecord('software', '${r.id}')" class="text-red-400 hover:text-red-600 p-1"><i class="ph ph-trash text-lg"></i></button>
+                                <button onclick="openEditTodayModal('software', '${r.id}')" class="text-blue-500 hover:text-blue-700 p-1 transition-colors" title="Edit Data"><i class="ph ph-pencil-simple text-lg"></i></button>
+                                <button onclick="deleteTodayRecord('software', '${r.id}')" class="text-red-400 hover:text-red-600 p-1 transition-colors"><i class="ph ph-trash text-lg"></i></button>
                             </div>
+                            ` : archivedBadgeHTML}
                         </td>
                     </tr>
                 `;
             });
         }
-
 
         // --- Modals Global Logic ---
         window.openModal = (id) => {
