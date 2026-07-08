@@ -6,6 +6,7 @@
     <title>ALP Admin OS - Command Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
@@ -25,12 +26,6 @@
         }
         .alarm-active { animation: pulseAlert 2s infinite; border-color: #dc2626 !important; }
         
-        /* Toast Animations */
-        .toast-enter { animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .toast-leave { animation: slideOutRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes slideOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
-
         /* Timeline styling */
         .timeline-line::before {
             content: '';
@@ -43,6 +38,54 @@
             z-index: 0;
         }
         .timeline-item:last-child .timeline-line::before { display: none; }
+
+        /* Mobile-specific fixes */
+        @media (max-width: 639px) {
+            /* Make timeline compact on mobile */
+            .timeline-item { padding-left: 4.5rem !important; }
+            .timeline-item .absolute.left-0 { width: 2.5rem !important; }
+            .timeline-item .absolute.left-0 span { font-size: 0.7rem !important; }
+            .timeline-item .absolute.left-20 { left: 3rem !important; width: 1.5rem !important; height: 1.5rem !important; font-size: 0.65rem !important; }
+            .timeline-line::before { left: 3.2rem !important; }
+
+            /* Always show action buttons on touch (no hover) */
+            .group .opacity-0 { opacity: 1 !important; }
+
+            /* Responsive form grids inside modals */
+            .modal-responsive-grid { grid-template-columns: 1fr !important; }
+
+            /* Action buttons in Today's tables - wrap on mobile */
+            .today-actions-wrap { flex-wrap: wrap !important; gap: 0.375rem !important; justify-content: flex-start !important; }
+
+            /* Smaller table cell padding on mobile */
+            .mobile-compact-table td, .mobile-compact-table th { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
+        }
+
+        /* Safe area for notched phones */
+        @supports(padding: max(0px)) {
+            body { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+        }
+
+        /* Prevent double-tap zoom on buttons */
+        button, a, input, select { touch-action: manipulation; }
+
+        /* Bottom nav for mobile */
+        .mobile-bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 40;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            padding: 0.375rem 0;
+            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        @media (max-width: 767px) {
+            .mobile-bottom-nav { display: flex; }
+            #views-container { padding-bottom: 4.5rem !important; }
+        }
     </style>
 </head>
 <body class="text-slate-800 h-screen overflow-hidden flex relative">
@@ -97,9 +140,14 @@
                 <h2 id="view-title" class="text-lg md:text-xl font-bold text-slate-800 truncate">Daily Schedule & Tasks</h2>
             </div>
             <div class="flex items-center gap-2 md:gap-4">
-                <button onclick="exportData()" title="Backup Database" class="p-2 bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-800 rounded-lg transition-colors border border-slate-200 flex items-center gap-2">
-                    <i class="ph ph-download-simple text-lg"></i> <span class="hidden md:inline text-sm font-semibold">Export</span>
+                <input type="file" id="import-excel-input" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleImportLeads(event)">
+                <button onclick="document.getElementById('import-excel-input').click()" title="Import Leads (Excel)" class="p-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg transition-colors border border-emerald-200 flex items-center gap-2">
+                    <i class="ph ph-upload-simple text-lg"></i> <span class="hidden sm:inline text-sm font-semibold">Import</span>
                 </button>
+                <button onclick="exportToExcel()" title="Export Database to Excel" class="p-2 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg transition-colors border border-blue-200 flex items-center gap-2">
+                    <i class="ph ph-file-xls text-lg"></i> <span class="hidden sm:inline text-sm font-semibold">Export</span>
+                </button>
+                
                 <button onclick="generateSmartRoutine()" title="Auto-Generate Standard Routine" class="hidden sm:flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg text-sm font-semibold transition-colors border border-indigo-200">
                     <i class="ph ph-magic-wand text-lg"></i> Auto-Generate
                 </button>
@@ -271,8 +319,21 @@
                     </div>
                 </div>
 
+                <!-- Filters Bar -->
+                <div class="flex flex-wrap items-center gap-2 -mt-2 mb-2">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mr-1">Filters:</span>
+                    <button onclick="setTodayFilter('all')" id="flt-all" class="today-flt-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700 border border-indigo-300 shadow-inner transition-colors">All Records</button>
+                    <button onclick="setTodayFilter('pending')" id="flt-pending" class="today-flt-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors flex items-center gap-1"><i class="ph ph-clock text-amber-500"></i> Pending Follow-ups</button>
+                    <button onclick="setTodayFilter('done')" id="flt-done" class="today-flt-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors flex items-center gap-1"><i class="ph ph-check-circle text-emerald-500"></i> Follow-up Done</button>
+                    <div class="w-px h-4 bg-slate-300 mx-1"></div>
+                    <button onclick="setTodayFilter('leads')" id="flt-leads" class="today-flt-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors">Leads Only</button>
+                    <button onclick="setTodayFilter('course')" id="flt-course" class="today-flt-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors">Courses</button>
+                    <button onclick="setTodayFilter('consult')" id="flt-consult" class="today-flt-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors">Consultations</button>
+                    <button onclick="setTodayFilter('software')" id="flt-software" class="today-flt-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors">Software</button>
+                </div>
+
                 <!-- New Leads Section -->
-                <div class="space-y-3">
+                <div id="section-leads" class="space-y-3">
                     <h4 class="font-semibold text-slate-700 flex items-center gap-2">
                         <i class="ph ph-magnet text-blue-500 text-xl"></i> Today's New Leads
                         <span id="count-leads" class="bg-blue-100 text-blue-700 py-0.5 px-2 rounded-full text-xs ml-2 shadow-sm font-bold">0</span>
@@ -295,7 +356,7 @@
                 </div>
 
                 <!-- Course Bookings Section -->
-                <div class="space-y-3">
+                <div id="section-course" class="space-y-3">
                     <h4 class="font-semibold text-slate-700 flex items-center gap-2">
                         <i class="ph ph-books text-indigo-500 text-xl"></i> Course Bookings
                         <span id="count-course" class="bg-indigo-100 text-indigo-700 py-0.5 px-2 rounded-full text-xs ml-2 shadow-sm font-bold">0</span>
@@ -319,7 +380,7 @@
                 </div>
 
                 <!-- Consultations Section -->
-                <div class="space-y-3">
+                <div id="section-consult" class="space-y-3">
                     <h4 class="font-semibold text-slate-700 flex items-center gap-2">
                         <i class="ph ph-sparkle text-purple-500 text-xl"></i> Consultations
                         <span id="count-consult" class="bg-purple-100 text-purple-700 py-0.5 px-2 rounded-full text-xs ml-2 shadow-sm font-bold">0</span>
@@ -345,7 +406,7 @@
                 </div>
 
                 <!-- Software Sales Section -->
-                <div class="space-y-3">
+                <div id="section-software" class="space-y-3">
                     <h4 class="font-semibold text-slate-700 flex items-center gap-2">
                         <i class="ph ph-laptop text-emerald-500 text-xl"></i> Software Sales
                         <span id="count-software" class="bg-emerald-100 text-emerald-700 py-0.5 px-2 rounded-full text-xs ml-2 shadow-sm font-bold">0</span>
@@ -373,8 +434,80 @@
         </div>
     </main>
 
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav justify-around items-center">
+        <button onclick="switchView('dashboard')" id="bnav-dashboard" class="bnav-btn flex flex-col items-center gap-0.5 px-2 py-1 text-indigo-600">
+            <i class="ph ph-squares-four text-xl"></i>
+            <span class="text-[10px] font-semibold">Schedule</span>
+        </button>
+        <button onclick="switchView('crm')" id="bnav-crm" class="bnav-btn flex flex-col items-center gap-0.5 px-2 py-1 text-slate-400">
+            <i class="ph ph-users text-xl"></i>
+            <span class="text-[10px] font-semibold">CRM</span>
+        </button>
+        <button onclick="switchView('students')" id="bnav-students" class="bnav-btn flex flex-col items-center gap-0.5 px-2 py-1 text-slate-400">
+            <i class="ph ph-graduation-cap text-xl"></i>
+            <span class="text-[10px] font-semibold">Students</span>
+        </button>
+        <button onclick="switchView('today')" id="bnav-today" class="bnav-btn flex flex-col items-center gap-0.5 px-2 py-1 text-slate-400">
+            <i class="ph ph-chart-line-up text-xl"></i>
+            <span class="text-[10px] font-semibold">Today</span>
+        </button>
+    </nav>
+
     <!-- Toast Notification Container -->
-    <div id="toast-container" class="fixed bottom-4 right-4 z-[70] flex flex-col gap-2 pointer-events-none"></div>
+    <div id="toast-container" class="fixed bottom-16 md:bottom-4 right-4 z-[70] flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Modals -->
+
+    <!-- WhatsApp Quick Message Modal -->
+    <div id="whatsapp-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-5 md:p-6 mx-4">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
+                <h2 class="text-lg font-bold text-emerald-600 flex items-center gap-2">
+                    <i class="ph-fill ph-whatsapp-logo text-2xl"></i> Smart WhatsApp Sender
+                </h2>
+                <button onclick="closeModal('whatsapp-modal')" class="text-slate-400 hover:text-slate-600 p-1 bg-slate-100 rounded-full transition-colors hover:bg-slate-200"><i class="ph ph-x text-lg"></i></button>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Send to Phone</label>
+                        <input type="text" id="wa-phone" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-emerald-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Message Template</label>
+                        <select id="wa-template-type" onchange="loadWhatsAppTemplate()" class="w-full px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg text-sm font-bold text-emerald-700 focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <option value="course">Course Booking Pitch</option>
+                            <option value="consult">Consultation Details</option>
+                            <option value="software">Software Setup</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="flex justify-between items-end mb-1">
+                        <label class="block text-xs font-medium text-slate-500">Message Content</label>
+                        <button onclick="saveWhatsAppTemplate()" title="Save edits as the new default for this category" class="text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-600 px-2 py-1 rounded border border-slate-200 transition-colors font-bold flex items-center gap-1">
+                            <i class="ph ph-floppy-disk"></i> Save as Default
+                        </button>
+                    </div>
+                    <textarea id="wa-message-body" rows="6" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-shadow text-slate-700"></textarea>
+                    <p class="text-[10px] text-slate-400 mt-1">Tip: Use <span class="font-mono text-slate-500 bg-slate-100 px-1 rounded">{{name}}</span> to automatically insert the client's name.</p>
+                </div>
+                
+                <!-- Hidden utility fields -->
+                <input type="hidden" id="wa-client-name">
+
+                <div class="pt-2 flex justify-end gap-3 border-t border-slate-100 mt-2">
+                    <button onclick="closeModal('whatsapp-modal')" class="px-5 py-2.5 text-slate-600 hover:bg-slate-100 rounded-lg font-medium text-sm transition-colors">Cancel</button>
+                    <button onclick="sendWhatsApp()" class="px-5 py-2.5 bg-emerald-500 text-white rounded-lg font-bold text-sm hover:bg-emerald-600 shadow-md transition-colors flex items-center gap-2">
+                        <i class="ph-fill ph-paper-plane-right text-lg"></i> Send via WhatsApp
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Custom Alert Modal -->
     <div id="custom-alert-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
@@ -637,15 +770,24 @@
 
     <script>
         // --- State Management (In-Memory + LocalStorage Persistence) ---
+        const defaultWATemplates = {
+            course: "Hello {{name}},\n\nThank you for your interest in our Astrology Course. Please let us know when you'd like to proceed with the registration.\n\nRegards,\nALP Admin",
+            consult: "Hello {{name}},\n\nYour Astrology Consultation is booked.\n\nPlease be ready on time and let us know if you need any assistance.\n\nRegards,\nALP Admin",
+            software: "Hello {{name}},\n\nYour ALP Software access has been generated.\n\nLet us know if you need help with installation.\n\nRegards,\nALP Admin"
+        };
+
         const state = {
             tasks: [],
             enquiries: [],
             students: [],
             todayRecords: { leads: [], course: [], consult: [], software: [] },
             history: {}, // Stores past daily records safely archived
+            templates: { ...defaultWATemplates }, // WhatsApp Custom Pitch Templates
             viewingDate: null, // Tracks currently selected date
             currentView: 'dashboard',
-            audioContext: null
+            currentTodayFilter: 'all', // Tracks active filter view
+            audioContext: null,
+            alarmInterval: null // Tracks the continuous 30-second alarm ring
         };
         
         let convertingRecord = null; // Tracks records when swapping/promoting
@@ -680,12 +822,14 @@
                 const loadedStudents = localStorage.getItem('alp_students');
                 const savedTodayStr = localStorage.getItem('alp_today_records');
                 const savedHistoryStr = localStorage.getItem('alp_history');
+                const savedTemplates = localStorage.getItem('alp_wa_templates');
                 
                 if (loadedTasks) state.tasks = JSON.parse(loadedTasks);
                 if (loadedEnquiries) state.enquiries = JSON.parse(loadedEnquiries);
                 if (loadedStudents) state.students = JSON.parse(loadedStudents);
                 if (savedTodayStr) state.todayRecords = JSON.parse(savedTodayStr);
                 if (savedHistoryStr) state.history = JSON.parse(savedHistoryStr);
+                if (savedTemplates) state.templates = JSON.parse(savedTemplates);
 
                 // Smart Date Reset Logic for Today Records
                 const lastDate = localStorage.getItem('alp_last_date');
@@ -741,6 +885,7 @@
                 localStorage.setItem('alp_students', JSON.stringify(state.students));
                 localStorage.setItem('alp_today_records', JSON.stringify(state.todayRecords));
                 localStorage.setItem('alp_history', JSON.stringify(state.history));
+                localStorage.setItem('alp_wa_templates', JSON.stringify(state.templates));
             } catch (e) {
                 console.error("Local storage save error:", e);
             }
@@ -817,16 +962,193 @@
             }, 300);
         }
 
-        // --- Data Export Feature ---
-        function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href",     dataStr);
-            downloadAnchorNode.setAttribute("download", "ALP_Backup_" + new Date().toISOString().slice(0, 10) + ".json");
-            document.body.appendChild(downloadAnchorNode); // required for firefox
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
-            showToast("Database successfully exported!");
+        // --- WhatsApp Messaging Hub Functions ---
+        function openWhatsAppModal(phone, name, defaultType) {
+            document.getElementById('wa-phone').value = phone || '';
+            document.getElementById('wa-client-name').value = name || '';
+            
+            const typeSelect = document.getElementById('wa-template-type');
+            if(defaultType && ['course', 'consult', 'software'].includes(defaultType)) {
+                typeSelect.value = defaultType;
+            } else {
+                typeSelect.value = 'course';
+            }
+            
+            loadWhatsAppTemplate(); // Load the proper message automatically
+            openModal('whatsapp-modal');
+        }
+
+        function loadWhatsAppTemplate() {
+            const type = document.getElementById('wa-template-type').value;
+            const name = document.getElementById('wa-client-name').value;
+            
+            // Get the saved template for this category
+            let tpl = state.templates[type] || defaultWATemplates[type];
+            
+            // Smart inject the client's actual name to make it personal
+            let previewText = tpl.replace(/\{\{name\}\}/gi, name || 'User');
+            document.getElementById('wa-message-body').value = previewText;
+        }
+
+        function saveWhatsAppTemplate() {
+            const type = document.getElementById('wa-template-type').value;
+            let currentText = document.getElementById('wa-message-body').value;
+            const name = document.getElementById('wa-client-name').value;
+            
+            // Safely swap the generated name BACK to the {{name}} placeholder so it works for future clients
+            if(name && name.length > 1) {
+                const regex = new RegExp(name, 'gi');
+                currentText = currentText.replace(regex, '{{name}}');
+            }
+            
+            state.templates[type] = currentText; // Save to memory
+            saveState(); // Persist to Local Storage
+            
+            showToast("Template successfully saved as default!", "success");
+        }
+
+        function sendWhatsApp() {
+            const phoneField = document.getElementById('wa-phone').value;
+            // Clean phone string just to numbers and + for URLs
+            const cleanPhone = phoneField.replace(/[^0-9\+]/g, '');
+            const text = document.getElementById('wa-message-body').value;
+            
+            if(!cleanPhone) return showCustomAlert("Please ensure a valid phone number is set before sending.");
+            
+            // Generate the secure native WhatsApp open link
+            const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`;
+            window.open(url, '_blank');
+            closeModal('whatsapp-modal');
+        }
+
+        // --- Data Export & Import (Excel) ---
+        function exportToExcel() {
+            try {
+                if (typeof XLSX === 'undefined') {
+                    return showCustomAlert("Excel library is still loading. Please wait a moment and try again.");
+                }
+
+                const wb = XLSX.utils.book_new();
+
+                // Helper to flatten nested objects (like follow-ups) for cleaner Excel rows
+                const flatten = (arr) => arr.map(obj => {
+                    const newObj = { ...obj };
+                    if (newObj.followUp) {
+                        newObj.followUpStatus = newObj.followUp.status;
+                        newObj.followUpTime = newObj.followUp.time;
+                        delete newObj.followUp;
+                    }
+                    if (newObj.linkedRecord) delete newObj.linkedRecord;
+                    return newObj;
+                });
+
+                // Attach main sections as individual sheets
+                if (state.tasks && state.tasks.length) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(flatten(state.tasks)), "Tasks");
+                if (state.enquiries && state.enquiries.length) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(flatten(state.enquiries)), "CRM Enquiries");
+                if (state.students && state.students.length) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(flatten(state.students)), "Students");
+                
+                if (state.todayRecords) {
+                    if (state.todayRecords.leads && state.todayRecords.leads.length) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(flatten(state.todayRecords.leads)), "Today Leads");
+                    if (state.todayRecords.course && state.todayRecords.course.length) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(flatten(state.todayRecords.course)), "Today Courses");
+                    if (state.todayRecords.consult && state.todayRecords.consult.length) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(flatten(state.todayRecords.consult)), "Today Consults");
+                    if (state.todayRecords.software && state.todayRecords.software.length) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(flatten(state.todayRecords.software)), "Today Software");
+                }
+
+                // Append Archived History if it exists
+                if (state.history) {
+                    Object.keys(state.history).forEach(dateStr => {
+                        const day = state.history[dateStr];
+                        const combined = [];
+                        if(day.leads) combined.push(...day.leads.map(l => ({ Type: 'Lead', ...l })));
+                        if(day.course) combined.push(...day.course.map(c => ({ Type: 'Course', ...c })));
+                        if(day.consult) combined.push(...day.consult.map(c => ({ Type: 'Consult', ...c })));
+                        if(day.software) combined.push(...day.software.map(s => ({ Type: 'Software', ...s })));
+                        
+                        if (combined.length > 0) {
+                            let safeName = "Hist_" + dateStr.substring(0, 20).replace(/[:\\\/?*\[\]]/g, "_");
+                            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(flatten(combined)), safeName);
+                        }
+                    });
+                }
+
+                if (wb.SheetNames.length === 0) {
+                    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([{Status: "No Data Available"}]), "Empty");
+                }
+
+                XLSX.writeFile(wb, "ALP_OS_Database_" + getLocalDateString(new Date()) + ".xlsx");
+                showToast("Database successfully exported to Excel!");
+            } catch (e) {
+                console.error(e);
+                showCustomAlert("Error generating Excel file. Please try again.");
+            }
+        }
+
+        function handleImportLeads(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (typeof XLSX === 'undefined') {
+                showCustomAlert("Excel library is still loading. Please try again.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    
+                    // Grab the first sheet of the imported Excel
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const json = XLSX.utils.sheet_to_json(worksheet);
+
+                    if (json.length === 0) {
+                        showCustomAlert("The selected Excel sheet is empty.");
+                        return;
+                    }
+
+                    let importedCount = 0;
+                    json.forEach(row => {
+                        // Gracefully map common columns, fallback to defaults
+                        const name = row['Name'] || row['Full Name'] || row['Client Name'] || row['name'] || 'Unknown';
+                        const phone = row['Phone'] || row['Mobile'] || row['Contact'] || row['phone'] || 'N/A';
+                        const source = row['Source'] || row['Lead Source'] || row['source'] || 'Excel Import';
+                        const interest = row['Interest'] || row['Requirement'] || row['interest'] || 'Course';
+                        const notes = row['Notes'] || row['Comments'] || row['notes'] || '-';
+
+                        if (name !== 'Unknown' || phone !== 'N/A') {
+                            state.todayRecords.leads.push({
+                                id: 'today_' + Date.now() + Math.random().toString(36).substr(2, 5),
+                                name: String(name),
+                                phone: String(phone),
+                                source: String(source),
+                                interest: String(interest),
+                                notes: String(notes)
+                            });
+                            importedCount++;
+                        }
+                    });
+
+                    if (importedCount > 0) {
+                        saveState(); 
+                        
+                        // Switch to 'today' view and filter strictly to 'leads' so user immediately sees results
+                        switchView('today');
+                        if (typeof setTodayFilter === 'function') setTodayFilter('leads');
+                        else renderTodayRecords();
+
+                        showToast(`${importedCount} New Leads successfully imported from Excel!`);
+                    } else {
+                        showCustomAlert("Could not find 'Name' or 'Phone' columns in the Excel file. Please ensure column headers exist.");
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showCustomAlert("Error processing Excel file. Make sure it is a valid .xlsx or .csv format.");
+                }
+                event.target.value = ''; // Reset input so same file can be selected again
+            };
+            reader.readAsArrayBuffer(file);
         }
 
         // --- Generic Search/Filter Logic ---
@@ -893,8 +1215,20 @@
             document.getElementById('view-title').textContent = titles[viewName];
             state.currentView = viewName;
             
+            // Sync mobile bottom nav active state
+            document.querySelectorAll('.bnav-btn').forEach(btn => {
+                btn.className = 'bnav-btn flex flex-col items-center gap-0.5 px-2 py-1 text-slate-400';
+            });
+            const activeColor = viewName === 'today' ? 'text-emerald-600' : 'text-indigo-600';
+            const bnavBtn = document.getElementById(`bnav-${viewName}`);
+            if (bnavBtn) bnavBtn.className = `bnav-btn flex flex-col items-center gap-0.5 px-2 py-1 ${activeColor}`;
+
+            // Only toggle sidebar if it's open (from sidebar nav click), not from bottom nav
             if(window.innerWidth < 768) {
-                toggleSidebar();
+                const sidebar = document.getElementById('sidebar');
+                if (!sidebar.classList.contains('-translate-x-full')) {
+                    toggleSidebar();
+                }
             }
         }
 
@@ -1086,9 +1420,23 @@
             const task = state.tasks.find(t => t.id === id);
             if (task) {
                 task.completed = !task.completed;
+
+                // CRITICAL FIX: Sync the follow-up status back to the original record
+                if (task.linkedRecord) {
+                    const { category, id: recordId } = task.linkedRecord;
+                    const record = state.todayRecords[category]?.find(r => r.id === recordId);
+                    if (record && record.followUp) {
+                        record.followUp.status = task.completed ? 'Done' : 'Pending';
+                        // Keep alarm triggered state if it's already done
+                        if (task.completed) record.alarmTriggered = true;
+                    }
+                }
+
                 saveState();
                 renderTimeline();
                 updateStats();
+                // Refresh today's records view if it's active so the badge updates
+                if (state.currentView === 'today') renderTodayRecords();
             }
         }
         
@@ -1194,6 +1542,10 @@
 
             const comms = state.tasks.filter(t => (t.category === 'call' || t.category === 'consultation') && !t.completed).length;
             document.getElementById('stat-comms').textContent = comms;
+
+            // Meetings count (consultation tasks that are not completed)
+            const meetings = state.todayRecords.consult ? state.todayRecords.consult.filter(c => !c.completed).length : 0;
+            document.getElementById('stat-meetings').textContent = meetings;
 
             // Find next upcoming
             const now = Date.now();
@@ -1335,6 +1687,12 @@
         }
 
         function dismissAlarm() {
+            // Stop the 30-second alarm instantly when dismissed
+            if (state.alarmInterval) {
+                clearInterval(state.alarmInterval);
+                state.alarmInterval = null;
+            }
+
             const modal = document.getElementById('alarm-modal');
             const content = document.getElementById('alarm-modal-content');
             
@@ -1348,27 +1706,49 @@
             if (!state.audioContext) initAudio();
             if (state.audioContext.state === 'suspended') state.audioContext.resume();
             
-            const playNote = (freq, startTime, duration) => {
-                const osc = state.audioContext.createOscillator();
-                const gain = state.audioContext.createGain();
-                osc.connect(gain);
-                gain.connect(state.audioContext.destination);
-                osc.type = 'square';
-                osc.frequency.value = freq;
+            // Clear any currently playing alarms to prevent overlapping noise
+            if (state.alarmInterval) clearInterval(state.alarmInterval);
+
+            let secondsElapsed = 0;
+
+            const beep = () => {
+                // Auto-stop after 30 seconds
+                if (secondsElapsed >= 30) {
+                    clearInterval(state.alarmInterval);
+                    return;
+                }
+
+                const now = state.audioContext.currentTime;
                 
-                gain.gain.setValueAtTime(0, startTime);
-                gain.gain.linearRampToValueAtTime(0.3, startTime + 0.05);
-                gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+                const playNote = (freq, startTime, duration) => {
+                    const osc = state.audioContext.createOscillator();
+                    const gain = state.audioContext.createGain();
+                    osc.connect(gain);
+                    gain.connect(state.audioContext.destination);
+                    osc.type = 'square';
+                    osc.frequency.value = freq;
+                    
+                    // Smooth volume fade in and out to prevent clicking sounds
+                    gain.gain.setValueAtTime(0, startTime);
+                    gain.gain.linearRampToValueAtTime(0.3, startTime + 0.02);
+                    gain.gain.setValueAtTime(0.3, startTime + duration - 0.02);
+                    gain.gain.linearRampToValueAtTime(0, startTime + duration);
+                    
+                    osc.start(startTime);
+                    osc.stop(startTime + duration);
+                };
+
+                // Classic digital alarm pattern: Beep-Beep-Beep (Pause)
+                playNote(880, now, 0.15);
+                playNote(880, now + 0.25, 0.15);
+                playNote(880, now + 0.50, 0.15);
                 
-                osc.start(startTime);
-                osc.stop(startTime + duration);
+                secondsElapsed++;
             };
 
-            const now = state.audioContext.currentTime;
-            playNote(880, now, 0.4);       // High A
-            playNote(1108.7, now + 0.2, 0.4); // High C#
-            playNote(880, now + 0.6, 0.4);
-            playNote(1108.7, now + 0.8, 0.6);
+            // Start the beeping immediately and loop it every 1 second
+            beep();
+            state.alarmInterval = setInterval(beep, 1000);
         }
 
 
@@ -1519,9 +1899,12 @@
             editingTodayRecord = { category, id };
             convertingRecord = null;
             
+            // Map plural 'leads' to singular 'lead' for setTodayForm compatibility
+            const formCategory = category === 'leads' ? 'lead' : category;
+            
             document.getElementById('today-modal-title').textContent = "Edit Record";
             openModal('today-modal');
-            setTodayForm(category);
+            setTodayForm(formCategory);
             
             setTimeout(() => {
                 const r = state.todayRecords[category].find(rec => rec.id === id);
@@ -1543,6 +1926,7 @@
                     document.getElementById('t-course-notes').value = r.notes !== '-' ? r.notes : '';
                 } else if (category === 'consult') {
                     document.getElementById('t-con-name').value = r.name;
+                    if(document.getElementById('t-con-phone')) document.getElementById('t-con-phone').value = r.phone || '';
                     document.getElementById('t-con-teacher').value = r.teacher;
                     document.getElementById('t-con-pay').value = r.payment;
                     document.getElementById('t-con-time').value = r.time;
@@ -1581,11 +1965,11 @@
 
             if (category === 'lead') {
                 container.innerHTML = `
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 modal-responsive-grid">
                         <div><label class="block text-xs font-medium text-slate-500 mb-1">Name</label><input type="text" id="t-lead-name" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
                         <div><label class="block text-xs font-medium text-slate-500 mb-1">Phone Number</label><input type="text" id="t-lead-phone" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 modal-responsive-grid">
                         <div>
                             <label class="block text-xs font-medium text-slate-500 mb-1">Lead Source</label>
                             <select id="t-lead-source" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
@@ -1608,15 +1992,15 @@
                 `;
             } else if (category === 'course') {
                 container.innerHTML = `
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 modal-responsive-grid">
                         <div><label class="block text-xs font-medium text-slate-500 mb-1">Name</label><input type="text" id="t-course-name" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
                         <div><label class="block text-xs font-medium text-slate-500 mb-1">Student ID</label><input type="text" id="t-course-id" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 modal-responsive-grid">
                         <div><label class="block text-xs font-medium text-slate-500 mb-1">Phone Number</label><input type="text" id="t-course-phone" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
                         <div><label class="block text-xs font-medium text-slate-500 mb-1">Key Given</label><input type="text" id="t-course-key" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 modal-responsive-grid">
                         <div>
                             <label class="block text-xs font-medium text-slate-500 mb-1">Payment Status</label>
                             <select id="t-course-pay-status" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
@@ -1630,11 +2014,12 @@
                 `;
             } else if (category === 'consult') {
                 container.innerHTML = `
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 modal-responsive-grid">
                         <div><label class="block text-xs font-medium text-slate-500 mb-1">Consultation Name (Client)</label><input type="text" id="t-con-name" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
-                        <div><label class="block text-xs font-medium text-slate-500 mb-1">Teacher / Prepared By</label><input type="text" id="t-con-teacher" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
+                        <div><label class="block text-xs font-medium text-slate-500 mb-1">Phone Number</label><input type="text" id="t-con-phone" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 modal-responsive-grid">
+                        <div><label class="block text-xs font-medium text-slate-500 mb-1">Teacher / Prepared By</label><input type="text" id="t-con-teacher" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
                         <div>
                             <label class="block text-xs font-medium text-slate-500 mb-1">Payment Amount & Status</label>
                             <select id="t-con-pay" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
@@ -1642,14 +2027,16 @@
                                 <option value="Pending">Pending Payment</option>
                             </select>
                         </div>
-                        <div><label class="block text-xs font-medium text-slate-500 mb-1">Date & Time (For Zoom)</label><input type="datetime-local" id="t-con-time" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
                     </div>
-                    <div><label class="block text-xs font-medium text-slate-500 mb-1">Meeting Link</label><input type="url" id="t-con-link" placeholder="https://..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 modal-responsive-grid">
+                        <div><label class="block text-xs font-medium text-slate-500 mb-1">Date & Time (For Zoom)</label><input type="datetime-local" id="t-con-time" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
+                        <div><label class="block text-xs font-medium text-slate-500 mb-1">Meeting Link</label><input type="url" id="t-con-link" placeholder="https://..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
+                    </div>
                     <div><label class="block text-xs font-medium text-slate-500 mb-1">Key Notes</label><input type="text" id="t-con-notes" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
                 `;
             } else if (category === 'software') {
                 container.innerHTML = `
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 modal-responsive-grid">
                         <div>
                             <label class="block text-xs font-medium text-slate-500 mb-1">Software Type</label>
                             <select id="t-soft-type" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
@@ -1660,11 +2047,11 @@
                         </div>
                         <div><label class="block text-xs font-medium text-slate-500 mb-1">Software Key</label><input type="text" id="t-soft-key" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 modal-responsive-grid">
                         <div><label class="block text-xs font-medium text-slate-500 mb-1">Username (Buyer)</label><input type="text" id="t-soft-name" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
                         <div><label class="block text-xs font-medium text-slate-500 mb-1">User ID</label><input type="text" id="t-soft-id" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 modal-responsive-grid">
                         <div><label class="block text-xs font-medium text-slate-500 mb-1">Phone Number</label><input type="text" id="t-soft-phone" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
                         <div><label class="block text-xs font-medium text-slate-500 mb-1">Assigned Coach</label><input type="text" id="t-soft-coach" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"></div>
                     </div>
@@ -1717,6 +2104,7 @@
                 }
 
                 record.name = document.getElementById('t-con-name').value;
+                record.phone = document.getElementById('t-con-phone').value || '';
                 record.teacher = document.getElementById('t-con-teacher').value;
                 record.payment = document.getElementById('t-con-pay').value;
                 record.time = newTime;
@@ -1857,8 +2245,27 @@
                     if (document.getElementById('t-course-phone') && sourceRecord.phone) document.getElementById('t-course-phone').value = sourceRecord.phone;
                 } else if (targetType === 'consult') {
                     if (document.getElementById('t-con-name')) document.getElementById('t-con-name').value = sourceRecord.name || '';
+                    if (document.getElementById('t-con-phone') && sourceRecord.phone) document.getElementById('t-con-phone').value = sourceRecord.phone;
                 }
             }, 10);
+        }
+
+        // Apply visual button styles and trigger filter rendering
+        function setTodayFilter(filterStr) {
+            state.currentTodayFilter = filterStr;
+            
+            document.querySelectorAll('.today-flt-btn').forEach(btn => {
+                btn.classList.remove('bg-indigo-100', 'text-indigo-700', 'border-indigo-300', 'shadow-inner');
+                btn.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
+            });
+            
+            const activeBtn = document.getElementById('flt-' + filterStr);
+            if(activeBtn) {
+                activeBtn.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
+                activeBtn.classList.add('bg-indigo-100', 'text-indigo-700', 'border-indigo-300', 'shadow-inner');
+            }
+            
+            renderTodayRecords();
         }
 
         function renderTodayRecords() {
@@ -1882,22 +2289,46 @@
                 return '';
             };
 
-            // Dynamic Header Updates
             document.getElementById('enrollments-view-title').textContent = isToday ? "Today's Completed Records" : `Archived Records (${state.viewingDate})`;
             document.getElementById('btn-add-today').style.display = isToday ? 'flex' : 'none';
 
-            document.getElementById('count-leads').textContent = recordsToRender.leads.length;
-            document.getElementById('count-course').textContent = recordsToRender.course.length;
-            document.getElementById('count-consult').textContent = recordsToRender.consult.length;
-            document.getElementById('count-software').textContent = recordsToRender.software.length;
+            // Filter logic application
+            let filter = state.currentTodayFilter || 'all';
+            let fLeads = recordsToRender.leads.slice().reverse();
+            let fCourse = recordsToRender.course.slice().reverse();
+            let fConsult = recordsToRender.consult.slice().reverse();
+            let fSoftware = recordsToRender.software.slice().reverse();
+
+            if (filter === 'pending') {
+                fLeads = fLeads.filter(r => r.followUp && r.followUp.status === 'Pending');
+                fCourse = fCourse.filter(r => r.followUp && r.followUp.status === 'Pending');
+                fConsult = fConsult.filter(r => r.followUp && r.followUp.status === 'Pending');
+                fSoftware = fSoftware.filter(r => r.followUp && r.followUp.status === 'Pending');
+            } else if (filter === 'done') {
+                fLeads = fLeads.filter(r => r.followUp && r.followUp.status === 'Done');
+                fCourse = fCourse.filter(r => r.followUp && r.followUp.status === 'Done');
+                fConsult = fConsult.filter(r => r.followUp && r.followUp.status === 'Done');
+                fSoftware = fSoftware.filter(r => r.followUp && r.followUp.status === 'Done');
+            }
+
+            // Manage visibility of the specific HTML Sections based on category filters
+            document.getElementById('section-leads').style.display = (['all', 'pending', 'done', 'leads'].includes(filter)) ? 'block' : 'none';
+            document.getElementById('section-course').style.display = (['all', 'pending', 'done', 'course'].includes(filter)) ? 'block' : 'none';
+            document.getElementById('section-consult').style.display = (['all', 'pending', 'done', 'consult'].includes(filter)) ? 'block' : 'none';
+            document.getElementById('section-software').style.display = (['all', 'pending', 'done', 'software'].includes(filter)) ? 'block' : 'none';
+
+            document.getElementById('count-leads').textContent = fLeads.length;
+            document.getElementById('count-course').textContent = fCourse.length;
+            document.getElementById('count-consult').textContent = fConsult.length;
+            document.getElementById('count-software').textContent = fSoftware.length;
 
             const archivedBadgeHTML = `<span class="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Archived (Read-only)</span>`;
 
             // Leads Render
             const lTbody = document.getElementById('today-leads-body');
             lTbody.innerHTML = '';
-            if (recordsToRender.leads.length === 0) lTbody.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-slate-400">No leads recorded on this date.</td></tr>`;
-            recordsToRender.leads.slice().reverse().forEach(r => {
+            if (fLeads.length === 0) lTbody.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-slate-400">No leads match this filter.</td></tr>`;
+            fLeads.forEach(r => {
                 const interestBadge = r.interest === 'Course' ? 'bg-indigo-100 text-indigo-700' : r.interest === 'Consultation' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-700';
                 lTbody.innerHTML += `
                     <tr class="hover:bg-slate-50 transition-colors">
@@ -1913,9 +2344,11 @@
                         <td class="px-4 py-3 text-xs text-slate-600 max-w-[200px] truncate" title="${r.notes || '-'}">${r.notes || '-'}</td>
                         <td class="px-4 py-3 text-right">
                             ${isToday ? `
-                            <div class="flex justify-end gap-2 items-center">
+                            <div class="flex justify-end gap-2 items-center flex-wrap today-actions-wrap">
+                                <a href="tel:${r.phone}" title="Call Directly" class="px-2 py-1 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded border border-emerald-200 text-xs font-semibold flex items-center gap-1 transition-colors shadow-sm"><i class="ph-fill ph-phone-call text-sm"></i> Call</a>
+                                <button onclick="openWhatsAppModal('${r.phone}', '${r.name}', 'course')" title="Send WhatsApp" class="px-2 py-1 bg-green-50 text-green-600 hover:bg-green-100 rounded border border-green-200 text-xs font-semibold flex items-center gap-1 transition-colors shadow-sm"><i class="ph-fill ph-whatsapp-logo text-sm"></i> WA</button>
                                 <button onclick="openReminderModal('leads', '${r.id}')" title="Set Call Reminder" class="px-2 py-1 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded border border-amber-200 text-xs font-semibold flex items-center gap-1 transition-colors shadow-sm">
-                                    <i class="ph ph-bell text-sm"></i> Alarm
+                                    <i class="ph-fill ph-bell text-sm"></i> Alarm
                                 </button>
                                 <button onclick="openPromoteModal('leads', '${r.id}', 'consult')" title="Swap to Consultation" class="px-2 py-1 bg-purple-50 text-purple-600 hover:bg-purple-100 rounded border border-purple-200 text-xs font-semibold flex items-center gap-1 transition-colors shadow-sm">
                                     <i class="ph ph-sparkle text-sm"></i> Consult
@@ -1935,8 +2368,8 @@
             // Course Render
             const cTbody = document.getElementById('today-course-body');
             cTbody.innerHTML = '';
-            if (recordsToRender.course.length === 0) cTbody.innerHTML = `<tr><td colspan="5" class="px-4 py-6 text-center text-slate-400">No course bookings on this date.</td></tr>`;
-            recordsToRender.course.slice().reverse().forEach(r => {
+            if (fCourse.length === 0) cTbody.innerHTML = `<tr><td colspan="5" class="px-4 py-6 text-center text-slate-400">No course bookings match this filter.</td></tr>`;
+            fCourse.forEach(r => {
                 const payBadge = r.paymentStatus === 'Installment' ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-emerald-100 text-emerald-700 border-emerald-200';
                 cTbody.innerHTML += `
                     <tr class="hover:bg-slate-50 transition-colors">
@@ -1956,9 +2389,11 @@
                         <td class="px-4 py-3 text-slate-500 text-xs max-w-[150px] truncate" title="${r.notes}">${r.notes}</td>
                         <td class="px-4 py-3 text-right">
                             ${isToday ? `
-                            <div class="flex justify-end gap-2 items-center">
+                            <div class="flex justify-end gap-2 items-center flex-wrap today-actions-wrap">
+                                <a href="tel:${r.phone}" title="Call Directly" class="px-2 py-1 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded border border-emerald-200 text-xs font-semibold flex items-center gap-1 transition-colors shadow-sm"><i class="ph-fill ph-phone-call text-sm"></i> Call</a>
+                                <button onclick="openWhatsAppModal('${r.phone}', '${r.name}', 'course')" title="Send WhatsApp" class="px-2 py-1 bg-green-50 text-green-600 hover:bg-green-100 rounded border border-green-200 text-xs font-semibold flex items-center gap-1 transition-colors shadow-sm"><i class="ph-fill ph-whatsapp-logo text-sm"></i> WA</button>
                                 <button onclick="openReminderModal('course', '${r.id}')" title="Set Call Reminder" class="px-2 py-1 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded border border-amber-200 text-xs font-semibold flex items-center gap-1 transition-colors shadow-sm">
-                                    <i class="ph ph-bell text-sm"></i> Alarm
+                                    <i class="ph-fill ph-bell text-sm"></i> Alarm
                                 </button>
                                 <button onclick="openEditTodayModal('course', '${r.id}')" class="text-blue-500 hover:text-blue-700 p-1 transition-colors" title="Edit Data"><i class="ph ph-pencil-simple text-lg"></i></button>
                                 <button onclick="deleteTodayRecord('course', '${r.id}')" class="text-red-400 hover:text-red-600 p-1 transition-colors"><i class="ph ph-trash text-lg"></i></button>
@@ -1972,8 +2407,8 @@
             // Consult Render
             const conTbody = document.getElementById('today-consult-body');
             conTbody.innerHTML = '';
-            if (recordsToRender.consult.length === 0) conTbody.innerHTML = `<tr><td colspan="7" class="px-4 py-6 text-center text-slate-400">No consultations scheduled for this date.</td></tr>`;
-            recordsToRender.consult.slice().reverse().forEach(r => {
+            if (fConsult.length === 0) conTbody.innerHTML = `<tr><td colspan="7" class="px-4 py-6 text-center text-slate-400">No consultations match this filter.</td></tr>`;
+            fConsult.forEach(r => {
                 const payClass = r.payment === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700';
                 
                 let displayTime = r.time;
@@ -1991,6 +2426,7 @@
                         </td>
                         <td class="px-4 py-3">
                             <div class="font-medium text-slate-800 ${r.completed ? 'line-through' : ''}">${r.name}</div>
+                            <div class="text-xs text-slate-500">${r.phone || 'No Phone'}</div>
                             ${getFollowUpBadge(r)}
                         </td>
                         <td class="px-4 py-3 text-slate-700">${r.teacher}</td>
@@ -2002,9 +2438,11 @@
                         <td class="px-4 py-3 text-slate-500 text-xs">${r.notes}</td>
                         <td class="px-4 py-3 text-right">
                             ${isToday ? `
-                            <div class="flex justify-end gap-2 items-center">
+                            <div class="flex justify-end gap-2 items-center flex-wrap today-actions-wrap">
+                                <a href="tel:${r.phone}" title="Call Directly" class="px-2 py-1 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded border border-emerald-200 text-xs font-semibold flex items-center gap-1 transition-colors shadow-sm"><i class="ph-fill ph-phone-call text-sm"></i> Call</a>
+                                <button onclick="openWhatsAppModal('${r.phone}', '${r.name}', 'consult')" title="Send WhatsApp" class="px-2 py-1 bg-green-50 text-green-600 hover:bg-green-100 rounded border border-green-200 text-xs font-semibold flex items-center gap-1 transition-colors shadow-sm"><i class="ph-fill ph-whatsapp-logo text-sm"></i> WA</button>
                                 <button onclick="openReminderModal('consult', '${r.id}')" title="Set Call Reminder" class="px-2 py-1 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded border border-amber-200 text-xs font-semibold flex items-center gap-1 transition-colors shadow-sm">
-                                    <i class="ph ph-bell text-sm"></i> Alarm
+                                    <i class="ph-fill ph-bell text-sm"></i> Alarm
                                 </button>
                                 <button onclick="openPromoteModal('consult', '${r.id}', 'course')" title="Client Joined Course" class="px-2 py-1 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded border border-indigo-200 text-xs font-semibold flex items-center gap-1 transition-colors shadow-sm">
                                     <i class="ph ph-arrow-circle-right text-base"></i> To Course
@@ -2021,8 +2459,8 @@
             // Software Render
             const sTbody = document.getElementById('today-software-body');
             sTbody.innerHTML = '';
-            if (recordsToRender.software.length === 0) sTbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-400">No software sales on this date.</td></tr>`;
-            recordsToRender.software.slice().reverse().forEach(r => {
+            if (fSoftware.length === 0) sTbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-400">No software sales match this filter.</td></tr>`;
+            fSoftware.forEach(r => {
                 const payClass = r.payment === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700';
                 sTbody.innerHTML += `
                     <tr class="hover:bg-slate-50 transition-colors">
@@ -2037,9 +2475,11 @@
                         <td class="px-4 py-3"><span class="px-2 py-0.5 rounded text-xs font-semibold ${payClass}">${r.payment}</span></td>
                         <td class="px-4 py-3 text-right">
                             ${isToday ? `
-                            <div class="flex justify-end gap-2 items-center">
+                            <div class="flex justify-end gap-2 items-center flex-wrap today-actions-wrap">
+                                <a href="tel:${r.phone}" title="Call Directly" class="px-2 py-1 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded border border-emerald-200 text-xs font-semibold flex items-center gap-1 transition-colors shadow-sm"><i class="ph-fill ph-phone-call text-sm"></i> Call</a>
+                                <button onclick="openWhatsAppModal('${r.phone}', '${r.name}', 'software')" title="Send WhatsApp" class="px-2 py-1 bg-green-50 text-green-600 hover:bg-green-100 rounded border border-green-200 text-xs font-semibold flex items-center gap-1 transition-colors shadow-sm"><i class="ph-fill ph-whatsapp-logo text-sm"></i> WA</button>
                                 <button onclick="openReminderModal('software', '${r.id}')" title="Set Call Reminder" class="px-2 py-1 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded border border-amber-200 text-xs font-semibold flex items-center gap-1 transition-colors shadow-sm">
-                                    <i class="ph ph-bell text-sm"></i> Alarm
+                                    <i class="ph-fill ph-bell text-sm"></i> Alarm
                                 </button>
                                 <button onclick="openEditTodayModal('software', '${r.id}')" class="text-blue-500 hover:text-blue-700 p-1 transition-colors" title="Edit Data"><i class="ph ph-pencil-simple text-lg"></i></button>
                                 <button onclick="deleteTodayRecord('software', '${r.id}')" class="text-red-400 hover:text-red-600 p-1 transition-colors"><i class="ph ph-trash text-lg"></i></button>
