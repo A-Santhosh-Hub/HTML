@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitFut - Premium Developer Card</title>
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ==========================================================================
+           DESIGN SYSTEM & VARIABLES
+           ========================================================================== */
+        :root {
+            --bg-color: #090714;
+            --bg-gradient: radial-gradient(circle at 50% 0%, #1a1635 0%, #090714 60%);
+            
+            --gold-primary: #FFD54A;
+            --gold-dark: #b9983c;
+            --gold-gradient: linear-gradient(135deg, #f6d365 0%, #ffb347 100%);
+            
+            --text-white: #ffffff;
+            --text-grey: #a0a0a0;
+            --text-dark: #111;
+            
+            --success-green: #38d96b;
+            --success-hover: #2db157;
+            
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            
+            --font-main: 'Inter', sans-serif;
+            --font-display: 'Bebas Neue', sans-serif;
+            --font-stats: 'Oswald', sans-serif;
+            
+            --transition-smooth: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        /* ==========================================================================
+           RESET & GLOBAL
+           ========================================================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: none; /* Custom cursor used */
+        }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--bg-color);
+            background-image: var(--bg-gradient);
+            color: var(--text-white);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Ambient Background Noise/Texture */
+        .bg-noise {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Custom Cursor */
+        .cursor-dot, .cursor-outline {
+            position: fixed;
+            top: 0; left: 0;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        .cursor-dot {
+            width: 8px; height: 8px;
+            background-color: var(--gold-primary);
+        }
+        .cursor-outline {
+            width: 40px; height: 40px;
+            border: 1px solid rgba(255, 213, 74, 0.5);
+            transition: width 0.2s, height 0.2s, background-color 0.2s;
+        }
+        .cursor-hover {
+            width: 60px; height: 60px;
+            background-color: rgba(255, 213, 74, 0.1);
+            border-color: var(--gold-primary);
+        }
+
+        /* ==========================================================================
+           TYPOGRAPHY & UTILITIES
+           ========================================================================== */
+        h1, h2, h3, h4 { font-weight: 700; }
+        .text-gold { color: var(--gold-primary); }
+        .text-grey { color: var(--text-grey); }
+        .font-display { font-family: var(--font-display); letter-spacing: 1px; }
+        .font-stats { font-family: var(--font-stats); }
+        
+        /* Glass Panel */
+        .glass-panel {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            transition: var(--transition-smooth);
+        }
+        .glass-panel:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Section Title (Attributes, Playstyles, etc) */
+        .panel-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-grey);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+        .panel-title::before {
+            content: '';
+            display: block;
+            width: 16px;
+            height: 2px;
+            background: var(--gold-primary);
+        }
+
+        /* ==========================================================================
+           MAIN LAYOUT
+           ========================================================================== */
+        .container {
+            width: 100%;
+            max-width: 1500px;
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+            opacity: 0;
+            animation: fadeIn 1s forwards 0.2s;
+        }
+
+        /* Header Area */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .rating-badge {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--gold-dark);
+            border-radius: 12px;
+            padding: 0.5rem 1rem;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(185, 152, 60, 0.2);
+        }
+        .rating-badge .num {
+            font-size: 2.5rem;
+            color: var(--gold-primary);
+            line-height: 1;
+        }
+        .rating-badge .tier {
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            color: var(--gold-primary);
+            font-weight: 600;
+        }
+
+        .header-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .profile-name {
+            font-size: 3rem;
+            line-height: 1;
+        }
+        .tags {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .tag {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .tag.green { background: rgba(56, 217, 107, 0.1); border-color: var(--success-green); color: var(--success-green); }
+        .tag-icon { width: 12px; height: 12px; }
+        .subtitle {
+            font-size: 0.9rem;
+            color: var(--text-grey);
+            margin-top: 0.25rem;
+        }
+
+        /* Grid Layout */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr 380px;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        /* ==========================================================================
+           LEFT PANEL: ATTRIBUTES & PLAYSTYLES
+           ========================================================================== */
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .attr-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.9rem;
+        }
+        .attr-row:last-child { border-bottom: none; padding-bottom: 0; }
+        
+        .stars { display: flex; gap: 4px; }
+        .star { color: var(--text-grey); font-size: 0.8rem; }
+        .star.active { color: var(--gold-primary); }
+
+        .playstyle-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem 0;
+            font-size: 0.9rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: var(--transition-smooth);
+        }
+        .playstyle-item:hover {
+            transform: translateX(5px);
+            color: var(--gold-primary);
+        }
+        .playstyle-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .playstyle-icon {
+            width: 24px; height: 24px;
+            color: var(--gold-primary);
+        }
+        .ps-badge {
+            margin-left: auto;
+            background: var(--gold-primary);
+            color: #000;
+            font-size: 0.6rem;
+            padding: 0.1rem 0.3rem;
+            border-radius: 3px;
+            font-weight: 800;
+        }
+
+        /* ==========================================================================
+           CENTER: FUT CARD
+           ========================================================================== */
+        .center-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+            perspective: 1000px; /* For 3D effect */
+        }
+
+        .card-wrapper {
+            position: relative;
+            width: 340px;
+            height: 480px;
+            filter: drop-shadow(0 20px 40px rgba(255, 213, 74, 0.15));
+            transform-style: preserve-3d;
+        }
+
+        .fut-card {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(145deg, #f7d571, #dcb059 20%, #a48135 50%, #dcb059 80%, #f7d571);
+            /* Classic FUT Card Shape */
+            clip-path: polygon(0 0, 100% 0, 100% 88%, 50% 100%, 0 88%);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+            border: 2px solid transparent; /* Replaced by inner elements */
+        }
+
+        /* Card Inner Border Effect */
+        .fut-card::before {
+            content: '';
+            position: absolute;
+            top: 4px; left: 4px; right: 4px; bottom: 4px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.05) 30%, transparent 50%, rgba(255,255,255,0.05) 70%, rgba(255,255,255,0.2));
+            clip-path: polygon(0 0, 100% 0, 100% 88%, 50% 100%, 0 88%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Card Background Texture */
+        .card-bg-texture {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                radial-gradient(circle at 50% 20%, rgba(255,255,255,0.2) 0%, transparent 50%),
+                repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.02) 10px, rgba(0,0,0,0.02) 20px);
+            z-index: 2;
+        }
+
+        /* Holographic Glare (Controlled by JS) */
+        .card-glare {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.4) 0%, transparent 60%);
+            opacity: 0;
+            z-index: 10;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            mix-blend-mode: overlay;
+        }
+
+        /* Card Content Base */
+        .card-content {
+            position: relative;
+            z-index: 3;
+            width: 100%;
+            height: 100%;
+            padding: 1.5rem;
+            color: #332608;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Card Top Section (Rating & Image) */
+        .card-top {
+            display: flex;
+            height: 220px;
+            position: relative;
+        }
+
+        .card-badge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 60px;
+        }
+        .card-badge .rating { font-size: 2.8rem; line-height: 1; font-weight: 700; margin-bottom: -5px; }
+        .card-badge .pos { font-size: 1rem; font-weight: 600; margin-bottom: 5px; }
+        .card-badge img { width: 30px; height: 20px; object-fit: cover; margin-bottom: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .card-badge .club-logo { width: 30px; height: 30px; }
+
+        .card-image-wrapper {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+        .card-image {
+            width: 190px;
+            height: auto;
+            object-fit: cover;
+            filter: drop-shadow(-5px 5px 10px rgba(0,0,0,0.3));
+        }
+
+        /* Card Bottom Section (Name & Stats) */
+        .card-bottom {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(0,0,0,0.15);
+            width: 80%;
+            text-align: center;
+            padding-bottom: 0.2rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .card-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            width: 90%;
+            row-gap: 0.2rem;
+            column-gap: 2rem;
+            position: relative;
+        }
+        .card-stats::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: rgba(0,0,0,0.15);
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1rem;
+        }
+        .stat-val { font-weight: 700; }
+        .stat-lbl { font-weight: 400; font-size: 1rem; margin-left: 4px; }
+
+        /* Action Buttons */
+        .card-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            width: 100%;
+        }
+
+        .btn-share {
+            width: 100%;
+            background: var(--success-green);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(56, 217, 107, 0.3);
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-share:hover {
+            background: var(--success-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(56, 217, 107, 0.4);
+        }
+        /* Ripple Effect */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(0);
+            animation: ripple-anim 0.6s linear;
+            pointer-events: none;
+        }
+        @keyframes ripple-anim {
+            to { transform: scale(4); opacity: 0; }
+        }
+
+        .secondary-actions {
+            display: grid;
+            grid-template-columns: auto auto 1fr;
+            gap: 0.5rem;
+        }
+        .btn-icon {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            width: 45px; height: 45px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-smooth);
+        }
+        .btn-icon:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn-download {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--gold-primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            transition: var(--transition-smooth);
+            padding: 0 1rem;
+        }
+        .btn-download:hover {
+            background: rgba(255,213,74,0.1);
+            border-color: var(--gold-primary);
+        }
+
+        .btn-duel {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            color: white;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: 1px;
+            transition: var(--transition-smooth);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-duel:hover { background: rgba(255,255,255,0.05); }
+        .btn-duel span { color: var(--gold-primary); font-size: 0.8rem; }
+
+        /* ==========================================================================
+           RIGHT PANEL: METRICS & DISTRIBUTION
+           ========================================================================== */
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .metric-row {
+            margin-bottom: 1rem;
+        }
+        .metric-row:last-child { margin-bottom: 0; }
+        
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 0.4rem;
+        }
+        .metric-label {
+            font-size: 0.9rem;
+            color: var(--text-white);
+        }
+        .metric-value {
+            font-size: 0.8rem;
+            color: var(--text-grey);
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+        }
+        .metric-score {
+            font-size: 1.1rem;
+            font-family: var(--font-stats);
+            color: var(--gold-primary);
+            font-weight: 600;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--gold-primary);
+            width: 0; /* Animated via JS */
+            border-radius: 2px;
+            transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+            box-shadow: 0 0 10px rgba(255, 213, 74, 0.5);
+        }
+
+        /* Distribution Graph */
+        .graph-container {
+            height: 100px;
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            margin-top: 1rem;
+            position: relative;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed rgba(255,255,255,0.1);
+        }
+        .bar {
+            flex: 1;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px 2px 0 0;
+            transition: height 1s ease, background 0.3s;
+            height: 0; /* Set via JS */
+        }
+        .bar:hover { background: rgba(255,255,255,0.3); }
+        .bar.highlight {
+            background: var(--gold-primary);
+            box-shadow: 0 0 10px rgba(255, 213, 74, 0.4);
+            position: relative;
+        }
+        
+        .graph-marker {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--gold-primary);
+            font-size: 0.7rem;
+            font-weight: 700;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards 1.5s;
+        }
+        .graph-marker::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            width: 1px;
+            height: 20px;
+            background: dashed 1px var(--gold-primary);
+        }
+
+        .graph-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.6rem;
+            color: var(--text-grey);
+            margin-top: 0.5rem;
+        }
+        .graph-footer {
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+        .graph-footer span { color: var(--gold-primary); font-weight: 700; }
+
+        /* ==========================================================================
+           FOOTER & FLOATING ACTIONS
+           ========================================================================== */
+        .footer {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-grey);
+            margin-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        .footer strong { color: white; }
+
+        .floating-buttons {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            z-index: 100;
+        }
+        .float-btn {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition-smooth);
+        }
+        .float-btn:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-3px);
+        }
+        .float-btn.active-hunt span { color: #f96854; }
+
+        /* ==========================================================================
+           ANIMATIONS
+           ========================================================================== */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        .animate-on-scroll.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ==========================================================================
+           MEDIA QUERIES & RESPONSIVE DESIGN
+           ========================================================================== */
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 2rem;
+            }
+            .center-panel {
+                grid-column: 1 / -1;
+                order: -1; /* Force Center Panel to Top */
+            }
+            .left-panel { order: 1; }
+            .right-panel { order: 2; }
+        }
+
+        @media (max-width: 900px) {
+            .container { padding: 2rem 1.5rem; gap: 2.5rem; }
+            .main-grid { grid-template-columns: 1fr; gap: 2rem; }
+            
+            .floating-buttons { display: none; }
+            .cursor-dot, .cursor-outline { display: none; } /* Disable custom cursor on mobile */
+            * { cursor: auto !important; }
+            
+            /* Vertical Stack Order for Mobile */
+            .center-panel { order: 1; gap: 1.5rem; }
+            .left-panel { order: 2; }
+            .right-panel { order: 3; }
+            
+            .profile-name { font-size: 2.5rem; }
+            .header-info { text-align: center; }
+            .tags { justify-content: center; }
+        }
+        
+        @media (max-width: 600px) {
+            .container { padding: 1.5rem 1rem; }
+            .profile-header { flex-direction: column; gap: 1.25rem; }
+            
+            .glass-panel { padding: 1.25rem; }
+            
+            /* Proportional Card Scaling */
+            .card-wrapper { 
+                transform: scale(0.9); 
+                transform-origin: top center;
+                margin-bottom: -12%; /* Pull up content below to close the gap */
+            }
+        }
+
+        @media (max-width: 380px) {
+            .profile-name { font-size: 2.2rem; }
+            .subtitle { font-size: 0.85rem; }
+            
+            .card-wrapper { 
+                transform: scale(0.82); 
+                margin-bottom: -22%;
+            }
+            
+            .rating-badge { padding: 0.4rem 0.8rem; }
+            .rating-badge .num { font-size: 2.2rem; }
+            
+            .stat-item { font-size: 1rem; }
+            .stat-lbl { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Effects -->
+    <div class="bg-noise"></div>
+    
+    <!-- Custom Cursor -->
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+
+    <div class="container" id="app">
+        <!-- Rendered via JS to keep HTML extremely clean, but pre-filled here for SEO/Structure -->
+        
+        <header class="profile-header">
+            <div class="rating-badge">
+                <div class="num" id="header-rating">78</div>
+                <div class="tier text-gold">GOLD</div>
+            </div>
+            
+            <div class="header-info">
+                <h1 class="profile-name font-display" id="header-name">SANTHOSH A</h1>
+                <div class="tags" id="header-tags">
+                    <!-- Populated by JS -->
+                </div>
+                <p class="subtitle" id="header-subtitle"></p>
+            </div>
+        </header>
+
+        <main class="main-grid">
+            
+            <!-- LEFT PANEL -->
+            <div class="left-panel">
+                <div class="glass-panel animate-on-scroll delay-1">
+                    <div class="panel-title">Attributes</div>
+                    <div id="attributes-container"></div>
+                </div>
+
+                <div class="glass-panel animate-on-scroll delay-2">
+                    <div class="panel-title">Playstyles</div>
+                    <div id="playstyles-container"></div>
+                </div>
+            </div>
+
+            <!-- CENTER PANEL (FUT CARD) -->
+            <div class="center-panel">
+                <div class="card-wrapper" id="card-wrapper">
+                    <div class="fut-card" id="fut-card">
+                        <div class="card-bg-texture"></div>
+                        <div class="card-glare" id="card-glare"></div>
+                        
+                        <div class="card-content font-stats">
+                            <div class="card-top">
+                                <div class="card-badge">
+                                    <div class="rating">78</div>
+                                    <div class="pos">ST</div>
+                                    <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 900 600'%3E%3Cpath fill='%23f93' d='M0 0h900v200H0z'/%3E%3Cpath fill='%23fff' d='M0 200h900v200H0z'/%3E%3Cpath fill='%23128807' d='M0 400h900v200H0z'/%3E%3Ccircle cx='450' cy='300' r='80' fill='%23008'/%3E%3Ccircle cx='450' cy='300' r='70' fill='%23fff'/%3E%3Cpath fill='%23008' d='m450 230 4 33 32-8-19 28 27 19-33 4 8 32-28-19-19 27-4-33-32 8 19-28-27-19 33-4-8-32 28 19z'/%3E%3C/svg%3E" alt="India">
+                                    <!-- Python Icon Placeholder -->
+                                    <svg class="club-logo" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg"><path d="M63.8 6.4c-30.8 0-29.6 13.3-29.6 13.3l.1 13.8h30.1v4.3H33.8s-14.2-.2-14.2 13.6 13.5 14 13.5 14h9.1V51.7c0-10.7 10-12.7 10-12.7h21.4s9.8.3 9.8-9.4c0-9.8-9.8-9.8-9.8-9.8H63.8zm-15 8.9c2.3 0 4.1 1.8 4.1 4.1s-1.8 4.1-4.1 4.1-4.1-1.8-4.1-4.1 1.8-4.1 4.1-4.1zM93 48.7c0-13.6-13.5-14-13.5-14h-9.1v13.6c0 10.7-10 12.7-10 12.7H39s-9.8-.3-9.8 9.4c0 9.8 9.8 9.8 9.8 9.8h10.4c30.8 0 29.6-13.3 29.6-13.3l-.1-13.8H48.8v-4.3h30.6s14.2.2 14.2-13.6zm-14.2 24.3c2.3 0 4.1 1.8 4.1 4.1s-1.8 4.1-4.1 4.1-4.1-1.8-4.1-4.1 1.8-4.1 4.1-4.1z" fill="#387eb8"/><path d="M64.2 121.6c30.8 0 29.6-13.3 29.6-13.3l-.1-13.8H63.6v-4.3h30.6s14.2.2 14.2-13.6-13.5-14-13.5-14h-9.1v13.6c0 10.7-10 12.7-10 12.7H54.4s-9.8-.3-9.8 9.4c0 9.8 9.8 9.8 9.8 9.8h9.8z" fill="#ffe052"/></svg>
+                                </div>
+                                <div class="card-image-wrapper">
+                                    <!-- GitHub Avatar with Premium Fade Mask -->
+                                    <img src="https://avatars.githubusercontent.com/u/177222217" alt="Santhosh A" class="card-image" style="mask-image: linear-gradient(to bottom, black 70%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%); object-position: center; border-radius: 8px 8px 0 0;">
+                                </div>
+                            </div>
+                            <div class="card-bottom">
+                                <div class="card-name" id="card-name">A</div>
+                                <div class="card-stats" id="card-stats">
+                                    <!-- Populated by JS -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="card-actions">
+                    <button class="btn-share" id="btnShare">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                        SHARE MY CARD
+                    </button>
+                    
+                    <div class="secondary-actions">
+                        <button class="btn-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l11.733 16h4.267l-11.733 -16z"></path><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772"></path></svg>
+                        </button>
+                        <button class="btn-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                        </button>
+                        <button class="btn-download">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            Download
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:auto"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                    </div>
+
+                    <button class="btn-duel">
+                        DUEL A RIVAL <span>VS</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- RIGHT PANEL -->
+            <div class="right-panel">
+                <div class="glass-panel animate-on-scroll delay-3">
+                    <div class="panel-title">Scouting Metrics</div>
+                    <div id="metrics-container"></div>
+                </div>
+
+                <div class="glass-panel animate-on-scroll delay-4">
+                    <div class="panel-title">Distribution</div>
+                    
+                    <div class="graph-container" id="graph-container">
+                        <!-- Bars generated by JS -->
+                    </div>
+                    
+                    <div class="graph-labels">
+                        <span>50</span><span>60</span><span>70</span><span>80</span><span>90</span><span>100</span>
+                    </div>
+                    
+                    <div class="graph-footer">
+                        <span class="text-gold">TOP 0.44%</span> of GitHub &nbsp;|&nbsp; <span class="text-gold">TOP 2.8%</span> of active devs
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <footer class="footer">
+            Built by <strong>@Younes</strong> & <strong>5 amazing contributors</strong>
+        </footer>
+    </div>
+
+    <div class="floating-buttons">
+        <button class="float-btn">
+            <span style="color:var(--gold-primary)">☕</span> Support the Builders
+        </button>
+        <button class="float-btn active-hunt">
+            <span>P</span> Upvote Product Hunt
+        </button>
+    </div>
+
+    <!-- ==========================================================================
+         JAVASCRIPT APPLICATION LOGIC
+         ========================================================================== -->
+    <script>
+        // Data Structure
+        const profileData = {
+            name: "SANTHOSH A",
+            shortName: "A",
+            rating: 78,
+            quality: "GOLD",
+            position: "ST",
+            tags: [
+                { type: 'role', label: 'Fantasista', color: 'green' },
+                { type: 'username', label: '@A-Santhosh-Hub', icon: 'github' },
+                { type: 'language', label: 'Python', icon: 'python' }
+            ],
+            subtitle: "<strong style='color:var(--gold-primary)'>FIRST-TEAM READY</strong> the magician: a polyglot working across many stacks.",
+            
+            attributes: [
+                { name: "Skill moves", type: "stars", value: 4 },
+                { name: "Weak foot", type: "stars", value: 4 },
+                { name: "Work rate", type: "text", value: "HIGH / LOW" },
+                { name: "Style", type: "text", value: "RELENTLESS" }
+            ],
+            
+            playstyles: [
+                { name: "Workhorse", icon: "⚡" },
+                { name: "Polyglot", icon: "A/文" },
+                { name: "Rapid Fire", icon: "⏩" },
+                { name: "Prolific", icon: "🎯" }
+            ],
+            
+            cardStats: [
+                { label: "PAC", value: 78 }, { label: "DRI", value: 82 },
+                { label: "SHO", value: 81 }, { label: "DEF", value: 46 },
+                { label: "PAS", value: 69 }, { label: "PHY", value: 74 }
+            ],
+            
+            metrics: [
+                { label: "Commits", value: 988, unit: "commits", score: 85, pct: 85 },
+                { label: "Stars earned", value: 488, unit: "stars", score: 50, pct: 50 },
+                { label: "Top repo reach", value: 15, unit: "stars", score: 23, pct: 23 },
+                { label: "Pull requests", value: 2, unit: "PRs", score: 14, pct: 14 },
+                { label: "Followers", value: 20, unit: "followers", score: 26, pct: 26 },
+                { label: "Languages", value: 9, unit: "languages", score: 82, pct: 82 },
+                { label: "Contributions", value: "1.5k", unit: "contributions", score: 67, pct: 67 },
+                { label: "Account age", value: 2, unit: "yrs", score: 39, pct: 39 }
+            ]
+        };
+
+        // Render Functions
+        const App = {
+            init() {
+                this.renderHeader();
+                this.renderAttributes();
+                this.renderPlaystyles();
+                this.renderCardStats();
+                this.renderMetrics();
+                this.renderGraph();
+                this.setupInteractions();
+                this.setupCustomCursor();
+                this.setupIntersectionObserver();
+            },
+
+            renderHeader() {
+                document.getElementById('header-rating').innerText = profileData.rating;
+                document.getElementById('header-name').innerText = profileData.name;
+                document.getElementById('header-subtitle').innerHTML = profileData.subtitle;
+                
+                const tagsHTML = profileData.tags.map(tag => {
+                    const cls = tag.color ? `tag ${tag.color}` : 'tag';
+                    const icon = tag.icon === 'python' ? '🐍' : (tag.icon === 'github' ? '@' : '');
+                    return `<span class="${cls}">${tag.type === 'role' ? `<span style="background:var(--success-green);color:#000;padding:1px 4px;border-radius:2px;font-weight:bold;margin-right:4px;">ST</span>` : ''} ${icon} ${tag.label}</span>`;
+                }).join('');
+                document.getElementById('header-tags').innerHTML = tagsHTML;
+            },
+
+            renderAttributes() {
+                const html = profileData.attributes.map(attr => {
+                    let valHTML = '';
+                    if (attr.type === 'stars') {
+                        let stars = '';
+                        for(let i=1; i<=5; i++) {
+                            stars += `<span class="star ${i <= attr.value ? 'active' : ''}">★</span>`;
+                        }
+                        valHTML = `<div class="stars">${stars}</div>`;
+                    } else {
+                        valHTML = `<strong>${attr.value}</strong>`;
+                    }
+                    return `<div class="attr-row"><span>${attr.name}</span>${valHTML}</div>`;
+                }).join('');
+                document.getElementById('attributes-container').innerHTML = html;
+            },
+
+            renderPlaystyles() {
+                const html = profileData.playstyles.map(ps => `
+                    <div class="playstyle-item">
+                        <span class="playstyle-icon">${ps.icon}</span>
+                        <span>${ps.name}</span>
+                        <span class="ps-badge">★</span>
+                    </div>
+                `).join('');
+                document.getElementById('playstyles-container').innerHTML = html;
+            },
+
+            renderCardStats() {
+                document.getElementById('card-name').innerText = profileData.shortName;
+                const html = profileData.cardStats.map(stat => `
+                    <div class="stat-item">
+                        <span class="stat-val">${stat.value}</span>
+                        <span class="stat-lbl">${stat.label}</span>
+                    </div>
+                `).join('');
+                document.getElementById('card-stats').innerHTML = html;
+            },
+
+            renderMetrics() {
+                const html = profileData.metrics.map((m, i) => `
+                    <div class="metric-row">
+                        <div class="metric-header">
+                            <span class="metric-label">${m.label}</span>
+                            <span class="metric-value">${m.value} ${m.unit} <span class="metric-score counter" data-target="${m.score}">0</span></span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill" data-width="${m.pct}%" style="width: 0%"></div>
+                        </div>
+                    </div>
+                `).join('');
+                document.getElementById('metrics-container').innerHTML = html;
+            },
+
+            renderGraph() {
+                // Generate normal distribution shape
+                const container = document.getElementById('graph-container');
+                const numBars = 40;
+                let html = '';
+                
+                for(let i=0; i<numBars; i++) {
+                    // Simple bell curve function
+                    const x = (i / numBars) * 4 - 2; // -2 to 2
+                    const height = Math.exp(-(x*x)) * 100;
+                    
+                    const isHighlight = i === 22; // approx 78 rating position
+                    const cls = isHighlight ? 'bar highlight' : 'bar';
+                    
+                    let marker = '';
+                    if(isHighlight) {
+                        marker = `<div class="graph-marker">a-santhosh-hub · 78</div>`;
+                    }
+                    
+                    html += `<div class="${cls}" data-height="${height}%" style="height:0">${marker}</div>`;
+                }
+                container.innerHTML = html;
+            },
+
+            // --- Interactions & Animations ---
+
+            setupInteractions() {
+                // 3D Card Tilt Effect
+                const wrapper = document.getElementById('card-wrapper');
+                const card = document.getElementById('fut-card');
+                const glare = document.getElementById('card-glare');
+
+                // Smooth transition for the card inner element
+                card.style.transition = 'transform 0.1s ease-out';
+
+                const handleMove = (e) => {
+                    const rect = wrapper.getBoundingClientRect();
+                    // Support both Mouse and Touch
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                    
+                    const x = clientX - rect.left;
+                    const y = clientY - rect.top;
+                    
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    
+                    const rotateX = ((y - centerY) / centerY) * -15; // Max 15deg
+                    const rotateY = ((x - centerX) / centerX) * 15;
+                    
+                    // Apply transform to inner card to preserve responsive scaling on wrapper
+                    card.style.transform = `scale3d(1.02, 1.02, 1.02) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                    
+                    // Move glare
+                    const glareX = (x / rect.width) * 100;
+                    const glareY = (y / rect.height) * 100;
+                    glare.style.opacity = '1';
+                    glare.style.background = `radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255,255,255,0.4) 0%, transparent 60%)`;
+                };
+
+                const handleLeave = () => {
+                    card.style.transform = `scale3d(1, 1, 1) rotateX(0) rotateY(0)`;
+                    glare.style.opacity = '0';
+                };
+
+                // Mouse Events
+                wrapper.addEventListener('mousemove', handleMove);
+                wrapper.addEventListener('mouseleave', handleLeave);
+
+                // Touch Events for Mobile/Tablet
+                wrapper.addEventListener('touchmove', (e) => {
+                    // Prevent scrolling while tilting the card
+                    if(e.cancelable) e.preventDefault();
+                    handleMove(e);
+                }, { passive: false });
+                wrapper.addEventListener('touchend', handleLeave);
+                wrapper.addEventListener('touchcancel', handleLeave);
+
+                // Ripple Effect on Share Button
+                const shareBtn = document.getElementById('btnShare');
+                shareBtn.addEventListener('click', function(e) {
+                    const rect = this.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const ripple = document.createElement('span');
+                    ripple.className = 'ripple';
+                    ripple.style.left = `${x}px`;
+                    ripple.style.top = `${y}px`;
+                    
+                    // Make it big enough to cover the button
+                    const size = Math.max(rect.width, rect.height);
+                    ripple.style.width = ripple.style.height = `${size}px`;
+                    ripple.style.transform = `translate(-50%, -50%) scale(0)`;
+                    
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => ripple.remove(), 600);
+                });
+            },
+
+            setupCustomCursor() {
+                const cursorDot = document.querySelector('.cursor-dot');
+                const cursorOutline = document.querySelector('.cursor-outline');
+                
+                window.addEventListener('mousemove', (e) => {
+                    const posX = e.clientX;
+                    const posY = e.clientY;
+                    
+                    cursorDot.style.left = `${posX}px`;
+                    cursorDot.style.top = `${posY}px`;
+                    
+                    // Smooth delay for outline
+                    cursorOutline.animate({
+                        left: `${posX}px`,
+                        top: `${posY}px`
+                    }, { duration: 150, fill: "forwards" });
+                });
+
+                // Add hover states to interactables
+                const interactables = document.querySelectorAll('button, .playstyle-item, .fut-card, a');
+                interactables.forEach(el => {
+                    el.addEventListener('mouseenter', () => cursorOutline.classList.add('cursor-hover'));
+                    el.addEventListener('mouseleave', () => cursorOutline.classList.remove('cursor-hover'));
+                });
+            },
+
+            setupIntersectionObserver() {
+                const observerOptions = { threshold: 0.1, rootMargin: "0px 0px -50px 0px" };
+                
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-visible');
+                            
+                            // Trigger Progress Bars
+                            if(entry.target.querySelector('.progress-fill')) {
+                                const bars = entry.target.querySelectorAll('.progress-fill');
+                                bars.forEach(bar => {
+                                    bar.style.width = bar.getAttribute('data-width');
+                                });
+                            }
+                            
+                            // Trigger Graph Bars
+                            if(entry.target.querySelector('.bar')) {
+                                const bars = entry.target.querySelectorAll('.bar');
+                                bars.forEach((bar, index) => {
+                                    setTimeout(() => {
+                                        bar.style.height = bar.getAttribute('data-height');
+                                    }, index * 20); // cascading animation
+                                });
+                            }
+
+                            // Trigger Counters
+                            if(entry.target.querySelector('.counter')) {
+                                const counters = entry.target.querySelectorAll('.counter');
+                                counters.forEach(counter => {
+                                    const target = +counter.getAttribute('data-target');
+                                    this.animateCounter(counter, target);
+                                });
+                            }
+                            
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, observerOptions);
+
+                document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+            },
+
+            animateCounter(el, target) {
+                let current = 0;
+                const duration = 1500; // ms
+                const stepTime = Math.abs(Math.floor(duration / target));
+                
+                const timer = setInterval(() => {
+                    current += 1;
+                    el.innerText = current;
+                    if (current >= target) {
+                        el.innerText = target;
+                        clearInterval(timer);
+                    }
+                }, stepTime > 10 ? stepTime : 10); // cap speed
+            }
+        };
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            App.init();
+        });
+
+    </script>
+</body>
+</html>
