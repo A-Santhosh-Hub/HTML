@@ -709,6 +709,28 @@
         }
 
         /* ==========================================================================
+           TOP NAVIGATION (Matches Mobile Reference)
+           ========================================================================== */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: -1rem;
+        }
+        .nav-left { display: flex; align-items: center; gap: 0.5rem; color: var(--success-green); text-transform: uppercase; letter-spacing: 1px;}
+        .nav-right { display: flex; align-items: center; gap: 1rem; color: var(--text-grey); }
+        .github-star-btn { 
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); 
+            padding: 0.4rem 0.8rem; border-radius: 20px; display: flex; align-items: center; gap: 0.5rem; color: white;
+            transition: var(--transition-smooth);
+        }
+        .github-star-btn:hover { background: rgba(255,255,255,0.1); }
+        .github-star-btn .star-icon { color: var(--gold-primary); }
+
+        /* ==========================================================================
            MEDIA QUERIES & RESPONSIVE DESIGN
            ========================================================================== */
         @media (max-width: 1200px) {
@@ -718,17 +740,16 @@
             }
             .center-panel {
                 grid-column: 1 / -1;
-                order: -1; /* Force Center Panel to Top */
+                order: -1; /* Push to top on tablet */
             }
             .left-panel { order: 1; }
             .right-panel { order: 2; }
         }
 
         @media (max-width: 900px) {
-            .container { padding: 2rem 1.5rem; gap: 2.5rem; }
-            .main-grid { grid-template-columns: 1fr; gap: 2rem; }
+            .container { padding: 1.5rem 1rem; gap: 2rem; }
+            .main-grid { grid-template-columns: 1fr; gap: 1.5rem; }
             
-            .floating-buttons { display: none; }
             .cursor-dot, .cursor-outline { display: none; } /* Disable custom cursor on mobile */
             * { cursor: auto !important; }
             
@@ -737,39 +758,32 @@
             .left-panel { order: 2; }
             .right-panel { order: 3; }
             
-            .profile-name { font-size: 2.5rem; }
-            .header-info { text-align: center; }
-            .tags { justify-content: center; }
-        }
-        
-        @media (max-width: 600px) {
-            .container { padding: 1.5rem 1rem; }
-            .profile-header { flex-direction: column; gap: 1.25rem; }
+            /* Profile Header Mobile Alignment (Matches Reference Exactly) */
+            .profile-header { flex-direction: row; align-items: flex-start; justify-content: flex-start; gap: 1rem; }
+            .header-info { text-align: left; align-items: flex-start; }
+            .tags { justify-content: flex-start; }
             
-            .glass-panel { padding: 1.25rem; }
-            
-            /* Proportional Card Scaling */
-            .card-wrapper { 
-                transform: scale(0.9); 
-                transform-origin: top center;
-                margin-bottom: -12%; /* Pull up content below to close the gap */
-            }
-        }
-
-        @media (max-width: 380px) {
             .profile-name { font-size: 2.2rem; }
-            .subtitle { font-size: 0.85rem; }
-            
-            .card-wrapper { 
-                transform: scale(0.82); 
-                margin-bottom: -22%;
-            }
-            
-            .rating-badge { padding: 0.4rem 0.8rem; }
+            .rating-badge { padding: 0.4rem 0.8rem; border-radius: 10px; }
             .rating-badge .num { font-size: 2.2rem; }
             
-            .stat-item { font-size: 1rem; }
-            .stat-lbl { font-size: 0.9rem; }
+            .card-wrapper { 
+                transform: scale(0.95); 
+                transform-origin: top center;
+                margin-bottom: -5%;
+            }
+
+            /* Floating Buttons Mobile FAB style */
+            .floating-buttons { display: flex; bottom: 1.5rem; right: 1.5rem; gap: 0.75rem; }
+            .float-btn { padding: 0; width: 45px; height: 45px; justify-content: center; border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+            .float-btn .text-label { display: none; } /* Hide text, keep icon */
+            .top-nav { font-size: 0.75rem; }
+        }
+        
+        @media (max-width: 480px) {
+            .card-wrapper { transform: scale(0.85); margin-bottom: -15%; }
+            .profile-name { font-size: 1.8rem; }
+            .subtitle { font-size: 0.8rem; }
         }
     </style>
 </head>
@@ -785,6 +799,19 @@
     <div class="container" id="app">
         <!-- Rendered via JS to keep HTML extremely clean, but pre-filled here for SEO/Structure -->
         
+        <nav class="top-nav">
+            <a href="https://a-santhosh-hub.github.io/in/" class="nav-left" style="text-decoration: none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                GET SCOUTED
+            </a>
+            <div class="nav-right">
+                <button class="github-star-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+                    <span class="star-icon">★</span> 2k
+                </button>
+            </div>
+        </nav>
+
         <header class="profile-header">
             <div class="rating-badge">
                 <div class="num" id="header-rating">78</div>
@@ -832,7 +859,6 @@
                                     <svg class="club-logo" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg"><path d="M63.8 6.4c-30.8 0-29.6 13.3-29.6 13.3l.1 13.8h30.1v4.3H33.8s-14.2-.2-14.2 13.6 13.5 14 13.5 14h9.1V51.7c0-10.7 10-12.7 10-12.7h21.4s9.8.3 9.8-9.4c0-9.8-9.8-9.8-9.8-9.8H63.8zm-15 8.9c2.3 0 4.1 1.8 4.1 4.1s-1.8 4.1-4.1 4.1-4.1-1.8-4.1-4.1 1.8-4.1 4.1-4.1zM93 48.7c0-13.6-13.5-14-13.5-14h-9.1v13.6c0 10.7-10 12.7-10 12.7H39s-9.8-.3-9.8 9.4c0 9.8 9.8 9.8 9.8 9.8h10.4c30.8 0 29.6-13.3 29.6-13.3l-.1-13.8H48.8v-4.3h30.6s14.2.2 14.2-13.6zm-14.2 24.3c2.3 0 4.1 1.8 4.1 4.1s-1.8 4.1-4.1 4.1-4.1-1.8-4.1-4.1 1.8-4.1 4.1-4.1z" fill="#387eb8"/><path d="M64.2 121.6c30.8 0 29.6-13.3 29.6-13.3l-.1-13.8H63.6v-4.3h30.6s14.2.2 14.2-13.6-13.5-14-13.5-14h-9.1v13.6c0 10.7-10 12.7-10 12.7H54.4s-9.8-.3-9.8 9.4c0 9.8 9.8 9.8 9.8 9.8h9.8z" fill="#ffe052"/></svg>
                                 </div>
                                 <div class="card-image-wrapper">
-                                    <!-- GitHub Avatar with Premium Fade Mask -->
                                     <img src="https://avatars.githubusercontent.com/u/177222217" alt="Santhosh A" class="card-image" style="mask-image: linear-gradient(to bottom, black 70%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%); object-position: center; border-radius: 8px 8px 0 0;">
                                 </div>
                             </div>
@@ -857,9 +883,9 @@
                         <button class="btn-icon">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l11.733 16h4.267l-11.733 -16z"></path><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772"></path></svg>
                         </button>
-                        <button class="btn-icon">
+                        <a href="https://www.linkedin.com/in/santhosh-a-sanstudio/" target="_blank" class="btn-icon">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
-                        </button>
+                        </a>
                         <button class="btn-download">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                             Download
@@ -906,10 +932,10 @@
 
     <div class="floating-buttons">
         <button class="float-btn">
-            <span style="color:var(--gold-primary)">☕</span> Support the Builders
+            <span style="color:var(--gold-primary)">☕</span> <span class="text-label">Support the Builders</span>
         </button>
         <button class="float-btn active-hunt">
-            <span>P</span> Upvote Product Hunt
+            <span>P</span> <span class="text-label">Upvote Product Hunt</span>
         </button>
     </div>
 
