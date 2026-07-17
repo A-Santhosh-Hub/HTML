@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SANTHOSH | SanStudio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+        }
+
+        .serif {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .gallery-columns {
+            column-count: 1;
+            column-gap: 12px;
+        }
+        @media (min-width: 640px) { .gallery-columns { column-count: 2; } }
+        @media (min-width: 1024px) { .gallery-columns { column-count: 3; } }
+
+        .gallery-item {
+            break-inside: avoid;
+            margin-bottom: 12px;
+        }
+
+        .fade-overlay {
+            background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%);
+        }
+
+        .tab-active {
+            border-bottom: 2px solid #000;
+            color: #000;
+        }
+
+        .zoom-active {
+            transform: scale(1.5);
+            cursor: zoom-out;
+        }
+
+        .liked {
+            color: #ef4444 !important;
+            fill: #ef4444;
+            stroke: #ef4444;
+        }
+
+        .checkbox-ring {
+            width: 24px;
+            height: 24px;
+            border: 2px solid white;
+            border-radius: 50%;
+            background-color: rgba(0,0,0,0.2);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .checkbox-ring.selected {
+            background-color: #2563eb;
+            border-color: #2563eb;
+        }
+
+        .modal-enter {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        .modal-enter-active {
+            opacity: 1;
+            transform: scale(1);
+            transition: opacity 300ms, transform 300ms;
+        }
+    </style>
+</head>
+<body class="text-zinc-900 selection:bg-black selection:text-white">
+
+    <div id="main-app">
+        <!-- 1. FULLSCREEN HERO SECTION -->
+        <header class="relative h-screen w-full flex items-center justify-center overflow-hidden">
+            <img id="hero-img" src="" class="absolute inset-0 w-full h-full object-cover" alt="Wedding Hero">
+            <div class="absolute inset-0 fade-overlay"></div>
+            
+            <div class="relative z-10 text-center text-white px-4">
+                <p class="text-[10px] md:text-xs tracking-[0.2em] mb-4 opacity-80 uppercase" id="hero-date"></p>
+                <h1 class="text-3xl md:text-6xl lg:text-7xl serif tracking-wider mb-6 uppercase" id="hero-title"></h1>
+                <div class="text-[10px] md:text-xs tracking-widest opacity-70 flex flex-col md:flex-row items-center justify-center gap-2 md:gap-4 uppercase">
+                    <a href="#" target="_blank" id="photographer-name" class="hover:text-white hover:underline underline-offset-4 transition-all"></a>
+                    <span class="hidden md:block">|</span>
+                    <a href="#" class="underline underline-offset-4" id="portfolio-link"></a>
+                </div>
+            </div>
+
+            <!-- Scroll Down Arrow -->
+            <div class="absolute bottom-10 left-1/2 -translate-x-1/2 text-white animate-bounce cursor-pointer" onclick="scrollToGallery()">
+                <i data-lucide="chevron-down" class="w-6 h-6"></i>
+            </div>
+        </header>
+
+        <!-- 2. STICKY ACTION BAR -->
+        <div id="gallery-section" class="sticky top-0 z-50 bg-white border-b border-zinc-100 px-4 md:px-10 py-3 flex justify-between items-center">
+            <!-- Tabs -->
+            <div class="flex gap-6 md:gap-8 overflow-x-auto no-scrollbar">
+                <button onclick="switchTab('CAM 01')" class="text-[10px] font-bold tracking-widest uppercase pb-2 transition-all tab-btn tab-active" id="tab-01">CAM 01</button>
+                <button onclick="switchTab('CAM 02')" class="text-[10px] font-bold tracking-widest uppercase pb-2 transition-all tab-btn text-zinc-400 hover:text-zinc-900" id="tab-02">CAM 02</button>
+            </div>
+
+            <!-- Utilities -->
+            <div class="flex items-center gap-4 md:gap-6 relative">
+                <div class="flex items-center gap-1 group cursor-pointer" onclick="filterLikes()">
+                    <button id="nav-heart"><i data-lucide="heart" class="w-4 h-4"></i></button>
+                    <span id="like-count" class="text-[10px] font-bold">0</span>
+                </div>
+                <button class="hover:opacity-60 transition-opacity"><i data-lucide="send" class="w-4 h-4"></i></button>
+                <button onclick="openContactModal()" class="hover:opacity-60 transition-opacity"><i data-lucide="message-circle" class="w-4 h-4"></i></button>
+                
+                <!-- NEW: Admin Login Button -->
+                <button onclick="openAdminAuth()" class="hover:text-blue-600 transition-colors" title="Admin Panel"><i data-lucide="lock" class="w-4 h-4"></i></button>
+
+                <!-- Download Button & Dropdown -->
+                <div class="relative">
+                    <button id="download-trigger" onclick="toggleDownloadMenu()" class="hidden md:flex items-center gap-2 border border-zinc-900 px-4 py-1.5 rounded-sm text-[10px] font-bold tracking-widest uppercase hover:bg-black hover:text-white transition-all">
+                        Download Files <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                    </button>
+                    <div id="download-menu" class="absolute right-0 top-full mt-2 w-56 bg-white rounded-lg shadow-xl border border-zinc-100 hidden flex-col overflow-hidden z-[60] animate-fade-in">
+                        <button onclick="startSelectionMode()" class="text-left px-4 py-3 text-xs font-medium hover:bg-zinc-50 border-b border-zinc-50 w-full flex items-center gap-2">
+                            <i data-lucide="check-square" class="w-3 h-3"></i> Select photos to download
+                        </button>
+                        <button onclick="downloadAllInTab()" class="text-left px-4 py-3 text-xs font-medium hover:bg-zinc-50 w-full flex items-center gap-2">
+                            <i data-lucide="download-cloud" class="w-3 h-3"></i> Download all <span id="current-tab-name">CAM 01</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. GALLERY BODY -->
+        <main class="bg-white min-h-screen">
+            <div class="py-12 text-center">
+                <h2 class="text-xs font-bold tracking-[0.4em] uppercase serif" id="gallery-subtitle"></h2>
+                <div id="selection-instructions" class="hidden mt-4">
+                    <p class="text-xs text-zinc-500 bg-zinc-100 inline-block px-4 py-2 rounded-full">
+                        Click on photos to select them for download
+                    </p>
+                </div>
+            </div>
+
+            <!-- Photo Grid -->
+            <div class="max-w-[1600px] mx-auto px-4 md:px-10 pb-24">
+                <div id="photo-grid" class="gallery-columns">
+                    <!-- Images Injected Here -->
+                </div>
+            </div>
+        </main>
+
+        <!-- 4. FLOATING SELECTION BAR -->
+        <div id="selection-bar" class="fixed bottom-0 left-0 right-0 z-[70] bg-white border-t border-zinc-200 p-4 transform translate-y-full transition-transform duration-300 shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
+            <div class="max-w-4xl mx-auto flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <button onclick="cancelSelectionMode()" class="p-2 hover:bg-zinc-100 rounded-full">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                    <div class="flex flex-col">
+                        <span class="text-sm font-bold"><span id="selected-count">0</span> Selected</span>
+                        <button onclick="selectAll()" class="text-[10px] text-zinc-500 hover:text-black underline text-left">Select All</button>
+                    </div>
+                </div>
+                <button onclick="downloadSelectedBatch()" class="bg-black text-white px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-zinc-800 transition-colors">
+                    Download Selected
+                </button>
+            </div>
+        </div>
+
+        <!-- 5. FLOATING CHAT BUBBLE -->
+        <div class="fixed bottom-6 right-6 z-[60]" id="chat-bubble">
+            <button onclick="openContactModal()" class="bg-black text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform">
+                <i data-lucide="message-square" class="w-6 h-6"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- NEW: ADMIN DASHBOARD (Hidden by default) -->
+    <div id="admin-app" class="hidden min-h-screen bg-zinc-50 pb-20">
+        <header class="bg-black text-white px-6 py-4 flex justify-between items-center sticky top-0 z-50">
+            <div>
+                <h1 class="text-lg font-bold tracking-widest uppercase">Admin Dashboard</h1>
+                <p class="text-xs text-zinc-400">SanStudio Content Management</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="syncWithGoogleSheets()" class="text-xs bg-white text-black px-4 py-2 rounded font-bold hover:bg-zinc-200 transition-colors flex items-center gap-2">
+                    <i data-lucide="refresh-cw" class="w-3 h-3"></i> Sync with Sheets
+                </button>
+                <button onclick="closeAdminDashboard()" class="text-xs text-zinc-300 hover:text-white underline underline-offset-4">Back to Gallery</button>
+            </div>
+        </header>
+
+        <main class="max-w-5xl mx-auto px-4 mt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Add Image Form -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-zinc-200 h-fit">
+                <h2 class="text-sm font-bold uppercase tracking-wider mb-4 border-b pb-2">Add New Image</h2>
+                <form id="add-image-form" onsubmit="handleAdminSubmit(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-zinc-500 mb-1">Google Drive File ID</label>
+                        <input type="text" id="admin-img-id" required placeholder="e.g. 1irDTA7B76UE..." class="w-full border border-zinc-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-black">
+                        <p class="text-[10px] text-zinc-400 mt-1">Make sure the file sharing is set to "Anyone with the link".</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-zinc-500 mb-1">Image Name / Title</label>
+                        <input type="text" id="admin-img-name" required placeholder="Santhosh 04" class="w-full border border-zinc-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-black">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-zinc-500 mb-1">Assign to Camera</label>
+                        <select id="admin-img-cam" class="w-full border border-zinc-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-black">
+                            <option value="cam01">CAM 01</option>
+                            <option value="cam02">CAM 02</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full bg-black text-white font-bold text-xs uppercase tracking-widest py-3 rounded hover:bg-zinc-800 transition-colors">
+                        Add to Gallery
+                    </button>
+                </form>
+            </div>
+
+            <!-- Manage Images Table -->
+            <div class="md:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-zinc-200">
+                <div class="flex justify-between items-center border-b pb-2 mb-4">
+                    <h2 class="text-sm font-bold uppercase tracking-wider">Manage Images</h2>
+                    <span class="text-xs bg-zinc-100 text-zinc-600 px-2 py-1 rounded" id="admin-total-count">Total: 0</span>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="text-xs text-zinc-500 border-b border-zinc-200">
+                                <th class="pb-2 font-medium">Preview</th>
+                                <th class="pb-2 font-medium">Name</th>
+                                <th class="pb-2 font-medium">Camera</th>
+                                <th class="pb-2 font-medium text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-table-body" class="text-sm">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 6. LIGHTBOX VIEWER -->
+    <div id="lightbox" class="fixed inset-0 z-[100] bg-white hidden flex-col transition-opacity duration-300">
+        <div class="flex justify-between items-center p-6 border-b border-zinc-50">
+            <div id="lb-counter" class="text-[10px] font-bold tracking-widest uppercase text-zinc-400"></div>
+            <div class="flex items-center gap-6">
+                <button id="lb-heart-btn" onclick="toggleLikeCurrent()">
+                    <i data-lucide="heart" class="w-5 h-5 cursor-pointer"></i>
+                </button>
+                <button onclick="downloadCurrent()">
+                    <i data-lucide="download" class="w-5 h-5 cursor-pointer hover:opacity-50"></i>
+                </button>
+                <i data-lucide="x" class="w-6 h-6 cursor-pointer hover:rotate-90 transition-transform" onclick="closeLightbox()"></i>
+            </div>
+        </div>
+        <div class="flex-1 relative flex items-center justify-center p-4">
+            <button onclick="changePhoto(-1)" class="absolute left-6 p-4 hover:bg-zinc-50 rounded-full"><i data-lucide="chevron-left"></i></button>
+            <img id="lb-img" src="" class="max-w-full max-h-[80vh] object-contain transition-transform" onclick="toggleZoom()">
+            <button onclick="changePhoto(1)" class="absolute right-6 p-4 hover:bg-zinc-50 rounded-full"><i data-lucide="chevron-right"></i></button>
+        </div>
+    </div>
+
+    <!-- 7. SHARE MODAL -->
+    <div id="share-modal" class="fixed inset-0 z-[110] bg-black/60 hidden items-center justify-center backdrop-blur-sm transition-opacity opacity-0" onclick="closeShareModal(event)">
+        <!-- Details omitted for brevity, same as user provided -->
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 relative transform scale-95 transition-transform duration-300" id="share-modal-content" onclick="event.stopPropagation()">
+            <button onclick="closeShareModal()" class="absolute top-4 right-4 text-zinc-300 hover:text-zinc-600 transition-colors"><i data-lucide="x-circle" class="w-6 h-6"></i></button>
+            <h3 class="text-xl font-medium text-center mb-6">Share link</h3>
+            <div class="mb-6"><input type="text" id="share-url-input" class="w-full border border-zinc-200 rounded-lg px-4 py-3 text-sm text-zinc-600 bg-zinc-50" readonly></div>
+            <button id="copy-btn" onclick="copyShareLink()" class="w-full bg-black text-white rounded-lg py-3 font-medium flex items-center justify-center gap-2 hover:bg-zinc-800 transition-colors mb-8"><i data-lucide="link" class="w-4 h-4"></i> <span id="copy-btn-text">Copy the link</span></button>
+        </div>
+    </div>
+
+    <!-- 8. CONTACT MODAL -->
+    <div id="contact-modal" class="fixed inset-0 z-[120] bg-black/60 hidden items-center justify-center backdrop-blur-sm transition-opacity opacity-0" onclick="closeContactModal(event)">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm p-8 relative transform scale-95 transition-transform duration-300 text-center" id="contact-modal-content" onclick="event.stopPropagation()">
+            <button onclick="closeContactModal()" class="absolute top-4 right-4 text-zinc-300 hover:text-zinc-600 transition-colors"><i data-lucide="x-circle" class="w-6 h-6"></i></button>
+            <div class="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden shadow-inner"><img src="https://lh3.googleusercontent.com/d/1DblR5JoUzec4SqeBW895NzQamrQydX_u" class="w-full h-full object-cover"></div>
+            <h3 class="text-2xl font-bold mb-1">SanStudio</h3>
+            <p class="text-sm text-zinc-500 font-medium mb-4">Wedding Web designer</p>
+            <p class="text-xl font-medium mb-1 tracking-tight">+91 9003356047</p>
+            <p class="text-sm text-zinc-500 mb-6">arussanthosh@gmail.com</p>
+            <button onclick="saveContact()" class="w-full bg-black text-white rounded-lg py-3 hover:bg-zinc-800 transition-colors font-bold text-sm">Save contact</button>
+        </div>
+    </div>
+
+    <!-- NEW: ADMIN AUTH MODAL -->
+    <div id="admin-auth-modal" class="fixed inset-0 z-[130] bg-black/60 hidden items-center justify-center backdrop-blur-sm transition-opacity opacity-0" onclick="closeAdminAuth(event)">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 relative transform scale-95 transition-transform duration-300" id="admin-auth-content" onclick="event.stopPropagation()">
+            <button onclick="closeAdminAuth()" class="absolute top-4 right-4 text-zinc-300 hover:text-zinc-600 transition-colors"><i data-lucide="x-circle" class="w-6 h-6"></i></button>
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center mx-auto mb-3"><i data-lucide="lock" class="w-6 h-6 text-zinc-800"></i></div>
+                <h3 class="text-xl font-bold">Admin Login</h3>
+                <p class="text-xs text-zinc-500">Enter password to manage gallery content</p>
+            </div>
+            <input type="password" id="admin-password" placeholder="Password (admin123)" class="w-full border border-zinc-300 rounded-lg px-4 py-3 text-sm mb-4 focus:outline-none focus:border-black">
+            <button onclick="verifyAdmin()" class="w-full bg-black text-white font-bold text-sm py-3 rounded-lg hover:bg-zinc-800 transition-colors">Login</button>
+        </div>
+    </div>
+
+    <!-- CUSTOM CONFIRM MODAL -->
+    <div id="custom-confirm" class="fixed inset-0 z-[200] bg-black/60 hidden items-center justify-center backdrop-blur-sm opacity-0 transition-opacity">
+        <div class="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full mx-4 transform scale-95 transition-transform" id="confirm-box">
+            <h3 class="text-lg font-bold mb-2">Confirmation</h3>
+            <p id="confirm-message" class="text-zinc-600 text-sm mb-6"></p>
+            <div class="flex justify-end gap-3">
+                <button id="confirm-cancel" class="px-4 py-2 text-sm font-medium text-zinc-600 hover:text-black bg-zinc-100 rounded-lg">Cancel</button>
+                <button id="confirm-ok" class="px-4 py-2 text-sm font-bold bg-black text-white rounded-lg hover:bg-zinc-800">Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATIONS CONTAINER -->
+    <div id="toast-container" class="fixed top-5 left-1/2 -translate-x-1/2 z-[200] flex flex-col gap-2 pointer-events-none"></div>
+
+    <script>
+        // --- DATA & STATE ---
+        const ALBUM_META = {
+            title: "SANTHOSH | SanStudio",
+            date: "2026-04-01 | Loop",
+            photographer: "Santhosh X San",
+            photographerUrl: "https://a-santhosh-hub.github.io/in/",
+            portfolio: "By SanStudio",
+            portfolioUrl: "https://a-santhosh-hub.github.io/in/",
+            heroId: "1HHUwECxCEerAvJiYPsMnwB-CBU0ru6-x", 
+        };
+
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbza_M6IOUViZK7zVBDcd99qLQzpeOB-4RAKpOIuYSawzDa0GSmmhicWHL7Sr2ALuvdz/exec";
+
+        // Fallback data in case the Google Sheet is unreachable or restricted
+        const FALLBACK_DATA = {
+            cam01: [
+                { id: "1irDTA7B76UEgs1xv4ln_oV_yziyoVTE5", name: "Santhosh 01" },
+                { id: "13ZzY31yu1rUUGxyC1oQClbXtK8nYcxCn", name: "Santhosh 02" },
+                { id: "1lM42SgwfqjMWXnZnr2BwR0G19wq7DcQM", name: "Santhosh 03" }
+            ],
+            cam02: []
+        };
+
+        // State variables
+        let dynamicData = { cam01: [...FALLBACK_DATA.cam01], cam02: [...FALLBACK_DATA.cam02] };
+        let currentTab = 'CAM 01';
+        let currentIndex = 0;
+        let isZoomed = false;
+        let likedPhotos = new Set(JSON.parse(localStorage.getItem('wedding_likes') || '[]'));
+        let isSelectionMode = false;
+        let selectedPhotos = new Set();
+
+        const getDriveUrl = (id) => `https://lh3.googleusercontent.com/d/${id}`;
+        const getDownloadUrl = (id) => `https://drive.google.com/uc?export=download&id=${id}`;
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            const colors = {
+                success: 'bg-green-500 text-white',
+                error: 'bg-red-500 text-white',
+                info: 'bg-black text-white'
+            };
+            toast.className = `${colors[type] || colors.info} px-4 py-2 rounded shadow-lg text-sm font-medium transform translate-y-[-100%] opacity-0 transition-all duration-300`;
+            toast.textContent = message;
+            
+            container.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => toast.classList.remove('translate-y-[-100%]', 'opacity-0'), 10);
+            
+            // Animate out and remove
+            setTimeout(() => {
+                toast.classList.add('translate-y-[-100%]', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function showConfirm(message, onConfirm) {
+            const modal = document.getElementById('custom-confirm');
+            const box = document.getElementById('confirm-box');
+            document.getElementById('confirm-message').textContent = message;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            const close = () => {
+                modal.classList.add('opacity-0');
+                box.classList.remove('scale-100');
+                box.classList.add('scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }, 300);
+            };
+
+            document.getElementById('confirm-cancel').onclick = close;
+            document.getElementById('confirm-ok').onclick = () => {
+                close();
+                onConfirm();
+            };
+            
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                box.classList.remove('scale-95');
+                box.classList.add('scale-100');
+            }, 10);
+        }
+
+        // --- GOOGLE SHEETS API INTEGRATION ---
+        async function fetchFromGoogleSheets() {
+            try {
+                // Use redirect: 'follow' to handle GAS redirects properly
+                const response = await fetch(SCRIPT_URL, { redirect: "follow" });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    // Reset dynamicData
+                    dynamicData = { cam01: [], cam02: [] };
+                    
+                    // Group data by camera
+                    result.data.forEach(item => {
+                        const cam = (item.camera || 'cam01').toLowerCase();
+                        if (dynamicData[cam]) {
+                            dynamicData[cam].push({
+                                id: item.id,
+                                name: item.name
+                            });
+                        }
+                    });
+                    
+                    renderGallery();
+                    
+                    // Update admin table if it's currently open
+                    if (!document.getElementById('admin-app').classList.contains('hidden')) {
+                        renderAdminTable();
+                    }
+                    return true;
+                } else {
+                    throw new Error(result.message || "Unknown error from Sheets");
+                }
+            } catch (error) {
+                // Changed from console.error to console.warn to prevent scary console logs
+                console.warn("Could not fetch live data. Please verify Google Apps Script is deployed with 'Who has access' set to 'Anyone'.", error.message);
+                showToast("Cannot reach Google Sheets. Using fallback gallery.", "error");
+                
+                // Fallback to initial data so the gallery doesn't break
+                dynamicData = { cam01: [...FALLBACK_DATA.cam01], cam02: [...FALLBACK_DATA.cam02] };
+                renderGallery();
+                return false;
+            }
+        }
+
+        // --- INIT MAIN APP ---
+        async function init() {
+            document.getElementById('hero-img').src = getDriveUrl(ALBUM_META.heroId);
+            document.getElementById('hero-title').textContent = ALBUM_META.title;
+            document.getElementById('hero-date').textContent = ALBUM_META.date;
+            
+            const photogName = document.getElementById('photographer-name');
+            photogName.textContent = ALBUM_META.photographer;
+            photogName.href = ALBUM_META.photographerUrl;
+            
+            const portfolioLink = document.getElementById('portfolio-link');
+            portfolioLink.textContent = ALBUM_META.portfolio;
+            portfolioLink.href = ALBUM_META.portfolioUrl;
+
+            document.getElementById('gallery-subtitle').textContent = "SANTHOSH | SanStudio";
+            document.getElementById('current-tab-name').textContent = currentTab;
+
+            updateLikeCount();
+            lucide.createIcons();
+            
+            // Show loading toast and fetch live data
+            showToast("Loading live gallery...", "info");
+            await fetchFromGoogleSheets();
+            
+            // Dropdown click outside handling
+            document.addEventListener('click', (e) => {
+                const menu = document.getElementById('download-menu');
+                const btn = e.target.closest('#download-trigger');
+                if (btn) return;
+                if (menu && !menu.classList.contains('hidden') && !menu.contains(e.target)) {
+                    menu.classList.add('hidden');
+                    menu.classList.remove('flex');
+                }
+            });
+        }
+
+        function renderGallery() {
+            const grid = document.getElementById('photo-grid');
+            const images = currentTab === 'CAM 01' ? dynamicData.cam01 : dynamicData.cam02;
+
+            if (images.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-20 text-center text-zinc-300 text-xs tracking-widest">NO PHOTOS IN THIS TAB YET</div>`;
+                return;
+            }
+
+            if (isSelectionMode) {
+                grid.innerHTML = images.map((img, idx) => `
+                    <div class="gallery-item cursor-pointer overflow-hidden group relative" onclick="toggleSelection('${img.id}')">
+                        <img src="${getDriveUrl(img.id)}" class="w-full h-auto object-cover transition-opacity duration-300 ${selectedPhotos.has(img.id) ? 'opacity-80' : ''}" onerror="this.src='https://placehold.co/800x1200/eee/999?text=Image+Not+Found'">
+                        <div class="absolute inset-0 bg-black/10 transition-opacity ${selectedPhotos.has(img.id) ? 'opacity-100' : 'opacity-0'}"></div>
+                        <div class="absolute top-3 right-3 z-20">
+                            <div class="checkbox-ring ${selectedPhotos.has(img.id) ? 'selected' : ''}">
+                                ${selectedPhotos.has(img.id) ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                grid.innerHTML = images.map((img, idx) => `
+                    <div class="gallery-item cursor-pointer overflow-hidden group relative" onclick="openLightbox(${idx})">
+                        <img src="${getDriveUrl(img.id)}" class="w-full h-auto object-cover transition-opacity duration-500 group-hover:opacity-90" onerror="this.src='https://placehold.co/800x1200/eee/999?text=Image+Not+Found'">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                        <div class="absolute bottom-4 right-4 flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 z-10">
+                             <button onclick="event.stopPropagation(); shareImage('${img.id}')" class="text-white hover:text-zinc-200 transition-colors" title="Share Link"><i data-lucide="share" class="w-5 h-5"></i></button>
+                             <button onclick="event.stopPropagation(); downloadImage('${img.id}')" class="text-white hover:text-zinc-200 transition-colors" title="Download"><i data-lucide="download" class="w-5 h-5"></i></button>
+                             <button onclick="event.stopPropagation(); toggleLike('${img.id}')" class="text-white hover:text-red-500 transition-colors" title="Like"><i data-lucide="heart" class="w-5 h-5 ${likedPhotos.has(img.id) ? 'liked' : ''}"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            lucide.createIcons();
+        }
+
+        // --- ADMIN LOGIN & DASHBOARD ---
+        function openAdminAuth() {
+            const modal = document.getElementById('admin-auth-modal');
+            const content = document.getElementById('admin-auth-content');
+            document.getElementById('admin-password').value = '';
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeAdminAuth(event) {
+            const modal = document.getElementById('admin-auth-modal');
+            const content = document.getElementById('admin-auth-content');
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
+        function verifyAdmin() {
+            const pwd = document.getElementById('admin-password').value;
+            if (pwd === 'admin123') { // Simple demo password
+                closeAdminAuth();
+                showToast("Admin access granted", "success");
+                openAdminDashboard();
+            } else {
+                showToast("Incorrect password", "error");
+            }
+        }
+
+        function openAdminDashboard() {
+            document.getElementById('main-app').classList.add('hidden');
+            document.getElementById('admin-app').classList.remove('hidden');
+            renderAdminTable();
+        }
+
+        function closeAdminDashboard() {
+            document.getElementById('admin-app').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            renderGallery(); // Re-render gallery in case data changed
+            window.scrollTo(0,0);
+        }
+
+        async function handleAdminSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('admin-img-id').value.trim();
+            const name = document.getElementById('admin-img-name').value.trim();
+            const cam = document.getElementById('admin-img-cam').value;
+
+            if(!id || !name) return;
+
+            const submitBtn = e.target.querySelector('button');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = "SAVING TO SHEETS...";
+            submitBtn.disabled = true;
+
+            try {
+                // Post to Google Sheets Web App
+                // NOTE: Using 'text/plain' bypasses the strict CORS preflight (OPTIONS) check that Google Apps Script blocks.
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8',
+                    },
+                    body: JSON.stringify({ id, name, camera: cam })
+                });
+                
+                const result = await response.json();
+                
+                if(result.status === 'success') {
+                    // Add locally for instant UI update
+                    dynamicData[cam].push({ id, name });
+                    
+                    document.getElementById('add-image-form').reset();
+                    showToast("Image successfully added to Sheets!", "success");
+                    renderAdminTable();
+                } else {
+                    showToast("Failed to add image to Sheets.", "error");
+                }
+            } catch (error) {
+                console.warn("Network error. Could not reach Sheets API:", error.message);
+                showToast("Failed to save. Check GAS permissions.", "error");
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        function removeAdminImage(cam, index) {
+            showConfirm("Delete this image locally? (Note: To permanently delete, you must remove the row in your Google Sheet manually).", () => {
+                dynamicData[cam].splice(index, 1);
+                showToast("Image removed from view");
+                renderAdminTable();
+            });
+        }
+
+        function renderAdminTable() {
+            const tbody = document.getElementById('admin-table-body');
+            const totalCount = document.getElementById('admin-total-count');
+            
+            let html = '';
+            let count = 0;
+            
+            ['cam01', 'cam02'].forEach(cam => {
+                dynamicData[cam].forEach((img, index) => {
+                    count++;
+                    html += `
+                        <tr class="border-b border-zinc-100 hover:bg-zinc-50 transition-colors">
+                            <td class="py-3">
+                                <div class="w-12 h-12 rounded overflow-hidden bg-zinc-200">
+                                    <img src="${getDriveUrl(img.id)}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100?text=Err'">
+                                </div>
+                            </td>
+                            <td class="py-3 font-medium text-zinc-800">${img.name}</td>
+                            <td class="py-3"><span class="bg-zinc-200 text-xs px-2 py-1 rounded-full font-medium">${cam.toUpperCase()}</span></td>
+                            <td class="py-3 text-right">
+                                <button onclick="removeAdminImage('${cam}', ${index})" class="text-red-500 hover:bg-red-50 p-2 rounded transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            });
+
+            if (count === 0) {
+                html = `<tr><td colspan="4" class="text-center py-8 text-zinc-400 text-sm">No images found. Add one above.</td></tr>`;
+            }
+
+            tbody.innerHTML = html;
+            totalCount.textContent = `Total: ${count}`;
+            lucide.createIcons();
+        }
+
+        async function syncWithGoogleSheets() {
+            showToast("Syncing with Google Sheets...", "info");
+            const success = await fetchFromGoogleSheets();
+            if (success) {
+                showToast("Data synced successfully!", "success");
+            }
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('tab-active', 'text-zinc-900');
+                btn.classList.add('text-zinc-400');
+            });
+            const activeBtn = tab === 'CAM 01' ? document.getElementById('tab-01') : document.getElementById('tab-02');
+            activeBtn.classList.add('tab-active', 'text-zinc-900');
+            activeBtn.classList.remove('text-zinc-400');
+            document.getElementById('current-tab-name').textContent = currentTab;
+            renderGallery();
+        }
+
+        // ... Selection and Download logic ...
+        function toggleDownloadMenu() { document.getElementById('download-menu').classList.toggle('hidden'); document.getElementById('download-menu').classList.toggle('flex'); }
+        function startSelectionMode() {
+            isSelectionMode = true; selectedPhotos.clear();
+            document.getElementById('download-menu').classList.add('hidden');
+            document.getElementById('chat-bubble').classList.add('hidden');
+            document.getElementById('selection-bar').classList.remove('translate-y-full');
+            document.getElementById('selection-instructions').classList.remove('hidden');
+            renderGallery();
+        }
+        function cancelSelectionMode() {
+            isSelectionMode = false; selectedPhotos.clear();
+            document.getElementById('selection-bar').classList.add('translate-y-full');
+            document.getElementById('selection-instructions').classList.add('hidden');
+            document.getElementById('chat-bubble').classList.remove('hidden');
+            renderGallery();
+        }
+        function toggleSelection(id) {
+            selectedPhotos.has(id) ? selectedPhotos.delete(id) : selectedPhotos.add(id);
+            document.getElementById('selected-count').textContent = selectedPhotos.size;
+            renderGallery();
+        }
+        function selectAll() {
+            const images = currentTab === 'CAM 01' ? dynamicData.cam01 : dynamicData.cam02;
+            images.forEach(img => selectedPhotos.add(img.id));
+            document.getElementById('selected-count').textContent = selectedPhotos.size;
+            renderGallery();
+        }
+        function downloadSelectedBatch() {
+            if (selectedPhotos.size === 0) return showToast("Please select at least one photo.", "error");
+            batchDownload(Array.from(selectedPhotos));
+        }
+        function downloadAllInTab() {
+            const images = currentTab === 'CAM 01' ? dynamicData.cam01 : dynamicData.cam02;
+            const ids = images.map(img => img.id);
+            if (ids.length === 0) return showToast("No photos to download.", "error");
+            showConfirm(`This will download all ${ids.length} images from ${currentTab}. Continue?`, () => batchDownload(ids));
+            document.getElementById('download-menu').classList.add('hidden');
+        }
+        function batchDownload(ids) {
+            showToast(`Starting download for ${ids.length} images...`, "success");
+            let delay = 0;
+            ids.forEach(id => {
+                setTimeout(() => {
+                    const link = document.createElement('a');
+                    link.href = getDownloadUrl(id);
+                    link.setAttribute('download', '');
+                    document.body.appendChild(link);
+                    link.click(); document.body.removeChild(link);
+                }, delay);
+                delay += 1000;
+            });
+        }
+
+        // ... Lightbox & Sharing ...
+        function openLightbox(index) {
+            if (isSelectionMode) return;
+            currentIndex = index;
+            const images = currentTab === 'CAM 01' ? dynamicData.cam01 : dynamicData.cam02;
+            document.getElementById('lb-img').src = getDriveUrl(images[index].id);
+            document.getElementById('lb-counter').textContent = `${index + 1} / ${images.length}`;
+            document.getElementById('lightbox').classList.remove('hidden');
+            document.getElementById('lightbox').classList.add('flex');
+            document.body.style.overflow = 'hidden';
+            updateLightboxHeart(); lucide.createIcons();
+        }
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.add('hidden');
+            document.body.style.overflow = '';
+            isZoomed = false; document.getElementById('lb-img').classList.remove('zoom-active');
+        }
+        function changePhoto(dir) {
+            const images = currentTab === 'CAM 01' ? dynamicData.cam01 : dynamicData.cam02;
+            currentIndex = (currentIndex + dir + images.length) % images.length;
+            openLightbox(currentIndex);
+        }
+        function toggleZoom() {
+            isZoomed = !isZoomed; document.getElementById('lb-img').classList.toggle('zoom-active', isZoomed);
+        }
+
+        function toggleLike(id) {
+            likedPhotos.has(id) ? likedPhotos.delete(id) : likedPhotos.add(id);
+            localStorage.setItem('wedding_likes', JSON.stringify(Array.from(likedPhotos)));
+            updateLikeCount(); renderGallery(); updateLightboxHeart();
+        }
+        function toggleLikeCurrent() { toggleLike((currentTab === 'CAM 01' ? dynamicData.cam01 : dynamicData.cam02)[currentIndex].id); }
+        function updateLikeCount() {
+            document.getElementById('like-count').textContent = likedPhotos.size;
+            const navHeart = document.getElementById('nav-heart').querySelector('svg');
+            likedPhotos.size > 0 ? navHeart?.classList.add('liked') : navHeart?.classList.remove('liked');
+        }
+        function updateLightboxHeart() {
+            const imgId = (currentTab === 'CAM 01' ? dynamicData.cam01 : dynamicData.cam02)[currentIndex]?.id;
+            const heartIcon = document.getElementById('lb-heart-btn').querySelector('svg');
+            if(!imgId) return;
+            likedPhotos.has(imgId) ? heartIcon?.classList.add('liked') : heartIcon?.classList.remove('liked');
+        }
+        function filterLikes() {
+            if (likedPhotos.size === 0) return showToast("You haven't liked any photos yet!", "info");
+            const grid = document.getElementById('photo-grid');
+            const favorites = [...dynamicData.cam01, ...dynamicData.cam02].filter(img => likedPhotos.has(img.id));
+            grid.innerHTML = favorites.map((img, idx) => `
+                <div class="gallery-item cursor-pointer overflow-hidden group relative" onclick="openLightbox(${idx})">
+                    <img src="${getDriveUrl(img.id)}" class="w-full h-auto object-cover">
+                </div>
+            `).join('');
+            document.getElementById('gallery-subtitle').textContent = "MY FAVORITES";
+            lucide.createIcons();
+        }
+
+        function scrollToGallery() { document.getElementById('gallery-section').scrollIntoView({ behavior: 'smooth' }); }
+        
+        window.onload = init;
+    </script>
+</body>
+</html>
