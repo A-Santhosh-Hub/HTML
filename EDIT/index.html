@@ -287,9 +287,21 @@
                 category: 'Stock Footages',
                 type: 'image',
                 driveId: '1N3zcjUH6sJQB8aPFCQDI9dbrP2ThncSZ',
-                thumbnail: 'https://drive.google.com/uc?export=download&id=1N3zcjUH6sJQB8aPFCQDI9dbrP2ThncSZ',
+                thumbnail: 'https://drive.google.com/thumbnail?id=1N3zcjUH6sJQB8aPFCQDI9dbrP2ThncSZ&sz=w600',
                 tags: ['stock', 'footage', 'image'],
                 description: 'High-quality stock asset for your reels.'
+            },
+            {
+                id: '12',
+                title: 'How to download YouTube videos',
+                category: 'Tutorial Videos',
+                type: 'video',
+                driveId: '1UuiFUMlPi_AyMDbY-zxZZl_GKwISnmQL',
+                thumbnail: 'https://drive.google.com/thumbnail?id=1UuiFUMlPi_AyMDbY-zxZZl_GKwISnmQL&sz=w600',
+                duration: '05:00',
+                resolution: '1080p',
+                tags: ['tutorial', 'youtube', 'download'],
+                description: 'Complete guide on how to download high-quality YouTube videos for your editing workflow.'
             }
         ];
 
@@ -355,7 +367,9 @@
                 // Category Match
                 const matchCategory = currentCategory === 'All' 
                     || (currentCategory === 'Favorites' && favorites.includes(item.id))
-                    || item.category === currentCategory;
+                    || item.category === currentCategory
+                    || (currentCategory === 'Images' && item.type === 'image')
+                    || (currentCategory === 'Tutorial Videos' && item.type === 'video');
                 
                 // Type Match
                 const matchType = currentTypeFilter === 'all' || item.type === currentTypeFilter;
