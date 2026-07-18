@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reels Editing Resource Hub</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: { 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5' },
+                        dark: { 900: '#0f1115', 800: '#161920', 700: '#1f242e' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+        
+        /* Glassmorphism utilities */
+        .glass {
+            background: rgba(22, 25, 32, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.5), 0 0 15px rgba(99, 102, 241, 0.1);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;  
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-dark-900 text-slate-200 h-screen overflow-hidden flex selection:bg-brand-500 selection:text-white">
+
+    <!-- Sidebar -->
+    <aside class="w-64 h-full glass border-r border-slate-800 flex flex-col flex-shrink-0 z-20 hidden md:flex">
+        <div class="p-6 flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shadow-lg shadow-brand-500/30">
+                <i class="ph-bold ph-video-camera text-white text-lg"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold text-white tracking-tight">ReelsHub</h1>
+                <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Creator Assets</p>
+            </div>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto px-4 py-2 space-y-1">
+            <a href="#" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium bg-brand-500/10 text-brand-400" data-category="All">
+                <i class="ph ph-squares-four text-lg"></i> Dashboard
+            </a>
+            
+            <div class="pt-4 pb-2">
+                <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Resources</p>
+            </div>
+            
+            <a href="#" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors" data-category="Tutorial Videos">
+                <i class="ph ph-graduation-cap text-lg"></i> Tutorial Videos
+            </a>
+            <a href="#" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors" data-category="Stock Footages">
+                <i class="ph ph-film-strip text-lg"></i> Stock Footages
+            </a>
+            <a href="#" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors" data-category="Images">
+                <i class="ph ph-image text-lg"></i> Images
+            </a>
+            <a href="#" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors" data-category="Logos">
+                <i class="ph ph-bezier-curve text-lg"></i> Logos
+            </a>
+            <a href="#" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors" data-category="Songs">
+                <i class="ph ph-music-notes text-lg"></i> Songs
+            </a>
+            <a href="#" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors" data-category="Sound Effects">
+                <i class="ph ph-speaker-high text-lg"></i> Sound Effects
+            </a>
+            
+            <div class="pt-4 pb-2">
+                <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Library</p>
+            </div>
+            <a href="#" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors" data-category="Favorites">
+                <i class="ph ph-heart text-lg"></i> Favorites
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full relative overflow-hidden">
+        
+        <!-- Header -->
+        <header class="h-20 glass border-b border-slate-800 flex items-center justify-between px-6 z-10">
+            <!-- Search -->
+            <div class="relative w-full max-w-xl group">
+                <i class="ph ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-400 transition-colors"></i>
+                <input type="text" id="searchInput" placeholder="Search resources, tags, categories..." 
+                    class="w-full bg-dark-800 border border-slate-700 text-sm rounded-full pl-11 pr-4 py-2.5 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all placeholder-slate-500 text-white">
+            </div>
+
+            <!-- Stats -->
+            <div class="hidden lg:flex items-center gap-6 ml-6">
+                <div class="text-center">
+                    <p class="text-[10px] text-slate-400 uppercase font-bold">Videos</p>
+                    <p class="text-sm font-bold text-white" id="stat-videos">0</p>
+                </div>
+                <div class="w-px h-6 bg-slate-700"></div>
+                <div class="text-center">
+                    <p class="text-[10px] text-slate-400 uppercase font-bold">Audio</p>
+                    <p class="text-sm font-bold text-white" id="stat-audio">0</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Filters Container -->
+        <div class="px-6 py-4 border-b border-slate-800/50 bg-dark-900/50 flex gap-2 overflow-x-auto no-scrollbar">
+            <button class="filter-btn px-4 py-1.5 rounded-full bg-slate-800 text-white text-xs font-medium border border-slate-700 hover:bg-slate-700 transition-colors active" data-type="all">All Formats</button>
+            <button class="filter-btn px-4 py-1.5 rounded-full bg-transparent text-slate-400 text-xs font-medium border border-slate-800 hover:bg-slate-800 hover:text-white transition-colors" data-type="video">Videos</button>
+            <button class="filter-btn px-4 py-1.5 rounded-full bg-transparent text-slate-400 text-xs font-medium border border-slate-800 hover:bg-slate-800 hover:text-white transition-colors" data-type="audio">Audios</button>
+            <button class="filter-btn px-4 py-1.5 rounded-full bg-transparent text-slate-400 text-xs font-medium border border-slate-800 hover:bg-slate-800 hover:text-white transition-colors" data-type="image">Images</button>
+        </div>
+
+        <!-- Content Scroll Area -->
+        <div class="flex-1 overflow-y-auto p-6" id="mainScroll">
+            <div class="max-w-7xl mx-auto">
+                
+                <div class="flex items-end justify-between mb-8">
+                    <div>
+                        <h2 id="categoryTitle" class="text-3xl font-bold text-white mb-2">Dashboard</h2>
+                        <p class="text-slate-400 text-sm">Explore all resources for your next reel.</p>
+                    </div>
+                    <p class="text-sm text-slate-500" id="resultCount">0 items</p>
+                </div>
+
+                <!-- Grid -->
+                <div id="resourceGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <!-- Cards injected by JS -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="hidden flex-col items-center justify-center py-20">
+                    <i class="ph ph-folder-open text-6xl text-slate-600 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-white mb-2">No resources found</h3>
+                    <p class="text-slate-400">Try adjusting your search or filters.</p>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Player / Preview Modal -->
+    <div id="previewModal" class="fixed inset-0 z-50 hidden flex items-center justify-center transition-all duration-300 opacity-0">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/90 backdrop-blur-sm" id="modalBackdrop"></div>
+        
+        <!-- Modal Content Container -->
+        <div class="relative w-full max-w-5xl w-[95%] max-h-[90vh] flex flex-col transform scale-95 opacity-0 transition-all duration-300" id="modalContentWrapper">
+            
+            <!-- Close Button -->
+            <button id="closeModalBtn" class="absolute -top-12 right-0 text-slate-400 hover:text-white bg-slate-800/50 hover:bg-slate-700 p-2 rounded-full transition-colors z-10">
+                <i class="ph ph-x text-xl"></i>
+            </button>
+
+            <!-- Dynamic Player Area -->
+            <div id="playerContainer" class="w-full bg-dark-800 rounded-xl overflow-hidden shadow-2xl border border-slate-700 flex flex-col">
+                <!-- Video / Image / Audio injected here -->
+            </div>
+            
+        </div>
+    </div>
+
+    <script>
+        // === MOCK DATABASE ===
+        // Note: Using the specific Google Drive ID requested by the user.
+        const mockResources = [
+            {
+                id: '1',
+                title: 'Reels Editing Masterclass',
+                category: 'Tutorial Videos',
+                type: 'video',
+                driveId: '1RXJU-yMstaDO9u8UH9bptiHHAkT4bSJe', // Provided by user
+                thumbnail: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=800&q=80',
+                duration: '12:45',
+                resolution: '1080p',
+                tags: ['tutorial', 'reels', 'editing'],
+                description: 'Comprehensive guide to editing your reels.'
+            },
+            {
+                id: '4',
+                title: 'How to make Thumbnail and poster and add to video',
+                category: 'Tutorial Videos',
+                type: 'video',
+                driveId: '1sxa_-YmNdAp0gYovoNQpxzMU9beh-TaC',
+                thumbnail: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=800&q=80',
+                duration: '15:20',
+                resolution: '1080p',
+                tags: ['tutorial', 'thumbnail', 'poster', 'design'],
+                description: 'Complete guide on designing high-quality thumbnails and posters, and adding them directly to your videos.'
+            },
+            {
+                id: '5',
+                title: 'How to post a video on YouTube and get titles from ChatGPT',
+                category: 'Tutorial Videos',
+                type: 'video',
+                driveId: '1LYowZNjKsKlpi01iIWcpGrM0e4h1DZYN',
+                thumbnail: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=800&q=80',
+                duration: '08:45',
+                resolution: '1080p',
+                tags: ['tutorial', 'youtube', 'chatgpt', 'upload'],
+                description: 'Learn the best workflow for uploading videos to YouTube and utilizing ChatGPT to generate viral titles.'
+            },
+            {
+                id: '6',
+                title: 'Stock Asset 1',
+                category: 'Stock Footages',
+                type: 'image',
+                driveId: '1l9H1kc-ueu4SJTepzsn3_YUDjCbsXhTP',
+                thumbnail: 'https://drive.google.com/uc?export=download&id=1l9H1kc-ueu4SJTepzsn3_YUDjCbsXhTP',
+                tags: ['stock', 'footage', 'image'],
+                description: 'High-quality stock asset for your reels.'
+            },
+            {
+                id: '7',
+                title: 'Stock Asset 2',
+                category: 'Stock Footages',
+                type: 'image',
+                driveId: '1UURtsQH8SkNx_VPRKxnLZKCRXt1Yp8Rb',
+                thumbnail: 'https://drive.google.com/uc?export=download&id=1UURtsQH8SkNx_VPRKxnLZKCRXt1Yp8Rb',
+                tags: ['stock', 'footage', 'image'],
+                description: 'High-quality stock asset for your reels.'
+            },
+            {
+                id: '8',
+                title: 'Stock Asset 3',
+                category: 'Stock Footages',
+                type: 'image',
+                driveId: '1BCOiEKrKLxhSdMpJpEfXTG2o8AnPykaI',
+                thumbnail: 'https://drive.google.com/uc?export=download&id=1BCOiEKrKLxhSdMpJpEfXTG2o8AnPykaI',
+                tags: ['stock', 'footage', 'image'],
+                description: 'High-quality stock asset for your reels.'
+            },
+            {
+                id: '9',
+                title: 'Stock Asset 4',
+                category: 'Stock Footages',
+                type: 'image',
+                driveId: '1N2pFLCnREg5Xcqu57EepGpQO4_-HScx1',
+                thumbnail: 'https://drive.google.com/uc?export=download&id=1N2pFLCnREg5Xcqu57EepGpQO4_-HScx1',
+                tags: ['stock', 'footage', 'image'],
+                description: 'High-quality stock asset for your reels.'
+            },
+            {
+                id: '10',
+                title: 'Stock Asset 5',
+                category: 'Stock Footages',
+                type: 'image',
+                driveId: '1FEYBmuu4hscaYKrL5U0ZM0241NXsA1B5',
+                thumbnail: 'https://drive.google.com/uc?export=download&id=1FEYBmuu4hscaYKrL5U0ZM0241NXsA1B5',
+                tags: ['stock', 'footage', 'image'],
+                description: 'High-quality stock asset for your reels.'
+            },
+            {
+                id: '11',
+                title: 'Stock Asset 6',
+                category: 'Stock Footages',
+                type: 'image',
+                driveId: '1N3zcjUH6sJQB8aPFCQDI9dbrP2ThncSZ',
+                thumbnail: 'https://drive.google.com/uc?export=download&id=1N3zcjUH6sJQB8aPFCQDI9dbrP2ThncSZ',
+                tags: ['stock', 'footage', 'image'],
+                description: 'High-quality stock asset for your reels.'
+            }
+        ];
+
+        // === STATE & UTILS ===
+        let currentCategory = 'All';
+        let currentTypeFilter = 'all';
+        let searchQuery = '';
+        let favorites = JSON.parse(localStorage.getItem('reelsFavorites')) || [];
+        let currentAudio = null;
+
+        const els = {
+            grid: document.getElementById('resourceGrid'),
+            empty: document.getElementById('emptyState'),
+            search: document.getElementById('searchInput'),
+            categoryTitle: document.getElementById('categoryTitle'),
+            resultCount: document.getElementById('resultCount'),
+            sidebarLinks: document.querySelectorAll('.sidebar-link'),
+            filterBtns: document.querySelectorAll('.filter-btn'),
+            modal: {
+                container: document.getElementById('previewModal'),
+                backdrop: document.getElementById('modalBackdrop'),
+                contentWrapper: document.getElementById('modalContentWrapper'),
+                player: document.getElementById('playerContainer'),
+                closeBtn: document.getElementById('closeModalBtn')
+            },
+            stats: {
+                videos: document.getElementById('stat-videos'),
+                audio: document.getElementById('stat-audio')
+            }
+        };
+
+        const driveUtils = {
+            getPreview: (id) => `https://drive.google.com/file/d/${id}/preview`,
+            getDownload: (id) => `https://drive.google.com/uc?export=download&id=${id}`,
+            getView: (id) => `https://drive.google.com/file/d/${id}/view`
+        };
+
+        // === STREAMING_CHUNK:Core Functions ===
+        
+        function toggleFavorite(id, btnElement) {
+            const index = favorites.indexOf(id);
+            if (index === -1) {
+                favorites.push(id);
+                btnElement.classList.remove('text-slate-400');
+                btnElement.classList.add('text-pink-500');
+                btnElement.innerHTML = '<i class="ph-fill ph-heart"></i>';
+            } else {
+                favorites.splice(index, 1);
+                btnElement.classList.add('text-slate-400');
+                btnElement.classList.remove('text-pink-500');
+                btnElement.innerHTML = '<i class="ph ph-heart"></i>';
+            }
+            localStorage.setItem('reelsFavorites', JSON.stringify(favorites));
+            
+            // Re-render if we are currently in the Favorites view
+            if (currentCategory === 'Favorites') {
+                renderUI();
+            }
+        }
+
+        function filterData() {
+            return mockResources.filter(item => {
+                // Category Match
+                const matchCategory = currentCategory === 'All' 
+                    || (currentCategory === 'Favorites' && favorites.includes(item.id))
+                    || item.category === currentCategory;
+                
+                // Type Match
+                const matchType = currentTypeFilter === 'all' || item.type === currentTypeFilter;
+                
+                // Search Match
+                const s = searchQuery.toLowerCase();
+                const matchSearch = item.title.toLowerCase().includes(s) 
+                    || item.description.toLowerCase().includes(s)
+                    || item.tags.some(t => t.toLowerCase().includes(s));
+
+                return matchCategory && matchType && matchSearch;
+            });
+        }
+
+        function createCardHTML(item) {
+            const isFav = favorites.includes(item.id);
+            const favIcon = isFav ? '<i class="ph-fill ph-heart text-pink-500"></i>' : '<i class="ph ph-heart text-slate-400"></i>';
+            
+            // Thumbnail setup
+            let thumbnailHTML = '';
+            if (item.type === 'audio') {
+                thumbnailHTML = `
+                    <div class="w-full h-40 bg-slate-800 flex items-center justify-center">
+                        <i class="ph-fill ph-music-notes text-4xl text-brand-500/50"></i>
+                    </div>`;
+            } else {
+                // Using Google Drive thumbnail API for reliable grid images instead of direct download links
+                const safeThumbnail = item.driveId ? `https://drive.google.com/thumbnail?id=${item.driveId}&sz=w600` : item.thumbnail;
+                thumbnailHTML = `
+                    <div class="w-full h-40 relative bg-slate-800 group-hover:scale-105 transition-transform duration-500">
+                        <img src="${safeThumbnail}" alt="${item.title}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/600x400/1e293b/475569?text=Preview+Not+Found'">
+                        ${item.duration ? `<span class="absolute bottom-2 right-2 bg-black/80 text-white text-[10px] font-bold px-1.5 py-0.5 rounded backdrop-blur-md">${item.duration}</span>` : ''}
+                        ${item.resolution ? `<span class="absolute top-2 right-2 bg-brand-500/90 text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-lg backdrop-blur-md">${item.resolution}</span>` : ''}
+                    </div>`;
+            }
+
+            return `
+                <div class="card-hover bg-dark-800 border border-slate-800 rounded-xl overflow-hidden flex flex-col h-full group relative">
+                    
+                    <!-- Top Actions Overlay -->
+                    <div class="absolute top-2 left-2 z-10 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                         <button onclick="toggleFavorite('${item.id}', this)" class="w-8 h-8 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center hover:bg-black/70 transition-colors">
+                            ${favIcon}
+                        </button>
+                    </div>
+
+                    ${thumbnailHTML}
+                    
+                    <div class="p-4 flex flex-col flex-1">
+                        <p class="text-xs font-semibold text-brand-400 mb-1">${item.category}</p>
+                        <h3 class="text-white font-semibold text-sm leading-tight mb-2 line-clamp-2">${item.title}</h3>
+                        
+                        <div class="flex flex-wrap gap-1 mb-4">
+                            ${item.tags.slice(0,3).map(tag => `<span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full border border-slate-700">#${tag}</span>`).join('')}
+                        </div>
+                        
+                        <div class="mt-auto flex items-center gap-2 pt-3 border-t border-slate-800/50">
+                            <button onclick='openPreview(${JSON.stringify(item).replace(/'/g, "&#39;")})' class="flex-1 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5">
+                                <i class="ph-fill ph-play text-brand-400"></i> Preview
+                            </button>
+                            <a href="${driveUtils.getDownload(item.driveId)}" target="_blank" class="w-9 h-9 flex items-center justify-center bg-brand-500 hover:bg-brand-600 text-white rounded-lg transition-colors shadow-lg shadow-brand-500/20" title="Download">
+                                <i class="ph-bold ph-download-simple"></i>
+                            </a>
+                            <a href="${driveUtils.getView(item.driveId)}" target="_blank" class="w-9 h-9 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-lg transition-colors" title="Open in Drive">
+                                <i class="ph-bold ph-arrow-square-out"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // === STREAMING_CHUNK:Player Logic ===
+        
+        function openPreview(item) {
+            buildPlayer(item);
+            
+            // Show modal
+            els.modal.container.classList.remove('hidden');
+            setTimeout(() => {
+                els.modal.container.classList.remove('opacity-0');
+                els.modal.contentWrapper.classList.remove('scale-95', 'opacity-0');
+                els.modal.contentWrapper.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closePreview() {
+            // Stop Audio Native Player
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
+            
+            // Animate out
+            els.modal.container.classList.add('opacity-0');
+            els.modal.contentWrapper.classList.remove('scale-100', 'opacity-100');
+            els.modal.contentWrapper.classList.add('scale-95', 'opacity-0');
+            
+            // Destroy iframe to stop video playback
+            setTimeout(() => {
+                els.modal.container.classList.add('hidden');
+                els.modal.player.innerHTML = ''; 
+            }, 300);
+        }
+
+        function buildPlayer(item) {
+            els.modal.player.innerHTML = '';
+            
+            if (item.type === 'video') {
+                // Google Drive iframe provides native UI (Play, Quality, Speed, Fullscreen) securely.
+                // We enforce 'aspect-video' so it NEVER collapses to a black line.
+                const previewUrl = driveUtils.getPreview(item.driveId);
+                els.modal.player.innerHTML = `
+                    <div class="w-full aspect-video bg-black relative flex items-center justify-center">
+                        <div class="absolute inset-0 flex items-center justify-center z-0">
+                            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-500"></div>
+                        </div>
+                        <iframe 
+                            src="${previewUrl}" 
+                            class="w-full h-full absolute inset-0 z-10 border-0" 
+                            allow="autoplay; fullscreen; encrypted-media; picture-in-picture" 
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+                `;
+            } else if (item.type === 'audio') {
+                const downloadUrl = driveUtils.getDownload(item.driveId);
+                els.modal.player.innerHTML = `
+                    <div class="w-full bg-slate-900 p-10 flex flex-col items-center justify-center">
+                        <div class="w-24 h-24 bg-brand-500/10 text-brand-400 rounded-full flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(99,102,241,0.15)] ring-1 ring-brand-500/30">
+                            <i class="ph-fill ph-music-notes text-4xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white mb-2 text-center">${item.title}</h3>
+                        <p class="text-slate-400 mb-8 text-sm">Audio Track Preview</p>
+                        <audio controls class="w-full max-w-md" autoplay>
+                            <source src="${downloadUrl}" type="audio/mpeg">
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
+                `;
+                setTimeout(() => {
+                    currentAudio = els.modal.player.querySelector('audio');
+                }, 100);
+            } else if (item.type === 'image') {
+                // Google Drive blocks direct image rendering via download links (Content-Disposition headers).
+                // Using the native iframe preview guarantees it loads flawlessly, just like the videos!
+                const previewUrl = driveUtils.getPreview(item.driveId);
+                els.modal.player.innerHTML = `
+                    <div class="w-full h-[75vh] bg-dark-900 relative flex items-center justify-center">
+                        <div class="absolute inset-0 flex items-center justify-center z-0">
+                            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-500"></div>
+                        </div>
+                        <iframe 
+                            src="${previewUrl}" 
+                            class="w-full h-full absolute inset-0 z-10 border-0" 
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+                `;
+            } else {
+                els.modal.player.innerHTML = `
+                    <div class="p-12 text-center bg-slate-900">
+                        <i class="ph ph-image text-5xl text-slate-500 mb-4"></i>
+                        <h3 class="text-lg font-medium text-white mb-2">Preview Available in Drive</h3>
+                        <a href="${driveUtils.getView(item.driveId)}" target="_blank" class="mt-4 px-6 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-lg inline-flex items-center gap-2 transition-colors">
+                            Open File
+                        </a>
+                    </div>
+                `;
+            }
+        }
+
+        // === STREAMING_CHUNK:Render and Events ===
+        
+        function renderUI() {
+            const data = filterData();
+            
+            // Update Headers
+            els.categoryTitle.textContent = currentCategory;
+            els.resultCount.textContent = `${data.length} item${data.length !== 1 ? 's' : ''}`;
+            
+            // Update Grid
+            if (data.length === 0) {
+                els.grid.innerHTML = '';
+                els.grid.classList.add('hidden');
+                els.empty.classList.remove('hidden');
+                els.empty.classList.add('flex');
+            } else {
+                els.empty.classList.add('hidden');
+                els.empty.classList.remove('flex');
+                els.grid.classList.remove('hidden');
+                els.grid.innerHTML = data.map(createCardHTML).join('');
+            }
+            
+            // Update Sidebar Active State
+            els.sidebarLinks.forEach(link => {
+                if (link.dataset.category === currentCategory) {
+                    link.classList.add('bg-brand-500/10', 'text-brand-400');
+                    link.classList.remove('text-slate-400');
+                } else {
+                    link.classList.remove('bg-brand-500/10', 'text-brand-400');
+                    link.classList.add('text-slate-400');
+                }
+            });
+
+            // Calculate overall stats for header
+            els.stats.videos.textContent = mockResources.filter(r => r.type === 'video').length;
+            els.stats.audio.textContent = mockResources.filter(r => r.type === 'audio').length;
+        }
+
+        // Event Listeners
+        els.sidebarLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                currentCategory = e.currentTarget.dataset.category;
+                renderUI();
+            });
+        });
+
+        els.filterBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                els.filterBtns.forEach(b => {
+                    b.classList.remove('bg-slate-800', 'text-white', 'border-slate-700');
+                    b.classList.add('bg-transparent', 'text-slate-400', 'border-slate-800');
+                });
+                
+                const target = e.currentTarget;
+                target.classList.remove('bg-transparent', 'text-slate-400', 'border-slate-800');
+                target.classList.add('bg-slate-800', 'text-white', 'border-slate-700');
+                
+                currentTypeFilter = target.dataset.type;
+                renderUI();
+            });
+        });
+
+        els.search.addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            renderUI();
+        });
+
+        els.modal.closeBtn.addEventListener('click', closePreview);
+        els.modal.backdrop.addEventListener('click', closePreview);
+        
+        // Escape key to close modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !els.modal.container.classList.contains('hidden')) {
+                closePreview();
+            }
+        });
+
+        // Initialize App
+        renderUI();
+
+    </script>
+</body>
+</html>
