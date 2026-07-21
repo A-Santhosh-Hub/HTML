@@ -467,7 +467,7 @@
                 <button class="border-2 border-gray-200 text-gray-700 font-bold py-3.5 rounded-2xl spring-transform flex items-center justify-center gap-2" onclick="startNewBill()">
                     <i data-lucide="file-text" class="w-5 h-5"></i> Save Only
                 </button>
-                <button class="bg-text-main text-white font-bold py-3.5 rounded-2xl spring-transform shadow-float flex items-center justify-center gap-2" onclick="startNewBill()">
+                <button class="bg-text-main text-white font-bold py-3.5 rounded-2xl spring-transform shadow-float flex items-center justify-center gap-2" onclick="printAndSaveBill()">
                     <i data-lucide="printer" class="w-5 h-5"></i> Print & Save
                 </button>
             </div>
@@ -948,6 +948,116 @@
                 clearCart();
                 generateBillNumber();
             }, 300);
+        }
+
+        // --- Print Logic ---
+        function generateReceiptHTML() {
+            const finalTotal = getCartTotal();
+            const paid = parseInt(document.getElementById('amountPaid').value) || finalTotal;
+            const balance = paid - finalTotal;
+            const billNo = document.getElementById('billNumber').innerText;
+            const date = new Date().toLocaleString('en-IN');
+            
+            const itemsHtml = state.cart.map(item => `
+                <tr>
+                    <td>${item.name}</td>
+                    <td class="center">${item.qty}</td>
+                    <td class="right">₹${item.price * item.qty}</td>
+                </tr>
+            `).join('');
+
+            return `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Receipt ${billNo}</title>
+                    <style>
+                        body { font-family: 'Courier New', Courier, monospace; color: #000; max-width: 80mm; margin: 0 auto; padding: 10px; font-size: 14px; }
+                        .center { text-align: center; }
+                        .bold { font-weight: bold; }
+                        .divider { border-bottom: 2px dashed #000; margin: 12px 0; }
+                        table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+                        th { border-bottom: 1px solid #000; padding-bottom: 5px; text-align: left; }
+                        th.right, td.right { text-align: right; }
+                        th.center, td.center { text-align: center; }
+                        td { padding: 6px 0; vertical-align: top; }
+                        .total-row { display: flex; justify-content: space-between; margin-top: 5px; font-size: 16px; font-weight: bold; }
+                        .sub-row { display: flex; justify-content: space-between; margin-top: 5px; font-size: 14px; color: #333; }
+                    </style>
+                </head>
+                <body>
+                    <div class="center bold" style="font-size: 20px; margin-bottom: 4px;">SanStudio</div>
+                    <div class="center" style="font-size: 12px; margin-bottom: 15px;">Smart Shop Assistant</div>
+                    
+                    <div style="font-size: 12px; line-height: 1.5;">
+                        <div>Bill No: <span class="bold">${billNo}</span></div>
+                        <div>Date: ${date}</div>
+                    </div>
+                    
+                    <div class="divider"></div>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th class="center">Qty</th>
+                                <th class="right">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${itemsHtml}
+                        </tbody>
+                    </table>
+                    
+                    <div class="divider"></div>
+                    
+                    <div class="total-row">
+                        <span>Total Amount:</span>
+                        <span>₹${finalTotal}</span>
+                    </div>
+                    <div class="sub-row">
+                        <span>Paid:</span>
+                        <span>₹${paid}</span>
+                    </div>
+                    <div class="sub-row">
+                        <span>Change Return:</span>
+                        <span>₹${balance > 0 ? balance : 0}</span>
+                    </div>
+                    
+                    <div class="divider"></div>
+                    
+                    <div class="center bold" style="font-size: 14px; margin-bottom: 5px;">Thank you for shopping!</div>
+                    <div class="center" style="font-size: 10px;">Developed by SanStudio</div>
+                </body>
+                </html>
+            `;
+        }
+
+        function printAndSaveBill() {
+            if (state.cart.length === 0) return;
+            
+            // 1. Generate the HTML for the receipt
+            const receipt = generateReceiptHTML();
+            
+            // 2. Create a hidden iframe so we don't need popups
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+            
+            // 3. Write the receipt code into the iframe
+            iframe.contentWindow.document.open();
+            iframe.contentWindow.document.write(receipt);
+            iframe.contentWindow.document.close();
+            
+            // 4. Wait a split second to render, print, then clean up and save
+            setTimeout(() => {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+                document.body.removeChild(iframe);
+                
+                // Now save the bill to local storage and clear the cart just like "Save Only"
+                startNewBill();
+            }, 500);
         }
 
         function holdBill(event) {
