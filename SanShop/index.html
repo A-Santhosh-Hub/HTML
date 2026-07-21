@@ -83,6 +83,9 @@
 </head>
 <body class="text-text-main h-screen flex flex-col overflow-hidden selection:bg-primary selection:text-white">
 
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 w-full max-w-sm px-4 pointer-events-none"></div>
+
     <header class="w-full flex items-center justify-between p-4 md:px-6 shrink-0 z-10 relative">
         <div class="flex items-center gap-3">
             <div class="bg-primary text-white p-2.5 rounded-2xl shadow-float spring-transform">
@@ -229,9 +232,31 @@
                 </button>
                 <h2 class="text-xl font-bold text-gray-800 tracking-tight">Today's Sales</h2>
             </div>
-            <button onclick="clearSalesData()" class="text-sm font-semibold text-red-500 bg-red-50 hover:bg-red-100 px-4 py-2 rounded-2xl spring-transform transition-colors">
-                Clear Data
-            </button>
+            
+            <div class="flex items-center gap-1.5 md:gap-2">
+                <!-- Hidden file input for Sales JSON -->
+                <input type="file" id="importSales" accept=".json" class="hidden" onchange="processImport(event, 'sales')">
+                
+                <button onclick="exportData('sales', 'csv')" class="p-2 bg-green-50 text-green-600 rounded-xl hover:bg-green-100 spring-transform shadow-sm" title="Export to Excel (CSV)">
+                    <i data-lucide="file-spreadsheet" class="w-4 h-4 md:w-5 md:h-5"></i>
+                </button>
+                <button onclick="exportData('sales', 'json')" class="p-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 spring-transform shadow-sm" title="Backup Data (JSON)">
+                    <i data-lucide="download" class="w-4 h-4 md:w-5 md:h-5"></i>
+                </button>
+                <button onclick="document.getElementById('importSales').click()" class="p-2 bg-purple-50 text-purple-600 rounded-xl hover:bg-purple-100 spring-transform shadow-sm" title="Restore Data (JSON)">
+                    <i data-lucide="upload" class="w-4 h-4 md:w-5 md:h-5"></i>
+                </button>
+                
+                <div class="w-px h-6 bg-gray-200 mx-0.5 md:mx-1"></div>
+
+                <button onclick="clearSalesData()" class="text-sm font-semibold text-red-500 bg-red-50 hover:bg-red-100 px-3 md:px-4 py-2 rounded-2xl spring-transform transition-colors hidden sm:block">
+                    Clear Data
+                </button>
+                <!-- Mobile clear button -->
+                <button onclick="clearSalesData()" class="p-2 text-red-500 bg-red-50 hover:bg-red-100 rounded-xl spring-transform transition-colors sm:hidden" title="Clear Data">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+            </div>
         </div>
 
         <!-- Stats Grid -->
@@ -263,9 +288,27 @@
                 </button>
                 <h2 class="text-xl font-bold text-gray-800 tracking-tight">Inventory</h2>
             </div>
-            <button onclick="openProductModal()" class="flex items-center gap-2 text-sm font-semibold text-white bg-primary hover:bg-primary-light px-4 py-2 rounded-2xl spring-transform transition-colors shadow-float">
-                <i data-lucide="plus" class="w-4 h-4"></i> Add Product
-            </button>
+            
+            <div class="flex items-center gap-1.5 md:gap-2">
+                <!-- Hidden file input for Inventory JSON -->
+                <input type="file" id="importProducts" accept=".json" class="hidden" onchange="processImport(event, 'products')">
+                
+                <button onclick="exportData('products', 'csv')" class="p-2 bg-green-50 text-green-600 rounded-xl hover:bg-green-100 spring-transform shadow-sm" title="Export to Excel (CSV)">
+                    <i data-lucide="file-spreadsheet" class="w-4 h-4 md:w-5 md:h-5"></i>
+                </button>
+                <button onclick="exportData('products', 'json')" class="p-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 spring-transform shadow-sm" title="Backup Data (JSON)">
+                    <i data-lucide="download" class="w-4 h-4 md:w-5 md:h-5"></i>
+                </button>
+                <button onclick="document.getElementById('importProducts').click()" class="p-2 bg-purple-50 text-purple-600 rounded-xl hover:bg-purple-100 spring-transform shadow-sm" title="Restore Data (JSON)">
+                    <i data-lucide="upload" class="w-4 h-4 md:w-5 md:h-5"></i>
+                </button>
+                
+                <div class="w-px h-6 bg-gray-200 mx-0.5 md:mx-1"></div>
+
+                <button onclick="openProductModal()" class="flex items-center gap-1.5 text-sm font-semibold text-white bg-primary hover:bg-primary-light px-3 md:px-4 py-2 rounded-xl spring-transform transition-colors shadow-float">
+                    <i data-lucide="plus" class="w-4 h-4 md:w-5 md:h-5"></i> Add <span class="hidden md:inline">Product</span>
+                </button>
+            </div>
         </div>
 
         <!-- Inventory List -->
@@ -1227,6 +1270,116 @@
             renderCategories();
             renderProducts();
             renderInventory();
+        }
+
+        // --- Notifications ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const bgColor = type === 'error' ? 'bg-red-500' : 'bg-gray-800';
+            toast.className = `${bgColor} text-white px-4 py-3 rounded-2xl shadow-float flex items-center justify-center gap-3 transform transition-all duration-300 -translate-y-full opacity-0 max-w-sm mx-auto w-full`;
+            toast.innerHTML = `
+                <i data-lucide="${type === 'error' ? 'alert-circle' : 'check-circle'}" class="w-5 h-5 shrink-0"></i>
+                <span class="font-semibold text-sm text-center">${message}</span>
+            `;
+            container.appendChild(toast);
+            lucide.createIcons();
+            
+            // Slide in
+            requestAnimationFrame(() => {
+                toast.classList.remove('-translate-y-full', 'opacity-0');
+            });
+
+            // Slide out & remove
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // --- Export / Import Logic ---
+        function exportData(type, format) {
+            const data = type === 'sales' ? state.sales : state.products;
+            if (data.length === 0) {
+                showToast(`No ${type} data available to export!`, 'error');
+                return;
+            }
+
+            const filename = `SanStudio_${type}_${new Date().toISOString().split('T')[0]}`;
+            
+            if (format === 'json') {
+                // JSON Export (Exact Backup)
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                triggerDownload(blob, `${filename}.json`);
+                showToast(`Successfully downloaded ${type} backup`);
+                
+            } else if (format === 'csv') {
+                // CSV Export (For Excel)
+                let csvContent = "";
+                const headers = Object.keys(data[0]);
+                csvContent += headers.join(",") + "\n";
+                
+                data.forEach(row => {
+                    const values = headers.map(header => {
+                        let val = row[header];
+                        if (val === null || val === undefined) val = '';
+                        if (typeof val === 'object') {
+                            val = JSON.stringify(val).replace(/"/g, '""'); // Escape inner quotes
+                        } else {
+                            val = String(val).replace(/"/g, '""');
+                        }
+                        return `"${val}"`; // Wrap in quotes to protect commas
+                    });
+                    csvContent += values.join(",") + "\n";
+                });
+                
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                triggerDownload(blob, `${filename}.csv`);
+                showToast(`Successfully exported ${type} to Excel format`);
+            }
+        }
+
+        function triggerDownload(blob, filename) {
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function processImport(event, type) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (!Array.isArray(importedData)) throw new Error("File must contain an array of data.");
+                    
+                    if (type === 'sales') {
+                        state.sales = importedData;
+                        localStorage.setItem('sanstudio_sales', JSON.stringify(state.sales));
+                        renderSales();
+                    } else if (type === 'products') {
+                        state.products = importedData;
+                        localStorage.setItem('sanstudio_products', JSON.stringify(state.products));
+                        renderCategories();
+                        renderProducts();
+                        renderInventory();
+                    }
+                    
+                    showToast(`Successfully restored ${importedData.length} ${type}!`);
+                } catch (err) {
+                    console.error("Import failed", err);
+                    showToast("Failed to import. Invalid JSON file format.", "error");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ''; // Reset input to allow importing same file again if needed
         }
 
         // Run App
