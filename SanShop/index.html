@@ -99,6 +99,9 @@
         </div>
 
         <div class="flex items-center gap-2 md:gap-3">
+            <button class="spring-transform bg-white/80 border border-gray-200 p-2.5 rounded-full text-indigo-600 shadow-sm" onclick="toggleView('inventory')" title="Manage Inventory">
+                <i data-lucide="package" class="w-5 h-5"></i>
+            </button>
             <button class="spring-transform bg-white/80 border border-gray-200 p-2.5 rounded-full text-primary shadow-sm" onclick="toggleView('sales')" title="Today's Sales">
                 <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
             </button>
@@ -241,6 +244,68 @@
         </div>
     </main>
 
+    <!-- Inventory Dashboard View -->
+    <main id="inventoryView" class="hidden flex-1 flex-col overflow-hidden w-full max-w-[1000px] mx-auto p-2 md:p-4 gap-4 animate-enter">
+        <div class="flex items-center justify-between glass-card p-4 rounded-3xl shrink-0">
+            <div class="flex items-center gap-3">
+                <button onclick="toggleView('pos')" class="bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition-colors spring-transform shadow-inner-soft">
+                    <i data-lucide="arrow-left" class="w-5 h-5 text-gray-700"></i>
+                </button>
+                <h2 class="text-xl font-bold text-gray-800 tracking-tight">Inventory</h2>
+            </div>
+            <button onclick="openProductModal()" class="flex items-center gap-2 text-sm font-semibold text-white bg-primary hover:bg-primary-light px-4 py-2 rounded-2xl spring-transform transition-colors shadow-float">
+                <i data-lucide="plus" class="w-4 h-4"></i> Add Product
+            </button>
+        </div>
+
+        <!-- Inventory List -->
+        <div class="flex-1 overflow-y-auto hide-scrollbar glass-card rounded-3xl p-2 md:p-4">
+            <div class="flex flex-col gap-2" id="inventoryList">
+                <!-- Inventory records injected here by JS -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Product Modal -->
+    <div id="productModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden items-center justify-center opacity-0 transition-opacity duration-300 p-4">
+        <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col" id="productModalCard">
+            <div class="bg-gray-50 p-5 border-b border-gray-100 flex justify-between items-center shrink-0">
+                <h2 class="text-xl font-extrabold text-gray-800" id="productModalTitle">Add Product</h2>
+                <button onclick="closeProductModal()" class="bg-gray-200 text-gray-600 p-2 rounded-full spring-transform">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-5 flex flex-col gap-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Product Name</label>
+                    <input type="text" id="prodName" class="w-full bg-white border-2 border-gray-200 font-semibold text-gray-800 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary transition-colors" placeholder="e.g. Milk 1L">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Price (₹)</label>
+                        <input type="number" id="prodPrice" class="w-full bg-white border-2 border-gray-200 font-bold text-gray-800 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary transition-colors" placeholder="0">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Category</label>
+                        <input type="text" id="prodCat" list="categoryList" class="w-full bg-white border-2 border-gray-200 font-semibold text-gray-800 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary transition-colors" placeholder="Category">
+                        <datalist id="categoryList">
+                            <option value="Groceries">
+                            <option value="Snacks">
+                            <option value="Beverages">
+                            <option value="Dairy">
+                            <option value="Personal Care">
+                        </datalist>
+                    </div>
+                </div>
+            </div>
+            <div class="p-5 border-t border-gray-100 bg-gray-50">
+                <button class="w-full bg-primary text-white font-bold py-3.5 rounded-2xl spring-transform shadow-float flex items-center justify-center gap-2" onclick="saveProductData(event)">
+                    <i data-lucide="save" class="w-5 h-5"></i> Save Product
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Edit Total Modal -->
     <div id="editTotalModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden items-center justify-center opacity-0 transition-opacity duration-300">
         <div class="bg-white p-6 rounded-3xl shadow-2xl w-full max-w-sm mx-4 transform scale-95 transition-transform duration-300" id="editTotalCard">
@@ -272,7 +337,24 @@
                 <!-- Amount to Pay -->
                 <div class="text-center">
                     <p class="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-1">Amount to Pay</p>
-                    <p class="text-5xl font-black text-gray-900 tracking-tighter" id="modalTotalPay">₹0</p>
+                    <div id="checkoutTotalDisplay" class="flex items-center justify-center gap-3">
+                        <p class="text-5xl font-black text-gray-900 tracking-tighter" id="modalTotalPay">₹0</p>
+                        <button onclick="toggleCheckoutTotalEdit()" class="text-gray-400 hover:text-primary transition-colors p-2 bg-gray-100 hover:bg-gray-200 rounded-full spring-transform shadow-inner-soft" title="Edit Total">
+                            <i data-lucide="pencil" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    <div id="checkoutTotalEdit" class="hidden items-center justify-center gap-2 mt-2">
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-xl font-bold">₹</span>
+                            <input type="number" id="inlineTotalInput" class="w-36 bg-white border-2 border-gray-200 text-2xl font-bold text-gray-800 rounded-2xl pl-10 pr-3 py-2 focus:outline-none focus:border-primary text-center" placeholder="0">
+                        </div>
+                        <button onclick="saveCheckoutTotal()" class="bg-primary text-white p-3 rounded-2xl spring-transform shadow-md hover:bg-primary-light">
+                            <i data-lucide="check" class="w-5 h-5"></i>
+                        </button>
+                        <button onclick="toggleCheckoutTotalEdit()" class="bg-gray-100 text-gray-600 p-3 rounded-2xl spring-transform hover:bg-gray-200">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Payment Input -->
@@ -322,20 +404,8 @@
 
     <!-- Application Logic -->
     <script>
-        // App State
-        let state = {
-            cart: [],
-            currentCategory: "All",
-            searchQuery: "",
-            amountPaid: "",
-            manualTotal: null,
-            sales: JSON.parse(localStorage.getItem('sanstudio_sales')) || [],
-            isMobileCartOpen: false
-        };
-
-        // Dummy Database
-        const categories = ["All", "Groceries", "Snacks", "Beverages", "Dairy", "Personal Care"];
-        const products = [
+        // Dummy Database (Fallback)
+        const defaultProducts = [
             { id: 1, name: "Aashirvaad Atta 5kg", price: 215, category: "Groceries", stock: 12, color: "bg-amber-100" },
             { id: 2, name: "Tata Salt 1kg", price: 24, category: "Groceries", stock: 45, color: "bg-blue-100" },
             { id: 3, name: "Maggi 2-Min Noodles", price: 14, category: "Snacks", stock: 100, color: "bg-yellow-100" },
@@ -349,6 +419,19 @@
             { id: 11, name: "Red Label Tea 250g", price: 145, category: "Beverages", stock: 18, color: "bg-orange-100" },
             { id: 12, name: "Parle-G Gold", price: 10, category: "Snacks", stock: 200, color: "bg-yellow-100" },
         ];
+
+        // App State
+        let state = {
+            cart: [],
+            products: JSON.parse(localStorage.getItem('sanstudio_products')) || defaultProducts,
+            currentCategory: "All",
+            searchQuery: "",
+            amountPaid: "",
+            manualTotal: null,
+            sales: JSON.parse(localStorage.getItem('sanstudio_sales')) || [],
+            isMobileCartOpen: false,
+            editingProductId: null
+        };
 
         // DOM Elements
         const DOM = {
@@ -368,7 +451,9 @@
             salesList: document.getElementById('salesList'),
             salesTotalRevenue: document.getElementById('salesTotalRevenue'),
             salesTotalBills: document.getElementById('salesTotalBills'),
-            checkoutBtn: document.getElementById('checkoutBtn')
+            checkoutBtn: document.getElementById('checkoutBtn'),
+            inventoryView: document.getElementById('inventoryView'),
+            inventoryList: document.getElementById('inventoryList')
         };
 
         // Initialize App
@@ -386,7 +471,11 @@
         }
 
         function renderCategories() {
-            DOM.categoryContainer.innerHTML = categories.map(cat => `
+            // Dynamically generate categories from current products
+            const uniqueCats = new Set(state.products.map(p => p.category));
+            const dynamicCategories = ["All", ...Array.from(uniqueCats)];
+
+            DOM.categoryContainer.innerHTML = dynamicCategories.map(cat => `
                 <button onclick="setCategory('${cat}')" 
                     class="whitespace-nowrap px-4 py-2 rounded-xl text-sm font-semibold spring-transform transition-colors
                     ${state.currentCategory === cat ? 'bg-text-main text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'}">
@@ -402,7 +491,7 @@
         }
 
         function renderProducts() {
-            const filtered = products.filter(p => 
+            const filtered = state.products.filter(p => 
                 (state.currentCategory === "All" || p.category === state.currentCategory) &&
                 p.name.toLowerCase().includes(state.searchQuery)
             );
@@ -426,7 +515,7 @@
 
         // Cart Logic
         function addToCart(productId) {
-            const product = products.find(p => p.id === productId);
+            const product = state.products.find(p => p.id === productId);
             const existingItem = state.cart.find(i => i.id === productId);
             
             // Reset manual total if items change
@@ -592,6 +681,11 @@
             const modal = document.getElementById('paymentModal');
             const card = document.getElementById('paymentModalCard');
             
+            document.getElementById('checkoutTotalEdit').classList.add('hidden');
+            document.getElementById('checkoutTotalEdit').classList.remove('flex');
+            document.getElementById('checkoutTotalDisplay').classList.remove('hidden');
+            document.getElementById('checkoutTotalDisplay').classList.add('flex');
+            
             document.getElementById('modalTotalPay').innerText = `₹${finalTotal}`;
             document.getElementById('amountPaid').value = '';
             state.amountPaid = '';
@@ -674,6 +768,38 @@
             }
         }
 
+        function toggleCheckoutTotalEdit() {
+            const displayDiv = document.getElementById('checkoutTotalDisplay');
+            const editDiv = document.getElementById('checkoutTotalEdit');
+            
+            if(editDiv.classList.contains('hidden')) {
+                displayDiv.classList.add('hidden');
+                displayDiv.classList.remove('flex');
+                editDiv.classList.remove('hidden');
+                editDiv.classList.add('flex');
+                document.getElementById('inlineTotalInput').value = getCartTotal();
+                document.getElementById('inlineTotalInput').focus();
+            } else {
+                editDiv.classList.add('hidden');
+                editDiv.classList.remove('flex');
+                displayDiv.classList.remove('hidden');
+                displayDiv.classList.add('flex');
+            }
+        }
+
+        function saveCheckoutTotal() {
+            const val = parseFloat(document.getElementById('inlineTotalInput').value);
+            if(!isNaN(val) && val >= 0) {
+                state.manualTotal = val;
+                updateCartUI(); 
+                
+                document.getElementById('modalTotalPay').innerText = `₹${val}`;
+                calculateChange(); 
+                
+                toggleCheckoutTotalEdit();
+            }
+        }
+
         // Helpers
         function generateBillNumber() {
             document.getElementById('billNumber').innerText = '#INV-' + Math.floor(1000 + Math.random() * 9000);
@@ -739,15 +865,23 @@
         }
 
         function toggleView(view) {
+            // Hide everything first
+            DOM.posView.classList.add('hidden');
+            DOM.posView.classList.remove('flex', 'md:flex-row');
+            DOM.salesView.classList.add('hidden');
+            DOM.salesView.classList.remove('flex'); 
+            DOM.inventoryView.classList.add('hidden');
+            DOM.inventoryView.classList.remove('flex'); 
+
             if (view === 'sales') {
-                DOM.posView.classList.add('hidden');
-                DOM.posView.classList.remove('flex', 'md:flex-row');
                 DOM.salesView.classList.remove('hidden');
                 DOM.salesView.classList.add('flex'); 
                 renderSales();
+            } else if (view === 'inventory') {
+                DOM.inventoryView.classList.remove('hidden');
+                DOM.inventoryView.classList.add('flex');
+                renderInventory();
             } else {
-                DOM.salesView.classList.add('hidden');
-                DOM.salesView.classList.remove('flex'); 
                 DOM.posView.classList.remove('hidden');
                 DOM.posView.classList.add('flex', 'md:flex-row');
             }
@@ -807,9 +941,156 @@
             renderSales();
         }
 
+        // Inventory Management Logic
+        function renderInventory() {
+            if (state.products.length === 0) {
+                DOM.inventoryList.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-40 text-gray-400 opacity-60">
+                        <i data-lucide="package-open" class="w-12 h-12 mb-3"></i>
+                        <p class="text-sm font-medium">No products in inventory</p>
+                    </div>
+                `;
+            } else {
+                DOM.inventoryList.innerHTML = state.products.map((p, index) => `
+                    <div class="bg-white border border-gray-100 rounded-xl p-3 shadow-sm flex justify-between items-center animate-enter" style="animation-delay: ${index * 20}ms">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg ${p.color} flex items-center justify-center shrink-0">
+                                <span class="font-bold text-black/30">${p.name.charAt(0)}</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-800 text-sm line-clamp-1">${p.name}</h4>
+                                <p class="text-xs text-gray-500">${p.category} • <span class="font-bold text-primary">₹${p.price}</span></p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button onclick="openProductModal(${p.id})" class="p-2 text-gray-500 hover:text-primary bg-gray-50 hover:bg-primary/10 rounded-lg transition-colors spring-transform">
+                                <i data-lucide="pencil" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="deleteProduct(${p.id})" class="p-2 text-gray-500 hover:text-red-500 bg-gray-50 hover:bg-red-50 rounded-lg transition-colors spring-transform">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            lucide.createIcons();
+        }
+
+        function openProductModal(id = null) {
+            state.editingProductId = id;
+            const modal = document.getElementById('productModal');
+            const card = document.getElementById('productModalCard');
+            const title = document.getElementById('productModalTitle');
+            
+            // Reset fields
+            document.getElementById('prodName').value = '';
+            document.getElementById('prodPrice').value = '';
+            document.getElementById('prodCat').value = 'Groceries';
+
+            if (id) {
+                title.innerText = "Edit Product";
+                const prod = state.products.find(p => p.id === id);
+                if (prod) {
+                    document.getElementById('prodName').value = prod.name;
+                    document.getElementById('prodPrice').value = prod.price;
+                    document.getElementById('prodCat').value = prod.category;
+                }
+            } else {
+                title.innerText = "Add Product";
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                card.classList.remove('scale-95');
+                card.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeProductModal() {
+            const modal = document.getElementById('productModal');
+            const card = document.getElementById('productModalCard');
+            
+            modal.classList.add('opacity-0');
+            card.classList.remove('scale-100');
+            card.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
+        function saveProductData(event) {
+            const name = document.getElementById('prodName').value.trim();
+            const price = parseFloat(document.getElementById('prodPrice').value);
+            let category = document.getElementById('prodCat').value.trim();
+
+            if (!name || isNaN(price) || price < 0 || !category) {
+                const btn = event.currentTarget;
+                const origHtml = btn.innerHTML;
+                btn.innerHTML = 'Invalid Details!';
+                btn.classList.add('!bg-red-500');
+                setTimeout(() => {
+                    btn.innerHTML = origHtml;
+                    btn.classList.remove('!bg-red-500');
+                }, 1500);
+                return;
+            }
+
+            if (state.editingProductId) {
+                const index = state.products.findIndex(p => p.id === state.editingProductId);
+                if (index > -1) {
+                    state.products[index].name = name;
+                    state.products[index].price = price;
+                    state.products[index].category = category;
+                }
+            } else {
+                const colors = ['bg-amber-100', 'bg-blue-100', 'bg-yellow-100', 'bg-red-100', 'bg-green-100', 'bg-orange-100', 'bg-purple-100', 'bg-pink-100', 'bg-teal-100', 'bg-indigo-100'];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                state.products.push({
+                    id: Date.now(),
+                    name,
+                    price,
+                    category,
+                    stock: 100,
+                    color: randomColor
+                });
+            }
+
+            localStorage.setItem('sanstudio_products', JSON.stringify(state.products));
+            renderCategories();
+            renderProducts();
+            renderInventory();
+            closeProductModal();
+            
+            // Sync active cart items if modified
+            state.cart.forEach(item => {
+                const updatedProd = state.products.find(p => p.id === item.id);
+                if(updatedProd) {
+                    item.name = updatedProd.name;
+                    item.price = updatedProd.price;
+                }
+            });
+            updateCartUI();
+        }
+
+        function deleteProduct(id) {
+            state.products = state.products.filter(p => p.id !== id);
+            localStorage.setItem('sanstudio_products', JSON.stringify(state.products));
+            
+            // Remove from cart if active
+            state.cart = state.cart.filter(item => item.id !== id);
+            updateCartUI();
+            
+            renderCategories();
+            renderProducts();
+            renderInventory();
+        }
+
         // Run App
         window.onload = initApp;
-
     </script>
 </body>
 </html>
