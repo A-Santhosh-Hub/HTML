@@ -117,12 +117,22 @@
         <section class="flex-1 flex flex-col min-w-0 glass-card rounded-3xl shadow-soft overflow-hidden p-3 md:p-5 pb-20 md:pb-5 relative z-0">
             <!-- Search & Categories -->
             <div class="flex flex-col gap-4 mb-4 shrink-0">
-                <div class="relative">
-                    <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5"></i>
-                    <input type="text" id="searchInput" placeholder="Search products..." 
-                        class="w-full bg-white/60 border border-gray-200 text-gray-800 placeholder-gray-400 rounded-2xl pl-12 pr-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-medium">
+                <div class="flex gap-2">
+                    <div class="relative flex-1">
+                        <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                        <input type="text" id="searchInput" placeholder="Search products..." 
+                            class="w-full bg-white/60 border border-gray-200 text-gray-800 placeholder-gray-400 rounded-2xl pl-12 pr-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-medium">
+                    </div>
+                    <button onclick="openCustomItemModal()" class="bg-primary text-white p-3.5 rounded-2xl spring-transform shadow-sm flex items-center justify-center shrink-0" title="Add Custom Ad-Hoc Item">
+                        <i data-lucide="plus" class="w-5 h-5"></i>
+                    </button>
                 </div>
                 
+                <!-- Quick Packs / Combos -->
+                <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-1" id="combosContainer">
+                    <!-- Combos injected here -->
+                </div>
+
                 <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-1" id="categoryContainer">
                     <!-- Categories injected here -->
                 </div>
@@ -306,6 +316,32 @@
         </div>
     </div>
 
+    <!-- Custom Item Modal -->
+    <div id="customItemModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden items-center justify-center opacity-0 transition-opacity duration-300 p-4">
+        <div class="bg-white p-6 rounded-3xl shadow-2xl w-full max-w-sm mx-4 transform scale-95 transition-transform duration-300" id="customItemCard">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gray-800">Quick Custom Item</h3>
+                <button onclick="closeCustomItemModal()" class="text-gray-400 hover:text-gray-600 bg-gray-100 rounded-full p-1 spring-transform">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-gray-700 mb-1">Item Name (Optional)</label>
+                <input type="text" id="customItemName" class="w-full bg-gray-50 border border-gray-200 font-medium text-gray-800 rounded-xl px-4 py-3 focus:outline-none focus:border-primary" placeholder="e.g. Loose Sugar">
+            </div>
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-gray-700 mb-1">Price (₹)</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">₹</span>
+                    <input type="number" id="customItemPrice" class="w-full bg-gray-50 border border-gray-200 text-xl font-bold text-gray-800 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-primary" placeholder="0">
+                </div>
+            </div>
+            <button onclick="saveCustomItem(event)" class="w-full bg-primary text-white font-bold py-3.5 rounded-2xl spring-transform shadow-float flex justify-center items-center gap-2">
+                <i data-lucide="shopping-bag" class="w-5 h-5"></i> Add to Bill
+            </button>
+        </div>
+    </div>
+
     <!-- Edit Total Modal -->
     <div id="editTotalModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden items-center justify-center opacity-0 transition-opacity duration-300">
         <div class="bg-white p-6 rounded-3xl shadow-2xl w-full max-w-sm mx-4 transform scale-95 transition-transform duration-300" id="editTotalCard">
@@ -430,12 +466,18 @@
             manualTotal: null,
             sales: JSON.parse(localStorage.getItem('sanstudio_sales')) || [],
             isMobileCartOpen: false,
-            editingProductId: null
+            editingProductId: null,
+            combos: [
+                { id: 101, name: "Morning", icon: "sunrise", items: [{name: "Amul Milk 1L", price: 68}, {name: "Eggs (6)", price: 45}, {name: "Bread", price: 40}] },
+                { id: 102, name: "Tea Time", icon: "coffee", items: [{name: "Tea Powder", price: 145}, {name: "Biscuits", price: 20}] },
+                { id: 103, name: "Cleaning", icon: "sparkles", items: [{name: "Soap", price: 35}, {name: "Detergent", price: 130}] }
+            ]
         };
 
         // DOM Elements
         const DOM = {
             categoryContainer: document.getElementById('categoryContainer'),
+            combosContainer: document.getElementById('combosContainer'),
             productGrid: document.getElementById('productGrid'),
             cartItems: document.getElementById('cartItems'),
             cartSubtotal: document.getElementById('cartSubtotal'),
@@ -459,6 +501,7 @@
         // Initialize App
         function initApp() {
             lucide.createIcons();
+            renderCombos();
             renderCategories();
             renderProducts();
             generateBillNumber();
@@ -488,6 +531,40 @@
             state.currentCategory = cat;
             renderCategories();
             renderProducts();
+        }
+
+        function renderCombos() {
+            DOM.combosContainer.innerHTML = state.combos.map(combo => `
+                <button onclick="addComboToCart(${combo.id})" 
+                    class="flex items-center gap-2 whitespace-nowrap px-4 py-2.5 rounded-2xl text-sm font-bold bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 spring-transform transition-colors shadow-sm">
+                    <i data-lucide="${combo.icon}" class="w-4 h-4"></i> ${combo.name} Pack
+                </button>
+            `).join('');
+        }
+
+        function addComboToCart(comboId) {
+            const combo = state.combos.find(c => c.id === comboId);
+            if(!combo) return;
+            
+            combo.items.forEach(comboItem => {
+                // Check if an item with this exact name is already in the cart to increase quantity
+                const existingItem = state.cart.find(i => i.name === comboItem.name);
+                if (existingItem) {
+                    existingItem.qty += 1;
+                } else {
+                    // Generate a unique numerical ID for ad-hoc combo items
+                    const uniqueId = Date.now() + Math.floor(Math.random() * 1000);
+                    state.cart.push({ 
+                        id: uniqueId, 
+                        name: comboItem.name, 
+                        price: comboItem.price, 
+                        qty: 1
+                    });
+                }
+            });
+            
+            state.manualTotal = null; // Reset custom total
+            updateCartUI();
         }
 
         function renderProducts() {
@@ -845,6 +922,69 @@
                     if(state.isMobileCartOpen) toggleMobileCart();
                 }, 500);
             }
+        }
+
+        // Custom Item Logic
+        function openCustomItemModal() {
+            document.getElementById('customItemName').value = '';
+            document.getElementById('customItemPrice').value = '';
+            const modal = document.getElementById('customItemModal');
+            const card = document.getElementById('customItemCard');
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                card.classList.remove('scale-95');
+                card.classList.add('scale-100');
+                document.getElementById('customItemPrice').focus();
+            }, 10);
+        }
+
+        function closeCustomItemModal() {
+            const modal = document.getElementById('customItemModal');
+            const card = document.getElementById('customItemCard');
+            
+            modal.classList.add('opacity-0');
+            card.classList.remove('scale-100');
+            card.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
+        function saveCustomItem(event) {
+            let name = document.getElementById('customItemName').value.trim();
+            const price = parseFloat(document.getElementById('customItemPrice').value);
+            
+            if(isNaN(price) || price < 0) {
+                const btn = event.currentTarget;
+                btn.classList.add('!bg-red-500');
+                btn.innerHTML = "Enter Valid Price!";
+                setTimeout(() => {
+                    btn.classList.remove('!bg-red-500');
+                    btn.innerHTML = `<i data-lucide="shopping-bag" class="w-5 h-5"></i> Add to Bill`;
+                    lucide.createIcons();
+                }, 1500);
+                return;
+            }
+
+            if(!name) name = "Custom Item";
+
+            const uniqueId = Date.now() + Math.floor(Math.random() * 1000);
+            
+            state.cart.push({
+                id: uniqueId,
+                name: name,
+                price: price,
+                qty: 1
+            });
+
+            state.manualTotal = null;
+            updateCartUI();
+            closeCustomItemModal();
         }
 
         // Local Sales Dashboard Logic
