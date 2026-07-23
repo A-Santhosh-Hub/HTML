@@ -6,6 +6,7 @@
     <title>SanStudio Smart Shop</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f0f2f5; -webkit-tap-highlight-color: transparent; }
@@ -94,6 +95,9 @@
             </button>
             <button onclick="toggleView('inventory')" class="p-2.5 rounded-full hover:bg-slate-200 transition-colors bg-white shadow-sm touch-active" title="Inventory Management">
                 <i data-lucide="package" class="w-5 h-5 text-slate-600"></i>
+            </button>
+            <button onclick="toggleView('settings')" class="p-2.5 rounded-full hover:bg-slate-200 transition-colors bg-white shadow-sm touch-active" title="Settings">
+                <i data-lucide="settings" class="w-5 h-5 text-slate-600"></i>
             </button>
         </div>
     </header>
@@ -225,6 +229,17 @@
             </div>
             
             <div class="p-6 space-y-6">
+                <!-- UPI QR Section -->
+                <div class="flex flex-col items-center border-b border-slate-100 pb-5">
+                    <button id="showQrBtn" onclick="generateUPIQR()" class="bg-emerald-100 text-emerald-700 px-6 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-emerald-200 transition-colors touch-active w-full">
+                        <i data-lucide="qr-code" class="w-5 h-5"></i> Generate UPI QR Code
+                    </button>
+                    <div id="qrContainer" class="hidden flex-col items-center justify-center mt-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm w-full">
+                        <canvas id="upiQrCanvas"></canvas>
+                        <p class="text-sm text-slate-500 mt-3 font-semibold text-center">Scan with any UPI App<br><span class="text-xs text-slate-400">(Amount will be auto-filled)</span></p>
+                    </div>
+                </div>
+
                 <div>
                     <label class="block text-sm font-semibold text-slate-500 mb-3">Quick Cash</label>
                     <div class="grid grid-cols-4 gap-2">
@@ -416,6 +431,28 @@
         </div>
     </div>
 
+    <!-- SETTINGS VIEW -->
+    <main id="settingsView" class="flex-1 bg-white flex flex-col hidden overflow-hidden relative">
+        <div class="p-4 md:p-8 flex flex-col h-full max-w-2xl mx-auto w-full">
+            <div class="mb-6">
+                <h2 class="text-3xl font-extrabold text-slate-900">Settings</h2>
+                <p class="text-slate-500 font-medium">Configure shop details & UPI</p>
+            </div>
+            <div class="bg-slate-50 p-6 rounded-3xl border border-slate-100 space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-500 mb-2">Shop Name</label>
+                    <input type="text" id="settingShopName" class="w-full bg-white border border-slate-200 rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-slate-800">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-500 mb-2">UPI ID (For QR Payments)</label>
+                    <input type="text" id="settingUpiId" placeholder="e.g. yournumber@ybl or shop@upi" class="w-full bg-white border border-slate-200 rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-slate-800">
+                    <p class="text-xs text-slate-400 mt-2">Enter your GPay, PhonePe, or Paytm UPI ID to automatically generate payment QRs with pre-filled amounts.</p>
+                </div>
+                <button onclick="saveSettings()" class="w-full sm:w-auto bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold shadow-md hover:bg-indigo-700 transition-colors touch-active">Save Changes</button>
+            </div>
+        </div>
+    </main>
+
     <div id="toast-container"></div>
 
     <script>
@@ -438,8 +475,9 @@
             currentCategory: "All",
             searchQuery: "",
             amountPaid: "",
-            manualCartTotal: null, // Allow custom total editing
+            manualCartTotal: null, 
             sales: JSON.parse(localStorage.getItem('sanstudio_sales')) || [],
+            settings: JSON.parse(localStorage.getItem('sanstudio_settings')) || { shopName: 'SanStudio', upiId: '' }
         };
 
         let isMobileCartOpen = false;
@@ -455,6 +493,7 @@
             posView: document.getElementById('posView'),
             salesView: document.getElementById('salesView'),
             inventoryView: document.getElementById('inventoryView'),
+            settingsView: document.getElementById('settingsView'),
             
             salesList: document.getElementById('salesList'),
             salesTotalRevenue: document.getElementById('salesTotalRevenue'),
@@ -481,10 +520,12 @@
             DOM.posView.classList.add('hidden');
             DOM.salesView.classList.add('hidden');
             DOM.inventoryView.classList.add('hidden');
+            DOM.settingsView.classList.add('hidden');
             
             DOM.posView.classList.remove('flex', 'md:flex-row');
             DOM.salesView.classList.remove('flex');
             DOM.inventoryView.classList.remove('flex');
+            DOM.settingsView.classList.remove('flex');
 
             if (view === 'pos') {
                 DOM.posView.classList.remove('hidden');
@@ -498,6 +539,9 @@
                 DOM.inventoryView.classList.remove('hidden');
                 DOM.inventoryView.classList.add('flex');
                 renderInventory();
+            } else if (view === 'settings') {
+                DOM.settingsView.classList.remove('hidden');
+                DOM.settingsView.classList.add('flex');
             }
         }
 
@@ -682,6 +726,11 @@
             document.getElementById('payAmount').innerText = `₹${finalTotal}`;
             document.getElementById('amountPaid').value = '';
             document.getElementById('changeAmount').innerText = '₹0';
+            
+            // Reset QR Code UI when modal opens
+            document.getElementById('qrContainer').classList.add('hidden');
+            document.getElementById('qrContainer').classList.remove('flex');
+            document.getElementById('showQrBtn').classList.remove('hidden');
             
             modal.classList.remove('hidden');
             modal.classList.add('flex');
@@ -1081,6 +1130,57 @@
             }
         }
 
+        // --- Settings & UPI QR Logic ---
+        function saveSettings() {
+            const name = document.getElementById('settingShopName').value;
+            const upi = document.getElementById('settingUpiId').value;
+            state.settings.shopName = name || 'SanStudio';
+            state.settings.upiId = upi;
+            localStorage.setItem('sanstudio_settings', JSON.stringify(state.settings));
+            showToast("Settings Saved!");
+        }
+
+        function generateUPIQR() {
+            if (!state.settings.upiId) {
+                showToast("Please set up your UPI ID in Settings first!");
+                closePayment();
+                toggleView('settings');
+                return;
+            }
+
+            const subtotal = state.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const finalTotal = state.manualCartTotal !== null ? state.manualCartTotal : subtotal;
+            
+            // Format for UPI Deep Link
+            const upiId = encodeURIComponent(state.settings.upiId);
+            const shopName = encodeURIComponent(state.settings.shopName);
+            const amount = parseFloat(finalTotal).toFixed(2);
+            
+            // Standard UPI String
+            const upiUrl = `upi://pay?pa=${upiId}&pn=${shopName}&am=${amount}&cu=INR`;
+
+            const canvas = document.getElementById('upiQrCanvas');
+            
+            // Generate QR using QRious library
+            new QRious({
+                element: canvas,
+                value: upiUrl,
+                size: 200,
+                background: 'white',
+                foreground: '#0f172a' // Tailwind slate-900
+            });
+
+            // Toggle UI Elements
+            document.getElementById('qrContainer').classList.remove('hidden');
+            document.getElementById('qrContainer').classList.add('flex');
+            document.getElementById('showQrBtn').classList.add('hidden');
+            
+            // Pre-fill amount paid automatically since it's an exact digital payment
+            document.getElementById('amountPaid').value = finalTotal;
+            calculateChange();
+            showToast("QR Code Generated!");
+        }
+
         // Setup Event Listeners
         document.getElementById('searchInput').addEventListener('input', (e) => {
             state.searchQuery = e.target.value;
@@ -1094,6 +1194,10 @@
             renderCategories();
             renderProducts();
             updateCartUI();
+            
+            // Load Settings UI
+            document.getElementById('settingShopName').value = state.settings.shopName || '';
+            document.getElementById('settingUpiId').value = state.settings.upiId || '';
         }
 
         window.onload = initApp;
