@@ -186,7 +186,7 @@
                     <div class="flex justify-between items-end border-t border-slate-100 pt-3">
                         <span class="text-slate-800 font-bold text-lg">Total</span>
                         <div class="flex items-center gap-2">
-                            <button onclick="editTotal()" class="text-slate-400 hover:text-indigo-600 p-1">
+                            <button onclick="openEditTotalModal(false)" class="text-slate-400 hover:text-indigo-600 p-1 touch-active">
                                 <i data-lucide="pencil" class="w-4 h-4"></i>
                             </button>
                             <span id="cartTotal" class="text-3xl font-extrabold text-slate-900 tracking-tight">₹0</span>
@@ -220,7 +220,7 @@
                 <div class="flex items-center justify-between mt-4">
                     <span class="text-slate-600 font-medium">Amount to Pay</span>
                     <div class="flex items-center gap-2">
-                        <button onclick="editModalTotal()" class="text-indigo-400 hover:text-indigo-600 p-1">
+                        <button onclick="openEditTotalModal(true)" class="text-indigo-400 hover:text-indigo-600 p-1 touch-active">
                             <i data-lucide="pencil" class="w-4 h-4"></i>
                         </button>
                         <span id="payAmount" class="text-4xl font-extrabold text-indigo-600">₹0</span>
@@ -271,6 +271,19 @@
                         <i data-lucide="printer" class="w-5 h-5"></i> Print
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT TOTAL MODAL -->
+    <div id="editTotalModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[60] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-[32px] w-full max-w-sm shadow-2xl p-6 transition-all duration-300 scale-95 opacity-0" id="editTotalModalCard">
+            <h2 class="text-xl font-bold text-slate-800 mb-4">Edit Total Amount</h2>
+            <label class="block text-sm font-semibold text-slate-500 mb-2">New Total (₹)</label>
+            <input type="number" id="newTotalInput" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 mb-5 text-2xl font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+            <div class="flex gap-3">
+                <button onclick="closeEditTotalModal()" class="flex-1 py-3 bg-slate-100 rounded-xl font-bold text-slate-600 touch-active">Cancel</button>
+                <button onclick="saveNewTotal()" class="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-bold shadow-md shadow-indigo-200 touch-active">Save</button>
             </div>
         </div>
     </div>
@@ -622,14 +635,59 @@
             updateCartUI();
         }
 
-        function editTotal() {
+        let isEditingFromModal = false;
+
+        function openEditTotalModal(fromCheckout = false) {
+            isEditingFromModal = fromCheckout;
             const subtotal = state.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             const currentTotal = state.manualCartTotal !== null ? state.manualCartTotal : subtotal;
-            const newTotal = prompt("Enter new total amount:", currentTotal);
             
-            if (newTotal !== null && !isNaN(newTotal) && newTotal !== "") {
-                state.manualCartTotal = parseFloat(newTotal);
+            document.getElementById('newTotalInput').value = currentTotal;
+            
+            const modal = document.getElementById('editTotalModal');
+            const card = document.getElementById('editTotalModalCard');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                card.classList.remove('scale-95', 'opacity-0');
+                card.classList.add('scale-100', 'opacity-100');
+                document.getElementById('newTotalInput').focus();
+            }, 10);
+        }
+
+        function closeEditTotalModal() {
+            const modal = document.getElementById('editTotalModal');
+            const card = document.getElementById('editTotalModalCard');
+            card.classList.remove('scale-100', 'opacity-100');
+            card.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
+        function saveNewTotal() {
+            const inputVal = document.getElementById('newTotalInput').value;
+            const newTotal = parseFloat(inputVal);
+            
+            if (!isNaN(newTotal) && newTotal >= 0) {
+                state.manualCartTotal = newTotal;
                 updateCartUI();
+                
+                if (isEditingFromModal) {
+                    // Instantly update the Checkout Modal UI
+                    document.getElementById('payAmount').innerText = `₹${newTotal}`;
+                    calculateChange();
+                    
+                    // If QR is already generated, regenerate it with the new total
+                    const qrContainer = document.getElementById('qrContainer');
+                    if (!qrContainer.classList.contains('hidden')) {
+                        generateUPIQR();
+                    }
+                }
+                closeEditTotalModal();
+            } else {
+                showToast("Please enter a valid amount");
             }
         }
 
@@ -740,14 +798,6 @@
                 card.classList.remove('scale-95', 'opacity-0');
                 card.classList.add('scale-100', 'opacity-100');
             }, 10);
-        }
-
-        function editModalTotal() {
-            editTotal(); // reuse function
-            const subtotal = state.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            const finalTotal = state.manualCartTotal !== null ? state.manualCartTotal : subtotal;
-            document.getElementById('payAmount').innerText = `₹${finalTotal}`;
-            calculateChange();
         }
 
         function closePayment() {
