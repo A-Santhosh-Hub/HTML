@@ -89,7 +89,7 @@
 
 # Project 43 SanVibe ---> [ https://a-santhosh-hub.github.io/WEB_APPLICATION-S/SanVibe/test.html]
 
-# Project 45 SanShop [ Now WORKING ] ---> [ https://a-santhosh-hub.github.io/HTML/SanShop/ ]
+# Project 45 SanShop  ---> [ https://a-santhosh-hub.github.io/HTML/SanShop/ ]
 
 # Project   https://santhosh2024.neocities.org/skill/in ---[ SKILL ]
 
