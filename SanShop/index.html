@@ -115,7 +115,10 @@
                         <input type="text" id="searchInput" placeholder="Search products..." 
                             class="w-full bg-white border-none rounded-2xl py-3 pl-12 pr-4 shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none text-slate-700 font-medium transition-shadow placeholder-slate-400 text-lg">
                     </div>
-                    <button onclick="openCustomItemModal()" class="bg-white px-4 rounded-2xl shadow-sm text-indigo-600 hover:bg-indigo-50 flex items-center justify-center touch-active transition-colors font-semibold">
+                    <button onclick="openCalculator()" class="bg-indigo-50 px-4 rounded-2xl shadow-sm text-indigo-600 hover:bg-indigo-100 flex items-center justify-center touch-active transition-colors font-semibold" title="Quick Calculator">
+                        <i data-lucide="calculator" class="w-6 h-6"></i>
+                    </button>
+                    <button onclick="openCustomItemModal()" class="bg-white px-4 rounded-2xl shadow-sm text-indigo-600 hover:bg-indigo-50 flex items-center justify-center touch-active transition-colors font-semibold" title="Add Custom Item">
                         <i data-lucide="plus" class="w-6 h-6"></i>
                     </button>
                 </div>
@@ -465,6 +468,44 @@
             </div>
         </div>
     </main>
+
+    <!-- QUICK CALCULATOR MODAL -->
+    <div id="calculatorModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[80] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-[32px] w-full max-w-xs shadow-2xl p-6 transition-all duration-300 scale-95 opacity-0" id="calculatorCard">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-slate-800">Calculator</h2>
+                <button onclick="closeCalculator()" class="p-2 bg-slate-50 rounded-full text-slate-500 hover:text-slate-800 touch-active transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-4 text-right overflow-hidden shadow-inner">
+                <span id="calcDisplay" class="text-3xl font-extrabold text-slate-800 tracking-tight break-all">0</span>
+            </div>
+            <div class="grid grid-cols-4 gap-2">
+                <button onclick="clearCalc()" class="col-span-2 py-3 bg-red-100 text-red-600 rounded-xl font-bold text-lg touch-active hover:bg-red-200 transition-colors">C</button>
+                <button onclick="calcInput('/')" class="py-3 bg-indigo-50 text-indigo-700 rounded-xl font-bold text-lg touch-active hover:bg-indigo-100 transition-colors">÷</button>
+                <button onclick="calcInput('*')" class="py-3 bg-indigo-50 text-indigo-700 rounded-xl font-bold text-lg touch-active hover:bg-indigo-100 transition-colors">×</button>
+                
+                <button onclick="calcInput('7')" class="py-3 bg-white border border-slate-100 shadow-sm text-slate-800 rounded-xl font-bold text-lg touch-active hover:bg-slate-50 transition-colors">7</button>
+                <button onclick="calcInput('8')" class="py-3 bg-white border border-slate-100 shadow-sm text-slate-800 rounded-xl font-bold text-lg touch-active hover:bg-slate-50 transition-colors">8</button>
+                <button onclick="calcInput('9')" class="py-3 bg-white border border-slate-100 shadow-sm text-slate-800 rounded-xl font-bold text-lg touch-active hover:bg-slate-50 transition-colors">9</button>
+                <button onclick="calcInput('-')" class="py-3 bg-indigo-50 text-indigo-700 rounded-xl font-bold text-lg touch-active hover:bg-indigo-100 transition-colors">-</button>
+                
+                <button onclick="calcInput('4')" class="py-3 bg-white border border-slate-100 shadow-sm text-slate-800 rounded-xl font-bold text-lg touch-active hover:bg-slate-50 transition-colors">4</button>
+                <button onclick="calcInput('5')" class="py-3 bg-white border border-slate-100 shadow-sm text-slate-800 rounded-xl font-bold text-lg touch-active hover:bg-slate-50 transition-colors">5</button>
+                <button onclick="calcInput('6')" class="py-3 bg-white border border-slate-100 shadow-sm text-slate-800 rounded-xl font-bold text-lg touch-active hover:bg-slate-50 transition-colors">6</button>
+                <button onclick="calcInput('+')" class="py-3 bg-indigo-50 text-indigo-700 rounded-xl font-bold text-lg touch-active hover:bg-indigo-100 transition-colors">+</button>
+                
+                <button onclick="calcInput('1')" class="py-3 bg-white border border-slate-100 shadow-sm text-slate-800 rounded-xl font-bold text-lg touch-active hover:bg-slate-50 transition-colors">1</button>
+                <button onclick="calcInput('2')" class="py-3 bg-white border border-slate-100 shadow-sm text-slate-800 rounded-xl font-bold text-lg touch-active hover:bg-slate-50 transition-colors">2</button>
+                <button onclick="calcInput('3')" class="py-3 bg-white border border-slate-100 shadow-sm text-slate-800 rounded-xl font-bold text-lg touch-active hover:bg-slate-50 transition-colors">3</button>
+                <button onclick="calcResult()" class="row-span-2 py-3 bg-indigo-600 shadow-lg shadow-indigo-200 text-white rounded-xl font-bold text-2xl touch-active hover:bg-indigo-700 transition-colors">=</button>
+                
+                <button onclick="calcInput('0')" class="col-span-2 py-3 bg-white border border-slate-100 shadow-sm text-slate-800 rounded-xl font-bold text-lg touch-active hover:bg-slate-50 transition-colors">0</button>
+                <button onclick="calcInput('.')" class="py-3 bg-white border border-slate-100 shadow-sm text-slate-800 rounded-xl font-bold text-lg touch-active hover:bg-slate-50 transition-colors">.</button>
+            </div>
+        </div>
+    </div>
 
     <div id="toast-container"></div>
 
@@ -1229,6 +1270,74 @@
             document.getElementById('amountPaid').value = finalTotal;
             calculateChange();
             showToast("QR Code Generated!");
+        }
+
+        // --- Quick Calculator Logic ---
+        let calcExpression = "";
+        
+        function openCalculator() {
+            calcExpression = "";
+            document.getElementById('calcDisplay').innerText = "0";
+            const modal = document.getElementById('calculatorModal');
+            const card = document.getElementById('calculatorCard');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                card.classList.remove('scale-95', 'opacity-0');
+                card.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeCalculator() {
+            const modal = document.getElementById('calculatorModal');
+            const card = document.getElementById('calculatorCard');
+            card.classList.remove('scale-100', 'opacity-100');
+            card.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
+        function calcInput(val) {
+            if (calcExpression === "Error") calcExpression = "";
+            // Prevent entering operators first
+            if (calcExpression === "" && ['+', '*', '/'].includes(val)) return;
+            
+            calcExpression += val;
+            
+            // Format math symbols for display nicely
+            let displayStr = calcExpression.replace(/\*/g, '×').replace(/\//g, '÷');
+            document.getElementById('calcDisplay').innerText = displayStr;
+        }
+
+        function clearCalc() {
+            calcExpression = "";
+            document.getElementById('calcDisplay').innerText = "0";
+        }
+
+        function calcResult() {
+            try {
+                if(!calcExpression) return;
+                
+                // Heavily sanitize input to ensure security (only allow math chars)
+                const sanitized = calcExpression.replace(/[^-()\d/*+.]/g, '');
+                let result = new Function('return ' + sanitized)();
+                
+                // Prevent infinity crashes
+                if (!isFinite(result)) throw new Error("Math Error");
+                
+                // Handle decimals cleanly
+                if (!Number.isInteger(result)) {
+                    result = parseFloat(result.toFixed(4)); 
+                }
+                
+                calcExpression = String(result);
+                document.getElementById('calcDisplay').innerText = calcExpression;
+            } catch(e) {
+                calcExpression = "Error";
+                document.getElementById('calcDisplay').innerText = "Error";
+            }
         }
 
         // Setup Event Listeners
