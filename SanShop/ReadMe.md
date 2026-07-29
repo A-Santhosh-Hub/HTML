@@ -308,4 +308,4 @@ This project is licensed under the **MIT License**.
 
 Modern Web Applications • Business Tools • POS Systems • UI/UX Design • JavaScript Development
 
-Made with ❤️ by **SanStudio**
+Made with ❤️ by **SanStudio 2026**
