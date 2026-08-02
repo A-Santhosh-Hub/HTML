@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+    <meta name="description" content="Find. Preview. Download. Instantly.">
+    <title>SanStudio Subtitle Hub</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Phosphor Icons (Premium Iconography) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Google Fonts (Inter / Roboto Flex fallback) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Roboto+Flex:opsz,wght@8..144,300..800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Roboto Flex', 'system-ui', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+                    },
+                    colors: {
+                        primary: 'var(--color-primary)',
+                        'primary-light': 'var(--color-primary-light)',
+                        surface: 'var(--color-surface)',
+                        'surface-glass': 'var(--color-surface-glass)',
+                        background: 'var(--color-background)',
+                        text: 'var(--color-text)',
+                        'text-muted': 'var(--color-text-muted)',
+                        border: 'var(--color-border)',
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(0,0,0,0.08)',
+                        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.05)',
+                        'float': '0 20px 40px -5px rgba(0, 0, 0, 0.1)',
+                        'origin': '0 4px 20px rgba(0,0,0,0.05), inset 0 0 0 0.5px rgba(255,255,255,0.4)',
+                    },
+                    animation: {
+                        'spring-up': 'springUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+                        'fade-in': 'fadeIn 0.3s ease-out forwards',
+                        'ripple': 'ripple 0.6s linear',
+                        'scale-in': 'scaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+                    },
+                    keyframes: {
+                        springUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        ripple: {
+                            '0%': { transform: 'scale(0)', opacity: '0.5' },
+                            '100%': { transform: 'scale(4)', opacity: '0' },
+                        },
+                        scaleIn: {
+                            '0%': { transform: 'scale(0.95)', opacity: '0' },
+                            '100%': { transform: 'scale(1)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            /* OriginOS / Android 16 Light Theme */
+            --color-primary: #0055FF;
+            --color-primary-light: #E5EEFF;
+            --color-background: #F2F4F8; /* Slightly deeper gray for OriginOS depth */
+            --color-surface: #FFFFFF;
+            --color-surface-glass: rgba(255, 255, 255, 0.75);
+            --color-text: #1A1D20;
+            --color-text-muted: #64748B;
+            --color-border: rgba(0, 0, 0, 0.06);
+            
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --glass-blur: 24px;
+        }
+
+        .dark {
+            /* OLED Black / Material You Dark */
+            --color-primary: #3377FF;
+            --color-primary-light: #1A2942;
+            --color-background: #000000;
+            --color-surface: #121212;
+            --color-surface-glass: rgba(28, 28, 30, 0.75);
+            --color-text: #F8FAFC;
+            --color-text-muted: #94A3B8;
+            --color-border: rgba(255, 255, 255, 0.08);
+            
+            --glass-border: rgba(255, 255, 255, 0.05);
+        }
+
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--color-background);
+            color: var(--color-text);
+            overflow-x: hidden;
+            overscroll-behavior-y: none; /* Prevent pull-to-refresh for native feel */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Glassmorphism utility */
+        .glass {
+            background: var(--color-surface-glass);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--tw-shadow-origin);
+        }
+
+        /* Hide scrollbars structurally but allow scrolling */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Custom Scrollbar for Previews */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: var(--color-border);
+            border-radius: 10px;
+        }
+
+        /* Ripple effect container */
+        .ripple-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        .ripple-element {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(0);
+            pointer-events: none;
+            animation: ripple 0.6s linear;
+        }
+        .dark .ripple-element {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        /* Dynamic Island / Toast */
+        #toast-container {
+            position: fixed;
+            top: env(safe-area-inset-top, 20px);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .toast {
+            background: var(--color-surface);
+            color: var(--color-text);
+            padding: 12px 24px;
+            border-radius: 999px;
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.3);
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: springUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            border: 1px solid var(--color-border);
+        }
+
+        /* Syntax Highlighting for Subtitle Preview */
+        .preview-line { padding: 2px 0; display: flex; font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.5; }
+        .preview-num { width: 40px; color: var(--color-text-muted); text-align: right; padding-right: 12px; user-select: none; opacity: 0.5; }
+        .preview-text { flex: 1; white-space: pre-wrap; word-break: break-all; }
+        .srt-time { color: #3b82f6; font-weight: 600; }
+        .dark .srt-time { color: #60a5fa; }
+        .srt-tag { color: #a855f7; }
+        .dark .srt-tag { color: #c084fc; }
+
+        /* Layout Transitions */
+        .page-enter {
+            animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* Safe area padding for mobile notches */
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 1rem); }
+        .pt-safe { padding-top: env(safe-area-inset-top, 1rem); }
+    </style>
+</head>
+<body class="pb-24 md:pb-0 md:pl-20 text-sm md:text-base">
+    
+    <!-- Top Navigation / Search Bar (Mobile Sticky) -->
+    <header class="glass sticky top-0 z-40 px-4 py-3 md:py-4 transition-all duration-300 pt-safe" id="main-header">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            <!-- Brand (Desktop) -->
+            <div class="hidden md:flex items-center gap-2 cursor-pointer ripple-btn p-2 rounded-xl" onclick="router.navigate('/home')">
+                <i class="ph-fill ph-subtitles text-3xl text-primary drop-shadow-md"></i>
+                <span class="font-bold text-xl tracking-tight">SanStudio</span>
+            </div>
+            
+            <!-- Global Search -->
+            <div class="flex-1 max-w-2xl mx-auto relative group">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i class="ph ph-magnifying-glass text-text-muted text-lg transition-colors group-focus-within:text-primary"></i>
+                </div>
+                <input type="text" id="global-search" 
+                    class="w-full bg-surface dark:bg-surface-glass border border-border rounded-full py-3.5 pl-12 pr-12 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all shadow-sm hover:shadow-md text-sm sm:text-base placeholder-gray-400 font-medium"
+                    placeholder="Search local library..." autocomplete="off">
+                <div class="absolute inset-y-0 right-0 pr-2 flex items-center gap-1">
+                     <button id="clear-search" class="hidden p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-text-muted transition-colors">
+                        <i class="ph ph-x"></i>
+                     </button>
+                </div>
+            </div>
+            
+            <!-- Profile/Settings (Desktop) -->
+            <div class="hidden md:flex items-center gap-2">
+                <button onclick="router.navigate('/admin')" class="p-3 rounded-full bg-primary text-white shadow-[0_4px_15px_rgba(0,85,255,0.3)] hover:shadow-[0_6px_20px_rgba(0,85,255,0.4)] transition-all ripple-btn flex items-center gap-2 font-semibold text-sm">
+                    <i class="ph-bold ph-upload-simple text-lg"></i> Add Files
+                </button>
+                <button onclick="router.navigate('/settings')" class="p-3 rounded-full bg-surface glass shadow-sm hover:shadow-md transition-all ripple-btn border border-border">
+                    <i class="ph ph-gear text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar Navigation (Desktop) -->
+    <nav class="hidden md:flex flex-col fixed inset-y-0 left-0 w-20 glass border-r border-border z-50 py-6 items-center justify-between">
+        <div class="flex flex-col gap-6 w-full px-2">
+            <div class="w-12 h-12 rounded-[1.25rem] bg-primary flex items-center justify-center text-white mb-4 mx-auto shadow-lg shadow-primary/30">
+                <i class="ph-bold ph-subtitles text-2xl"></i>
+            </div>
+            <a href="#/home" class="nav-item flex flex-col items-center gap-1 p-3 rounded-2xl text-text-muted hover:bg-surface hover:shadow-sm transition-all group active-nav">
+                <i class="ph ph-house text-2xl group-[.active-nav]:ph-fill group-[.active-nav]:text-primary transition-all"></i>
+            </a>
+            <a href="#/library" class="nav-item flex flex-col items-center gap-1 p-3 rounded-2xl text-text-muted hover:bg-surface hover:shadow-sm transition-all group">
+                <i class="ph ph-books text-2xl group-[.active-nav]:ph-fill group-[.active-nav]:text-primary transition-all"></i>
+            </a>
+            <a href="#/bookmarks" class="nav-item flex flex-col items-center gap-1 p-3 rounded-2xl text-text-muted hover:bg-surface hover:shadow-sm transition-all group">
+                <i class="ph ph-bookmark-simple text-2xl group-[.active-nav]:ph-fill group-[.active-nav]:text-primary transition-all"></i>
+            </a>
+            <div class="w-full h-px bg-border my-2"></div>
+            <a href="#/admin" class="nav-item flex flex-col items-center gap-1 p-3 rounded-2xl text-text-muted hover:bg-surface hover:shadow-sm transition-all group">
+                <i class="ph ph-folder-plus text-2xl group-[.active-nav]:ph-fill group-[.active-nav]:text-primary transition-all"></i>
+            </a>
+        </div>
+        <div class="w-full px-2">
+             <a href="#/settings" class="nav-item flex flex-col items-center gap-1 p-3 rounded-2xl text-text-muted hover:bg-surface hover:shadow-sm transition-all group">
+                <i class="ph ph-gear text-2xl group-[.active-nav]:ph-fill group-[.active-nav]:text-primary transition-all"></i>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main id="app-content" class="max-w-7xl mx-auto min-h-[80vh] relative">
+        <!-- Views will be injected here -->
+    </main>
+
+    <!-- Bottom Navigation (Mobile) -->
+    <nav class="md:hidden fixed bottom-4 left-4 right-4 glass rounded-[2rem] shadow-float z-50 px-6 py-2 flex justify-between items-center pb-safe border border-border">
+        <a href="#/home" class="nav-item-mobile flex flex-col items-center gap-1 text-text-muted transition-all group active-nav p-2">
+            <div class="relative">
+                <i class="ph ph-house text-2xl group-[.active-nav]:ph-fill group-[.active-nav]:text-primary transition-all relative z-10"></i>
+                <div class="absolute inset-0 bg-primary/10 rounded-full scale-0 group-[.active-nav]:scale-150 transition-transform -z-0"></div>
+            </div>
+            <span class="text-[10px] font-semibold group-[.active-nav]:text-primary">Home</span>
+        </a>
+        <a href="#/library" class="nav-item-mobile flex flex-col items-center gap-1 text-text-muted transition-all group p-2">
+             <div class="relative">
+                <i class="ph ph-books text-2xl group-[.active-nav]:ph-fill group-[.active-nav]:text-primary transition-all relative z-10"></i>
+                <div class="absolute inset-0 bg-primary/10 rounded-full scale-0 group-[.active-nav]:scale-150 transition-transform -z-0"></div>
+            </div>
+            <span class="text-[10px] font-semibold group-[.active-nav]:text-primary">Library</span>
+        </a>
+        <a href="#/admin" class="nav-item-mobile flex flex-col items-center gap-1 text-text-muted transition-all group p-2 -mt-6">
+            <div class="bg-primary text-white p-3 rounded-full shadow-lg shadow-primary/40 group-[.active-nav]:scale-110 transition-transform">
+                <i class="ph-bold ph-plus text-2xl"></i>
+            </div>
+            <span class="text-[10px] font-semibold group-[.active-nav]:text-primary mt-1">Add</span>
+        </a>
+        <a href="#/bookmarks" class="nav-item-mobile flex flex-col items-center gap-1 text-text-muted transition-all group p-2">
+             <div class="relative">
+                <i class="ph ph-bookmark-simple text-2xl group-[.active-nav]:ph-fill group-[.active-nav]:text-primary transition-all relative z-10"></i>
+                <div class="absolute inset-0 bg-primary/10 rounded-full scale-0 group-[.active-nav]:scale-150 transition-transform -z-0"></div>
+            </div>
+            <span class="text-[10px] font-semibold group-[.active-nav]:text-primary">Saved</span>
+        </a>
+        <a href="#/settings" class="nav-item-mobile flex flex-col items-center gap-1 text-text-muted transition-all group p-2">
+             <div class="relative">
+                <i class="ph ph-gear text-2xl group-[.active-nav]:ph-fill group-[.active-nav]:text-primary transition-all relative z-10"></i>
+                <div class="absolute inset-0 bg-primary/10 rounded-full scale-0 group-[.active-nav]:scale-150 transition-transform -z-0"></div>
+            </div>
+            <span class="text-[10px] font-semibold group-[.active-nav]:text-primary">Settings</span>
+        </a>
+    </nav>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Footer -->
+    <footer class="mt-12 py-8 text-center text-text-muted border-t border-border">
+        <p class="text-sm font-medium">
+            Developed by <a href="https://sanstudio-hub.github.io/in/" target="_blank" rel="noopener noreferrer" class="font-bold text-primary hover:underline inline-flex items-center gap-1">SanStudio <i class="ph-bold ph-arrow-up-right text-xs"></i></a>
+        </p>
+    </footer>
+
+    <script>
+        /**
+         * CORE STATE
+         * This app relies completely on the user's local filesystem via IndexedDB.
+         * There are no fake/mock databases.
+         */
+        const state = {
+            searchQuery: '',
+            searchResults: [],
+            isSearching: false,
+            bookmarks: new Set(),
+            theme: localStorage.getItem('theme') || 'auto',
+            reduceMotion: localStorage.getItem('reduceMotion') === 'true',
+            stats: { totalFiles: 0, totalSize: 0 }
+        };
+
+        /**
+         * IndexedDB Architecture
+         * Stores actual File Blobs to allow offline access, searching, and exporting.
+         */
+        const DB_NAME = 'SanStudioRealDB';
+        const DB_VERSION = 1;
+        let db;
+
+        const initDB = () => {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                
+                request.onerror = (event) => reject("IndexedDB error: " + event.target.error);
+                
+                request.onsuccess = (event) => {
+                    db = event.target.result;
+                    loadUserPreferences();
+                    updateStats();
+                    resolve(db);
+                };
+                
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    // Store metadata and blob together
+                    if (!db.objectStoreNames.contains('subtitles')) {
+                        const subStore = db.createObjectStore('subtitles', { keyPath: 'id' });
+                        subStore.createIndex('title', 'title', { unique: false });
+                        subStore.createIndex('uploadDate', 'uploadDate', { unique: false });
+                        subStore.createIndex('type', 'type', { unique: false });
+                    }
+                    if (!db.objectStoreNames.contains('bookmarks')) {
+                        db.createObjectStore('bookmarks', { keyPath: 'id' });
+                    }
+                };
+            });
+        };
+
+        const loadUserPreferences = () => {
+            if(!db) return;
+            const tx = db.transaction(['bookmarks'], 'readonly');
+            const bmStore = tx.objectStore('bookmarks');
+            const bmRequest = bmStore.getAll();
+            bmRequest.onsuccess = () => {
+                state.bookmarks = new Set(bmRequest.result.map(item => item.id));
+                updateUIForBookmarks();
+            };
+        };
+
+        const updateStats = () => {
+            if(!db) return;
+            const tx = db.transaction('subtitles', 'readonly');
+            const store = tx.objectStore('subtitles');
+            const req = store.getAll();
+            req.onsuccess = () => {
+                const subs = req.result;
+                state.stats.totalFiles = subs.length;
+                state.stats.totalSize = subs.reduce((acc, curr) => acc + (curr.rawSize || 0), 0);
+                
+                // Re-initialize worker with fresh data whenever stats update
+                searchWorker.postMessage({ type: 'INIT', payload: subs.map(s => ({...s, blob: null})) }); // strip blob for worker memory
+                
+                // Trigger UI update if on home or admin
+                if(window.location.hash === '#/home' || window.location.hash === '' || window.location.hash === '#/admin') {
+                    // Slight delay to allow DOM to settle if called during route change
+                    setTimeout(() => {
+                        const statsEl = document.getElementById('stat-total-files');
+                        if(statsEl) statsEl.innerText = state.stats.totalFiles;
+                    }, 100);
+                }
+            };
+        };
+
+        /**
+         * Real Local File Parsing Logic
+         */
+        function formatBytes(bytes, decimals = 2) {
+            if (!+bytes) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+        }
+
+        function extractMetadataFromFilename(filename) {
+            let title = filename.replace(/\.(srt|vtt|ass)$/i, '').replace(/\./g, ' ');
+            let type = 'Movie';
+            let season = null;
+            let episode = null;
+            let year = null;
+
+            // Regex for S01E01 or s1e1 format
+            const seMatch = title.match(/s(\d{1,2})e(\d{1,2})/i);
+            if (seMatch) {
+                type = 'Series';
+                season = parseInt(seMatch[1], 10);
+                episode = parseInt(seMatch[2], 10);
+                title = title.replace(seMatch[0], '').trim();
+            }
+
+            // Regex for Year (e.g., 2023)
+            const yearMatch = title.match(/(19|20)\d{2}/);
+            if (yearMatch && !season) { // If it's a series, year is less relevant for title display usually
+                year = yearMatch[0];
+                title = title.replace(yearMatch[0], '').trim();
+            }
+
+            // Cleanup trailing dashes or brackets
+            title = title.replace(/[-_\[\]()]/g, ' ').replace(/\s+/g, ' ').trim();
+
+            return { title, type, season, episode, year };
+        }
+
+        async function processFiles(files) {
+            if (!db) {
+                showToast("Database not ready", "error");
+                return;
+            }
+
+            const tx = db.transaction('subtitles', 'readwrite');
+            const store = tx.objectStore('subtitles');
+            let addedCount = 0;
+
+            showToast("Processing files...", "info");
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const ext = file.name.split('.').pop().toLowerCase();
+                
+                if (['srt', 'vtt', 'ass'].includes(ext)) {
+                    const meta = extractMetadataFromFilename(file.name);
+                    
+                    const subData = {
+                        id: 'sub_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                        filename: file.name,
+                        title: meta.title || file.name,
+                        type: meta.type,
+                        season: meta.season,
+                        episode: meta.episode,
+                        year: meta.year || 'Unknown',
+                        format: ext.toUpperCase(),
+                        size: formatBytes(file.size),
+                        rawSize: file.size,
+                        uploadDate: Date.now(),
+                        blob: file // Store the actual file blob
+                    };
+
+                    store.put(subData);
+                    addedCount++;
+                }
+            }
+
+            tx.oncomplete = () => {
+                showToast(`Successfully indexed ${addedCount} subtitles!`, "success");
+                updateStats();
+                if(window.location.hash === '#/admin') router.handleHashChange(); // Refresh view
+            };
+
+            tx.onerror = () => {
+                showToast("Error saving files to library.", "error");
+            };
+        }
+
+        const toggleBookmark = (subId, event) => {
+            if(event) event.stopPropagation();
+            if (!db) return;
+
+            const subTx = db.transaction('subtitles', 'readonly');
+            const subStore = subTx.objectStore('subtitles');
+            const req = subStore.get(subId);
+
+            req.onsuccess = () => {
+                const subtitle = req.result;
+                if (!subtitle) return;
+
+                const tx = db.transaction('bookmarks', 'readwrite');
+                const store = tx.objectStore('bookmarks');
+
+                if (state.bookmarks.has(subId)) {
+                    store.delete(subId);
+                    state.bookmarks.delete(subId);
+                    showToast('Removed from saved items', 'info');
+                } else {
+                    store.put({ id: subtitle.id, timestamp: Date.now() });
+                    state.bookmarks.add(subId);
+                    showToast('Saved to offline bookmarks', 'success');
+                }
+                updateUIForBookmarks();
+                
+                // Refresh views if necessary
+                if(window.location.hash === '#/bookmarks') router.handleHashChange();
+            };
+        };
+
+        /**
+         * Web Worker for Search Engine
+         * Kept in a Blob URL to maintain the single-file architecture while offloading main thread.
+         */
+        const searchWorkerCode = `
+            let dbData = [];
+            
+            self.onmessage = function(e) {
+                const { type, payload } = e.data;
+                
+                if (type === 'INIT') {
+                    dbData = payload; // Array of metadata without heavy Blobs
+                } 
+                else if (type === 'SEARCH') {
+                    const query = payload.toLowerCase().trim();
+                    if (!query) {
+                        postMessage({ type: 'RESULTS', results: [] });
+                        return;
+                    }
+
+                    // Performant substring & token matching
+                    const results = dbData.map(item => {
+                        let score = 0;
+                        const titleLower = item.title.toLowerCase();
+                        const filenameLower = item.filename.toLowerCase();
+                        
+                        if (titleLower === query) score += 100;
+                        else if (titleLower.startsWith(query)) score += 50;
+                        else if (titleLower.includes(query)) score += 10;
+                        
+                        if (filenameLower.includes(query)) score += 5;
+
+                        return { item, score };
+                    })
+                    .filter(res => res.score > 0)
+                    .sort((a, b) => b.score - a.score || b.item.uploadDate - a.item.uploadDate)
+                    .map(res => res.item)
+                    .slice(0, 100); // Max 100 results for UI performance
+
+                    postMessage({ type: 'RESULTS', results });
+                }
+            };
+        `;
+
+        const blob = new Blob([searchWorkerCode], { type: 'application/javascript' });
+        const workerUrl = URL.createObjectURL(blob);
+        const searchWorker = new Worker(workerUrl);
+
+        searchWorker.onmessage = function(e) {
+            const { type, results } = e.data;
+            if (type === 'RESULTS') {
+                state.searchResults = results;
+                renderSearchResults(state.searchQuery, results);
+            }
+        };
+
+        /**
+         * SPA Router
+         */
+        const router = {
+            routes: {
+                '/home': renderHome,
+                '/library': renderLibrary,
+                '/admin': renderAdmin,
+                '/bookmarks': renderBookmarks,
+                '/settings': renderSettings,
+                '/subtitle/:id': renderSubtitleDetail
+            },
+            
+            navigate(path) {
+                window.location.hash = path;
+            },
+            
+            handleHashChange() {
+                const hash = window.location.hash.slice(1) || '/home';
+                if(hash.startsWith('/search')) return;
+
+                const appContent = document.getElementById('app-content');
+                appContent.innerHTML = '<div class="flex h-[60vh] items-center justify-center"><div class="w-10 h-10 border-4 border-border border-t-primary rounded-full animate-spin"></div></div>';
+                
+                let matched = false;
+                for (const route in this.routes) {
+                    const paramMatch = route.match(/:([^\/]+)/g);
+                    if (paramMatch) {
+                        const regexStr = route.replace(/:([^\/]+)/g, '([^/]+)');
+                        const regex = new RegExp(`^${regexStr}$`);
+                        const match = hash.match(regex);
+                        if (match) {
+                            setTimeout(() => this.routes[route](match[1]), 30); 
+                            matched = true;
+                            break;
+                        }
+                    } else if (route === hash) {
+                        setTimeout(() => this.routes[route](), 30);
+                        matched = true;
+                        break;
+                    }
+                }
+                
+                if (!matched) this.navigate('/home');
+                updateActiveNav(hash);
+                
+                // Clear search input if leaving search route
+                if(!hash.startsWith('/search')) {
+                    const searchInput = document.getElementById('global-search');
+                    if(searchInput.value) {
+                        searchInput.value = '';
+                        document.getElementById('clear-search').classList.add('hidden');
+                    }
+                }
+            }
+        };
+
+        function updateActiveNav(hash) {
+            const baseHash = hash.split('?')[0];
+            document.querySelectorAll('.nav-item, .nav-item-mobile').forEach(el => {
+                el.classList.remove('active-nav');
+                if (el.getAttribute('href') === `#${baseHash}` || (baseHash.startsWith('/subtitle') && el.getAttribute('href') === '#/library')) {
+                    el.classList.add('active-nav');
+                }
+            });
+        }
+
+        /**
+         * Reusable UI Components
+         */
+        function createSubtitleCard(sub) {
+            const isBookmarked = state.bookmarks.has(sub.id);
+            const typeColor = sub.type === 'Movie' ? 'text-blue-500 bg-blue-500/10' : 'text-purple-500 bg-purple-500/10';
+            const formatColor = sub.format === 'SRT' ? 'text-orange-500 bg-orange-500/10' : 'text-green-500 bg-green-500/10';
+
+            return `
+                <div class="glass rounded-[1.5rem] p-4 flex flex-col gap-3 hover:-translate-y-1 transition-transform duration-300 shadow-sm hover:shadow-float cursor-pointer relative group border border-border"
+                     onclick="router.navigate('/subtitle/${sub.id}')">
+                    
+                    <div class="flex justify-between items-start">
+                        <div class="flex flex-col pr-8">
+                            <h3 class="font-bold text-base line-clamp-1 leading-tight">${sub.title}</h3>
+                            <p class="text-xs text-text-muted mt-1 truncate">${sub.filename}</p>
+                        </div>
+                        <button class="absolute top-4 right-4 p-2 rounded-full hover:bg-surface transition-colors z-10 ripple-btn shadow-sm border border-border bg-surface-glass"
+                                onclick="toggleBookmark('${sub.id}', event)">
+                            <i class="ph${isBookmarked ? '-fill text-primary' : ''} ph-bookmark-simple text-lg bookmark-icon-${sub.id}"></i>
+                        </button>
+                    </div>
+
+                    ${sub.season ? `<p class="text-sm font-semibold text-primary">Season ${String(sub.season).padStart(2,'0')} • Episode ${String(sub.episode).padStart(2,'0')}</p>` : ''}
+                    
+                    <div class="flex items-center gap-2 mt-auto pt-2 border-t border-border">
+                        <span class="text-[10px] font-bold px-2.5 py-1 rounded-lg ${typeColor} tracking-wide uppercase">${sub.type}</span>
+                        <span class="text-[10px] font-bold px-2.5 py-1 rounded-lg ${formatColor} tracking-wide uppercase">${sub.format}</span>
+                        <span class="text-[10px] font-medium text-text-muted ml-auto bg-surface/50 px-2 py-1 rounded-lg border border-border">${sub.size}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        /**
+         * Views
+         */
+        function renderHome() {
+            const app = document.getElementById('app-content');
+            
+            if(!db) {
+                app.innerHTML = `<div class="p-8 text-center text-text-muted">Initializing database...</div>`;
+                return;
+            }
+
+            const tx = db.transaction('subtitles', 'readonly');
+            const store = tx.objectStore('subtitles');
+            const req = store.getAll();
+
+            req.onsuccess = () => {
+                const subs = req.result;
+                const recent = subs.sort((a, b) => b.uploadDate - a.uploadDate).slice(0, 8);
+
+                app.innerHTML = `
+                    <div class="page-enter p-4 md:p-8 flex flex-col gap-8">
+                        
+                        <!-- Hero Dashboard -->
+                        <div class="relative w-full rounded-[2.5rem] overflow-hidden glass p-8 flex flex-col justify-center min-h-[280px] border border-border shadow-origin group">
+                            <div class="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent dark:from-primary/5 transition-opacity duration-500 group-hover:opacity-70"></div>
+                            <div class="absolute -top-32 -right-32 w-80 h-80 bg-primary/20 rounded-full blur-[100px] transition-transform duration-1000 group-hover:scale-110"></div>
+                            
+                            <div class="relative z-10 max-w-2xl">
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-glass backdrop-blur-md rounded-full text-[10px] font-bold text-primary mb-6 border border-border shadow-sm uppercase tracking-wider">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div> Local Offline Engine
+                                </span>
+                                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 leading-tight">
+                                    Your personal <br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-400">subtitle library.</span>
+                                </h1>
+                                <p class="text-text-muted text-base mb-8 max-w-md font-medium">
+                                    Manage, search, and extract your local .srt files securely. Everything stays on your device.
+                                </p>
+                                
+                                <div class="flex gap-4">
+                                    <button onclick="router.navigate('/admin')" class="bg-primary text-white px-6 py-3 rounded-2xl font-bold shadow-[0_8px_20px_rgba(0,85,255,0.3)] hover:-translate-y-1 transition-all ripple-btn flex items-center gap-2">
+                                        <i class="ph-bold ph-plus"></i> Add Subtitles
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Stat Floating Card -->
+                            <div class="hidden lg:flex absolute bottom-8 right-8 glass p-4 rounded-[1.5rem] border border-border shadow-soft flex-col gap-1 items-end hover:scale-105 transition-transform cursor-default">
+                                <div class="text-text-muted text-xs font-semibold uppercase tracking-wider">Total Indexed</div>
+                                <div class="text-3xl font-extrabold text-primary" id="stat-total-files">${state.stats.totalFiles}</div>
+                            </div>
+                        </div>
+
+                        ${subs.length === 0 ? `
+                            <div class="glass rounded-[2rem] p-12 text-center border border-border shadow-sm mt-4 flex flex-col items-center">
+                                <div class="w-24 h-24 bg-primary/5 rounded-full flex items-center justify-center mb-4 border border-border">
+                                    <i class="ph-duotone ph-folder-open text-5xl text-primary/60"></i>
+                                </div>
+                                <h2 class="text-2xl font-bold mb-2 tracking-tight">Your library is empty</h2>
+                                <p class="text-text-muted mb-6 max-w-sm">Import folders containing .srt or .vtt files to generate your instant, offline search index.</p>
+                                <button onclick="router.navigate('/admin')" class="px-6 py-3 rounded-2xl bg-surface border border-border shadow-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ripple-btn">
+                                    Go to Importer
+                                </button>
+                            </div>
+                        ` : `
+                            <!-- Recently Added -->
+                            <div>
+                                <div class="flex justify-between items-end mb-6 px-2">
+                                    <h2 class="text-xl font-bold flex items-center gap-2 tracking-tight">
+                                        <i class="ph-fill ph-clock-counter-clockwise text-blue-500 text-2xl"></i> Recently Indexed
+                                    </h2>
+                                    <button onclick="router.navigate('/library')" class="text-sm font-bold text-primary hover:underline bg-primary/10 px-3 py-1 rounded-full transition-colors hover:bg-primary/20">View All</button>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                    ${recent.map(sub => createSubtitleCard(sub)).join('')}
+                                </div>
+                            </div>
+                        `}
+                    </div>
+                `;
+            };
+        }
+
+        function renderAdmin() {
+            const app = document.getElementById('app-content');
+            
+            app.innerHTML = `
+                <div class="page-enter p-4 md:p-8 max-w-3xl mx-auto pb-32">
+                    <h2 class="text-3xl font-extrabold mb-2 tracking-tight">Library Manager</h2>
+                    <p class="text-text-muted mb-8 font-medium">Select folders containing subtitle files to ingest into your local IndexedDB.</p>
+                    
+                    <div class="glass rounded-[2rem] p-8 border border-border shadow-soft relative overflow-hidden group">
+                        <div class="absolute inset-0 bg-primary/[0.02] group-hover:bg-primary/[0.04] transition-colors"></div>
+                        
+                        <div class="flex flex-col items-center justify-center border-2 border-dashed border-primary/30 rounded-[1.5rem] p-12 bg-surface-glass text-center relative z-10 transition-all hover:border-primary/60">
+                            <i class="ph-duotone ph-upload-simple text-6xl text-primary mb-4"></i>
+                            <h3 class="text-xl font-bold mb-2">Select Folder to Import</h3>
+                            <p class="text-sm text-text-muted mb-6 max-w-xs">Supports .srt, .vtt, and .ass files. Files are processed locally and securely.</p>
+                            
+                            <label class="bg-primary text-white px-8 py-3.5 rounded-2xl font-bold shadow-[0_8px_20px_rgba(0,85,255,0.3)] hover:shadow-[0_10px_25px_rgba(0,85,255,0.4)] hover:-translate-y-1 transition-all cursor-pointer ripple-btn inline-block">
+                                Browse Folders
+                                <!-- The magic attribute webkitdirectory allows folder selection -->
+                                <input type="file" id="folder-upload" webkitdirectory directory multiple class="hidden" onchange="processFiles(this.files)">
+                            </label>
+                        </div>
+
+                        <div class="mt-8 grid grid-cols-2 gap-4 relative z-10">
+                             <div class="bg-surface p-4 rounded-[1.25rem] border border-border flex items-center justify-between shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center text-green-500">
+                                        <i class="ph-bold ph-files text-xl"></i>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-[10px] font-bold text-text-muted uppercase tracking-wider">Total Files</span>
+                                        <span class="font-extrabold text-lg" id="stat-files-view">${state.stats.totalFiles}</span>
+                                    </div>
+                                </div>
+                             </div>
+                             <div class="bg-surface p-4 rounded-[1.25rem] border border-border flex items-center justify-between shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-500">
+                                        <i class="ph-bold ph-database text-xl"></i>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-[10px] font-bold text-text-muted uppercase tracking-wider">Storage Used</span>
+                                        <span class="font-extrabold text-lg">${formatBytes(state.stats.totalSize)}</span>
+                                    </div>
+                                </div>
+                             </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 flex justify-end">
+                        <button onclick="clearDatabase()" class="text-red-500 text-sm font-semibold hover:bg-red-500/10 px-4 py-2 rounded-xl transition-colors flex items-center gap-2">
+                            <i class="ph-bold ph-trash"></i> Wipe Database
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderLibrary() {
+             const app = document.getElementById('app-content');
+             if(!db) return;
+
+             const tx = db.transaction('subtitles', 'readonly');
+             const store = tx.objectStore('subtitles');
+             const req = store.getAll();
+
+             req.onsuccess = () => {
+                 const subs = req.result.sort((a, b) => b.uploadDate - a.uploadDate);
+                 
+                 app.innerHTML = `
+                    <div class="page-enter p-4 md:p-8 pb-32">
+                        <h2 class="text-3xl font-extrabold mb-2 tracking-tight">Full Library</h2>
+                        <p class="text-text-muted mb-8 font-medium">All indexed files on your device.</p>
+                        
+                        ${subs.length === 0 ? `
+                            <p class="text-text-muted text-center py-12">No files in library. Go to Add to import folders.</p>
+                        ` : `
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                ${subs.map(sub => createSubtitleCard(sub)).join('')}
+                            </div>
+                        `}
+                    </div>
+                 `;
+             };
+        }
+
+        function renderSearchResults(query, results) {
+            const app = document.getElementById('app-content');
+            
+            if(!query) {
+                router.handleHashChange(); 
+                return;
+            }
+
+            app.innerHTML = `
+                <div class="page-enter p-4 md:p-8 pb-32">
+                    <div class="flex justify-between items-center mb-6 sticky top-[4.5rem] z-30 glass p-4 rounded-[1.5rem] border border-border shadow-sm pt-safe">
+                        <div>
+                            <h2 class="text-xl font-bold">Results for "<span class="text-primary">${query}</span>"</h2>
+                            <p class="text-xs text-text-muted font-medium mt-1">${results.length} files matched locally</p>
+                        </div>
+                    </div>
+
+                    ${results.length === 0 ? `
+                        <div class="flex flex-col items-center justify-center py-20 text-text-muted bg-surface glass rounded-[2rem] border border-border mt-4">
+                            <i class="ph-duotone ph-magnifying-glass-minus text-6xl mb-4 opacity-50"></i>
+                            <h3 class="text-lg font-bold">No matches found</h3>
+                            <p class="text-sm mt-2">Try adjusting your search terms.</p>
+                        </div>
+                    ` : `
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${results.map(sub => createSubtitleCard(sub)).join('')}
+                        </div>
+                    `}
+                </div>
+            `;
+        }
+
+        function renderSubtitleDetail(id) {
+            const app = document.getElementById('app-content');
+            
+            if(!db) return;
+            const tx = db.transaction('subtitles', 'readonly');
+            const store = tx.objectStore('subtitles');
+            const req = store.get(id);
+
+            req.onsuccess = async () => {
+                const sub = req.result;
+                if (!sub) {
+                    app.innerHTML = `<div class="p-8 text-center text-red-500 font-bold">Subtitle not found in local database.</div>`;
+                    return;
+                }
+
+                const isBookmarked = state.bookmarks.has(sub.id);
+                
+                // Extract file content for preview
+                let previewContent = "Could not load preview.";
+                try {
+                    const text = await sub.blob.text();
+                    // Take first 30 lines for preview
+                    const lines = text.split('\n').slice(0, 30);
+                    
+                    previewContent = lines.map((line, index) => {
+                        let formattedLine = line.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                        
+                        // Basic syntax highlighting based on regex
+                        if(line.includes('-->')) {
+                            formattedLine = `<span class="srt-time">${formattedLine}</span>`;
+                        } else if(line.match(/^\d+\s*$/)) {
+                            formattedLine = `<span class="text-purple-500 dark:text-purple-400 font-bold">${formattedLine}</span>`;
+                        } else if(line.includes('&lt;i&gt;') || line.includes('<i>')) {
+                             formattedLine = `<span class="srt-tag italic opacity-80">${formattedLine}</span>`;
+                        }
+
+                        return `
+                            <div class="preview-line hover:bg-white/5 transition-colors rounded px-1">
+                                <div class="preview-num">${index + 1}</div>
+                                <div class="preview-text">${formattedLine}</div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    if(text.split('\n').length > 30) {
+                        previewContent += `<div class="text-center text-text-muted mt-4 text-xs font-bold uppercase tracking-widest border-t border-border pt-4">[ File Truncated for Preview ]</div>`;
+                    }
+                } catch(e) {
+                    console.error("Preview error", e);
+                }
+
+                app.innerHTML = `
+                    <div class="page-enter p-4 md:p-8 max-w-4xl mx-auto pb-32">
+                        
+                        <!-- Back Button -->
+                        <button onclick="history.back()" class="flex items-center gap-2 text-text-muted hover:text-primary mb-6 transition-colors font-semibold group ripple-btn px-4 py-2 rounded-xl hover:bg-surface-glass border border-transparent hover:border-border">
+                            <i class="ph-bold ph-arrow-left text-xl group-hover:-translate-x-1 transition-transform"></i> Back
+                        </button>
+
+                        <!-- Details Header Card -->
+                        <div class="glass rounded-[2.5rem] p-6 md:p-10 flex flex-col relative overflow-hidden mb-8 border border-border shadow-soft">
+                            
+                            <div class="flex flex-col relative z-10 flex-1">
+                                <div class="flex flex-wrap items-center gap-2 mb-4">
+                                    <span class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-surface border border-border shadow-sm uppercase tracking-wide text-text-muted">${sub.type}</span>
+                                    <span class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-primary/10 text-primary uppercase tracking-wide border border-primary/20">${sub.format}</span>
+                                    ${sub.year !== 'Unknown' ? `<span class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-surface border border-border shadow-sm text-text-muted">${sub.year}</span>` : ''}
+                                </div>
+                                
+                                <h1 class="text-3xl md:text-4xl font-extrabold mb-2 tracking-tight leading-tight">${sub.title}</h1>
+                                <p class="text-text-muted mb-8 font-mono text-sm break-all bg-surface/50 p-3 rounded-xl border border-border inline-block self-start">${sub.filename}</p>
+                                
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
+                                    <div class="bg-surface rounded-2xl p-4 border border-border shadow-sm flex flex-col gap-1">
+                                        <div class="text-[10px] text-text-muted uppercase font-extrabold tracking-wider">File Size</div>
+                                        <div class="font-bold text-lg">${sub.size}</div>
+                                    </div>
+                                    <div class="bg-surface rounded-2xl p-4 border border-border shadow-sm flex flex-col gap-1">
+                                        <div class="text-[10px] text-text-muted uppercase font-extrabold tracking-wider">Date Indexed</div>
+                                        <div class="font-bold text-base truncate">${new Date(sub.uploadDate).toLocaleDateString()}</div>
+                                    </div>
+                                    ${sub.season ? `
+                                    <div class="bg-surface rounded-2xl p-4 border border-border shadow-sm flex flex-col gap-1">
+                                        <div class="text-[10px] text-primary uppercase font-extrabold tracking-wider">Season</div>
+                                        <div class="font-bold text-lg">${sub.season}</div>
+                                    </div>
+                                    <div class="bg-surface rounded-2xl p-4 border border-border shadow-sm flex flex-col gap-1">
+                                        <div class="text-[10px] text-primary uppercase font-extrabold tracking-wider">Episode</div>
+                                        <div class="font-bold text-lg">${sub.episode}</div>
+                                    </div>
+                                    ` : ''}
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="flex flex-wrap gap-4">
+                                    <button onclick="exportFile('${sub.id}')" class="flex-1 sm:flex-none bg-primary text-white px-8 py-4 rounded-2xl font-bold shadow-[0_8px_20px_rgba(0,85,255,0.3)] hover:-translate-y-1 transition-all flex items-center justify-center gap-3 ripple-btn text-base">
+                                        <i class="ph-bold ph-download-simple text-xl"></i> Export File
+                                    </button>
+                                    <button onclick="toggleBookmark('${sub.id}')" class="w-14 h-14 rounded-2xl bg-surface border border-border shadow-sm flex items-center justify-center hover:bg-primary/5 transition-colors ripple-btn group">
+                                        <i class="ph${isBookmarked ? '-fill text-primary' : '-bold text-text-muted'} ph-bookmark-simple text-2xl group-hover:text-primary transition-colors bookmark-icon-${sub.id}"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- File Preview Card -->
+                        <div class="glass rounded-[2.5rem] overflow-hidden flex flex-col shadow-soft border border-border">
+                            <div class="bg-surface/90 p-5 border-b border-border flex justify-between items-center backdrop-blur-md">
+                                <h3 class="font-bold flex items-center gap-2"><i class="ph-bold ph-code text-primary text-xl"></i> Content Preview</h3>
+                                <div class="flex gap-2">
+                                    <div class="w-3 h-3 rounded-full bg-red-400 shadow-inner"></div>
+                                    <div class="w-3 h-3 rounded-full bg-yellow-400 shadow-inner"></div>
+                                    <div class="w-3 h-3 rounded-full bg-green-400 shadow-inner"></div>
+                                </div>
+                            </div>
+                            <div class="bg-[#1A1A1A] dark:bg-[#0A0A0A] p-6 h-[450px] overflow-y-auto custom-scrollbar text-gray-200">
+                                ${previewContent}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            };
+        }
+
+        // Real file export logic
+        window.exportFile = function(id) {
+            if(!db) return;
+            const tx = db.transaction('subtitles', 'readonly');
+            const store = tx.objectStore('subtitles');
+            const req = store.get(id);
+
+            req.onsuccess = () => {
+                const sub = req.result;
+                if(!sub) return;
+
+                const url = URL.createObjectURL(sub.blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = sub.filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showToast(`Exported ${sub.filename}`, 'success');
+            };
+        };
+
+        function renderBookmarks() {
+            const app = document.getElementById('app-content');
+            if(!db) return;
+
+            const tx = db.transaction('subtitles', 'readonly');
+            const store = tx.objectStore('subtitles');
+            const req = store.getAll();
+
+            req.onsuccess = () => {
+                const allSubs = req.result;
+                const savedItems = allSubs.filter(sub => state.bookmarks.has(sub.id));
+                
+                app.innerHTML = `
+                    <div class="page-enter p-4 md:p-8 pb-32">
+                        <h2 class="text-3xl font-extrabold mb-2 tracking-tight">Saved Items</h2>
+                        <p class="text-text-muted mb-8 font-medium">Quick access to bookmarked files.</p>
+                        
+                        ${savedItems.length === 0 ? `
+                            <div class="glass rounded-[2rem] p-12 flex flex-col items-center justify-center text-center border border-border mt-4">
+                                <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-4 text-primary">
+                                    <i class="ph-duotone ph-bookmark-simple text-4xl"></i>
+                                </div>
+                                <h3 class="text-xl font-bold mb-2">No saved items</h3>
+                                <p class="text-text-muted font-medium">Tap the bookmark icon on any file to save it here.</p>
+                            </div>
+                        ` : `
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                ${savedItems.map(sub => createSubtitleCard(sub)).join('')}
+                            </div>
+                        `}
+                    </div>
+                `;
+            };
+        }
+
+        function renderSettings() {
+            const app = document.getElementById('app-content');
+            const isDark = document.documentElement.classList.contains('dark');
+            
+            app.innerHTML = `
+                <div class="page-enter p-4 md:p-8 max-w-2xl mx-auto pb-32">
+                    <h2 class="text-3xl font-extrabold mb-8 tracking-tight">Settings</h2>
+                    
+                    <div class="glass rounded-[2rem] p-2 mb-6 border border-border shadow-sm">
+                        <div class="p-5 flex items-center justify-between border-b border-border hover:bg-surface/50 transition-colors rounded-t-[1.75rem]">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                                    <i class="ph-bold ph-palette text-2xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-base">Dark Mode</h4>
+                                    <p class="text-xs text-text-muted font-medium mt-0.5">Toggle OLED friendly dark theme.</p>
+                                </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer" ${isDark ? 'checked' : ''} onchange="toggleTheme()">
+                                <div class="w-12 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary shadow-inner"></div>
+                            </label>
+                        </div>
+                        
+                        <div class="p-5 flex items-center justify-between hover:bg-surface/50 transition-colors rounded-b-[1.75rem]">
+                             <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                                    <i class="ph-bold ph-magic-wand text-2xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-base">Reduce Motion</h4>
+                                    <p class="text-xs text-text-muted font-medium mt-0.5">Disable UI spring animations.</p>
+                                </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer" ${state.reduceMotion ? 'checked' : ''} onchange="toggleMotion()">
+                                <div class="w-12 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary shadow-inner"></div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-12 opacity-60 hover:opacity-100 transition-opacity">
+                        <i class="ph-fill ph-subtitles text-5xl text-primary mb-3"></i>
+                        <p class="text-sm font-bold tracking-wide">SanStudio Subtitle Hub</p>
+                        <p class="text-xs font-medium mt-1">Local PWA Engine v2.0</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        function toggleMotion() {
+            state.reduceMotion = !state.reduceMotion;
+            localStorage.setItem('reduceMotion', state.reduceMotion);
+            if(state.reduceMotion) {
+                document.body.style.setProperty('--animate-duration', '0.01ms');
+            } else {
+                document.body.style.removeProperty('--animate-duration');
+            }
+        }
+
+        function clearDatabase() {
+            if(confirm("Are you sure you want to delete all indexed files and metadata? The original files on your computer will remain safe.")) {
+                const req = indexedDB.deleteDatabase(DB_NAME);
+                req.onsuccess = () => {
+                    showToast("Database wiped. Reloading...", "success");
+                    setTimeout(() => window.location.reload(), 1500);
+                };
+            }
+        }
+
+        function updateUIForBookmarks() {
+            document.querySelectorAll('[class*="bookmark-icon-"]').forEach(icon => {
+                const match = icon.className.match(/bookmark-icon-(sub_[A-Za-z0-9_]+)/);
+                if(match) {
+                    const id = match[1];
+                    if (state.bookmarks.has(id)) {
+                        icon.classList.remove('ph-bold', 'text-text-muted');
+                        icon.classList.add('ph-fill', 'text-primary');
+                    } else {
+                        icon.classList.remove('ph-fill', 'text-primary');
+                        icon.classList.add('ph-bold', 'text-text-muted');
+                    }
+                }
+            });
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast glass';
+            
+            const icon = type === 'success' ? '<i class="ph-fill ph-check-circle text-green-500 text-xl drop-shadow-sm"></i>' : 
+                         type === 'error' ? '<i class="ph-fill ph-warning-circle text-red-500 text-xl drop-shadow-sm"></i>' : 
+                         '<i class="ph-fill ph-info text-primary text-xl drop-shadow-sm"></i>';
+                         
+            toast.innerHTML = `${icon} <span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'scaleIn 0.3s ease-in reverse forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Search Input Handling
+        let searchTimeout;
+        const searchInput = document.getElementById('global-search');
+        const clearBtn = document.getElementById('clear-search');
+
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value;
+            state.searchQuery = query;
+            
+            if (query.length > 0) {
+                clearBtn.classList.remove('hidden');
+                if(!window.location.hash.startsWith('#/search')) {
+                    window.history.pushState(null, '', '#/search');
+                    updateActiveNav('#/search');
+                }
+            } else {
+                clearBtn.classList.add('hidden');
+                if(window.location.hash.startsWith('#/search')) {
+                    window.history.back();
+                }
+                return;
+            }
+
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                searchWorker.postMessage({ type: 'SEARCH', payload: query });
+            }, 150); // Fast 150ms debounce for local search
+        });
+
+        clearBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            searchInput.dispatchEvent(new Event('input'));
+            searchInput.focus();
+        });
+
+        // Add Ripple Effect
+        document.addEventListener('click', function(e) {
+            const target = e.target.closest('.ripple-btn');
+            if (!target) return;
+            const rect = target.getBoundingClientRect();
+            const ripple = document.createElement('div');
+            const size = Math.max(rect.width, rect.height);
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = e.clientX - rect.left - size / 2 + 'px';
+            ripple.style.top = e.clientY - rect.top - size / 2 + 'px';
+            ripple.className = 'ripple-element';
+            target.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+        });
+
+        // Header Style on Scroll
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('main-header');
+            if (window.scrollY > 10) {
+                header.classList.add('shadow-glass', 'bg-surface-glass');
+                header.classList.replace('py-4', 'py-2');
+                header.classList.replace('md:py-4', 'md:py-2');
+            } else {
+                header.classList.remove('shadow-glass', 'bg-surface-glass');
+                header.classList.replace('py-2', 'py-4');
+                header.classList.replace('md:py-2', 'md:py-4');
+            }
+        });
+
+        // Initialize App
+        window.addEventListener('hashchange', () => router.handleHashChange());
+        
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Apply Theme Preferences
+            if (state.theme === 'dark' || (state.theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+            if(state.reduceMotion) {
+                document.body.style.setProperty('--animate-duration', '0.01ms');
+            }
+
+            try {
+                await initDB();
+                console.log("Real DB Initialized.");
+            } catch(e) {
+                showToast("Could not access local storage.", "error");
+                console.error(e);
+            }
+
+            if (!window.location.hash) {
+                window.location.hash = '#/home';
+            } else {
+                router.handleHashChange();
+            }
+        });
+
+        /**
+         * Dynamic Service Worker
+         */
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                const CACHE_NAME = 'sanstudio-real-pwa-v2';
+                const urlsToCache = [
+                    '/',
+                    'https://cdn.tailwindcss.com',
+                    'https://unpkg.com/@phosphor-icons/web',
+                    'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Roboto+Flex:opsz,wght@8..144,300..800&display=swap'
+                ];
+
+                self.addEventListener('install', event => {
+                    event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)));
+                });
+
+                self.addEventListener('fetch', event => {
+                    event.respondWith(
+                        caches.match(event.request).then(response => response || fetch(event.request))
+                    );
+                });
+            `;
+            
+            try {
+                const swBlob = new Blob([swCode], { type: 'application/javascript' });
+                const swUrl = URL.createObjectURL(swBlob);
+                navigator.serviceWorker.register(swUrl).then(registration => {
+                    console.log('PWA ServiceWorker registered.');
+                }).catch(() => {});
+            } catch(e) {}
+        }
+    </script>
+</body>
+</html>
