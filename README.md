@@ -95,8 +95,9 @@
 
 # Project   https://santhosh2024.neocities.org/skill/in ---[ SKILL ]
 
-new project is loading for Android mobile display checking online back soon
+
 # The SanStudio.neocities.org  NOW ON[ https://sanstudio-hub.github.io/SanStudio-Hub/in ]
+
 
 # Portfolio 2026 https://a-santhosh-hub.github.io/in/2026/
 
