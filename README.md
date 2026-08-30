@@ -104,7 +104,4 @@
 
 -------------------------------
 
-# Now Working On CALL MIND ---> Android App 
-The APK is Upload
-
 <<-------------- More Soon -------------->More My Main Portfolio   https://santhosh2025.neocities.org/profile/
