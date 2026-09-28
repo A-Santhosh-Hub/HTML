@@ -93,7 +93,9 @@
 
 # Project 46 Full Stack Developer Roadmap ---> [ https://a-santhosh-hub.github.io/Full-Stack/Full%20Stack%20Rodemap/ ]
 
-# Project 47 San Wake ----> [ working ]
+# Project 47 San Wake ----> [  ]
+
+# Project 48 ALP Astrology Event Book Management [ working ]
 
 # Project   https://santhosh2024.neocities.org/skill/in ---[ SKILL ]
 
