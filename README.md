@@ -95,7 +95,7 @@
 
 # Project 47 San Wake ----> [  ]
 
-# Project 48 ALP Astrology Event Book Management [ working ]
+# Project 48 ALP Astrology Event Book Management ---> (https://nimkarli-baba-staging-2f070.web.app/)[ working ] 
 
 # Project   https://santhosh2024.neocities.org/skill/in ---[ SKILL ]
 
