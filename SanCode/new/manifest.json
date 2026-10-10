@@ -1,0 +1,19 @@
+{
+  "name": "SanCode Browser Workspace",
+  "short_name": "SanCode",
+  "description": "Code, documents, spreadsheets and everyday tools for desktop and mobile browsers",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1e1e1e",
+  "theme_color": "#007acc",
+  "icons": [
+    {
+      "src": "icons/san.png",
+      "sizes": "550x541",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

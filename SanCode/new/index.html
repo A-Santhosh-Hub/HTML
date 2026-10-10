@@ -1,0 +1,2299 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>SanCode | Browser Workspace</title>
+    <meta name="description"
+        content="Free online text tool. Format code, clean text, and preview HTML files instantly in a VS Code-like environment.">
+    <meta name="theme-color" content="#1e1e1e">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SanCode">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/png" href="./icons/san.png">
+
+    <!-- All libraries are vendored in lib/ so the app works fully offline (see tools/engine/vendor.mjs) -->
+    <link rel="stylesheet" href="lib/fonts/fonts.css">
+    <link rel="stylesheet" href="lib/fontawesome/css/all.min.css">
+    <script src="lib/tailwind.min.js"></script>
+    <script src="js/tailwind-config.js"></script>
+    <script src="lib/marked.min.js"></script>
+    <script src="lib/jszip.min.js"></script>
+    <script src="lib/pdf-lib.min.js"></script>
+    <script src="lib/jspdf.umd.min.js"></script>
+    <script src="lib/qr-code-styling.js"></script>
+    <script src="js/native-bridge.js"></script>
+    <script src="lib/san-editor.js"></script>
+    <!-- YouTube IFrame API is the only online-only dependency; never block startup on it -->
+    <script async src="https://www.youtube.com/iframe_api" onerror="void 0"></script>
+
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/workbench.css">
+</head>
+
+<body
+    class="bg-vs-editor text-vs-text h-screen w-screen flex flex-col font-sans overflow-hidden select-none theme-dark">
+
+    <!-- Title Bar -->
+    <header class="h-8 bg-vs-activity flex items-center justify-between px-3 shrink-0 text-xs text-vs-text z-50">
+        <div class="flex items-center gap-4">
+            <div class="san-brand flex items-center gap-2 text-vs-activityActive">
+                <img src="icons/san.png" alt="" width="28" height="28">
+                <span>SanCode</span>
+            </div>
+            <nav class="hidden sm:flex items-center gap-3 text-vs-text">
+                <div class="relative group">
+                    <div class="hover:bg-vs-hover px-2 py-0.5 rounded cursor-pointer transition-colors">File</div>
+                    <div class="absolute top-full left-0 w-full h-2 z-[100]"></div>
+                    <div
+                        class="absolute left-0 top-full mt-1 w-56 bg-vs-sidebar border border-vs-border shadow-2xl rounded hidden group-hover:flex flex-col py-1 z-[100]">
+                        <div class="px-4 py-1.5 text-vs-text hover:bg-vs-selection hover:text-white cursor-pointer flex justify-between items-center transition-colors"
+                            onclick="createNewFile()">
+                            <span>New File</span><span class="text-vs-textMuted text-[10px]">Ctrl+N</span>
+                        </div>
+                        <div class="px-4 py-1.5 text-vs-text hover:bg-vs-selection hover:text-white cursor-pointer flex justify-between items-center transition-colors"
+                            onclick="document.getElementById('file-input').click()">
+                            <span>Open File...</span><span class="text-vs-textMuted text-[10px]">Ctrl+O</span>
+                        </div>
+                        <div class="px-4 py-1.5 text-vs-text hover:bg-vs-selection hover:text-white cursor-pointer flex justify-between items-center transition-colors"
+                            onclick="openFolder()">
+                            <span>Open Folder Workspace...</span>
+                        </div>
+                        <div class="h-px bg-vs-border my-1 mx-2"></div>
+                        <div class="px-4 py-1.5 text-vs-text hover:bg-vs-selection hover:text-white cursor-pointer flex justify-between items-center transition-colors"
+                            onclick="downloadFile()">
+                            <span>Save File</span><span class="text-vs-textMuted text-[10px]">Ctrl+S</span>
+                        </div>
+                        <div class="px-4 py-1.5 text-vs-text hover:bg-vs-selection hover:text-white cursor-pointer flex justify-between items-center transition-colors"
+                            onclick="downloadZip()">
+                            <span>Download Active as ZIP</span>
+                        </div>
+                        <div class="px-4 py-1.5 text-vs-text hover:bg-vs-selection hover:text-white cursor-pointer flex justify-between items-center transition-colors"
+                            onclick="downloadWorkspaceZip()">
+                            <span>Download Workspace ZIP</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="hover:bg-vs-hover px-2 py-0.5 rounded cursor-pointer transition-colors"
+                    onclick="formatContent()">Edit</div>
+                <div class="hover:bg-vs-hover px-2 py-0.5 rounded cursor-pointer transition-colors">Selection</div>
+                <div class="hover:bg-vs-hover px-2 py-0.5 rounded cursor-pointer transition-colors"
+                    onclick="toggleSidebar()">View</div>
+                <div class="hover:bg-vs-hover px-2 py-0.5 rounded cursor-pointer transition-colors"
+                    onclick="toggleHtmlPreview()">Run</div>
+            </nav>
+        </div>
+        <div
+            class="absolute left-1/2 transform -translate-x-1/2 text-vs-textMuted text-xs flex items-center gap-2 pointer-events-none">
+            <span id="window-title">untitled - SanCode</span>
+        </div>
+        <div class="flex items-center gap-2 text-vs-textMuted">
+            <button onclick="installPWA()" id="install-app-btn-header"
+                class="hidden md:flex items-center gap-1.5 bg-vs-accent/20 hover:bg-vs-accent text-vs-accent hover:text-white border border-vs-accent/40 text-[11px] px-2.5 py-0.5 rounded transition-all font-medium cursor-pointer"
+                title="Install App on Desktop, Laptop, or Mobile">
+                <i class="fa-solid fa-download text-[10px]"></i> Install App
+            </button>
+            <div class="w-3 h-3 rounded-full bg-yellow-500 hidden sm:block"></div>
+            <div class="w-3 h-3 rounded-full bg-green-500 hidden sm:block"></div>
+            <div class="w-3 h-3 rounded-full bg-red-500 hidden sm:block"></div>
+            <!-- Mobile Hamburger Button -->
+            <button id="mobile-hamburger-btn" onclick="toggleMobileHamburger()" title="Menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="flex flex-1 overflow-hidden relative">
+
+        <!-- Activity Bar (Far Left) -->
+        <aside id="activity-bar"
+            class="w-12 bg-vs-activity flex flex-col items-center py-2 shrink-0 z-20 border-r border-vs-border overflow-y-auto hide-scrollbar">
+            <button onclick="toggleMobileToolDrawer()" title="All tools" aria-label="All tools" class="w-12 h-12 flex items-center justify-center text-vs-textMuted">
+                <i class="fa-solid fa-grip"></i>
+            </button>
+            <button onclick="switchSidebarTab('workspace')" id="activity-workspace"
+                class="w-12 h-12 flex items-center justify-center text-vs-activityActive relative group mb-1"
+                title="Project Workspace">
+                <div id="activity-workspace-border" class="absolute left-0 top-0 bottom-0 w-0.5 bg-vs-accent"></div>
+                <i class="fa-regular fa-folder-open text-2xl group-hover:text-vs-activityActive transition-colors"></i>
+            </button>
+            <button onclick="switchSidebarTab('explorer')" id="activity-explorer"
+                class="w-12 h-12 flex items-center justify-center text-vs-activityInactive relative group mb-1"
+                title="History &amp; Single Files">
+                <div id="activity-explorer-border" class="absolute left-0 top-0 bottom-0 w-0.5 bg-transparent"></div>
+                <i class="fa-regular fa-clock text-xl group-hover:text-vs-activityActive transition-colors"></i>
+            </button>
+            <button onclick="switchSidebarTab('tools')" id="activity-tools"
+                class="w-12 h-12 flex items-center justify-center text-vs-activityInactive relative group mb-1"
+                title="Format &amp; Clean">
+                <div id="activity-tools-border" class="absolute left-0 top-0 bottom-0 w-0.5 bg-transparent"></div>
+                <i
+                    class="fa-solid fa-wand-magic-sparkles text-xl group-hover:text-vs-activityActive transition-colors"></i>
+            </button>
+            <button onclick="switchSidebarTab('video')" id="activity-video"
+                class="w-12 h-12 flex items-center justify-center text-vs-activityInactive relative group mb-1"
+                title="Mini Media Player">
+                <div id="activity-video-border" class="absolute left-0 top-0 bottom-0 w-0.5 bg-transparent"></div>
+                <span id="activity-video-dot" class="media-dot" hidden></span>
+                <i class="fa-solid fa-circle-play text-xl group-hover:text-vs-activityActive transition-colors"></i>
+            </button>
+            <button onclick="switchSidebarTab('word')" id="activity-word"
+                class="w-12 h-12 flex items-center justify-center text-vs-activityInactive relative group mb-1"
+                title="Word Processor">
+                <div id="activity-word-border" class="absolute left-0 top-0 bottom-0 w-0.5 bg-transparent"></div>
+                <i class="fa-solid fa-file-word text-xl group-hover:text-vs-activityActive transition-colors"></i>
+            </button>
+            <button onclick="switchSidebarTab('excel')" id="activity-excel"
+                class="w-12 h-12 flex items-center justify-center text-vs-activityInactive relative group mb-1"
+                title="Excel Sheet">
+                <div id="activity-excel-border" class="absolute left-0 top-0 bottom-0 w-0.5 bg-transparent"></div>
+                <i class="fa-solid fa-table text-xl group-hover:text-vs-activityActive transition-colors"></i>
+            </button>
+            <button onclick="switchSidebarTab('snippets')" id="activity-snippets"
+                class="w-12 h-12 flex items-center justify-center text-vs-activityInactive relative group mb-1"
+                title="Code Snippets">
+                <div id="activity-snippets-border" class="absolute left-0 top-0 bottom-0 w-0.5 bg-transparent"></div>
+                <i class="fa-solid fa-puzzle-piece text-xl group-hover:text-vs-activityActive transition-colors"></i>
+            </button>
+            <button onclick="switchSidebarTab('devkit')" id="activity-devkit"
+                class="w-12 h-12 flex items-center justify-center text-vs-activityInactive relative group mb-1"
+                title="Developer Kit">
+                <div id="activity-devkit-border" class="absolute left-0 top-0 bottom-0 w-0.5 bg-transparent"></div>
+                <i class="fa-solid fa-toolbox text-xl group-hover:text-vs-activityActive transition-colors"></i>
+            </button>
+            <button onclick="switchSidebarTab('extractor')" id="activity-extractor"
+                class="w-12 h-12 flex items-center justify-center text-vs-activityInactive relative group mb-1"
+                title="Web Extractor">
+                <div id="activity-extractor-border" class="absolute left-0 top-0 bottom-0 w-0.5 bg-transparent"></div>
+                <i class="fa-solid fa-globe text-xl group-hover:text-vs-activityActive transition-colors"></i>
+            </button>
+            <button onclick="switchSidebarTab('formatter')" id="activity-formatter"
+                class="w-12 h-12 flex items-center justify-center text-vs-activityInactive relative group mb-1"
+                title="IN Number Formatter">
+                <div id="activity-formatter-border" class="absolute left-0 top-0 bottom-0 w-0.5 bg-transparent"></div>
+                <i class="fa-solid fa-phone-flip text-xl group-hover:text-vs-activityActive transition-colors"></i>
+            </button>
+            <button onclick="switchSidebarTab('contact-links')" id="activity-contact-links"
+                class="w-12 h-12 flex items-center justify-center text-vs-activityInactive relative group mb-1"
+                title="Contact Link Generator">
+                <div id="activity-contact-links-border" class="absolute left-0 top-0 bottom-0 w-0.5 bg-transparent">
+                </div>
+                <i class="fa-solid fa-link text-xl group-hover:text-vs-activityActive transition-colors"></i>
+            </button>
+            <button onclick="switchSidebarTab('drive-extractor')" id="activity-drive-extractor"
+                class="w-12 h-12 flex items-center justify-center text-vs-activityInactive relative group mb-1"
+                title="Google Drive Extractor">
+                <div id="activity-drive-extractor-border" class="absolute left-0 top-0 bottom-0 w-0.5 bg-transparent">
+                </div>
+                <i class="fa-brands fa-google-drive text-xl group-hover:text-vs-activityActive transition-colors"></i>
+            </button>
+            <button onclick="switchSidebarTab('qr-generator')" id="activity-qr-generator"
+                class="w-12 h-12 flex items-center justify-center text-vs-activityInactive relative group mb-1"
+                title="QR Code Generator">
+                <div id="activity-qr-generator-border" class="absolute left-0 top-0 bottom-0 w-0.5 bg-transparent">
+                </div>
+                <i class="fa-solid fa-qrcode text-xl group-hover:text-vs-activityActive transition-colors"></i>
+            </button>
+            <button onclick="switchSidebarTab('yt-thumbnail')" id="activity-yt-thumbnail"
+                class="w-12 h-12 flex items-center justify-center text-vs-activityInactive relative group mb-1"
+                title="YouTube Thumbnail Downloader">
+                <div id="activity-yt-thumbnail-border" class="absolute left-0 top-0 bottom-0 w-0.5 bg-transparent">
+                </div>
+                <i class="fa-solid fa-image text-xl group-hover:text-vs-activityActive transition-colors"></i>
+            </button>
+            <button onclick="switchSidebarTab('keep-notes')" id="activity-keep-notes"
+                class="w-12 h-12 flex items-center justify-center text-vs-activityInactive relative group mb-1"
+                title="Keep Notes">
+                <div id="activity-keep-notes-border" class="absolute left-0 top-0 bottom-0 w-0.5 bg-transparent"></div>
+                <i class="fa-solid fa-note-sticky text-xl group-hover:text-vs-activityActive transition-colors"></i>
+            </button>
+            <button onclick="switchSidebarTab('asset-explorer')" id="activity-asset-explorer"
+                class="w-12 h-12 flex items-center justify-center text-vs-activityInactive relative group mb-1"
+                title="Web Asset Explorer">
+                <div id="activity-asset-explorer-border" class="absolute left-0 top-0 bottom-0 w-0.5 bg-transparent">
+                </div>
+                <i class="fa-solid fa-satellite-dish text-xl group-hover:text-vs-activityActive transition-colors"></i>
+            </button>
+            <button onclick="switchSidebarTab('todo')" id="activity-todo"
+                class="w-12 h-12 flex items-center justify-center text-vs-activityInactive relative group mb-1"
+                title="To-Do List & Task Alarms">
+                <div id="activity-todo-border" class="absolute left-0 top-0 bottom-0 w-0.5 bg-transparent"></div>
+                <i class="fa-solid fa-list-check text-xl group-hover:text-vs-activityActive transition-colors"></i>
+            </button>
+            <button onclick="switchSidebarTab('doc-tools')" id="activity-doc-tools"
+                class="w-12 h-12 flex items-center justify-center text-vs-activityInactive relative group mb-1"
+                title="Document Tools Suite">
+                <div id="activity-doc-tools-border" class="absolute left-0 top-0 bottom-0 w-0.5 bg-transparent"></div>
+                <i class="fa-solid fa-file-pdf text-xl group-hover:text-vs-activityActive transition-colors"></i>
+            </button>
+            <button onclick="switchSidebarTab('templates')" id="activity-templates"
+                class="w-12 h-12 flex items-center justify-center text-vs-activityInactive relative group mb-1"
+                title="Message Templates">
+                <div id="activity-templates-border" class="absolute left-0 top-0 bottom-0 w-0.5 bg-transparent"></div>
+                <i class="fa-brands fa-whatsapp text-xl group-hover:text-vs-activityActive transition-colors"></i>
+            </button>
+
+            <div class="mt-auto flex flex-col items-center w-full">
+                <button onclick="toggleHtmlPreview()"
+                    class="w-12 h-12 flex items-center justify-center text-vs-activityInactive relative group mb-1"
+                    title="Split Live Preview">
+                    <i class="fa-brands fa-html5 text-2xl group-hover:text-vs-activityActive transition-colors"></i>
+                </button>
+                <button onclick="openAboutModal()"
+                    class="w-12 h-12 flex items-center justify-center text-vs-activityInactive relative group mb-1"
+                    title="About the Developer">
+                    <i
+                        class="fa-regular fa-circle-user text-xl group-hover:text-vs-activityActive transition-colors"></i>
+                </button>
+                <button onclick="switchSidebarTab('settings')" id="activity-settings"
+                    class="w-12 h-12 flex items-center justify-center text-vs-activityInactive relative group"
+                    title="Settings">
+                    <div id="activity-settings-border" class="absolute left-0 top-0 bottom-0 w-0.5 bg-transparent">
+                    </div>
+                    <i class="fa-solid fa-gear text-xl group-hover:text-vs-activityActive transition-colors"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Primary Sidebar -->
+        <aside id="sidebar" style="width: 256px;"
+            class="bg-vs-sidebar border-r border-vs-border flex flex-col shrink-0 z-10 overflow-hidden relative transition-none">
+
+            <!-- Mobile Sidebar Close Button -->
+            <button id="mobile-sidebar-close" onclick="closeMobileSidebar()" aria-label="Back to code" title="Back to code">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+
+            <!-- Sidebar Header -->
+            <div
+                class="h-9 flex items-center px-4 text-[11px] font-semibold tracking-wider text-vs-textMuted uppercase shrink-0">
+                <span id="sidebar-title">Project Workspace</span>
+            </div>
+            <nav id="files-segments" class="workspace-segments" aria-label="File views" hidden>
+                <button onclick="switchSidebarTab('workspace')" data-panel="workspace">Project</button>
+                <button onclick="switchSidebarTab('explorer')" data-panel="explorer">Recent files</button>
+            </nav>
+            <nav id="notes-segments" class="workspace-segments" aria-label="Notebook views" hidden>
+                <button onclick="switchSidebarTab('keep-notes')" data-panel="keep-notes">Notes</button>
+                <button onclick="switchSidebarTab('todo')" data-panel="todo">Tasks</button>
+            </nav>
+
+            <!-- Sidebar Content: WORKSPACE (Folder Explorer) -->
+            <div id="sidebar-workspace" class="flex-1 overflow-y-auto flex flex-col">
+                <div class="p-3 shrink-0">
+                    <button onclick="openFolder()"
+                        class="file-primary bg-vs-accent hover:bg-vs-accentHover text-white text-xs py-2 rounded flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-sm">
+                        <i class="fa-solid fa-folder-plus"></i> Open Folder
+                    </button>
+                    <input type="file" id="folder-input" class="hidden" webkitdirectory="" directory="" multiple=""
+                        onchange="handleFolderSelection(this.files)">
+                </div>
+
+                <div id="workspace-empty-state"
+                    class="px-4 py-8 flex flex-col items-center justify-center text-vs-textMuted text-center">
+                    <i class="fa-solid fa-folder-tree text-3xl mb-3 opacity-50"></i>
+                    <h2>No project open</h2>
+                    <div class="file-empty-actions">
+                        <button onclick="createNewFile(); if (isMobile()) closeMobileSidebar();"><i class="fa-solid fa-plus"></i> New file</button>
+                        <button onclick="document.getElementById('file-input').click()"><i class="fa-regular fa-file"></i> Open file</button>
+                    </div>
+                </div>
+
+                <div id="workspace-tree-container" class="hidden flex-col pb-4">
+                    <div class="flex items-center px-4 py-2 bg-vs-editor border-y border-vs-border/50">
+                        <i class="fa-solid fa-cube text-vs-accent mr-2 text-xs"></i>
+                        <span id="workspace-root-name"
+                            class="text-xs font-bold uppercase tracking-wider truncate">Project</span>
+                    </div>
+                    <!-- Tree injected via JS -->
+                    <div id="workspace-tree-content" class="px-2 py-2 text-[13px] font-mono leading-relaxed"></div>
+
+                    <div class="p-3 mt-auto">
+                        <button onclick="downloadWorkspaceZip()"
+                            class="w-full bg-vs-editor hover:bg-vs-hover border border-vs-border text-vs-textMuted hover:text-vs-text text-[10px] py-2 rounded transition-colors flex items-center justify-center gap-1 mt-4">
+                            <i class="fa-solid fa-file-zipper"></i> Download Workspace ZIP
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Content: EXPLORER (Timeline & Editors) -->
+            <div id="sidebar-explorer" class="hidden flex-1 overflow-y-auto flex flex-col">
+                <div class="p-3">
+                    <button onclick="document.getElementById('file-input').click()"
+                        class="file-primary border border-vs-border hover:border-vs-accent bg-vs-editor rounded p-4 text-center cursor-pointer group transition-colors">
+                        <i
+                            class="fa-solid fa-cloud-arrow-up text-xl text-vs-textMuted group-hover:text-vs-accent mb-2 transition-colors"></i>
+                        <span>Open file</span>
+                    </button>
+                    <input type="file" id="file-input" class="hidden" onchange="handleFileUpload(this.files[0], this)">
+                </div>
+                <div class="mt-2">
+                    <div class="flex items-center px-1 py-1 cursor-pointer hover:bg-vs-hover group"
+                        onclick="toggleAccordion('acc-editors')">
+                        <i id="icon-acc-editors"
+                            class="fa-solid fa-chevron-down text-[10px] w-4 text-center text-vs-textMuted transition-transform"></i>
+                        <span
+                            class="text-[11px] font-bold text-vs-textMuted group-hover:text-vs-text uppercase tracking-wider">Open
+                            Editors</span>
+                    </div>
+                    <div id="acc-editors" class="accordion-content expanded">
+                        <div id="sidebar-open-editors" class="flex flex-col py-1"></div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center px-1 py-1 cursor-pointer hover:bg-vs-hover group"
+                        onclick="toggleAccordion('acc-history')">
+                        <i id="icon-acc-history"
+                            class="fa-solid fa-chevron-down text-[10px] w-4 text-center text-vs-textMuted transition-transform"></i>
+                        <span
+                            class="text-[11px] font-bold text-vs-textMuted group-hover:text-vs-text uppercase tracking-wider flex-1">Timeline
+                            (History)</span>
+                        <i onclick="clearHistory(); event.stopPropagation();"
+                            class="fa-solid fa-trash-can text-[10px] mr-2 opacity-0 group-hover:opacity-100 hover:text-red-400"></i>
+                    </div>
+                    <div id="acc-history" class="accordion-content expanded pb-2">
+                        <div id="history-list" class="flex flex-col text-sm"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Content: MINI MEDIA PLAYER -->
+            <div id="sidebar-video" class="hidden flex-1 overflow-y-auto flex flex-col">
+                <div class="p-4 flex flex-col gap-4">
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-xs font-bold text-vs-text uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-circle-play text-vs-accent"></i> Mini Media Player
+                        </h3>
+                        <p class="text-[10px] text-vs-textMuted">Watch or listen while you code.</p>
+                    </div>
+
+                    <!-- Media Player slot: the real player (#mini-player, at the end of <body>) sits over this
+                         box while the Media tool is open and floats over the app when you switch tools -->
+                    <div id="player-slot" class="w-full aspect-video rounded bg-black/40 sticky top-0 z-30"></div>
+
+                    <!-- YouTube Link Input -->
+                    <div class="flex items-center gap-1 mt-2">
+                        <input type="text" id="yt-url-input" placeholder="Paste YouTube link here..."
+                            class="w-full bg-vs-editor border border-vs-border text-vs-text text-[10px] p-1.5 rounded focus:border-vs-accent focus:outline-none">
+                        <button onclick="addYouTubeVideo()"
+                            class="bg-vs-editor hover:bg-vs-hover border border-vs-border text-vs-textMuted hover:text-vs-text text-[10px] px-2 py-1.5 rounded transition-colors shrink-0"
+                            title="Add YouTube Video">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+
+                    <!-- Upload / Drop Zone -->
+                    <div id="video-drop-zone" onclick="document.getElementById('video-input').click()"
+                        class="border border-dashed border-vs-border hover:border-vs-accent bg-vs-editor/50 rounded p-3 text-center cursor-pointer group transition-colors mt-2">
+                        <i
+                            class="fa-solid fa-folder-plus text-lg text-vs-textMuted group-hover:text-vs-accent mb-1 transition-colors"></i>
+                        <p class="text-[10px] text-vs-textMuted">Click or Drop media here</p>
+                        <input type="file" id="video-input" class="hidden"
+                            accept="video/*,audio/*,.mkv,.avi,.mov,.mp3,.wav,.flac" multiple=""
+                            onchange="handleVideoSelection(this.files)">
+                    </div>
+
+                    <!-- Playlist -->
+                    <div class="flex flex-col gap-1 mt-2">
+                        <div class="flex justify-between items-end">
+                            <label class="text-[10px] text-vs-textMuted uppercase tracking-wider">Media Queue</label>
+                            <button onclick="clearVideoQueue()"
+                                class="text-[10px] text-red-400 hover:text-red-300 transition-colors"
+                                title="Clear Queue">Clear</button>
+                        </div>
+                        <div id="video-queue-list"
+                            class="flex flex-col gap-1 max-h-[250px] overflow-y-auto pr-1 video-scroll"></div>
+                    </div>
+
+                    <div class="mt-auto pt-6 pb-2 text-center border-t border-vs-border/50 mt-4">
+                        <a href="https://sanstudio-hub.github.io/SanStudio-Hub/in" target="_blank"
+                            class="text-[10px] text-vs-textMuted hover:text-vs-accent font-mono transition-colors block">Developed
+                            By SanStudio Developer Team</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Content: TOOLS / SETTINGS -->
+            <div id="sidebar-tools" class="hidden flex-1 overflow-y-auto flex flex-col">
+                <div class="p-3">
+                    <button onclick="formatContent()"
+                        class="w-full bg-vs-accent hover:bg-vs-accentHover text-white text-sm py-1.5 rounded flex items-center justify-center gap-2 transition-colors border border-transparent shadow-sm">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Format Code
+                    </button>
+                </div>
+                <div>
+                    <div class="flex items-center px-1 py-1 cursor-pointer hover:bg-vs-hover group"
+                        onclick="toggleAccordion('acc-target')">
+                        <i id="icon-acc-target"
+                            class="fa-solid fa-chevron-down text-[10px] w-4 text-center text-vs-textMuted transition-transform"></i>
+                        <span
+                            class="text-[11px] font-bold text-vs-textMuted group-hover:text-vs-text uppercase tracking-wider">Configuration</span>
+                    </div>
+                    <div id="acc-target" class="accordion-content expanded px-4 py-2 flex flex-col gap-3 text-sm">
+                        <div class="flex flex-col gap-1">
+                            <label class="text-xs text-vs-textMuted">Language / Format Target</label>
+                            <select id="format-select"
+                                class="w-full bg-vs-editor border border-vs-border text-vs-text text-xs p-1 rounded focus:border-vs-accent focus:outline-none">
+                                <option value="txt" selected="">Plain Text (.txt)</option>
+                                <option value="md">Markdown (.md)</option>
+                                <option value="json">JSON (.json)</option>
+                                <option value="html">HTML (.html)</option>
+                                <option value="css">CSS (.css)</option>
+                                <option value="js">JavaScript (.js)</option>
+                                <option value="jsx">JavaScript React (.jsx)</option>
+                                <option value="ts">TypeScript (.ts)</option>
+                                <option value="tsx">TypeScript React (.tsx)</option>
+                                <option value="c">C / C++ (.c)</option>
+                                <option value="py">Python (.py)</option>
+                                <option value="java">Java (.java)</option>
+                                <option value="kt">Kotlin (.kt)</option>
+                                <option value="sql">SQL (.sql)</option>
+                                <option value="xml">XML / SVG (.xml)</option>
+                                <option value="yaml">YAML (.yaml)</option>
+                                <option value="sh">Shell (.sh)</option>
+                                <option disabled="">──────────</option>
+                                <option value="base64-enc">Base64 Encode</option>
+                                <option value="base64-dec">Base64 Decode</option>
+                                <option value="url-enc">URL Encode</option>
+                                <option value="url-dec">URL Decode</option>
+                                <option disabled="">──────────</option>
+                                <option value="passage">Passage / Case</option>
+                                <option value="youtube">YouTube Title</option>
+                                <option value="hashtag">Hashtag Maker</option>
+                            </select>
+                        </div>
+                        <div id="opt-code" class="hidden flex flex-col gap-2">
+                            <div class="flex flex-col gap-1">
+                                <label class="text-xs text-vs-textMuted">Indent Size</label>
+                                <select id="indent-size"
+                                    class="w-full bg-vs-editor border border-vs-border text-vs-text text-xs p-1 rounded focus:border-vs-accent focus:outline-none">
+                                    <option value="2">2 Spaces</option>
+                                    <option value="4" selected="">4 Spaces</option>
+                                    <option value="tab">Tabs</option>
+                                </select>
+                            </div>
+                            <label class="flex items-center gap-2 cursor-pointer group mt-1">
+                                <input type="checkbox" id="chk-minify"
+                                    class="w-3.5 h-3.5 accent-vs-accent bg-vs-editor border-vs-border rounded-sm">
+                                <span class="text-xs text-vs-textMuted group-hover:text-vs-text">Minify Output
+                                    (Squash)</span>
+                            </label>
+                        </div>
+                        <div id="opt-passage" class="hidden flex flex-col gap-1">
+                            <label class="text-xs text-vs-textMuted">Case Conversion</label>
+                            <select id="case-select"
+                                class="w-full bg-vs-editor border border-vs-border text-vs-text text-xs p-1 rounded focus:border-vs-accent focus:outline-none">
+                                <option value="none">No Change</option>
+                                <option value="sentence">Sentence case</option>
+                                <option value="title">Capitalize Words</option>
+                                <option value="upper">UPPERCASE</option>
+                                <option value="lower">lowercase</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex items-center px-1 py-1 cursor-pointer hover:bg-vs-hover group"
+                        onclick="toggleAccordion('acc-ops')">
+                        <i id="icon-acc-ops"
+                            class="fa-solid fa-chevron-down text-[10px] w-4 text-center text-vs-textMuted transition-transform"></i>
+                        <span
+                            class="text-[11px] font-bold text-vs-textMuted group-hover:text-vs-text uppercase tracking-wider">Clean
+                            Operations</span>
+                    </div>
+                    <div id="acc-ops" class="accordion-content expanded px-4 py-2 flex flex-col gap-2">
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="checkbox" id="chk-trim" checked=""
+                                class="w-3.5 h-3.5 accent-vs-accent bg-vs-editor border-vs-border rounded-sm">
+                            <span class="text-xs text-vs-textMuted group-hover:text-vs-text">Trim Edges</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="checkbox" id="chk-spaces"
+                                class="w-3.5 h-3.5 accent-vs-accent bg-vs-editor border-vs-border rounded-sm">
+                            <span class="text-xs text-vs-textMuted group-hover:text-vs-text">Remove Extra Spaces</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="checkbox" id="chk-lines"
+                                class="w-3.5 h-3.5 accent-vs-accent bg-vs-editor border-vs-border rounded-sm">
+                            <span class="text-xs text-vs-textMuted group-hover:text-vs-text">Remove Empty Lines</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Content: WORD PROCESSOR -->
+            <div id="sidebar-word" class="hidden flex-1 overflow-y-auto flex flex-col">
+                <div class="p-4 flex flex-col gap-4">
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-xs font-bold text-vs-text uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-file-word text-vs-accent"></i> Word Processor
+                        </h3>
+                        <p class="text-[10px] text-vs-textMuted">A4 rich text editor inside your workspace.</p>
+                    </div>
+                    <button onclick="toggleWordView(true)"
+                        class="w-full bg-vs-accent hover:bg-vs-accentHover text-white text-xs py-2.5 rounded flex items-center justify-center gap-2 transition-colors border border-transparent shadow-sm font-medium mt-2">
+                        <i class="fa-solid fa-file-signature"></i> Open Word Workspace
+                    </button>
+                    <button onclick="toggleWordView(false)"
+                        class="w-full bg-vs-editor hover:bg-vs-hover text-vs-text text-xs py-2.5 rounded flex items-center justify-center gap-2 transition-colors border border-vs-border shadow-sm font-medium">
+                        <i class="fa-solid fa-code"></i> Back to Code Editor
+                    </button>
+                    <div class="flex flex-col gap-3 mt-4 border-t border-vs-border/50 pt-4">
+                        <label class="text-[10px] text-vs-textMuted uppercase tracking-wider">Document Options</label>
+                        <div class="flex gap-2">
+                            <button onclick="exportWordHtml()"
+                                class="flex-1 bg-vs-editor hover:bg-vs-hover border border-vs-border text-vs-textMuted hover:text-vs-text text-[10px] py-1.5 rounded transition-colors flex justify-center items-center gap-1">
+                                <i class="fa-solid fa-download"></i> Save HTML
+                            </button>
+                        </div>
+                        <button onclick="clearWordDoc()"
+                            class="w-full bg-vs-editor hover:bg-red-500/20 hover:text-red-400 border border-vs-border hover:border-red-500/50 text-vs-textMuted text-[10px] py-1.5 rounded transition-colors flex items-center justify-center gap-1 mt-2">
+                            <i class="fa-solid fa-trash-can"></i> Clear Document
+                        </button>
+                    </div>
+
+                    <div class="mt-auto pt-6 pb-2 text-center border-t border-vs-border/50 mt-4">
+                        <a href="https://sanstudio-hub.github.io/SanStudio-Hub/in" target="_blank"
+                            class="text-[10px] text-vs-textMuted hover:text-vs-accent font-mono transition-colors block">Developed
+                            By SanStudio Developer Team</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Content: EXCEL SHEET -->
+            <div id="sidebar-excel" class="hidden flex-1 overflow-y-auto flex flex-col">
+                <div class="p-4 flex flex-col gap-4">
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-xs font-bold text-vs-text uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-table text-vs-accent"></i> Excel Sheet
+                        </h3>
+                        <p class="text-[10px] text-vs-textMuted">A lightweight spreadsheet inside your workspace.</p>
+                    </div>
+                    <button onclick="toggleSpreadsheetView(true)"
+                        class="w-full bg-vs-accent hover:bg-vs-accentHover text-white text-xs py-2.5 rounded flex items-center justify-center gap-2 transition-colors border border-transparent shadow-sm font-medium mt-2">
+                        <i class="fa-solid fa-table-cells"></i> Open Spreadsheet View
+                    </button>
+                    <button onclick="toggleSpreadsheetView(false)"
+                        class="w-full bg-vs-editor hover:bg-vs-hover text-vs-text text-xs py-2.5 rounded flex items-center justify-center gap-2 transition-colors border border-vs-border shadow-sm font-medium">
+                        <i class="fa-solid fa-code"></i> Back to Code Editor
+                    </button>
+                    <div class="flex flex-col gap-3 mt-4 border-t border-vs-border/50 pt-4">
+                        <label class="text-[10px] text-vs-textMuted uppercase tracking-wider">Sheet Options</label>
+                        <div class="flex gap-2">
+                            <button onclick="exportSheetCSV()"
+                                class="flex-1 bg-vs-editor hover:bg-vs-hover border border-vs-border text-vs-textMuted hover:text-vs-text text-[10px] py-1.5 rounded transition-colors flex justify-center items-center gap-1">
+                                <i class="fa-solid fa-download"></i> CSV
+                            </button>
+                            <button onclick="copySheetToEditor()"
+                                class="flex-1 bg-vs-editor hover:bg-vs-hover border border-vs-border text-vs-textMuted hover:text-vs-text text-[10px] py-1.5 rounded transition-colors flex justify-center items-center gap-1">
+                                <i class="fa-solid fa-file-export"></i> To Editor
+                            </button>
+                        </div>
+                        <button onclick="initSpreadsheet()"
+                            class="w-full bg-vs-editor hover:bg-red-500/20 hover:text-red-400 border border-vs-border hover:border-red-500/50 text-vs-textMuted text-[10px] py-1.5 rounded transition-colors flex items-center justify-center gap-1 mt-2">
+                            <i class="fa-solid fa-trash-can"></i> Reset Grid
+                        </button>
+                    </div>
+
+                    <div class="mt-auto pt-6 pb-2 text-center border-t border-vs-border/50 mt-4">
+                        <a href="https://sanstudio-hub.github.io/SanStudio-Hub/in" target="_blank"
+                            class="text-[10px] text-vs-textMuted hover:text-vs-accent font-mono transition-colors block">Developed
+                            By SanStudio Developer Team</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Content: SNIPPETS -->
+            <div id="sidebar-snippets" class="hidden flex-1 overflow-y-auto flex flex-col">
+                <div class="p-4 flex flex-col gap-4">
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-xs font-bold text-vs-text uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-puzzle-piece text-vs-accent"></i> Boilerplates
+                        </h3>
+                        <p class="text-[10px] text-vs-textMuted">Quickly start projects with pre-written code
+                            structures.</p>
+                    </div>
+                    <div class="flex flex-col gap-2 mt-2">
+                        <h4 class="text-[10px] uppercase font-bold text-vs-textMuted tracking-wider mt-2 mb-1">Web
+                            Development</h4>
+                        <button onclick="insertSnippet('html5')"
+                            class="w-full bg-vs-editor hover:bg-vs-hover border border-vs-border text-vs-text text-xs py-2 rounded transition-colors text-left px-3 flex items-center gap-2">
+                            <i class="fa-brands fa-html5 text-orange-500 w-4"></i> HTML5 Skeleton
+                        </button>
+                        <button onclick="insertSnippet('tailwind')"
+                            class="w-full bg-vs-editor hover:bg-vs-hover border border-vs-border text-vs-text text-xs py-2 rounded transition-colors text-left px-3 flex items-center gap-2">
+                            <i class="fa-brands fa-css3 text-blue-400 w-4"></i> Tailwind CSS Starter
+                        </button>
+                        <h4 class="text-[10px] uppercase font-bold text-vs-textMuted tracking-wider mt-4 mb-1">
+                            JavaScript / Backend</h4>
+                        <button onclick="insertSnippet('fetch')"
+                            class="w-full bg-vs-editor hover:bg-vs-hover border border-vs-border text-vs-text text-xs py-2 rounded transition-colors text-left px-3 flex items-center gap-2">
+                            <i class="fa-brands fa-js text-yellow-400 w-4"></i> Fetch API (Async)
+                        </button>
+                        <button onclick="insertSnippet('express')"
+                            class="w-full bg-vs-editor hover:bg-vs-hover border border-vs-border text-vs-text text-xs py-2 rounded transition-colors text-left px-3 flex items-center gap-2">
+                            <i class="fa-brands fa-node-js text-green-500 w-4"></i> Express.js Server
+                        </button>
+                        <h4 class="text-[10px] uppercase font-bold text-vs-textMuted tracking-wider mt-4 mb-1">Data</h4>
+                        <button onclick="insertSnippet('json')"
+                            class="w-full bg-vs-editor hover:bg-vs-hover border border-vs-border text-vs-text text-xs py-2 rounded transition-colors text-left px-3 flex items-center gap-2">
+                            <i class="fa-solid fa-code text-yellow-500 w-4"></i> Basic JSON Array
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Content: TEMPLATES -->
+            <div id="sidebar-templates" class="hidden flex-1 overflow-y-auto flex flex-col">
+                <div class="p-4 flex flex-col gap-4">
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-xs font-bold text-vs-text uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-brands fa-whatsapp text-vs-accent"></i> Msg Templates
+                        </h3>
+                        <p class="text-[10px] text-vs-textMuted">Quickly insert predefined messages.</p>
+                    </div>
+                    <div class="flex flex-col gap-2 mt-2">
+                        <h4 class="text-[10px] uppercase font-bold text-vs-textMuted tracking-wider mt-2 mb-1">ALP Astrology</h4>
+                        <div class="flex gap-1">
+                            <button onclick="insertTemplate('consultation')"
+                                class="flex-1 bg-vs-editor hover:bg-vs-hover border border-vs-border text-vs-text text-xs py-2 rounded transition-colors text-left px-3 flex items-center gap-2">
+                                <i class="fa-regular fa-calendar-check text-green-500 w-4"></i> Consultation Details
+                            </button>
+                            <button onclick="openTemplateEditor('consultation')" class="bg-vs-editor hover:bg-vs-hover border border-vs-border text-vs-text text-xs py-2 px-3 rounded transition-colors text-center" title="Edit Default Template">
+                                <i class="fa-solid fa-pen text-vs-textMuted hover:text-vs-accent"></i>
+                            </button>
+                        </div>
+                        <div class="flex gap-1">
+                            <button onclick="insertTemplate('course')"
+                                class="flex-1 bg-vs-editor hover:bg-vs-hover border border-vs-border text-vs-text text-xs py-2 rounded transition-colors text-left px-3 flex items-center gap-2">
+                                <i class="fa-solid fa-graduation-cap text-blue-400 w-4"></i> Course Details
+                            </button>
+                            <button onclick="openTemplateEditor('course')" class="bg-vs-editor hover:bg-vs-hover border border-vs-border text-vs-text text-xs py-2 px-3 rounded transition-colors text-center" title="Edit Default Template">
+                                <i class="fa-solid fa-pen text-vs-textMuted hover:text-vs-accent"></i>
+                            </button>
+                        </div>
+                        <h4 class="text-[10px] uppercase font-bold text-vs-textMuted tracking-wider mt-4 mb-1">App Info</h4>
+                        <button onclick="insertTemplate('whyfeature')"
+                            class="w-full bg-vs-editor hover:bg-vs-hover border border-vs-border text-vs-text text-xs py-2 rounded transition-colors text-left px-3 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-question text-yellow-400 w-4"></i> Why need this feature
+                        </button>
+                        
+                        <h4 class="text-[10px] uppercase font-bold text-vs-textMuted tracking-wider mt-4 mb-1">Direct Send</h4>
+                        <input type="tel" id="wa-number" placeholder="Phone Number (e.g. 919876543210)"
+                            class="w-full bg-vs-editor border border-vs-border text-vs-text text-xs p-2 rounded outline-none focus:border-vs-accent">
+                        <textarea id="wa-message" placeholder="Paste your message here..." rows="4"
+                            class="w-full bg-vs-editor border border-vs-border text-vs-text text-xs p-2 rounded outline-none focus:border-vs-accent resize-none"></textarea>
+                        <button onclick="sendToWhatsApp()"
+                            class="w-full bg-[#25D366] hover:bg-[#128C7E] text-white font-bold text-xs py-2 rounded transition-colors flex items-center justify-center gap-2 mt-1 shadow-sm">
+                            <i class="fa-brands fa-whatsapp text-white w-4 text-sm"></i> Send to WhatsApp
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Content: DEVKIT -->
+            <div id="sidebar-devkit" class="hidden flex-1 overflow-y-auto flex flex-col">
+                <div class="p-4 flex flex-col gap-4">
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-xs font-bold text-vs-text uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-toolbox text-vs-accent"></i> Developer Kit
+                        </h3>
+                        <p class="text-[10px] text-vs-textMuted">Generators and utilities for testing and prototyping.
+                        </p>
+                    </div>
+                    <div class="flex flex-col gap-2 mt-2">
+                        <h4 class="text-[10px] uppercase font-bold text-vs-textMuted tracking-wider mt-2 mb-1">Mock Data
+                            Generators</h4>
+                        <button onclick="generateDevKit('uuid')"
+                            class="w-full bg-vs-editor hover:bg-vs-hover border border-vs-border text-vs-text text-xs py-2 rounded transition-colors text-left px-3 flex items-center gap-2">
+                            <i class="fa-solid fa-fingerprint text-purple-400 w-4"></i> Generate UUID (v4)
+                        </button>
+                        <button onclick="generateDevKit('mockUsers')"
+                            class="w-full bg-vs-editor hover:bg-vs-hover border border-vs-border text-vs-text text-xs py-2 rounded transition-colors text-left px-3 flex items-center gap-2">
+                            <i class="fa-solid fa-users text-blue-400 w-4"></i> Dummy JSON Users
+                        </button>
+                        <h4 class="text-[10px] uppercase font-bold text-vs-textMuted tracking-wider mt-4 mb-1">Text
+                            Generators</h4>
+                        <button onclick="generateDevKit('lorem')"
+                            class="w-full bg-vs-editor hover:bg-vs-hover border border-vs-border text-vs-text text-xs py-2 rounded transition-colors text-left px-3 flex items-center gap-2">
+                            <i class="fa-solid fa-align-left text-gray-400 w-4"></i> Lorem Ipsum Text
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Content: EXTRACTOR -->
+            <div id="sidebar-extractor" class="hidden flex-1 overflow-y-auto flex flex-col">
+                <div class="p-4 flex flex-col gap-4">
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-xs font-bold text-vs-text uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-code-branch text-vs-accent"></i> Pro Web Extractor
+                        </h3>
+                        <p class="text-[10px] text-vs-textMuted">Open original HTML source in an editor tab. If the website blocks browser access, try the optional proxy or open a saved HTML file.</p>
+                    </div>
+                    <div class="flex flex-col gap-3 mt-2">
+                        <div class="flex flex-col gap-1">
+                            <label for="website-url" class="text-[10px] text-vs-textMuted uppercase tracking-wider">Website URL</label>
+                            <input type="url" id="website-url" placeholder="https://google.com"
+                                class="w-full bg-vs-editor border border-vs-border text-vs-text text-xs p-2 rounded focus:border-vs-accent focus:outline-none placeholder-vs-textMuted/40">
+                        </div>
+                        <label data-web-proxy class="flex items-center gap-2 cursor-pointer group">
+                            <input type="checkbox" id="cors-bypass"
+                                class="w-3.5 h-3.5 accent-vs-accent bg-vs-editor border-vs-border rounded-sm">
+                            <span class="text-xs text-vs-textMuted group-hover:text-vs-text">Allow public proxy fallback (sends the URL to AllOrigins; browser only)</span>
+                        </label>
+                        <button onclick="extractWebsite()" id="extract-btn"
+                            class="w-full bg-vs-accent hover:bg-vs-accentHover text-white text-xs py-2.5 rounded flex items-center justify-center gap-2 transition-colors border border-transparent shadow-sm mt-2 font-medium">
+                            <i id="extract-icon" class="fa-solid fa-cloud-arrow-down"></i>
+                            <span id="extract-text">Extract to Tab</span>
+                        </button>
+                        <p id="extract-status" role="status" aria-live="polite" class="text-xs text-vs-textMuted break-words"></p>
+                        <button type="button" onclick="document.getElementById('browser-source-file').click()" class="w-full bg-vs-editor border border-vs-border text-vs-text text-xs py-2 rounded">Open saved HTML source</button>
+                        <input type="file" id="browser-source-file" accept=".html,.htm,text/html" hidden>
+                        <p class="text-[10px] text-vs-textMuted">Login pages, bot protection, and content generated after page load may differ from the source returned here.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Content: FORMATTER -->
+            <div id="sidebar-formatter" class="hidden flex-1 overflow-y-auto flex flex-col">
+                <div class="p-4 flex flex-col gap-4">
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-xs font-bold text-vs-text uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-phone-flip text-vs-accent"></i> IN Number Formatter
+                        </h3>
+                        <p class="text-[10px] text-vs-textMuted">Clean, filter, and format Indian phone numbers.</p>
+                    </div>
+                    <div class="flex flex-col gap-3 mt-2">
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] text-vs-textMuted uppercase tracking-wider">Raw Numbers (Paste
+                                Here)</label>
+                            <textarea id="num-input" rows="4" placeholder="+91 98765-43210
+9876543210
+(091) 9876543210" class="w-full bg-vs-editor border border-vs-border text-vs-text text-xs p-2 rounded focus:border-vs-accent focus:outline-none placeholder-vs-textMuted/40 resize-y font-mono"></textarea>
+                        </div>
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="checkbox" id="add-91-prefix"
+                                class="w-3.5 h-3.5 accent-vs-accent bg-vs-editor border-vs-border rounded-sm">
+                            <span class="text-xs text-vs-textMuted group-hover:text-vs-text">Add +91 Prefix to
+                                output</span>
+                        </label>
+                        <button onclick="formatIndianNumbers()"
+                            class="w-full bg-vs-accent hover:bg-vs-accentHover text-white text-xs py-2.5 rounded flex items-center justify-center gap-2 transition-colors border border-transparent shadow-sm font-medium">
+                            <i class="fa-solid fa-filter"></i> Clean &amp; Format
+                        </button>
+                        <div class="flex flex-col gap-1 mt-2">
+                            <div class="flex justify-between items-end">
+                                <label class="text-[10px] text-vs-textMuted uppercase tracking-wider">Cleaned
+                                    Output</label>
+                                <button onclick="copyNumberOutput()"
+                                    class="text-[10px] text-vs-accent hover:text-vs-activityActive transition-colors flex items-center gap-1"
+                                    title="Copy Output">
+                                    <i class="fa-regular fa-copy"></i> Copy
+                                </button>
+                            </div>
+                            <textarea id="num-output" rows="5" readonly="" placeholder="Output will appear here..."
+                                class="w-full bg-vs-editor/50 border border-vs-border text-vs-text text-xs p-2 rounded focus:outline-none placeholder-vs-textMuted/40 resize-y font-mono"></textarea>
+                            <div class="text-[9px] text-vs-textMuted text-right font-mono" id="num-count">0 valid
+                                numbers</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Content: CONTACT LINK GENERATOR -->
+            <div id="sidebar-contact-links" class="hidden flex-1 overflow-y-auto flex flex-col">
+                <div class="p-4 flex flex-col gap-4">
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-xs font-bold text-vs-text uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-link text-vs-accent"></i> Contact Links
+                        </h3>
+                        <p class="text-[10px] text-vs-textMuted">Generate WhatsApp, Call, and Telegram links.</p>
+                    </div>
+                    <div class="flex flex-col gap-3 mt-2">
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] text-vs-textMuted uppercase tracking-wider">Phone Numbers</label>
+                            <textarea id="contact-numbers-input" rows="4" placeholder="Paste phone numbers (one per line)
++919876543210
+9876543211" class="w-full bg-vs-editor border border-vs-border text-vs-text text-xs p-2 rounded focus:border-vs-accent focus:outline-none placeholder-vs-textMuted/40 resize-y font-mono whitespace-pre"></textarea>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] text-vs-textMuted uppercase tracking-wider">Custom WhatsApp
+                                Message <span class="lowercase text-[9px] opacity-70">(Optional)</span></label>
+                            <textarea id="contact-wa-msg" rows="2"
+                                placeholder="Hello sir, this is regarding event photos."
+                                class="w-full bg-vs-editor border border-vs-border text-vs-text text-xs p-2 rounded focus:border-vs-accent focus:outline-none placeholder-vs-textMuted/40 resize-y"></textarea>
+                        </div>
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="checkbox" id="contact-remove-91" checked=""
+                                class="w-3.5 h-3.5 accent-vs-accent bg-vs-editor border-vs-border rounded-sm">
+                            <span class="text-xs text-vs-textMuted group-hover:text-vs-text">Remove +91
+                                automatically</span>
+                        </label>
+                        <button onclick="generateContactLinks()"
+                            class="w-full bg-vs-accent hover:bg-vs-accentHover text-white text-xs py-2.5 rounded flex items-center justify-center gap-2 transition-colors border border-transparent shadow-sm font-medium">
+                            <i class="fa-solid fa-bolt"></i> Generate Links
+                        </button>
+                        <div class="flex flex-col gap-1 mt-2">
+                            <div class="flex justify-between items-end">
+                                <label class="text-[10px] text-vs-textMuted uppercase tracking-wider">Output
+                                    Result</label>
+                                <button onclick="copyContactLinks()"
+                                    class="text-[10px] text-vs-accent hover:text-vs-activityActive transition-colors flex items-center gap-1"
+                                    title="Copy All Links">
+                                    <i class="fa-regular fa-copy"></i> Copy
+                                </button>
+                            </div>
+                            <textarea id="contact-links-output" rows="7" readonly=""
+                                placeholder="Generated links will appear here..."
+                                class="w-full bg-vs-editor/50 border border-vs-border text-vs-text text-xs p-2 rounded focus:outline-none placeholder-vs-textMuted/40 resize-y font-mono whitespace-pre overflow-x-auto"></textarea>
+                            <button onclick="downloadContactLinks()"
+                                class="w-full mt-1 bg-vs-editor hover:bg-vs-hover border border-vs-border text-vs-textMuted hover:text-vs-text text-[10px] py-1.5 rounded transition-colors flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-download"></i> Download TXT
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mt-auto pt-6 pb-2 text-center border-t border-vs-border/50 mt-4">
+                        <a href="https://sanstudio-hub.github.io/SanStudio-Hub/in" target="_blank"
+                            class="text-[10px] text-vs-textMuted hover:text-vs-accent font-mono transition-colors block">Developed
+                            By SanStudio Developer Team</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Content: G-DRIVE EXTRACTOR -->
+            <div id="sidebar-drive-extractor" class="hidden flex-1 overflow-y-auto flex flex-col">
+                <div class="p-4 flex flex-col gap-4">
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-xs font-bold text-vs-text uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-brands fa-google-drive text-vs-accent"></i> G-Drive Extractor
+                        </h3>
+                        <p class="text-[10px] text-vs-textMuted">Extract file IDs into structured JS/JSON arrays.</p>
+                    </div>
+                    <div class="flex flex-col gap-3 mt-2">
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] text-vs-textMuted uppercase tracking-wider">Event Name</label>
+                            <input type="text" id="drive-event-name" placeholder="Enter event name (Birthday, Wedding)"
+                                class="w-full bg-vs-editor border border-vs-border text-vs-text text-xs p-2 rounded focus:border-vs-accent focus:outline-none placeholder-vs-textMuted/40">
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] text-vs-textMuted uppercase tracking-wider">Drive Links</label>
+                            <textarea id="drive-links-input" rows="4"
+                                placeholder="Paste Google Drive links (one per line)"
+                                class="w-full bg-vs-editor border border-vs-border text-vs-text text-xs p-2 rounded focus:border-vs-accent focus:outline-none placeholder-vs-textMuted/40 resize-y font-mono whitespace-nowrap overflow-x-auto"></textarea>
+                        </div>
+                        <button onclick="extractDriveIDs()"
+                            class="w-full bg-vs-accent hover:bg-vs-accentHover text-white text-xs py-2.5 rounded flex items-center justify-center gap-2 transition-colors border border-transparent shadow-sm font-medium">
+                            <i class="fa-solid fa-bolt"></i> Extract IDs
+                        </button>
+                        <div class="flex flex-col gap-1 mt-2">
+                            <div class="flex justify-between items-end">
+                                <label class="text-[10px] text-vs-textMuted uppercase tracking-wider">Output
+                                    Result</label>
+                                <button onclick="copyDriveOutput()"
+                                    class="text-[10px] text-vs-accent hover:text-vs-activityActive transition-colors flex items-center gap-1"
+                                    title="Copy Output">
+                                    <i class="fa-regular fa-copy"></i> Copy
+                                </button>
+                            </div>
+                            <textarea id="drive-output" rows="7" readonly="" placeholder="data = [
+  {...}
+]" class="w-full bg-vs-editor/50 border border-vs-border text-vs-text text-xs p-2 rounded focus:outline-none placeholder-vs-textMuted/40 resize-y font-mono whitespace-pre overflow-x-auto"></textarea>
+                            <div class="flex gap-2 mt-1">
+                                <button onclick="downloadDriveOutput('js')"
+                                    class="flex-1 bg-vs-editor hover:bg-vs-hover border border-vs-border text-vs-textMuted hover:text-vs-text text-[10px] py-1.5 rounded transition-colors">
+                                    <i class="fa-brands fa-js mr-1"></i> Download JS
+                                </button>
+                                <button onclick="downloadDriveOutput('json')"
+                                    class="flex-1 bg-vs-editor hover:bg-vs-hover border border-vs-border text-vs-textMuted hover:text-vs-text text-[10px] py-1.5 rounded transition-colors">
+                                    <i class="fa-solid fa-code mr-1"></i> Download JSON
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-auto pt-6 pb-2 text-center border-t border-vs-border/50 mt-4">
+                        <a href="https://sanstudio-hub.github.io/SanStudio-Hub/in" target="_blank"
+                            class="text-[10px] text-vs-textMuted hover:text-vs-accent font-mono transition-colors block">Developed
+                            By SanStudio Developer Team</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Content: QR CODE GENERATOR -->
+            <div id="sidebar-qr-generator" class="hidden flex-1 overflow-y-auto flex flex-col">
+                <div class="p-4 flex flex-col gap-4">
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-xs font-bold text-vs-text uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-qrcode text-vs-accent"></i> QR Generator
+                        </h3>
+                        <p class="text-[10px] text-vs-textMuted">Generate pro QRs with logos &amp; custom colors.</p>
+                    </div>
+                    <div class="flex flex-col gap-3 mt-2">
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] text-vs-textMuted uppercase tracking-wider">Input (Text / URL /
+                                Phone)</label>
+                            <textarea id="qr-input-text" rows="3" placeholder="https://example.com
+or paste phone numbers..." class="w-full bg-vs-editor border border-vs-border text-vs-text text-xs p-2 rounded focus:border-vs-accent focus:outline-none placeholder-vs-textMuted/40 resize-y font-mono"></textarea>
+                        </div>
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="checkbox" id="qr-bulk-whatsapp"
+                                class="w-3.5 h-3.5 accent-vs-accent bg-vs-editor border-vs-border rounded-sm">
+                            <span class="text-xs text-vs-textMuted group-hover:text-vs-text leading-tight">Bulk WhatsApp
+                                QR<br><span class="text-[9px] opacity-70">(from phone numbers list)</span></span>
+                        </label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="flex flex-col gap-1">
+                                <label class="text-[10px] text-vs-textMuted uppercase tracking-wider">Foreground</label>
+                                <input type="color" id="qr-color-fg" value="#000000"
+                                    class="w-full h-8 p-0 border-none cursor-pointer rounded bg-transparent">
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <label class="text-[10px] text-vs-textMuted uppercase tracking-wider">Background</label>
+                                <input type="color" id="qr-color-bg" value="#ffffff"
+                                    class="w-full h-8 p-0 border-none cursor-pointer rounded bg-transparent">
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] text-vs-textMuted uppercase tracking-wider">Center Logo
+                                (Optional)</label>
+                            <input type="file" id="qr-logo-upload" accept="image/*"
+                                class="w-full bg-vs-editor border border-vs-border text-vs-textMuted text-[10px] p-1.5 rounded focus:outline-none file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:bg-vs-selection file:text-white hover:file:bg-vs-accent transition-colors"
+                                onchange="handleQrLogoUpload(event)">
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] text-vs-textMuted uppercase tracking-wider">Export Size</label>
+                            <select id="qr-size"
+                                class="w-full bg-vs-editor border border-vs-border text-vs-text text-xs p-1.5 rounded focus:border-vs-accent focus:outline-none">
+                                <option value="256">256 x 256</option>
+                                <option value="512" selected="">512 x 512</option>
+                                <option value="1024">1024 x 1024</option>
+                            </select>
+                        </div>
+                        <button onclick="generateQRCode()"
+                            class="w-full bg-vs-accent hover:bg-vs-accentHover text-white text-xs py-2.5 rounded flex items-center justify-center gap-2 transition-colors border border-transparent shadow-sm font-medium mt-1">
+                            <i class="fa-solid fa-qrcode"></i> Generate QR
+                        </button>
+                        <div class="flex flex-col gap-1 mt-2">
+                            <label class="text-[10px] text-vs-textMuted uppercase tracking-wider">Preview</label>
+                            <div id="qr-preview-container"
+                                class="w-full min-h-[150px] max-h-[250px] bg-vs-editor/50 border border-vs-border rounded flex flex-col items-center p-4 overflow-y-auto gap-4">
+                                <span class="text-vs-textMuted text-xs my-auto italic">Preview will appear here</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 mt-1">
+                                <button onclick="downloadQRCodes('png')"
+                                    class="w-full bg-vs-editor hover:bg-vs-hover border border-vs-border text-vs-textMuted hover:text-vs-text text-[10px] py-1.5 rounded transition-colors flex items-center justify-center gap-1">
+                                    <i class="fa-solid fa-image"></i> PNG
+                                </button>
+                                <button onclick="downloadQRCodes('svg')"
+                                    class="w-full bg-vs-editor hover:bg-vs-hover border border-vs-border text-vs-textMuted hover:text-vs-text text-[10px] py-1.5 rounded transition-colors flex items-center justify-center gap-1">
+                                    <i class="fa-solid fa-vector-square"></i> SVG
+                                </button>
+                            </div>
+                            <button onclick="copyQRCode()"
+                                class="w-full bg-vs-editor hover:bg-vs-hover border border-vs-border text-vs-textMuted hover:text-vs-text text-[10px] py-1.5 rounded transition-colors flex items-center justify-center gap-1 mt-1">
+                                <i class="fa-regular fa-copy"></i> Copy Image
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mt-auto pt-6 pb-2 text-center border-t border-vs-border/50 mt-4">
+                        <a href="https://sanstudio-hub.github.io/SanStudio-Hub/in" target="_blank"
+                            class="text-[10px] text-vs-textMuted hover:text-vs-accent font-mono transition-colors block">Developed
+                            By SanStudio Developer Team</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Content: YOUTUBE & WEB DOWNLOADER -->
+            <div id="sidebar-yt-thumbnail" class="hidden flex-1 overflow-y-auto flex flex-col">
+                <div class="p-4 flex flex-col gap-4">
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-xs font-bold text-vs-text uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-brands fa-youtube text-red-500 text-sm"></i> Pro YouTube & Web Downloader
+                        </h3>
+                        <p class="text-[10px] text-vs-textMuted">Extract YouTube videos, high-res thumbnails, audio
+                            streams & web pages.</p>
+                    </div>
+
+                    <!-- PWA Installation Banner -->
+                    <div
+                        class="p-3 rounded-lg bg-gradient-to-r from-red-600/20 to-purple-600/20 border border-red-500/30 flex flex-col gap-2">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-laptop-mobile text-red-400 text-sm"></i>
+                            <span class="text-xs font-semibold text-vs-text">Install App (Desktop & Mobile)</span>
+                        </div>
+                        <p class="text-[10px] text-vs-textMuted leading-tight">Install this tool on your PC, Laptop or
+                            Smartphone for instant offline access like the YouTube Web App!</p>
+                        <button onclick="installPWA()" id="pwa-install-btn-sidebar"
+                            class="bg-red-600 hover:bg-red-700 text-white text-[11px] py-1.5 px-3 rounded flex items-center justify-center gap-1.5 transition-colors font-medium shadow-sm mt-1">
+                            <i class="fa-solid fa-download"></i> Download & Install App
+                        </button>
+                    </div>
+
+                    <!-- YouTube Video URL Input -->
+                    <div class="flex flex-col gap-3 mt-1">
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] text-vs-textMuted uppercase tracking-wider font-semibold">YouTube
+                                Video URL</label>
+                            <input type="url" id="yt-thumb-url" placeholder="https://www.youtube.com/watch?v=..."
+                                class="w-full bg-vs-editor border border-vs-border text-vs-text text-xs p-2 rounded focus:border-vs-accent focus:outline-none placeholder-vs-textMuted/40 font-mono">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="getYouTubeThumbnails()" id="yt-thumb-btn"
+                                class="bg-red-600 hover:bg-red-700 text-white text-xs py-2 rounded flex items-center justify-center gap-1.5 transition-colors border border-transparent shadow-sm font-medium">
+                                <i class="fa-solid fa-images" id="yt-thumb-icon"></i>
+                                <span id="yt-thumb-btn-text">Extract Media</span>
+                            </button>
+                            <button onclick="sendYtToPlayer()"
+                                class="bg-vs-editor hover:bg-vs-hover text-vs-text border border-vs-border text-xs py-2 rounded flex items-center justify-center gap-1.5 transition-colors font-medium">
+                                <i class="fa-solid fa-circle-play text-red-400"></i> Play in Mini Player
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Web Page & File Downloader Quick Tools -->
+                    <div class="flex flex-col gap-2 mt-2 border-t border-vs-border/50 pt-3">
+                        <label class="text-[10px] text-vs-textMuted uppercase tracking-wider font-semibold">Web Page
+                            Downloader Tools</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="downloadFile()"
+                                class="bg-vs-editor hover:bg-vs-hover border border-vs-border text-vs-textMuted hover:text-vs-text text-[10px] py-2 rounded transition-colors flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-file-arrow-down text-blue-400"></i> Save Active File
+                            </button>
+                            <button onclick="downloadZip()"
+                                class="bg-vs-editor hover:bg-vs-hover border border-vs-border text-vs-textMuted hover:text-vs-text text-[10px] py-2 rounded transition-colors flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-file-zipper text-yellow-400"></i> Download as ZIP
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Thumbnail & Media Results -->
+                    <div id="yt-thumb-results" class="flex flex-col gap-3 mt-1" style="display:none;">
+                        <div class="flex items-center gap-2">
+                            <div class="h-px flex-1 bg-vs-border"></div>
+                            <span
+                                class="text-[9px] text-vs-textMuted uppercase tracking-widest font-semibold">Thumbnails
+                                & Stream Links</span>
+                            <div class="h-px flex-1 bg-vs-border"></div>
+                        </div>
+
+                        <!-- Quick Stream & Embed Tools -->
+                        <div class="bg-vs-editor border border-vs-border p-3 rounded-lg flex flex-col gap-2">
+                            <p class="text-[11px] font-semibold text-vs-text flex items-center gap-1.5">
+                                <i class="fa-solid fa-share-nodes text-vs-accent"></i> Video Tools & Embed Code
+                            </p>
+                            <div class="grid grid-cols-2 gap-1.5">
+                                <button onclick="copyYtEmbedCode()"
+                                    class="bg-vs-sidebar hover:bg-vs-hover border border-vs-border text-vs-textMuted hover:text-vs-text text-[10px] py-1 px-2 rounded transition-colors flex items-center justify-center gap-1">
+                                    <i class="fa-solid fa-code"></i> Copy Embed HTML
+                                </button>
+                                <button onclick="openYtDirectLink()"
+                                    class="bg-vs-sidebar hover:bg-vs-hover border border-vs-border text-vs-textMuted hover:text-vs-text text-[10px] py-1 px-2 rounded transition-colors flex items-center justify-center gap-1">
+                                    <i class="fa-solid fa-external-link"></i> Open Direct Web Link
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="yt-thumb-list" class="flex flex-col gap-3"></div>
+                    </div>
+
+                    <div class="mt-auto pt-6 pb-2 text-center border-t border-vs-border/50 mt-4">
+                        <a href="https://sanstudio-hub.github.io/SanStudio-Hub/in" target="_blank"
+                            class="text-[10px] text-vs-textMuted hover:text-vs-accent font-mono transition-colors block">Developed
+                            By SanStudio Developer Team</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Content: KEEP NOTES -->
+            <div id="sidebar-keep-notes" class="hidden flex-1 overflow-y-auto flex flex-col">
+                <div class="p-4 flex flex-col gap-3">
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-xs font-bold text-vs-text uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-note-sticky text-yellow-400"></i> New note
+                        </h3>
+                    </div>
+
+                    <!-- New Note Input -->
+                    <div class="note-composer flex flex-col gap-2 mt-1">
+                        <input type="text" id="keep-note-title" placeholder="Title" aria-label="Note title"
+                            class="w-full bg-transparent border-none text-vs-text text-xs font-semibold p-0 focus:outline-none placeholder-vs-textMuted/50">
+                        <textarea id="keep-note-content" rows="3" placeholder="Take a note..." aria-label="Note content"
+                            class="w-full bg-transparent border-none text-vs-text text-[11px] p-0 focus:outline-none placeholder-vs-textMuted/40 resize-none leading-relaxed"></textarea>
+                        <div class="flex items-center justify-between mt-1">
+                            <div class="flex items-center gap-1" id="keep-color-picker">
+                                <button onclick="setKeepNoteColor('#1e1e1e')"
+                                    class="w-5 h-5 rounded-full border-2 border-vs-textMuted/30 bg-[#1e1e1e] hover:border-vs-text transition-colors"
+                                    title="Default"></button>
+                                <button onclick="setKeepNoteColor('#5c2b29')"
+                                    class="w-5 h-5 rounded-full border-2 border-transparent bg-[#5c2b29] hover:border-vs-text transition-colors"
+                                    title="Red"></button>
+                                <button onclick="setKeepNoteColor('#614a19')"
+                                    class="w-5 h-5 rounded-full border-2 border-transparent bg-[#614a19] hover:border-vs-text transition-colors"
+                                    title="Orange"></button>
+                                <button onclick="setKeepNoteColor('#635d19')"
+                                    class="w-5 h-5 rounded-full border-2 border-transparent bg-[#635d19] hover:border-vs-text transition-colors"
+                                    title="Yellow"></button>
+                                <button onclick="setKeepNoteColor('#345920')"
+                                    class="w-5 h-5 rounded-full border-2 border-transparent bg-[#345920] hover:border-vs-text transition-colors"
+                                    title="Green"></button>
+                                <button onclick="setKeepNoteColor('#16504b')"
+                                    class="w-5 h-5 rounded-full border-2 border-transparent bg-[#16504b] hover:border-vs-text transition-colors"
+                                    title="Teal"></button>
+                                <button onclick="setKeepNoteColor('#2d555e')"
+                                    class="w-5 h-5 rounded-full border-2 border-transparent bg-[#2d555e] hover:border-vs-text transition-colors"
+                                    title="Blue"></button>
+                                <button onclick="setKeepNoteColor('#42275e')"
+                                    class="w-5 h-5 rounded-full border-2 border-transparent bg-[#42275e] hover:border-vs-text transition-colors"
+                                    title="Purple"></button>
+                            </div>
+                            <button onclick="addKeepNote()"
+                                class="bg-vs-accent hover:bg-vs-accentHover text-white text-[10px] px-3 py-1.5 rounded flex items-center gap-1.5 transition-colors shadow-sm font-medium">
+                                <i class="fa-solid fa-plus"></i> Add
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Search -->
+                    <div class="relative mt-1">
+                        <i
+                            class="fa-solid fa-magnifying-glass absolute left-2.5 top-1/2 -translate-y-1/2 text-vs-textMuted text-[10px]"></i>
+                        <input type="text" id="keep-search" placeholder="Search notes..." oninput="renderKeepNotes()"
+                            class="w-full bg-vs-editor border border-vs-border text-vs-text text-[11px] pl-7 pr-2 py-1.5 rounded focus:border-vs-accent focus:outline-none placeholder-vs-textMuted/40">
+                    </div>
+
+                    <!-- Pinned Notes Section -->
+                    <div id="keep-pinned-section" class="hidden flex flex-col gap-1 mt-1">
+                        <div class="flex items-center gap-2">
+                            <span
+                                class="text-[9px] text-vs-textMuted uppercase tracking-widest font-semibold">Pinned</span>
+                            <div class="h-px flex-1 bg-vs-border/50"></div>
+                        </div>
+                        <div id="keep-pinned-list" class="flex flex-col gap-2"></div>
+                    </div>
+
+                    <!-- Other Notes Section -->
+                    <div id="keep-others-section" class="flex flex-col gap-1 mt-1">
+                        <div id="keep-others-label" class="hidden flex items-center gap-2">
+                            <span
+                                class="text-[9px] text-vs-textMuted uppercase tracking-widest font-semibold">Others</span>
+                            <div class="h-px flex-1 bg-vs-border/50"></div>
+                        </div>
+                        <div id="keep-others-list" class="flex flex-col gap-2"></div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="keep-empty-state"
+                        class="py-8 flex flex-col items-center justify-center text-vs-textMuted text-center">
+                        <i class="fa-solid fa-note-sticky text-3xl mb-3 opacity-30"></i>
+                        <p class="text-xs">No notes yet</p>
+                        <p class="text-[10px] mt-1 opacity-60">Create your first note above.</p>
+                    </div>
+
+                    <div class="mt-auto pt-6 pb-2 text-center border-t border-vs-border/50 mt-4">
+                        <a href="https://sanstudio-hub.github.io/SanStudio-Hub/in" target="_blank"
+                            class="text-[10px] text-vs-textMuted hover:text-vs-accent font-mono transition-colors block">Developed
+                            By SanStudio Developer Team</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Content: WEB ASSET EXPLORER -->
+            <div id="sidebar-asset-explorer" class="hidden flex-1 overflow-y-auto flex flex-col">
+                <div class="p-4 flex flex-col gap-4">
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-xs font-bold text-vs-text uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-satellite-dish text-purple-400"></i> Web Asset Explorer
+                        </h3>
+                        <p class="text-[10px] text-vs-textMuted">Find images, SVGs, media, fonts, scripts, and downloadable files in page source and linked stylesheets. Tap an asset to preview or download.
+                        </p>
+                    </div>
+                    <div class="flex flex-col gap-3 mt-1">
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] text-vs-textMuted uppercase tracking-wider">Website URL</label>
+                            <input type="url" id="wae-url-input" placeholder="https://example.com"
+                                aria-label="Website URL for asset discovery"
+                                class="w-full bg-vs-editor border border-vs-border text-vs-text text-xs p-2 rounded focus:border-vs-accent focus:outline-none placeholder-vs-textMuted/40">
+                        </div>
+                        <label data-web-proxy class="flex items-center gap-2 text-xs text-vs-textMuted">
+                            <input type="checkbox" id="wae-proxy" class="accent-vs-accent">
+                            Allow public proxy fallback (sends the URL to AllOrigins; browser only)
+                        </label>
+                        <p class="text-[10px] text-vs-textMuted">Some websites block direct browser requests. You can also enter the original page URL and analyze its saved HTML below.</p>
+                        <button type="button" onclick="document.getElementById('browser-assets-file').click()" class="w-full bg-vs-editor border border-vs-border text-vs-text text-xs py-2 rounded">Analyze saved HTML</button>
+                        <input type="file" id="browser-assets-file" accept=".html,.htm,text/html" hidden>
+                        <button onclick="waeAnalyze()" id="wae-analyze-btn"
+                            class="w-full bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white text-xs py-2.5 rounded flex items-center justify-center gap-2 transition-all border border-transparent shadow-sm font-medium">
+                            <i class="fa-solid fa-bolt" id="wae-analyze-icon"></i>
+                            <span id="wae-analyze-text">Analyze Website</span>
+                        </button>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] text-vs-textMuted uppercase tracking-wider">Quick Try</label>
+                            <div class="flex flex-wrap gap-1">
+                                <button onclick="waeQuickUrl('https://github.com')"
+                                    class="text-[10px] px-2.5 py-1 rounded-full border border-vs-border bg-vs-editor text-vs-textMuted hover:border-purple-400 hover:text-vs-text transition-colors">github.com</button>
+                                <button onclick="waeQuickUrl('https://wikipedia.org')"
+                                    class="text-[10px] px-2.5 py-1 rounded-full border border-vs-border bg-vs-editor text-vs-textMuted hover:border-purple-400 hover:text-vs-text transition-colors">wikipedia.org</button>
+                                <button onclick="waeQuickUrl('https://stripe.com')"
+                                    class="text-[10px] px-2.5 py-1 rounded-full border border-vs-border bg-vs-editor text-vs-textMuted hover:border-purple-400 hover:text-vs-text transition-colors">stripe.com</button>
+                                <button onclick="waeQuickUrl('https://apple.com')"
+                                    class="text-[10px] px-2.5 py-1 rounded-full border border-vs-border bg-vs-editor text-vs-textMuted hover:border-purple-400 hover:text-vs-text transition-colors">apple.com</button>
+                            </div>
+                        </div>
+                        <div id="wae-status"
+                            class="hidden flex items-center gap-2 p-2.5 rounded bg-vs-editor border border-vs-border text-[11px] text-vs-textMuted">
+                            <div
+                                class="w-3 h-3 border-2 border-vs-border border-t-purple-400 rounded-full animate-spin shrink-0">
+                            </div>
+                            <span id="wae-status-text">Fetching page…</span>
+                        </div>
+                        <div id="wae-error"
+                            class="hidden p-2.5 rounded bg-red-500/10 border border-red-500/30 text-[11px] text-red-300">
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2 mt-2">
+                        <button onclick="toggleAssetExplorerView(true)"
+                            class="w-full bg-vs-accent hover:bg-vs-accentHover text-white text-xs py-2 rounded flex items-center justify-center gap-2 transition-colors font-medium">
+                            <i class="fa-solid fa-expand"></i> Open Explorer View
+                        </button>
+                        <button onclick="toggleAssetExplorerView(false)"
+                            class="w-full bg-vs-editor hover:bg-vs-hover text-vs-text text-xs py-2 rounded flex items-center justify-center gap-2 transition-colors border border-vs-border font-medium">
+                            <i class="fa-solid fa-code"></i> Back to Code Editor
+                        </button>
+                    </div>
+                    <div class="flex flex-col gap-1 mt-2" id="wae-sidebar-summary" style="display:none;">
+                        <div class="flex items-center gap-2">
+                            <div class="h-px flex-1 bg-vs-border/50"></div>
+                            <span class="text-[9px] text-vs-textMuted uppercase tracking-widest font-semibold">Last
+                                Scan</span>
+                            <div class="h-px flex-1 bg-vs-border/50"></div>
+                        </div>
+                        <div id="wae-sidebar-stats" class="text-[10px] text-vs-textMuted space-y-1"></div>
+                    </div>
+                    <div class="mt-auto pt-6 pb-2 text-center border-t border-vs-border/50 mt-4">
+                        <a href="https://sanstudio-hub.github.io/SanStudio-Hub/in" target="_blank"
+                            class="text-[10px] text-vs-textMuted hover:text-vs-accent font-mono transition-colors block">Developed
+                            By SanStudio Developer Team</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Content: TO-DO LIST & TASK ALARMS -->
+            <div id="sidebar-todo" class="hidden flex-1 overflow-y-auto flex flex-col">
+                <div class="p-4 flex flex-col gap-4">
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-xs font-bold text-vs-text uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-green-400"></i> Tasks
+                        </h3>
+                    </div>
+
+                    <!-- Browser Notification & Alarm Sound Controller -->
+                    <div class="task-notifications flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 text-xs text-vs-text truncate">
+                            <i class="fa-solid fa-bell text-yellow-400"></i>
+                            <span id="todo-notif-status" class="text-[10px] text-vs-textMuted truncate">Notifications Disabled</span>
+                        </div>
+                        <div class="flex items-center gap-1 shrink-0">
+                            <button onclick="testAlarmSound()" class="bg-vs-sidebar hover:bg-vs-hover border border-vs-border text-vs-textMuted hover:text-vs-text text-[9px] px-2 py-1 rounded transition-colors" title="Test Alarm Chime">
+                                <i class="fa-solid fa-volume-high"></i>
+                            </button>
+                            <button onclick="requestTodoNotificationPermission()" id="todo-notif-btn" class="bg-vs-accent hover:bg-vs-accentHover text-white text-[9px] px-2 py-1 rounded transition-colors font-medium">
+                                Enable
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="todo-alarm-hint" class="hidden -mt-2 p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-[10px] text-yellow-300 leading-snug">
+                        Alarms can arrive a few minutes late on this phone.
+                        <button onclick="SanNative.openExactAlarmSettings()" class="underline font-semibold">Allow exact alarms</button>
+                    </div>
+
+                    <div id="todo-battery-hint" class="hidden -mt-2 p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-[10px] text-yellow-300 leading-snug">
+                        Some phones (vivo, Xiaomi, Oppo, Samsung) stop apps in the background, which can silence alarms when SanCode is closed.
+                        Set SanCode to <b>Unrestricted</b> battery usage.
+                        <button onclick="SanNative.openBatterySettings()" class="underline font-semibold">Open battery settings</button>
+                    </div>
+
+                    <!-- Create Task Form -->
+                    <div class="task-composer flex flex-col gap-2.5">
+                        <label for="todo-title-input">New task</label>
+                        <input type="text" id="todo-title-input" placeholder="Task title"
+                            class="w-full bg-vs-sidebar border border-vs-border text-vs-text text-xs p-2 rounded focus:border-vs-accent focus:outline-none placeholder-vs-textMuted/40">
+                        
+                        <div class="flex flex-col gap-1">
+                            <label for="todo-datetime-input">Date & time</label>
+                            <input type="datetime-local" id="todo-datetime-input"
+                                class="w-full bg-vs-sidebar border border-vs-border text-vs-text text-xs p-1.5 rounded focus:border-vs-accent focus:outline-none font-mono">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="flex flex-col gap-1">
+                                <label for="todo-alarm-offset">Reminder</label>
+                                <select id="todo-alarm-offset"
+                                    class="w-full bg-vs-sidebar border border-vs-border text-vs-text text-[11px] p-1.5 rounded focus:border-vs-accent focus:outline-none cursor-pointer">
+                                    <option value="0" selected>At Exact Time</option>
+                                    <option value="1">1 Minute Before</option>
+                                    <option value="2">2 Minutes Before</option>
+                                    <option value="5">5 Minutes Before</option>
+                                    <option value="10">10 Minutes Before</option>
+                                    <option value="15">15 Minutes Before</option>
+                                    <option value="30">30 Minutes Before</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <label for="todo-priority-input">Priority</label>
+                                <select id="todo-priority-input"
+                                    class="w-full bg-vs-sidebar border border-vs-border text-vs-text text-[11px] p-1.5 rounded focus:border-vs-accent focus:outline-none cursor-pointer">
+                                    <option value="low">Normal</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="high">High ⚡</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button onclick="addTodoTask()" class="w-full bg-green-600 hover:bg-green-700 text-white text-xs py-2 rounded flex items-center justify-center gap-1.5 transition-colors font-medium mt-1 shadow-sm">
+                            <i class="fa-solid fa-plus"></i> Add task
+                        </button>
+                    </div>
+
+                    <!-- Task Filters -->
+                    <div id="task-filters" class="flex items-center gap-1" role="group" aria-label="Task filters">
+                        <button onclick="filterTodoTasks('all')" id="todo-filter-all" class="flex-1 text-[10px] py-1 rounded bg-vs-accent text-white font-medium transition-colors">All</button>
+                        <button onclick="filterTodoTasks('today')" id="todo-filter-today" class="flex-1 text-[10px] py-1 rounded text-vs-textMuted hover:text-vs-text transition-colors">Today</button>
+                        <button onclick="filterTodoTasks('upcoming')" id="todo-filter-upcoming" class="flex-1 text-[10px] py-1 rounded text-vs-textMuted hover:text-vs-text transition-colors">Upcoming</button>
+                        <button onclick="filterTodoTasks('done')" id="todo-filter-done" class="flex-1 text-[10px] py-1 rounded text-vs-textMuted hover:text-vs-text transition-colors">Done</button>
+                    </div>
+
+                    <!-- Task List Container -->
+                    <div id="todo-task-list" class="flex flex-col gap-2 min-h-[120px]">
+                        <!-- Rendered by JS -->
+                    </div>
+
+                    <div class="mt-auto pt-6 pb-2 text-center border-t border-vs-border/50 mt-4">
+                        <a href="https://sanstudio-hub.github.io/SanStudio-Hub/in" target="_blank"
+                            class="text-[10px] text-vs-textMuted hover:text-vs-accent font-mono transition-colors block">Developed
+                            By SanStudio Developer Team</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Content: DOCUMENT TOOLS SUITE -->
+            <div id="sidebar-doc-tools" class="hidden flex-1 overflow-y-auto flex flex-col">
+                <div class="p-4 flex flex-col gap-4">
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-xs font-bold text-vs-text uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-file-pdf text-red-500"></i> Document Tools Suite
+                        </h3>
+                        <p class="text-[10px] text-vs-textMuted">Process PDFs, sign documents, convert Word & edit spreadsheets.</p>
+                    </div>
+
+                    <!-- PDF Operations Accordion -->
+                    <div class="bg-vs-editor border border-vs-border rounded-lg p-3 flex flex-col gap-3">
+                        <span class="text-[10px] text-vs-textMuted uppercase tracking-wider font-bold flex items-center gap-1.5">
+                            <i class="fa-solid fa-file-pdf text-red-400"></i> PDF Utilities & Generator
+                        </span>
+
+                        <!-- Generate PDF -->
+                        <button onclick="docGeneratePdf()" class="w-full bg-red-600 hover:bg-red-700 text-white text-xs py-2 rounded flex items-center justify-center gap-2 transition-colors font-medium shadow-sm">
+                            <i class="fa-solid fa-file-export"></i> Generate PDF from Active Code
+                        </button>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="document.getElementById('doc-pdf-view-file').click()" class="bg-vs-sidebar hover:bg-vs-hover border border-vs-border text-vs-text text-[10px] py-2 rounded transition-colors flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-eye text-blue-400"></i> PDF Viewer
+                            </button>
+                            <input type="file" id="doc-pdf-view-file" accept="application/pdf" class="hidden" onchange="docViewPdf(this)">
+
+                            <button onclick="document.getElementById('doc-pdf-merge-files').click()" class="bg-vs-sidebar hover:bg-vs-hover border border-vs-border text-vs-text text-[10px] py-2 rounded transition-colors flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-object-group text-purple-400"></i> Merge PDFs
+                            </button>
+                            <input type="file" id="doc-pdf-merge-files" accept="application/pdf" multiple class="hidden" onchange="docMergePdfs(this)">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="document.getElementById('doc-pdf-split-file').click()" class="bg-vs-sidebar hover:bg-vs-hover border border-vs-border text-vs-text text-[10px] py-2 rounded transition-colors flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-scissors text-yellow-400"></i> Split PDFs
+                            </button>
+                            <input type="file" id="doc-pdf-split-file" accept="application/pdf" class="hidden" onchange="docSplitPdf(this)">
+
+                            <button onclick="document.getElementById('doc-pdf-watermark-file').click()" class="bg-vs-sidebar hover:bg-vs-hover border border-vs-border text-vs-text text-[10px] py-2 rounded transition-colors flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-stamp text-teal-400"></i> Add Watermark
+                            </button>
+                            <input type="file" id="doc-pdf-watermark-file" accept="application/pdf" class="hidden" onchange="docWatermarkPdf(this)">
+                        </div>
+                    </div>
+
+                    <!-- Signature Pad Modal / Tool -->
+                    <div class="bg-vs-editor border border-vs-border rounded-lg p-3 flex flex-col gap-2.5">
+                        <span class="text-[10px] text-vs-textMuted uppercase tracking-wider font-bold flex items-center gap-1.5">
+                            <i class="fa-solid fa-signature text-vs-accent"></i> Digital Signature Pad
+                        </span>
+                        <div class="bg-white rounded p-1 border border-vs-border relative">
+                            <canvas id="doc-sig-canvas" width="220" height="90" class="w-full bg-white cursor-crosshair touch-none"></canvas>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="docClearSignature()" class="bg-vs-sidebar hover:bg-vs-hover border border-vs-border text-vs-textMuted text-[10px] py-1.5 rounded transition-colors">
+                                Clear Pad
+                            </button>
+                            <button onclick="docSaveSignature()" class="bg-vs-accent hover:bg-vs-accentHover text-white text-[10px] py-1.5 rounded transition-colors font-medium">
+                                Save Signature PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Converters & Editors Grid -->
+                    <div class="bg-vs-editor border border-vs-border rounded-lg p-3 flex flex-col gap-2.5">
+                        <span class="text-[10px] text-vs-textMuted uppercase tracking-wider font-bold flex items-center gap-1.5">
+                            <i class="fa-solid fa-arrows-rotate text-orange-400"></i> Converters & Viewers
+                        </span>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="docWordToHtml()" class="bg-vs-sidebar hover:bg-vs-hover border border-vs-border text-vs-text text-[10px] py-2 rounded transition-colors flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-file-word text-blue-400"></i> Word → HTML
+                            </button>
+                            <button onclick="docOpenMarkdownEditor()" class="bg-vs-sidebar hover:bg-vs-hover border border-vs-border text-vs-text text-[10px] py-2 rounded transition-colors flex items-center justify-center gap-1.5">
+                                <i class="fa-brands fa-markdown text-purple-400"></i> Markdown Editor
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="switchSidebarTab('excel')" class="bg-vs-sidebar hover:bg-vs-hover border border-vs-border text-vs-text text-[10px] py-2 rounded transition-colors flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-table text-green-400"></i> Excel Viewer
+                            </button>
+                            <button onclick="docOpenCsvEditor()" class="bg-vs-sidebar hover:bg-vs-hover border border-vs-border text-vs-text text-[10px] py-2 rounded transition-colors flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-file-csv text-yellow-400"></i> CSV Editor
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mt-auto pt-6 pb-2 text-center border-t border-vs-border/50 mt-4">
+                        <a href="https://sanstudio-hub.github.io/SanStudio-Hub/in" target="_blank"
+                            class="text-[10px] text-vs-textMuted hover:text-vs-accent font-mono transition-colors block">Developed
+                            By SanStudio Developer Team</a>
+                    </div>
+                </div>
+            </div><!-- Sidebar Content: SETTINGS -->
+            <div id="sidebar-settings" class="hidden flex-1 overflow-y-auto flex flex-col">
+                <div class="p-4 flex flex-col gap-6">
+                    <div class="flex flex-col gap-3">
+                        <h3 class="text-xs font-bold text-vs-text uppercase tracking-wider">Appearance</h3>
+                        <div class="flex flex-col gap-1">
+                            <label for="theme-select" class="text-xs text-vs-textMuted">Theme</label>
+                            <select id="theme-select"
+                                class="w-full bg-vs-editor border border-vs-border text-vs-text text-xs p-1.5 rounded focus:border-vs-accent focus:outline-none cursor-pointer">
+                                <option value="theme-dark" selected="">Dark</option>
+                                <option value="theme-light">Light</option>
+                                <option value="theme-monokai">Monokai</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <section class="settings-section">
+                        <label class="setting-row" for="setting-glass"><span>Glass effects</span><input id="setting-glass" type="checkbox" role="switch" checked onchange="setWorkbenchSetting('glassEffects', this.checked)"></label>
+                    </section>
+                    <section class="settings-section">
+                        <h3>Editor</h3>
+                        <label class="setting-row" for="setting-font"><span>Text size</span><output id="setting-font-value" for="setting-font">14 px</output></label>
+                        <input id="setting-font" type="range" min="10" max="28" step="1" value="14" oninput="setWorkbenchSetting('fontSize', Number(this.value))">
+                        <label class="setting-row" for="setting-wrap"><span>Word wrap</span><input id="setting-wrap" type="checkbox" role="switch" onchange="setWorkbenchSetting('wordWrap', this.checked)"></label>
+                        <label class="setting-row" for="setting-guides"><span>Indent guides</span><input id="setting-guides" type="checkbox" role="switch" checked onchange="setWorkbenchSetting('indentGuides', this.checked)"></label>
+                        <label class="setting-row" for="setting-brackets"><span>Bracket colors</span><input id="setting-brackets" type="checkbox" role="switch" checked onchange="setWorkbenchSetting('rainbowBrackets', this.checked)"></label>
+                        <label class="setting-row" for="setting-whitespace"><span>Show whitespace</span><input id="setting-whitespace" type="checkbox" role="switch" onchange="setWorkbenchSetting('renderWhitespace', this.checked)"></label>
+                    </section>
+                    <div class="desktop-shortcuts flex flex-col gap-3 border-t border-vs-border/50 pt-4">
+                        <h3 class="text-xs font-bold text-vs-text uppercase tracking-wider">Keyboard Shortcuts</h3>
+                        <div class="grid grid-cols-2 gap-2 text-[10px] text-vs-textMuted font-mono">
+                            <div class="text-vs-text">Ctrl + S</div>
+                            <div>Save File</div>
+                            <div class="text-vs-text">Ctrl + N</div>
+                            <div>New Tab</div>
+                            <div class="text-vs-text">Ctrl + O</div>
+                            <div>Open File</div>
+                            <div class="text-vs-text">Ctrl + B</div>
+                            <div>Toggle Sidebar</div>
+                            <div class="text-vs-text">Ctrl + Enter</div>
+                            <div>Format Code</div>
+                            <div class="text-vs-text">Alt + Z</div>
+                            <div>Toggle Word Wrap</div>
+                            <div class="text-vs-text">Alt + W</div>
+                            <div>Close Active Tab</div>
+                            <div class="text-vs-text">Alt + P</div>
+                            <div>Toggle Live Preview</div>
+                            <div class="text-vs-text">Alt + 1..9</div>
+                            <div>Switch Tabs</div>
+                            <div class="text-vs-text">Ctrl+Shift+E</div>
+                            <div>Focus Explorer</div>
+                            <div class="text-vs-text">Ctrl+Shift+X</div>
+                            <div>Focus Tools</div>
+                            <div class="text-vs-text">Ctrl+Shift+P</div>
+                            <div>Command Palette</div>
+                            <div class="text-vs-text">Ctrl+P</div>
+                            <div>Go to File</div>
+                            <div class="text-vs-text">Ctrl+Shift+F</div>
+                            <div>Search in Files</div>
+                            <div class="text-vs-text">Ctrl+F / Ctrl+G</div>
+                            <div>Find / Go to Line</div>
+                            <div class="text-vs-text">Ctrl+D</div>
+                            <div>Select Next Match</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- Sidebar Resizer -->
+        <div id="sidebar-resizer"
+            class="w-[3px] bg-transparent hover:bg-vs-accent cursor-col-resize shrink-0 z-20 transition-colors"
+            title="Resize Sidebar"></div>
+
+        <!-- Main Editor Area -->
+        <main class="flex-1 flex flex-col min-w-0 bg-vs-editor relative">
+
+            <!-- Editor Tabs -->
+            <div id="editor-strip" class="h-9 flex bg-vs-sidebar shrink-0 overflow-x-auto overflow-y-hidden hide-scrollbar select-none">
+                <!-- Dynamic Tabs Container -->
+                <div id="editor-tabs-container" class="flex h-full shrink-0">
+                    <!-- Tabs generated by JS -->
+                </div>
+                <button onclick="createNewFile()"
+                    class="w-8 h-9 flex items-center justify-center text-vs-textMuted hover:bg-vs-hover hover:text-vs-text transition-colors border-b border-vs-border shrink-0"
+                    title="New File (Ctrl+N)">
+                    <i class="fa-solid fa-plus text-xs"></i>
+                </button>
+
+                <!-- Empty Space right of tabs -->
+                <div id="tab-actions" class="flex-1 border-b border-vs-border flex justify-end items-center pr-2 gap-1">
+                    <button onclick="openPalette('commands')"
+                        class="w-7 h-7 flex items-center justify-center rounded hover:bg-vs-hover text-vs-textMuted hover:text-vs-text transition-colors"
+                        title="Command Palette (Ctrl+Shift+P)">
+                        <i class="fa-solid fa-terminal text-xs"></i>
+                    </button>
+                    <button onclick="openPalette('files')"
+                        class="tab-action-extra w-7 h-7 flex items-center justify-center rounded hover:bg-vs-hover text-vs-textMuted hover:text-vs-text transition-colors"
+                        title="Go to File (Ctrl+P)">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </button>
+                    <button onclick="copyToClipboard()"
+                        class="tab-action-extra w-7 h-7 flex items-center justify-center rounded hover:bg-vs-hover text-vs-textMuted hover:text-vs-text transition-colors"
+                        title="Copy (Ctrl+C)">
+                        <i class="fa-regular fa-copy text-sm"></i>
+                    </button>
+                    <button onclick="formatContent()"
+                        class="w-7 h-7 flex items-center justify-center rounded hover:bg-vs-hover text-vs-textMuted hover:text-vs-text transition-colors"
+                        title="Format Code (Ctrl+Enter)">
+                <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
+                    </button>
+                    <button onclick="toggleHtmlPreview()"
+                        class="w-7 h-7 flex items-center justify-center rounded hover:bg-vs-hover text-vs-textMuted hover:text-vs-text transition-colors"
+                        title="Live Preview">
+                        <i class="fa-solid fa-table-columns text-sm"></i>
+                    </button>
+                    <button onclick="downloadFile()"
+                        class="w-7 h-7 flex items-center justify-center rounded hover:bg-vs-hover text-vs-textMuted hover:text-vs-text transition-colors"
+                        title="Download File (Ctrl+S)">
+                        <i class="fa-solid fa-download text-sm"></i>
+                    </button>
+                    <button onclick="downloadZip()"
+                        class="tab-action-extra w-7 h-7 flex items-center justify-center rounded hover:bg-vs-hover text-vs-textMuted hover:text-vs-text transition-colors"
+                        title="Download as ZIP">
+                        <i class="fa-solid fa-file-zipper text-sm"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Breadcrumbs -->
+            <div class="h-6 flex items-center px-4 text-xs text-vs-textMuted border-b border-vs-border/50 shrink-0">
+                <span>SanCode</span>
+                <i class="fa-solid fa-chevron-right text-[8px] mx-1"></i>
+                <span id="breadcrumb-format">plaintext</span>
+                <i class="fa-solid fa-chevron-right text-[8px] mx-1"></i>
+                <span id="breadcrumb-name" class="text-vs-text">untitled</span>
+            </div>
+
+            <!-- Editor Core (Split view container) -->
+            <div class="flex-1 flex overflow-hidden relative">
+
+                <!-- Text Editor Wrapper -->
+                <div id="text-editor-wrapper" class="flex-1 flex flex-col relative h-full min-w-0">
+                    <!-- Code editor engine (CodeMirror 6, see tools/engine) mounts here -->
+                    <div id="editor-host" class="flex-1 min-h-0 min-w-0 relative allow-select"></div>
+
+                    <!-- Mobile extra keys (shown above the soft keyboard) -->
+                    <div id="extra-keys" class="extra-keys" onpointerdown="event.preventDefault()">
+                        <button onclick="ekExec('tab')" aria-label="Tab"><i class="fa-solid fa-arrow-right-to-bracket"></i></button>
+                        <button onclick="ekExec('undo')" aria-label="Undo"><i class="fa-solid fa-rotate-left"></i></button>
+                        <button onclick="ekExec('redo')" aria-label="Redo"><i class="fa-solid fa-rotate-right"></i></button>
+                        <button onclick="ekExec('left')" aria-label="Left"><i class="fa-solid fa-arrow-left"></i></button>
+                        <button onclick="ekExec('down')" aria-label="Down"><i class="fa-solid fa-arrow-down"></i></button>
+                        <button onclick="ekExec('up')" aria-label="Up"><i class="fa-solid fa-arrow-up"></i></button>
+                        <button onclick="ekExec('right')" aria-label="Right"><i class="fa-solid fa-arrow-right"></i></button>
+                        <button onclick="ekPair('{','}')">{ }</button>
+                        <button onclick="ekPair('(',')')">( )</button>
+                        <button onclick="ekPair('[',']')">[ ]</button>
+                        <button onclick="ekPair('&lt;','&gt;')">&lt; &gt;</button>
+                        <button onclick="ekPair('&quot;','&quot;')">" "</button>
+                        <button onclick="ekPair('\'','\'')">' '</button>
+                        <button onclick="ekPair('`','`')">` `</button>
+                        <button onclick="ekInsert(';')">;</button>
+                        <button onclick="ekInsert(':')">:</button>
+                        <button onclick="ekInsert('=')">=</button>
+                        <button onclick="ekInsert('/')">/</button>
+                        <button onclick="ekInsert('\\')">\</button>
+                        <button onclick="ekInsert('|')">|</button>
+                        <button onclick="ekInsert('&amp;')">&amp;</button>
+                        <button onclick="ekInsert('!')">!</button>
+                        <button onclick="ekInsert('-')">-</button>
+                        <button onclick="ekInsert('_')">_</button>
+                        <button onclick="ekInsert('#')">#</button>
+                        <button onclick="ekInsert('$')">$</button>
+                        <button onclick="ekExec('toggleComment')" aria-label="Comment">//</button>
+                        <button onclick="ekExec('selectLine')" aria-label="Select line"><i class="fa-solid fa-text-width"></i></button>
+                        <button onclick="ekExec('find')" aria-label="Find"><i class="fa-solid fa-magnifying-glass"></i></button>
+                        <button onclick="openPalette('commands')" aria-label="Command palette"><i class="fa-solid fa-terminal"></i></button>
+                    </div>
+                </div>
+
+                <!-- Excel Editor Wrapper -->
+                <div id="excel-editor-wrapper" class="hidden flex-1 overflow-auto bg-white dark:bg-vs-editor relative">
+                    <div id="spreadsheet-container" class="min-w-max">
+                        <!-- Spreadsheet injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Word Editor Wrapper -->
+                <div id="word-editor-wrapper"
+                    class="hidden flex-1 flex-col relative h-full bg-[#f3f3f3] dark:bg-[#1e1e1e]">
+                    <!-- Word Toolbar -->
+                    <div
+                        class="word-toolbar shrink-0 shadow-sm z-10 flex items-center bg-vs-editor p-1 border-b border-vs-border overflow-x-auto whitespace-nowrap">
+                        <select onchange="formatDoc('fontName', this.value); this.selectedIndex=0;"
+                            class="bg-vs-editor text-vs-text border border-vs-border rounded text-xs px-2 py-1 outline-none shrink-0">
+                            <option value="">Font Family</option>
+                            <option value="Arial">Arial</option>
+                            <option value="Times New Roman">Times New Roman</option>
+                            <option value="Courier New">Courier New</option>
+                            <option value="Georgia">Georgia</option>
+                            <option value="Verdana">Verdana</option>
+                        </select>
+                        <select onchange="formatDoc('fontSize', this.value); this.selectedIndex=0;"
+                            class="bg-vs-editor text-vs-text border border-vs-border rounded text-xs px-2 py-1 outline-none mr-2 ml-1 shrink-0">
+                            <option value="">Size</option>
+                            <option value="1">Small</option>
+                            <option value="3">Normal</option>
+                            <option value="5">Large</option>
+                            <option value="7">Huge</option>
+                        </select>
+
+                        <div class="word-toolbar-divider shrink-0"></div>
+
+                        <button onclick="formatDoc('bold')" class="word-toolbar-btn shrink-0" title="Bold"><i
+                                class="fa-solid fa-bold"></i></button>
+                        <button onclick="formatDoc('italic')" class="word-toolbar-btn shrink-0" title="Italic"><i
+                                class="fa-solid fa-italic"></i></button>
+                        <button onclick="formatDoc('underline')" class="word-toolbar-btn shrink-0" title="Underline"><i
+                                class="fa-solid fa-underline"></i></button>
+                        <button onclick="formatDoc('strikeThrough')" class="word-toolbar-btn shrink-0"
+                            title="Strikethrough"><i class="fa-solid fa-strikethrough"></i></button>
+
+                        <div class="word-toolbar-divider shrink-0"></div>
+
+                        <button onclick="formatDoc('justifyLeft')" class="word-toolbar-btn shrink-0"
+                            title="Align Left"><i class="fa-solid fa-align-left"></i></button>
+                        <button onclick="formatDoc('justifyCenter')" class="word-toolbar-btn shrink-0"
+                            title="Align Center"><i class="fa-solid fa-align-center"></i></button>
+                        <button onclick="formatDoc('justifyRight')" class="word-toolbar-btn shrink-0"
+                            title="Align Right"><i class="fa-solid fa-align-right"></i></button>
+                        <button onclick="formatDoc('justifyFull')" class="word-toolbar-btn shrink-0" title="Justify"><i
+                                class="fa-solid fa-align-justify"></i></button>
+
+                        <div class="word-toolbar-divider shrink-0"></div>
+
+                        <button onclick="formatDoc('insertUnorderedList')" class="word-toolbar-btn shrink-0"
+                            title="Bullet List"><i class="fa-solid fa-list-ul"></i></button>
+                        <button onclick="formatDoc('insertOrderedList')" class="word-toolbar-btn shrink-0"
+                            title="Numbered List"><i class="fa-solid fa-list-ol"></i></button>
+
+                        <div class="word-toolbar-divider shrink-0"></div>
+
+                        <label class="word-toolbar-btn flex items-center cursor-pointer shrink-0" title="Text Color">
+                            <i class="fa-solid fa-palette mr-1"></i>
+                            <input type="color" oninput="formatDoc('foreColor', this.value)"
+                                class="w-4 h-4 p-0 border-none rounded bg-transparent cursor-pointer">
+                        </label>
+
+                        <button onclick="formatDoc('removeFormat')" class="word-toolbar-btn ml-auto shrink-0"
+                            title="Clear Formatting"><i class="fa-solid fa-eraser"></i></button>
+                    </div>
+
+                    <!-- Word Canvas Background (Desk) -->
+                    <div class="word-canvas-container allow-select">
+                        <div id="word-canvas" class="word-canvas" contenteditable="true" spellcheck="false"
+                            placeholder="Start typing your document here..."></div>
+                    </div>
+                </div>
+
+                <!-- Media Viewer Wrapper -->
+                <div id="media-viewer-wrapper"
+                    class="hidden flex-1 flex-col items-center justify-center bg-vs-editor relative p-4 overflow-hidden">
+                    <img id="media-preview-img" class="max-w-full max-h-full object-contain hidden shadow-lg rounded">
+                    <video id="media-preview-video"
+                        class="max-w-full max-h-full object-contain hidden shadow-lg rounded" controls=""></video>
+                    <iframe id="media-preview-pdf" class="w-full h-full border-none hidden rounded shadow-lg bg-white"></iframe>
+                    <div id="media-preview-info" class="mt-4 text-vs-textMuted text-xs font-mono"></div>
+                </div>
+
+                <!-- Web Asset Explorer Wrapper -->
+                <div id="asset-explorer-wrapper"
+                    class="hidden flex-1 flex-col relative h-full bg-vs-editor overflow-hidden">
+                    <div class="wae-wrap" id="wae-results-container">
+                        <div
+                            class="flex flex-col items-center justify-center h-full text-vs-textMuted text-center py-20">
+                            <i class="fa-solid fa-satellite-dish text-4xl mb-3 opacity-30"></i>
+                            <p class="text-sm font-medium">Web Asset Explorer</p>
+                            <p class="text-[11px] mt-1 opacity-60">Enter a URL in the sidebar and click Analyze</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HTML Live Preview (Split Pane Right) -->
+                <div id="html-preview-pane"
+                    class="hidden flex-1 border-l border-vs-border bg-vs-editor flex flex-col relative">
+                    <!-- Preview Toolbar -->
+                    <div
+                        class="h-9 bg-vs-sidebar flex items-center justify-between px-3 shrink-0 border-b border-vs-border text-vs-text">
+                        <div class="flex items-center gap-2 text-xs min-w-0">
+                            <button id="preview-back" onclick="previewBack()" class="hidden w-6 h-6 shrink-0 flex items-center justify-center rounded hover:bg-vs-hover text-vs-textMuted hover:text-white" title="Back">
+                                <i class="fa-solid fa-arrow-left text-xs"></i>
+                            </button>
+                            <i class="fa-brands fa-chrome text-blue-400 shrink-0"></i>
+                            <span id="preview-entry" class="truncate">Live Preview</span>
+                        </div>
+                        <div class="flex gap-1 shrink-0">
+                            <button onclick="togglePreviewConsole()" id="preview-console-btn"
+                                class="relative w-7 h-7 flex items-center justify-center rounded hover:bg-vs-hover text-vs-textMuted hover:text-white transition-colors"
+                                title="Console">
+                                <i class="fa-solid fa-terminal text-xs"></i>
+                                <span id="preview-console-badge" class="hidden absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] px-1 rounded-full bg-red-500 text-white text-[9px] leading-[14px] text-center">0</span>
+                            </button>
+                            <button onclick="toggleDevicePreview()" id="device-toggle-btn"
+                                class="w-7 h-7 flex items-center justify-center rounded hover:bg-vs-hover text-vs-textMuted hover:text-white transition-colors"
+                                title="Toggle Mobile View">
+                                <i class="fa-solid fa-mobile-screen text-xs"></i>
+                            </button>
+                            <button onclick="launchPreviewInNewTab()"
+                                class="w-7 h-7 flex items-center justify-center rounded hover:bg-vs-hover text-vs-textMuted hover:text-white transition-colors"
+                                title="Open in New Tab">
+                                <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                            </button>
+                            <button onclick="refreshPreview()"
+                                class="w-7 h-7 flex items-center justify-center rounded hover:bg-vs-hover text-vs-textMuted hover:text-white transition-colors"
+                                title="Refresh">
+                                <i class="fa-solid fa-rotate-right text-xs"></i>
+                            </button>
+                            <button onclick="toggleHtmlPreview()"
+                                class="w-7 h-7 flex items-center justify-center rounded hover:bg-vs-hover text-vs-textMuted hover:text-white transition-colors"
+                                title="Close Pane">
+                                <i class="fa-solid fa-xmark text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Iframe container -->
+                    <div class="flex-1 relative bg-vs-editor flex items-center justify-center overflow-auto p-0"
+                        id="preview-bg-wrapper">
+                        <div id="iframe-device-container"
+                            class="w-full h-full bg-white transition-all duration-300 relative shadow-2xl">
+                            <!-- Rendered by preview/frame.html (isolated origin on Android) -->
+                            <iframe id="live-iframe" title="Live preview"
+                                allow="autoplay; fullscreen; clipboard-write"
+                                class="w-full h-full border-none absolute inset-0 bg-white"></iframe>
+                        </div>
+                    </div>
+                    <!-- Preview console: console.* output and runtime errors from the previewed page -->
+                    <div id="preview-console" class="hidden shrink-0 border-t border-vs-border bg-vs-sidebar flex flex-col" style="height: 34%; min-height: 110px;">
+                        <div class="h-7 flex items-center justify-between px-3 text-[11px] text-vs-textMuted shrink-0 border-b border-vs-border/60">
+                            <span class="font-semibold uppercase tracking-wider">Console</span>
+                            <div class="flex gap-1">
+                                <button onclick="clearPreviewConsole()" class="w-6 h-6 rounded hover:bg-vs-hover hover:text-white" title="Clear"><i class="fa-solid fa-ban text-[10px]"></i></button>
+                                <button onclick="togglePreviewConsole()" class="w-6 h-6 rounded hover:bg-vs-hover hover:text-white" title="Close"><i class="fa-solid fa-xmark text-[11px]"></i></button>
+                            </div>
+                        </div>
+                        <div id="preview-console-list" class="flex-1 overflow-y-auto allow-select font-mono text-[11px] leading-snug"></div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Status Bar (Bottom) -->
+    <footer
+        class="san-status h-6 bg-vs-statusBar text-white flex items-center justify-between px-2 text-[11px] shrink-0 font-sans tracking-wide overflow-hidden whitespace-nowrap">
+        <div class="flex items-center h-full gap-4">
+            <div class="flex items-center gap-1 cursor-pointer hover:bg-white/20 px-1.5 h-full transition-colors"
+                onclick="toggleSidebar()">
+                <i class="fa-regular fa-window-maximize rotate-180"></i>
+            </div>
+            <div class="flex items-center gap-1 cursor-pointer hover:bg-white/20 px-1.5 h-full transition-colors"
+                onclick="openPalette('commands')" title="Errors / warnings in the current file">
+                <i class="fa-solid fa-circle-xmark"></i> <span id="status-errors">0</span>
+                <i class="fa-solid fa-triangle-exclamation ml-1"></i> <span id="status-warnings">0</span>
+            </div>
+            <div id="status-counts"
+                class="hidden sm:flex items-center gap-3 cursor-pointer hover:bg-white/20 px-1.5 h-full transition-colors">
+                <span id="char-count">0 Chars</span>
+                <span id="word-count">0 Words</span>
+            </div>
+        </div>
+
+        <div class="flex items-center h-full gap-3">
+            <div class="flex items-center cursor-pointer hover:bg-white/20 px-1.5 h-full transition-colors">
+                Ln <span id="status-ln" class="ml-1">1</span>, Col <span id="status-col" class="ml-1">1</span>
+                <span id="status-sel" class="ml-1 opacity-80"></span>
+            </div>
+            <div class="hidden sm:flex items-center cursor-pointer hover:bg-white/20 px-1.5 h-full transition-colors">
+                Spaces: <span id="status-spaces" class="ml-1">4</span>
+            </div>
+            <div class="hidden sm:flex items-center cursor-pointer hover:bg-white/20 px-1.5 h-full transition-colors">
+                UTF-8
+            </div>
+            <div id="status-word-wrap" onclick="toggleWordWrap()"
+                class="hidden sm:flex items-center cursor-pointer hover:bg-white/20 px-1.5 h-full transition-colors"
+                title="Toggle Word Wrap (Alt+Z)">
+                Wrap: Off
+            </div>
+            <div id="status-language" onclick="openPalette('langs')" title="Change language mode"
+                class="flex items-center cursor-pointer hover:bg-white/20 px-1.5 h-full transition-colors font-semibold uppercase">
+                Plain Text
+            </div>
+            <div class="flex items-center cursor-pointer hover:bg-white/20 px-1.5 h-full transition-colors"
+                id="status-prettier" onclick="formatContent()" title="Prettier (Format)">
+                <i class="fa-solid fa-check-double mr-1 text-green-300"></i> Prettier
+            </div>
+        </div>
+    </footer>
+
+    <!-- Global Drag Overlay -->
+    <div id="drag-overlay"
+        class="fixed inset-0 z-50 bg-vs-editor/90 backdrop-blur-sm hidden flex-col items-center justify-center text-vs-activityActive transition-opacity duration-200 pointer-events-none">
+        <div class="bg-vs-sidebar p-8 rounded-xl border border-vs-border shadow-2xl text-center animate-bounce">
+            <i class="fa-solid fa-file-import text-6xl mb-4 text-vs-accent block"></i>
+            <h2 class="text-2xl font-bold">Drop file to open in Editor</h2>
+        </div>
+    </div>
+
+    <!-- Edit Template Modal -->
+    <div id="template-edit-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex-col items-center justify-center transition-opacity duration-300 opacity-0">
+        <div class="relative w-[90%] max-w-lg bg-vs-sidebar border border-vs-border rounded-xl shadow-2xl flex flex-col overflow-hidden">
+            <div class="bg-vs-editor px-4 py-3 border-b border-vs-border flex justify-between items-center">
+                <h3 class="text-vs-text font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-pen text-vs-accent"></i> Edit Template</h3>
+                <button onclick="closeTemplateEditor()" class="text-vs-textMuted hover:text-vs-text transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-4 flex flex-col gap-3">
+                <input type="hidden" id="edit-template-key">
+                <label class="text-xs text-vs-textMuted font-bold uppercase tracking-wider">Message Content</label>
+                <textarea id="edit-template-content" rows="10" class="w-full bg-vs-editor border border-vs-border text-vs-text text-sm p-3 rounded outline-none focus:border-vs-accent font-mono resize-none"></textarea>
+            </div>
+            <div class="bg-vs-editor px-4 py-3 border-t border-vs-border flex justify-end gap-2">
+                <button onclick="closeTemplateEditor()" class="px-4 py-2 rounded text-xs font-bold bg-vs-activityInactive hover:bg-vs-hover text-vs-text transition-colors">Cancel</button>
+                <button onclick="saveTemplateEdit()" class="px-4 py-2 rounded text-xs font-bold bg-vs-accent hover:bg-blue-600 text-white transition-colors">Save to LocalBrowser</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Developer Modal -->
+    <div id="about-modal"
+        class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex-col items-center justify-center transition-opacity duration-300 opacity-0"
+        onclick="closeAboutModal(event)">
+        <div class="relative group cursor-pointer animate-modal-bounce"
+            onclick="event.stopPropagation(); window.open('https://sanstudio-hub.github.io/SanStudio-Hub/in', '_blank')">
+            <div
+                class="absolute -inset-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-2xl blur-md opacity-75 group-hover:opacity-100 transition duration-500 animate-gradient-xy">
+            </div>
+
+            <div
+                class="relative px-10 py-8 bg-vs-sidebar border border-vs-border/50 rounded-2xl shadow-2xl flex flex-col items-center text-center transform transition-all duration-300 group-hover:scale-[1.02]">
+
+                <div
+                    class="w-20 h-20 rounded-full bg-vs-editor flex items-center justify-center mb-5 border-2 border-vs-accent shadow-[0_0_15px_rgba(0,122,204,0.5)] group-hover:shadow-[0_0_25px_rgba(0,122,204,0.8)] transition-shadow duration-300">
+                    <span
+                        class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-blue-400 to-purple-500">SS</span>
+                </div>
+
+                <h3 class="text-vs-text text-2xl font-bold mb-1 tracking-tight">SanCode</h3>
+                <p class="text-vs-accent text-sm mb-5 font-mono">VS Code Edition v2.0</p>
+
+                <div class="h-px w-full bg-gradient-to-r from-transparent via-vs-border to-transparent my-2"></div>
+
+                <p class="text-vs-textMuted text-xs mt-4 uppercase tracking-widest font-semibold">Developed By</p>
+                <p
+                    class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500 font-extrabold text-xl mt-1 tracking-wide">
+                    SanStudio Developer Team
+                </p>
+
+                <div
+                    class="mt-6 flex items-center gap-2 text-sm text-vs-textMuted group-hover:text-blue-400 transition-colors bg-vs-editor/50 px-4 py-2 rounded-full border border-vs-border">
+                    <i class="fa-solid fa-link"></i>
+                    <span class="font-medium">View Developer Portfolio</span>
+                    <i
+                        class="fa-solid fa-arrow-right-long ml-1 transform group-hover:translate-x-1 transition-transform"></i>
+                </div>
+            </div>
+        </div>
+
+        <div
+            class="absolute bottom-10 text-vs-textMuted text-sm opacity-50 font-mono flex items-center gap-2 pointer-events-none">
+            Click anywhere to close
+        </div>
+    </div>
+
+    <!-- Custom Confirm Modal -->
+    <div id="confirm-modal"
+        class="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm hidden flex-col items-center justify-center transition-opacity duration-200">
+        <div
+            class="bg-vs-sidebar border border-vs-border shadow-2xl rounded-lg w-80 max-w-[90vw] flex flex-col overflow-hidden animate-modal-bounce">
+            <div class="px-4 py-3 border-b border-vs-border text-vs-text text-sm font-semibold flex items-center gap-2">
+                <i class="fa-solid fa-circle-question text-vs-accent"></i>
+                Confirmation
+            </div>
+            <div class="p-4 text-vs-textMuted text-xs leading-relaxed" id="confirm-message">
+                Are you sure?
+            </div>
+            <div class="px-4 py-3 bg-vs-editor/50 flex justify-end gap-2 border-t border-vs-border">
+                <button id="confirm-no"
+                    class="px-4 py-1.5 rounded text-xs font-medium text-vs-text bg-vs-editor hover:bg-vs-hover transition-colors border border-vs-border">Cancel</button>
+                <button id="confirm-yes"
+                    class="px-4 py-1.5 rounded text-xs font-medium bg-vs-accent hover:bg-vs-accentHover text-white transition-colors border border-transparent">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PWA Install Modal (Add to Home Screen App Prompt) -->
+    <div id="pwa-install-modal"
+        class="fixed inset-0 z-[150] bg-black/80 backdrop-blur-md hidden flex-col items-center justify-center p-4 transition-all duration-300 opacity-0">
+        <div
+            class="relative bg-vs-sidebar border border-vs-border rounded-2xl max-w-md w-full p-6 shadow-2xl flex flex-col items-center text-center animate-modal-bounce overflow-hidden">
+            <!-- Glow background effect -->
+            <div class="absolute -top-24 -left-24 w-48 h-48 bg-vs-accent/20 rounded-full blur-3xl pointer-events-none">
+            </div>
+            <div
+                class="absolute -bottom-24 -right-24 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl pointer-events-none">
+            </div>
+
+            <button onclick="closePwaModal()"
+                class="absolute top-3 right-3 w-8 h-8 rounded-full bg-vs-editor hover:bg-vs-hover text-vs-textMuted hover:text-vs-text flex items-center justify-center transition-colors">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+
+            <!-- App Logo Icon -->
+            <div
+                class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-purple-600 p-0.5 shadow-xl mb-4 flex items-center justify-center">
+                <div class="w-full h-full bg-vs-editor rounded-[14px] flex items-center justify-center">
+                    <i class="fa-solid fa-code text-3xl text-vs-accent"></i>
+                </div>
+            </div>
+
+            <h3 class="text-lg font-bold text-vs-text mb-1">Install App to Home Screen</h3>
+            <p class="text-xs text-vs-textMuted mb-4">Add <span class="text-vs-accent font-semibold">SanCode</span> to your home screen for quick access, where supported by your browser.</p>
+
+            <!-- Feature Checklist -->
+            <div
+                class="w-full bg-vs-editor/60 rounded-xl p-3 border border-vs-border/50 flex flex-col gap-2 mb-5 text-left text-xs text-vs-textMuted">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-bolt text-yellow-400 text-sm"></i>
+                    <span><strong>Instant Launch:</strong> Opens like a native app from Home Screen shortcut</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-wifi text-green-400 text-sm"></i>
+                    <span><strong>Offline Support:</strong> Works even without internet connection</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-mobile-screen text-purple-400 text-sm"></i>
+                    <span><strong>Full Screen Mode:</strong> No browser tabs or address bars cluttering</span>
+                </div>
+            </div>
+
+            <!-- Installation Instructions for iOS / Android / Desktop -->
+            <div id="pwa-ios-instructions"
+                class="hidden w-full bg-blue-500/10 border border-blue-500/30 rounded-xl p-3 mb-4 text-left text-xs text-blue-300 flex flex-col gap-1.5">
+                <p class="font-semibold flex items-center gap-1.5"><i class="fa-brands fa-apple"></i> How to Install on
+                    iPhone / iPad (Safari):</p>
+                <ol class="list-decimal pl-4 space-y-1 text-[11px] opacity-90">
+                    <li>Tap the <strong>Share button</strong> <i class="fa-solid fa-arrow-up-from-bracket"></i> in
+                        Safari toolbar</li>
+                    <li>Scroll down and tap <strong>"Add to Home Screen" <i
+                                class="fa-solid fa-square-plus"></i></strong></li>
+                    <li>Tap <strong>Add</strong> in top right corner!</li>
+                </ol>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="w-full flex flex-col gap-2">
+                <button onclick="triggerPwaInstall()" id="pwa-main-install-btn"
+                    class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold text-sm py-3 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all transform active:scale-95 cursor-pointer">
+                    <i class="fa-solid fa-download text-base"></i> Add App to Home Screen
+                </button>
+                <button onclick="closePwaModal()"
+                    class="w-full bg-transparent hover:bg-vs-hover text-vs-textMuted text-xs py-2 rounded-xl transition-colors">
+                    Maybe Later
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Command palette / quick open / search in files -->
+    <div id="palette" class="hidden fixed inset-0 z-[200] bg-black/40 items-start justify-center pt-[8vh]" onclick="closePalette()">
+        <div class="palette-box" onclick="event.stopPropagation()">
+            <input id="palette-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
+                placeholder="Go to file  (type > for commands, ? to search)">
+            <div id="palette-list" class="palette-list allow-select"></div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-10 right-4 z-[250] flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- ===== MOBILE: Sidebar Overlay Backdrop ===== -->
+    <!-- Mini player: persistent (never removed from the DOM, so playback is not interrupted), docked over #player-slot
+         in the Media tool and floating over everything else; see js/mini-player.js -->
+    <div id="mini-player" class="mp-idle" hidden>
+        <div id="mp-bar" class="mp-bar">
+            <span class="mp-eq" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span id="mp-title" class="mp-title">Nothing playing</span>
+            <button id="mp-prev" type="button" title="Previous" aria-label="Previous"><i class="fa-solid fa-backward-step"></i></button>
+            <button id="mp-play" type="button" title="Play / Pause" aria-label="Play or pause"><i class="fa-solid fa-pause"></i></button>
+            <button id="mp-next" type="button" title="Next" aria-label="Next"><i class="fa-solid fa-forward-step"></i></button>
+            <button id="mp-size" type="button" title="Window size" aria-label="Change window size"><i class="fa-solid fa-up-right-and-down-left-from-center"></i></button>
+            <button id="mp-collapse" type="button" title="Minimize to bar" aria-label="Minimize or restore the video"><i class="fa-solid fa-window-minimize"></i></button>
+            <button id="mp-open" type="button" title="Open Media tool" aria-label="Open the Media tool"><i class="fa-solid fa-list"></i></button>
+            <button id="mp-close" type="button" title="Stop and close" aria-label="Stop and close"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div id="mp-body" class="mp-body">
+            <!-- Audio Visualizer Overlay -->
+            <div id="audio-visualizer"
+                class="absolute inset-0 flex-col items-center justify-center bg-vs-editor hidden z-0">
+                <div class="visualizer mb-2" id="visualizer-bars">
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                </div>
+                <span class="text-[10px] text-vs-accent font-medium uppercase tracking-widest"><i
+                        class="fa-solid fa-music mr-1"></i> Audio Track</span>
+            </div>
+
+            <!-- Empty State Placeholder -->
+            <div id="video-placeholder"
+                class="absolute inset-0 flex flex-col items-center justify-center text-vs-textMuted pointer-events-none z-20 bg-black">
+                <i class="fa-solid fa-photo-film text-3xl mb-2 opacity-50"></i>
+                <span class="text-[10px]">No media playing</span>
+            </div>
+
+            <!-- The Actual Player -->
+            <video id="mini-video-player" class="w-full h-full object-contain z-10" controls=""></video>
+
+            <!-- YouTube Player Container -->
+            <div id="yt-player-wrapper" class="w-full h-full z-10 hidden bg-black">
+                <div id="youtube-player"></div>
+            </div>
+        </div>
+        <div id="mp-progress" class="mp-progress" title="Seek"><div id="mp-progress-fill"></div></div>
+    </div>
+
+    <div id="mobile-sidebar-backdrop" onclick="closeMobileSidebar()"></div>
+
+    <!-- ===== MOBILE: Bottom Navigation Bar ===== -->
+    <nav id="mobile-bottom-nav" aria-label="Main navigation">
+        <button id="mob-nav-editor" class="active" onclick="mobileNavSwitch('editor')">
+            <i class="fa-solid fa-code"></i>
+            <span>Code</span>
+        </button>
+        <button id="mob-nav-tools" onclick="mobileNavSwitch('tools')">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>Tools</span>
+        </button>
+        <button id="mob-nav-files" onclick="mobileNavSwitch('files')">
+            <i class="fa-regular fa-folder-open"></i>
+            <span>Files</span>
+        </button>
+        <button id="mob-nav-notes" onclick="mobileNavSwitch('notes')">
+            <i class="fa-solid fa-note-sticky"></i>
+            <span>Notes</span>
+        </button>
+    </nav>
+
+    <!-- ===== MOBILE: Tool Drawer Backdrop ===== -->
+    <div id="mobile-drawer-backdrop" onclick="closeMobileToolDrawer()"></div>
+
+    <!-- ===== MOBILE: Tool Drawer ===== -->
+    <div id="mobile-tool-drawer" role="dialog" aria-modal="true" aria-labelledby="catalog-title" tabindex="-1">
+        <div class="drawer-handle"></div>
+        <div class="drawer-header"><span id="catalog-title">Tools</span><button class="shell-icon" onclick="closeMobileToolDrawer()" aria-label="Close tools" title="Close tools"><i class="fa-solid fa-xmark"></i></button></div>
+        <label class="tool-search"><i class="fa-solid fa-magnifying-glass"></i><input id="tool-search" type="search" placeholder="Search tools" aria-label="Search tools" oninput="filterToolCatalog(this.value)"></label>
+        <p id="tool-search-empty" hidden>No tools found.</p>
+        <nav id="tool-categories" aria-label="Tool categories"></nav>
+        <div class="drawer-grid">
+            <!-- Editors -->
+            <div class="drawer-section-title">Editors</div>
+            <button class="drawer-item" onclick="mobileOpenTool('workspace')">
+                <i class="fa-regular fa-folder-open text-blue-400"></i>
+                <span>Workspace</span>
+            </button>
+            <button class="drawer-item" onclick="mobileOpenTool('explorer')">
+                <i class="fa-regular fa-clock text-yellow-400"></i>
+                <span>History</span>
+            </button>
+            <button class="drawer-item" onclick="mobileOpenTool('word')">
+                <i class="fa-solid fa-file-word text-blue-500"></i>
+                <span>Word</span>
+            </button>
+            <button class="drawer-item" onclick="mobileOpenTool('excel')">
+                <i class="fa-solid fa-table text-green-500"></i>
+                <span>Excel</span>
+            </button>
+
+            <!-- Tools -->
+            <div class="drawer-section-title">Tools</div>
+            <button class="drawer-item" onclick="mobileOpenTool('tools')">
+                <i class="fa-solid fa-wand-magic-sparkles text-purple-400"></i>
+                <span>Format</span>
+            </button>
+            <button class="drawer-item" onclick="mobileOpenTool('snippets')">
+                <i class="fa-solid fa-puzzle-piece text-orange-400"></i>
+                <span>Snippets</span>
+            </button>
+            <button class="drawer-item" onclick="mobileOpenTool('templates')">
+                <i class="fa-brands fa-whatsapp text-[#25D366]"></i>
+                <span>WhatsApp</span>
+            </button>
+            <button class="drawer-item" onclick="mobileOpenTool('devkit')">
+                <i class="fa-solid fa-toolbox text-cyan-400"></i>
+                <span>DevKit</span>
+            </button>
+            <button class="drawer-item" onclick="mobileOpenTool('formatter')">
+                <i class="fa-solid fa-phone-flip text-green-400"></i>
+                <span>IN Numbers</span>
+            </button>
+
+            <!-- Generators -->
+            <div class="drawer-section-title">Generators</div>
+            <button class="drawer-item" onclick="mobileOpenTool('qr-generator')">
+                <i class="fa-solid fa-qrcode text-indigo-400"></i>
+                <span>QR Code</span>
+            </button>
+            <button class="drawer-item" onclick="mobileOpenTool('contact-links')">
+                <i class="fa-solid fa-link text-teal-400"></i>
+                <span>Contact Links</span>
+            </button>
+
+            <!-- Media & Web -->
+            <div class="drawer-section-title">Media & Web</div>
+            <button class="drawer-item" onclick="mobileOpenTool('video')">
+                <i class="fa-solid fa-circle-play text-red-400"></i>
+                <span>Media Player</span>
+            </button>
+            <button class="drawer-item" onclick="mobileOpenTool('yt-thumbnail')">
+                <i class="fa-solid fa-image text-pink-400"></i>
+                <span>YT Thumbs</span>
+            </button>
+            <button class="drawer-item" onclick="mobileOpenTool('extractor')">
+                <i class="fa-solid fa-globe text-blue-400"></i>
+                <span>Web Extract</span>
+            </button>
+            <button class="drawer-item" onclick="mobileOpenTool('drive-extractor')">
+                <i class="fa-brands fa-google-drive text-yellow-500"></i>
+                <span>Drive Extract</span>
+            </button>
+            <button class="drawer-item" onclick="mobileOpenTool('asset-explorer')">
+                <i class="fa-solid fa-satellite-dish text-purple-400"></i>
+                <span>Web Assets</span>
+            </button>
+
+            <!-- Other -->
+            <div class="drawer-section-title">Other</div>
+            <button class="drawer-item" onclick="mobileOpenTool('doc-tools')">
+                <i class="fa-solid fa-file-pdf text-red-400"></i>
+                <span>Doc Tools</span>
+            </button>
+            <button class="drawer-item" onclick="mobileOpenTool('todo')">
+                <i class="fa-solid fa-list-check text-green-400"></i>
+                <span>To-Do & Alarms</span>
+            </button>
+            <button class="drawer-item" onclick="mobileOpenTool('keep-notes')">
+                <i class="fa-solid fa-note-sticky text-yellow-400"></i>
+                <span>Keep Notes</span>
+            </button>
+            <button class="drawer-item" onclick="mobileOpenTool('settings')">
+                <i class="fa-solid fa-gear text-gray-400"></i>
+                <span>Settings</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== MOBILE: Hamburger Menu ===== -->
+    <div id="mobile-hamburger-menu">
+        <button onclick="closeMobileHamburger(); createNewFile();">
+            <i class="fa-solid fa-file-circle-plus"></i> New File
+        </button>
+        <button onclick="closeMobileHamburger(); document.getElementById('file-input').click();">
+            <i class="fa-solid fa-folder-open"></i> Open File
+        </button>
+        <button onclick="closeMobileHamburger(); openPalette('commands');">
+            <i class="fa-solid fa-terminal"></i> Command Palette
+        </button>
+        <button onclick="closeMobileHamburger(); openPalette('files');">
+            <i class="fa-solid fa-magnifying-glass"></i> Go to File
+        </button>
+        <button onclick="closeMobileHamburger(); openFolder();">
+            <i class="fa-solid fa-folder-tree"></i> Open Folder
+        </button>
+        <div class="menu-divider"></div>
+        <button onclick="closeMobileHamburger(); downloadFile();">
+            <i class="fa-solid fa-download"></i> Save File
+        </button>
+        <button onclick="closeMobileHamburger(); downloadZip();">
+            <i class="fa-solid fa-file-zipper"></i> Download ZIP
+        </button>
+        <div class="menu-divider"></div>
+        <button onclick="closeMobileHamburger(); formatContent();">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Format Code
+        </button>
+        <button onclick="closeMobileHamburger(); toggleHtmlPreview();">
+            <i class="fa-brands fa-html5"></i> Live Preview
+        </button>
+        <div class="menu-divider"></div>
+        <button onclick="closeMobileHamburger(); switchSidebarTab('settings');">
+            <i class="fa-solid fa-gear"></i> Settings
+        </button>
+        <button onclick="closeMobileHamburger(); openAboutModal();">
+            <i class="fa-regular fa-circle-user"></i> About
+        </button>
+    </div>
+
+    <!-- ===== MOBILE: Hamburger Menu Backdrop (invisible tap to close) ===== -->
+    <div id="mobile-hamburger-backdrop"
+        style="display:none; position:fixed; inset:0; z-index:125; -webkit-tap-highlight-color:transparent;"
+        onclick="closeMobileHamburger()"></div>
+
+    <script src="js/san-format.js"></script>
+    <script src="js/preview-engine.js"></script>
+    <script src="js/core.js"></script>
+    <script src="js/workspace.js"></script>
+    <script src="js/preview-ui.js"></script>
+    <script src="js/web-tools.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/tool-catalog.js"></script>
+    <script src="js/workbench-settings.js"></script>
+    <script src="js/palette.js"></script>
+    <script src="js/mini-player.js"></script>
+    <script src="js/browser-support.js"></script>
+</body>
+
+</html>
